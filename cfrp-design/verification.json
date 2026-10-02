@@ -1,10 +1,16 @@
 {
-  "passed": 30,
+  "passed": 31,
   "results": [
     {
       "name": "kgf/cm² 轉換 MPa",
       "computed": 27.45862,
       "expected": 27.45862,
+      "tolerance": 1e-8
+    },
+    {
+      "name": "舊脫黏式應力單位比值抵消",
+      "computed": 0.006361013858934842,
+      "expected": 0.006361013858934842,
       "tolerance": 1e-8
     },
     {
@@ -243,8 +249,8 @@
       "phi": 0.65,
       "axial": 0.8,
       "t": 3.3000000000000003,
-      "legacyFcc": 545.0879119065518,
-      "legacyEfd": 0.002463610074064922
+      "legacyFcc": 576.3772955182628,
+      "legacyEfd": 0.002754399797831229
     }
   }
 }

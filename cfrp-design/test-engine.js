@@ -2,6 +2,7 @@ const assert=require('node:assert/strict'),F=require('./engine');
 const p={fc:280,fy:4200,Es:2040000,Ef:2350000,ffu:35000,efu:.015,CE:.95,tf:.165,n:3,pull:1.5,b:40,h:60,As:20,d:54,df:60,bf:30,Mu:50,ebi:.0003,dv:50,Av:2.54,ss:20,w:10,sf:15,angle:90,Vu:35,rc:3,Pu:350,target:350,shape:'rect',wrap:'u',ties:'tied'};
 const out=[];function close(name,a,b,tol=1e-8){assert.ok(Math.abs(a-b)<=tol*Math.max(1,Math.abs(b)),name+': '+a+' / '+b);out.push({name,computed:a,expected:b,tolerance:tol});}
 close('kgf/cm² 轉換 MPa',280*F.K,27.45862);
+close('舊脫黏式應力單位比值抵消',.41*Math.sqrt(280/(3*.165*2350000)),.41*Math.sqrt((280*F.K)/(3*.165*(2350000*F.K))));
 const m=F.material(p),r=F.flex(p);close('抗彎脫黏應變 SI',r.efd,Math.min(.41*Math.sqrt(27.45862/(230456.275*.495)),.9*.95*(35000/2350000)));
 close('抗彎力平衡殘差 tf',r.residual,0,1e-7);
 close('抗彎鋼筋應變相容',r.es,r.ec*(540-r.c)/r.c);
