@@ -1,0 +1,80 @@
+(function(root){
+'use strict';
+const bars={D10:[.953,.7133],D13:[1.27,1.267],D16:[1.59,1.986],D19:[1.91,2.865],D22:[2.22,3.871],D25:[2.54,5.067],D29:[2.87,6.469],D32:[3.22,8.143],D36:[3.58,10.07]};
+const defaults={mode:'rect',L:6,b1:2.5,b2:2.5,a1:.75,spacing:4,cx1:50,cy1:50,cx2:50,cy2:50,D1:60,Q1:30,D2:60,Q2:30,h:65,cover:7.5,fc:280,fy:4200,gamma:2.4,over:0,qa:20,s1:2,s2:2,a2:.75,bw1:.6,bw2:.6,bh:80,longBar:'D22',longBottom:15,longTop:15,shortBar:'D22',shortSpace1:15,shortSpace2:15,stirrup:'D13',stirrupSpace:15,manual:false,U1:120,U2:120};
+const examples={rect:{...defaults},trap:{...defaults,mode:'trap',b1:2,b2:3,a1:.5,spacing:4,L:6,D1:45,Q1:20,D2:80,Q2:35},strap:{...defaults,mode:'strap',a1:.1,a2:.75,spacing:7,qa:30,longTop:7.5,longBottom:7.5,b1:2.5,b2:2.5,s1:1.8,s2:2.5,bw1:.6,bw2:.6,bh:90,h:70}};
+const integral=(cs,a,b)=>cs.reduce((s,c,i)=>s+c*(b**(i+1)-a**(i+1))/(i+1),0);
+const mult=(a,b)=>{let c=Array(a.length+b.length-1).fill(0);a.forEach((v,i)=>b.forEach((w,j)=>c[i+j]+=v*w));return c;};
+const evalpoly=(cs,x)=>cs.reduceRight((s,c)=>s*x+c,0);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+function clip(poly,fn){let out=[];for(let i=0;i<poly.length;i++){let a=poly[i],b=poly[(i+1)%poly.length],fa=fn(a),fb=fn(b);if(fa>=-1e-10)out.push(a);if((fa>0&&fb<0)||(fa<0&&fb>0)){let t=fa/(fa-fb);out.push([a[0]+t*(b[0]-a[0]),a[1]+t*(b[1]-a[1])]);}}return out;}
+function polygonMoments(p){let A=0,X=0;for(let i=0;i<p.length;i++){let a=p[i],b=p[(i+1)%p.length],k=a[0]*b[1]-b[0]*a[1];A+=k;X+=(a[0]+b[0])*k;}return{A:Math.abs(A/2),X:Math.abs(X/6)};}
+function rectIntersection(g,box){let p=g.poly;for(let f of [v=>v[0]-box[0],v=>box[1]-v[0],v=>v[1]-box[2],v=>box[3]-v[1]])p=clip(p,f);const m=polygonMoments(p);let perimeter=0,closed=true;for(let i=0;i<p.length;i++){let a=p[i],b=p[(i+1)%p.length],mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];let foundationEdge=g.edges.some(f=>Math.abs(f(mid))<1e-8);if(!foundationEdge)perimeter+=Math.hypot(b[0]-a[0],b[1]-a[1]);else closed=false;}return{...m,p,perimeter,closed};}
+function geometry(p){let L=p.L,x1=p.a1+p.cx1/200,x2=x1+p.spacing;
+ if(p.mode==='strap')L=p.a1+p.cx1/200+p.spacing+p.cx2/200+p.a2;
+ const B2=p.mode==='rect'?p.b1:p.b2,k=(B2-p.b1)/L,A=L*(p.b1+B2)/2,xc=L*(p.b1+2*B2)/(3*(p.b1+B2)),I=p.b1*L**3/3+k*L**4/4-A*xc**2;
+ const poly=[[0,-p.b1/2],[L,-B2/2],[L,B2/2],[0,p.b1/2]];
+ let g={L,x1,x2,B2,k,A,xc,I,poly,edges:[v=>v[0],v=>v[0]-L,v=>v[1]-(p.b1+k*v[0])/2,v=>v[1]+(p.b1+k*v[0])/2],width:x=>p.b1+k*x};
+ if(p.mode==='strap'){g.pad1={lo:0,hi:p.s1,width:p.b1};g.pad2={lo:L-p.s2,hi:L,width:p.b2};g.gap=L-p.s1-p.s2;g.A=p.s1*p.b1+p.s2*p.b2;}
+ return g;
+}
+function validate(p){let errors=[];for(let [k,v]of Object.entries(defaults)){if(typeof v==='number'&&(!Number.isFinite(p[k])||Math.abs(p[k])>1e6))errors.push(k+' 必須是有限數值，且絕對值不超過 1,000,000。');}if(!['rect','trap','strap'].includes(p.mode))errors.push('基礎型式無效。');if(!bars[p.longBar]||!bars[p.shortBar]||!bars[p.stirrup])errors.push('鋼筋號數無效。');if(errors.length)return errors;
+ for(let k of ['L','b1','b2','spacing','cx1','cy1','cx2','cy2','h','cover','fc','fy','gamma','qa','s1','s2','bw1','bw2','bh','longBottom','longTop','shortSpace1','shortSpace2','stirrupSpace'])if(p[k]<=0)errors.push(k+' 必須大於零。');
+ for(let k of ['a1','a2','D1','D2','Q1','Q2','over','U1','U2'])if(p[k]<0)errors.push(k+' 不可為負值。');
+ if(p.D1+p.Q1<=0||p.D2+p.Q2<=0)errors.push('兩柱使用軸力均須大於零。');if(p.manual&&(p.U1<=0||p.U2<=0))errors.push('自訂因素化軸力須大於零。');if(p.fc<175||p.fc>700||p.fy<2800||p.fy>5500)errors.push('本版材料範圍：f′c 175～700、fy 2800～5500 kgf/cm²。');if(p.cover<7.5)errors.push('本版採直接接觸土壤澆置條件，保護層不得小於 7.5 cm。');
+ let g=geometry(p);if(g.x2+p.cx2/200>g.L+1e-9)errors.push('柱 2 超出基礎右緣，請增加 L。');if(p.spacing<(p.cx1+p.cx2)/200)errors.push('兩柱斷面重疊。');
+ let dx=p.h-p.cover-bars[p.longBar][0]/2,dy=p.h-p.cover-bars[p.longBar][0]-bars[p.shortBar][0]/2;
+ if(Math.min(dx,dy)<15)errors.push('兩方向有效深度均須至少 15 cm。');if(p.bh-p.cover-bars[p.longBar][0]/2-bars[p.stirrup][0]<=0)errors.push('連梁有效深度不足。');
+ if(p.mode==='strap'){if(g.gap<=0)errors.push('兩基腳重疊或無連梁淨跨。');if(g.x1+p.cx1/200>p.s1||g.x2-p.cx2/200<g.L-p.s2)errors.push('柱未完整落在所屬基腳內。');if(Math.max(p.bw1,p.bw2)>Math.min(p.b1,p.b2))errors.push('連梁寬度須不超過兩側基腳寬。');if(g.gap/p.bh*100<4)errors.push('連梁淨跨小於 4 倍梁深，屬深梁範圍；需壓拉桿模型。');}
+ for(let i of [1,2]){let x=i===1?g.x1:g.x2,cx=p['cx'+i]/100,cy=p['cy'+i]/100,b=p.mode==='strap'?p['b'+i]:Math.min(g.width(x-cx/2),g.width(x+cx/2));if(cy>b)errors.push('柱 '+i+' 橫向尺寸超出基腳。');}
+ return errors;
+}
+function model(p,g,P,fD){let seg=[],gross=[],weight=p.gamma*p.h/100+p.over,beamW=0;
+ if(p.mode!=='strap'){let N=P[0]+P[1],moment=P[0]*(g.x1-g.xc)+P[1]*(g.x2-g.xc),q=[N/g.A-moment*g.xc/g.I,moment/g.I];seg.push({lo:0,hi:g.L,c:mult([p.b1,g.k],q)});gross=[{lo:0,hi:g.L,q:[q[0]+fD*weight,q[1]],width:[p.b1,g.k]}];}
+ else{let gap=g.gap,wc=[p.bw1-(p.bw2-p.bw1)*p.s1/gap,(p.bw2-p.bw1)/gap],bw=wc.map(v=>v*p.gamma*p.bh/100*fD);beamW=integral(bw,p.s1,g.L-p.s2);let beamMX=integral([0,...bw],p.s1,g.L-p.s2),z1=p.s1/2,z2=g.L-p.s2/2;let R2=(P[0]*(g.x1-z1)+P[1]*(g.x2-z1)+beamMX-beamW*z1)/(z2-z1),R1=P[0]+P[1]+beamW-R2;
+ seg=[{lo:0,hi:p.s1,c:[R1/p.s1]},{lo:p.s1,hi:g.L-p.s2,c:bw.map(v=>-v)},{lo:g.L-p.s2,hi:g.L,c:[R2/p.s2]}];
+ gross=[{lo:0,hi:p.s1,q:[R1/(p.s1*p.b1)+fD*weight],width:[p.b1]},{lo:g.L-p.s2,hi:g.L,q:[R2/(p.s2*p.b2)+fD*weight],width:[p.b2]}];}
+ let accum=(x,power=0)=>seg.reduce((s,v)=>s+integral([...Array(power).fill(0),...v.c],v.lo,clamp(x,v.lo,v.hi)),0);
+ const V=x=>accum(x)-P.reduce((s,v,i)=>s+(x>=[g.x1,g.x2][i]?v:0),0);
+ const M=x=>x*accum(x)-accum(x,1)-P.reduce((s,v,i)=>s+v*Math.max(0,x-[g.x1,g.x2][i]),0);
+ const netQ=x=>p.mode==='strap'?(x<=p.s1?seg[0].c[0]/p.b1:x>=g.L-p.s2?seg[2].c[0]/p.b2:0):evalpoly(gross[0].q,x)-fD*weight;
+ const cuts=[...new Set([0,g.L,g.x1,g.x2,...seg.flatMap(v=>[v.lo,v.hi])])].sort((a,b)=>a-b);
+ let points=[...cuts];for(let i=1;i<cuts.length;i++){let a=cuts[i-1]+1e-8,b=cuts[i]-1e-8;if(V(a)*V(b)<0){for(let j=0;j<60;j++){let m=(a+b)/2;if(V(a)*V(m)<=0)b=m;else a=m;}points.push((a+b)/2);}}
+ return{P,fD,seg,gross,beamW,V,M,netQ,accum,points,balanceV:V(g.L),balanceM:M(g.L)};
+}
+function flex(As,b,d,p){let a=As*p.fy/(.85*p.fc*b),beta=clamp(.85-.05*(p.fc-280)/70,.65,.85),c=a/beta,ey=p.fy/2040000,eps=c>0?.003*(d-c)/c:1,phi=clamp(.65+.25*(eps-ey)/.003,.65,.9);return{a,c,eps,phi,capacity:phi*As*p.fy*(d-a/2)/100000,tension:eps>=ey+.003-1e-9};}
+function steelMin(b,d,h,p,beam=false){let slab=Math.max(.0018,p.fy<4200?.002:.0018*4200/p.fy)*b*h;return beam?Math.max(slab,14*b*d/p.fy,.8*Math.sqrt(p.fc)*b*d/p.fy):slab;}
+function rebarRow(name,Mu,bar,space,d,h,p,beam=false,b=100,combo=''){let beamCount=beam?Math.max(0,Math.floor((b-2*p.cover-2*bars[p.stirrup][0]-bars[bar][0])/space)+1):null,As=beam?beamCount*bars[bar][1]:bars[bar][1]*100/space*b/100,Asmin=steelMin(b,d,h,p,beam),ey=p.fy/2040000,beta=clamp(.85-.05*(p.fc-280)/70,.65,.85),cmax=.003*d/(.003+ey+.003),Asmax=.85*p.fc*b*beta*cmax/p.fy,low=0,hi=Asmax;
+ for(let i=0;i<60;i++){let mid=(low+hi)/2;if(flex(mid,b,d,p).capacity<Mu)low=mid;else hi=mid;}let req=Math.max(Asmin,hi),F=flex(As,b,d,p),maxCap=flex(Asmax,b,d,p).capacity,spaceMax=Math.min(3*h,45),clear=space-bars[bar][0],pass=F.capacity+1e-8>=Mu&&As>=Asmin-1e-8&&F.tension&&space<=spaceMax&&clear>=Math.max(2.5,bars[bar][0]);return{name,Mu,bar,space,beamCount,d,b,As,Asmin,required:req,maxCap,...F,combo,spaceMax,clear,pass,over:Mu>maxCap,ratio:F.capacity?Mu/F.capacity:Infinity};}
+function shearCapacity(p,As,b,d,lambdaS=1){return .75*Math.min(2.12*lambdaS*(As/(b*d))**(1/3),1.33)*Math.min(Math.sqrt(p.fc),26.5)*b*d/1000;}
+function calc(input){let p={...defaults,...input},errors=validate(p);if(errors.length)return{p,errors,valid:false};const g=geometry(p),db=bars[p.longBar][0],d=p.h-p.cover-db/2,dy=p.h-p.cover-db-bars[p.shortBar][0]/2,dp=(d+dy)/2,beamD=p.bh-p.cover-db/2-bars[p.stirrup][0];
+ const service=model(p,g,[p.D1+p.Q1,p.D2+p.Q2],1),combos=p.manual?[['自訂 U',p.U1,p.U2,1.2]]:[['1.4D',1.4*p.D1,1.4*p.D2,1.4],['1.2D＋1.6L',1.2*p.D1+1.6*p.Q1,1.2*p.D2+1.6*p.Q2,1.2]];
+ const models=combos.map(([name,u1,u2,fd])=>({...model(p,g,[u1,u2],fd),name}));let checks=[],warnings=[],bearing=service.gross.map((v,i)=>({name:p.mode==='strap'?'基腳 '+(i+1):'聯合基腳',min:Math.min(evalpoly(v.q,v.lo),evalpoly(v.q,v.hi)),max:Math.max(evalpoly(v.q,v.lo),evalpoly(v.q,v.hi))}));
+ const invalidContact=bearing.some(v=>v.min<-1e-8)||models.some(m=>m.gross.some(v=>Math.min(evalpoly(v.q,v.lo),evalpoly(v.q,v.hi))<-1e-8));
+ for(let v of bearing){checks.push({name:v.name+'承載力',demand:v.max,capacity:p.qa,unit:'tf/m²',pass:v.max<=p.qa,combo:'D＋L＋自重＋覆土'});checks.push({name:v.name+'無拉應力接觸',demand:v.min,capacity:0,unit:'tf/m²',pass:v.min>=-1e-8,combo:'使用載重；因素載重另檢查',lower:true});}
+ if(invalidContact){warnings.push('土壤反力出現負值，完全接觸假設失效；請調整尺寸／柱位，或另作無拉力接觸分析。下方強度結果停止評定。');return{p,g,d,dy,dp,beamD,service,models,bearing,checks,warnings,valid:true,invalidContact,overall:'模型不適用'};}
+ let bottom={Mu:0,x:0,combo:''},top={Mu:0,x:0,combo:''},beam={Mu:0,x:0,combo:''};
+ const localB=x=>p.mode!=='strap'?g.width(x):(x<p.s1?p.b1:x>g.L-p.s2?p.b2:p.bw1+(p.bw2-p.bw1)*(x-p.s1)/g.gap);
+ for(let m of models){let xs=[...m.points,...[g.x1-p.cx1/200,g.x1+p.cx1/200,g.x2-p.cx2/200,g.x2+p.cx2/200]];for(let i=0;i<=1200;i++)xs.push(g.L*i/1200);for(let x of xs){if(x<0||x>g.L)continue;let moment=m.M(x),bm=p.mode==='strap'&&x>=p.s1&&x<=g.L-p.s2,row=bm?beam:moment>=0?bottom:top;let demand=bm?Math.abs(moment):Math.abs(moment)/localB(x);if(demand>row.Mu)Object.assign(row,{Mu:demand,x,combo:m.name});}}
+ for(let row of [bottom,top,beam]){if(!row.combo)continue;let m=models.find(v=>v.name===row.combo),lo=Math.max(0,row.x-g.L/1200),hi=Math.min(g.L,row.x+g.L/1200),fn=x=>{let inBeam=p.mode==='strap'&&x>=p.s1&&x<=g.L-p.s2;if(row===beam)return inBeam?Math.abs(m.M(x)):0;if(inBeam)return 0;return Math.max(0,(row===bottom?1:-1)*m.M(x))/localB(x);};for(let j=0;j<50;j++){let a=lo+(hi-lo)/3,b=hi-(hi-lo)/3;if(fn(a)<fn(b))lo=a;else hi=b;}let x=(lo+hi)/2;if(fn(x)>row.Mu)Object.assign(row,{Mu:fn(x),x});}
+ let reinforcement=[rebarRow('長向底筋（全長）',bottom.Mu,p.longBar,p.longBottom,d,p.h,p,false,100,bottom.combo),rebarRow('長向頂筋（全長）',top.Mu,p.longBar,p.longTop,d,p.h,p,false,100,top.combo)];
+ let shear=[];
+ for(let i of [1,2]){let x=i===1?g.x1:g.x2,cx=p['cx'+i]/100,cy=p['cy'+i]/100;for(let sign of [-1,1]){let cut=x+sign*(cx/2+d/100),lo=p.mode==='strap'?(i===1?0:g.L-p.s2):0,hi=p.mode==='strap'?(i===1?p.s1:g.L):g.L;if(cut<=lo||cut>=hi)continue;let other=i===1?g.x2:g.x1,otherCx=p['cx'+(i===1?2:1)]/100;if(Math.abs(cut-other)<=otherCx/2){warnings.push('柱 '+i+' 的單向剪力臨界斷面落入另一柱，需局部模型分析。');continue;}let b=(p.mode==='strap'?p['b'+i]:g.width(cut))*100,As=bars[p.longBar][1]*100/Math.max(p.longBottom,p.longTop)*b/100,cap=shearCapacity(p,As,b,d);let worst=models.reduce((s,m)=>Math.abs(m.V(cut))>s.demand?{demand:Math.abs(m.V(cut)),combo:m.name}:s,{demand:0,combo:''});shear.push({name:'柱 '+i+' 長向'+(sign<0?'左側':'右側')+'單剪',...worst,capacity:cap,unit:'tf',pass:worst.demand<=cap,x:cut,b,d,As,lambdaS:1});}
+ let shortMu=0,shortV=0,shortCombo='',sourceQ=0,soilQ=0,shortB=p.mode==='strap'?p['b'+i]:g.width(x);let band=[Math.max(p.mode==='strap'?(i===1?0:g.L-p.s2):0,x-cx/2-d/200),Math.min(p.mode==='strap'?(i===1?p.s1:g.L):g.L,x+cx/2+d/200)],area=p.mode==='strap'?(band[1]-band[0])*shortB:integral([p.b1,g.k],...band);
+ for(let m of models){let qSoil=Math.max(m.netQ(band[0]),m.netQ(band[1])),qTrib=m.P[i-1]/area,q=Math.max(qSoil,qTrib),Bmax=p.mode==='strap'?shortB:Math.max(g.width(band[0]),g.width(band[1])),cant=(Bmax-cy)/2,Mu=q*cant**2/2,V=q*Math.max(0,cant-dy/100);if(Mu>shortMu){shortMu=Mu;shortCombo=m.name;sourceQ=qTrib;soilQ=qSoil;}shortV=Math.max(shortV,V);}
+ let sr=rebarRow('柱 '+i+' 短向底筋（每米）',shortMu,p.shortBar,p['shortSpace'+i],dy,p.h,p,false,100,shortCombo);Object.assign(sr,{band,sourceQ,soilQ});reinforcement.push(sr);let As=sr.As,cap=shearCapacity(p,As,100,dy);shear.push({name:'柱 '+i+' 短向單剪（每米）',demand:shortV,capacity:cap,unit:'tf/m',pass:shortV<=cap,combo:'兩因素組合包絡',b:100,d:dy,As,lambdaS:1});
+ }
+ let punching=[];for(let i of [1,2]){let x=i===1?g.x1:g.x2,cx=p['cx'+i]/100,cy=p['cy'+i]/100,box=[x-(cx+dp/100)/2,x+(cx+dp/100)/2,-(cy+dp/100)/2,(cy+dp/100)/2],pg=g;
+ if(p.mode==='strap'){let a=i===1?0:g.L-p.s2,b=i===1?p.s1:g.L,B=p['b'+i];pg={poly:[[a,-B/2],[b,-B/2],[b,B/2],[a,B/2]],edges:[v=>v[0]-a,v=>v[0]-b,v=>v[1]-B/2,v=>v[1]+B/2]};}
+ let area=rectIntersection(pg,box),b0=area.perimeter*100,other=i===1?g.x2:g.x1,otherCx=p['cx'+(i===1?2:1)]/100,overlap=box[1]>=other-otherCx/2&&box[0]<=other+otherCx/2;let candidates=models.map(m=>{let net=p.mode==='strap'?m.netQ(x)*area.A:(m.gross[0].q[0]-m.fD*(p.gamma*p.h/100+p.over))*area.A+m.gross[0].q[1]*area.X;return{demand:Math.abs(m.P[i-1]-net),reaction:net,combo:m.name,P:m.P[i-1]};}),worst=candidates.reduce((a,b)=>a.demand>=b.demand?a:b),beta=Math.max(cx,cy)/Math.min(cx,cy),alpha=area.closed?40:30,coeffs=[1.06,.53*(1+2/beta),.265*(2+alpha*dp/b0)],cap=.75*Math.min(...coeffs)*Math.min(Math.sqrt(p.fc),26.5)*b0*dp/1000,pending=!area.closed||overlap;
+ punching.push({name:'柱 '+i+' 沖切',...worst,b0,d:dp,area:area.A,poly:area.p,alpha,beta,coeffs,capacity:cap,unit:'tf',pass:pending?null:worst.demand<=cap,pending,reason:overlap?'沖切區涉及另一柱，需群柱周界分析':!area.closed?'臨界周界遇自由邊，需偏心沖切與不平衡彎矩分析':'',lambdaS:1});}
+ if(p.mode==='strap'){let bmin=Math.min(p.bw1,p.bw2)*100;br: {let br=rebarRow('連梁頂／底筋（均配）',beam.Mu,p.longBar,Math.max(p.longTop,p.longBottom),beamD,p.bh,p,true,bmin,beam.combo);reinforcement.push(br);let Vu=0;for(let m of models){for(let x of [p.s1+1e-7,g.L-p.s2-1e-7])Vu=Math.max(Vu,Math.abs(m.V(x)));}let ls=Math.min(1,Math.sqrt(2/(1+beamD/25))),vc=shearCapacity(p,br.As,bmin,beamD,ls)/.75,Av=2*bars[p.stirrup][1],Vs=Av*Math.min(p.fy,4200)*beamD/p.stirrupSpace/1000,AvMin=Math.max(.2*Math.sqrt(p.fc)*bmin*p.stirrupSpace/Math.min(p.fy,4200),3.5*bmin*p.stirrupSpace/Math.min(p.fy,4200)),smax=Vs>1.06*Math.sqrt(p.fc)*bmin*beamD/1000?Math.min(beamD/4,30):Math.min(beamD/2,60),cap=.75*((Av>=AvMin?.53*Math.sqrt(p.fc)*bmin*beamD/1000:vc)+Vs),legMax=Vs>1.06*Math.sqrt(p.fc)*bmin*beamD/1000?beamD/2:beamD,legDistance=Math.max(p.bw1,p.bw2)*100-2*p.cover-bars[p.stirrup][0],upper=.75*(vc+2.12*Math.sqrt(p.fc)*bmin*beamD/1000);shear.push({name:'連梁剪力（含雙肢箍筋）',demand:Vu,capacity:cap,unit:'tf',pass:Vu<=cap&&Vu<=upper&&Av>=AvMin&&p.stirrupSpace<=smax&&legDistance<=legMax,combo:'兩因素組合包絡',Av,AvMin,Vs,vc,smax,legMax,legDistance,lambdaS:Av>=AvMin?1:ls,b:bmin,d:beamD,As:br.As});}}
+ for(let v of punching){if(!v.pending&&v.demand> .75*.53*Math.sqrt(p.fc)*v.b0*v.d/1000){let needed=5*v.demand*1000*100/(.75*v.alpha*p.fy*v.d);for(let r of reinforcement.filter(r=>r.b===100)){r.Asmin=Math.max(r.Asmin,needed);r.required=Math.max(r.required,r.Asmin);r.pass=r.pass&&r.As>=r.Asmin;}}}
+ checks.push(...shear,...punching);for(let r of reinforcement){checks.push({name:r.name+'抗彎',demand:r.Mu,capacity:r.capacity,unit:r.b===100?'tf·m/m':'tf·m',pass:r.pass,combo:r.combo});if(!r.tension)warnings.push(r.name+'未達拉力控制；請加深斷面或調整鋼筋。');if(r.over)warnings.push(r.name+'需求超過拉力控制上限，不可單純加筋。');}
+ if(punching.some(v=>v.pending))warnings.push('邊柱／周界重疊沖切只顯示平均應力參考值，不評定通過。');
+ if(p.manual)warnings.push('自訂 U 僅代表輸入的同一組合；基礎與連梁自重因素固定採 1.2。完整風震組合請另行建立與檢查。');
+ const allPass=checks.every(v=>v.pass===true),overall=checks.some(v=>v.pass===false)?'需調整':allPass&&!warnings.length?'範圍內檢核通過':'需補充分析';return{p,g,d,dy,dp,beamD,service,models,bearing,checks,shear,punching,reinforcement,warnings,valid:true,invalidContact:false,overall,bottom,top,beam};
+}
+root.Footing={bars,defaults,examples,geometry,validate,calc,integral,mult,evalpoly,polygonMoments,rectIntersection,model,flex,shearCapacity};
+if(typeof module!=='undefined')module.exports=root.Footing;
+})(typeof globalThis!=='undefined'?globalThis:this);

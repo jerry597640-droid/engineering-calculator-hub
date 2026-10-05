@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-05",
+  "cases": 63,
+  "combinations": 126,
+  "assertions": 3342,
+  "failures": [],
+  "max_shear_error_tf": 1.1368683772161603e-13,
+  "max_moment_error_tfm": 5.684341886080801e-13,
+  "method": "Independent Python Simpson integration (400 subintervals per piece), textbook closed form and full statics."
+}
