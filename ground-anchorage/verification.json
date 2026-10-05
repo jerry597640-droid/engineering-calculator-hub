@@ -1,0 +1,186 @@
+{
+  "count": 21,
+  "passed": 21,
+  "results": [
+    {
+      "label": "原版預設：三項極限能力與水平能力",
+      "status": "PASS"
+    },
+    {
+      "label": "範例 B：鋼絞線真實金屬面積及補充上限",
+      "status": "PASS"
+    },
+    {
+      "label": "獨立 SI 驗算：力、握裹、抗拔及伸長",
+      "status": "PASS"
+    },
+    {
+      "label": "低加壓砂土原式分支",
+      "status": "PASS"
+    },
+    {
+      "label": "低加壓黏土原式分支",
+      "status": "PASS"
+    },
+    {
+      "label": "直接容許應力不二次折減",
+      "status": "PASS"
+    },
+    {
+      "label": "原型實心面積與鋼絞線面積不可混用",
+      "status": "PASS"
+    },
+    {
+      "label": "軸力輸入不再次除 cosθ",
+      "status": "PASS"
+    },
+    {
+      "label": "kgf／tf 換算不改結果",
+      "status": "PASS"
+    },
+    {
+      "label": "kN／tf 換算不改結果",
+      "status": "PASS"
+    },
+    {
+      "label": "自由段幾何正確：交點同時滿足兩條直線",
+      "status": "PASS"
+    },
+    {
+      "label": "自由段不足與等號邊界",
+      "status": "PASS"
+    },
+    {
+      "label": "外部滑動面交點不套平面公式",
+      "status": "PASS"
+    },
+    {
+      "label": "錨碇段 300cm 可等號通過",
+      "status": "PASS"
+    },
+    {
+      "label": "錨碇長度超過10m 不假報全設計已合格",
+      "status": "PASS"
+    },
+    {
+      "label": "錨碇中心距150cm、4D邊界",
+      "status": "PASS"
+    },
+    {
+      "label": "傾角 10° 及高傾角輸入界限",
+      "status": "PASS"
+    },
+    {
+      "label": "最大試驗力超過80%能被獨立判出",
+      "status": "PASS"
+    },
+    {
+      "label": "長久安全係數下限",
+      "status": "PASS"
+    },
+    {
+      "label": "減支數與增荷重應使強度失敗",
+      "status": "PASS"
+    },
+    {
+      "label": "空值、零值、分數支數與不合理深度阻擋",
+      "status": "PASS"
+    }
+  ],
+  "exampleB": {
+    "errors": [],
+    "T": 67.57528855222041,
+    "H": 63.49999999999999,
+    "V": 23.112109875903847,
+    "A": 0.987,
+    "At": 6.909,
+    "ultimate": 131.271,
+    "steel": 78.76259999999999,
+    "ground": 330.574086973986,
+    "grout": 281.10295621900946,
+    "caps": [
+      78.76259999999999,
+      165.287043486993,
+      140.55147810950473
+    ],
+    "axialCapacity": 78.76259999999999,
+    "horizontalCapacity": 74.01263401391218,
+    "beta": 60,
+    "slip": 459.9882551842426,
+    "buffer": 231.6,
+    "minLf": 450,
+    "requiredLf": 691.5882551842426,
+    "checks": [
+      {
+        "key": "steel",
+        "name": "抗張材抗拉",
+        "ok": true,
+        "detail": "設計軸力 ≤ 抗張材容許軸力"
+      },
+      {
+        "key": "ground",
+        "name": "地層／漿體抗拔",
+        "ok": true,
+        "detail": "設計軸力 ≤ 極限抗拔力／FSg"
+      },
+      {
+        "key": "grout",
+        "name": "漿體／抗張材握裹",
+        "ok": true,
+        "detail": "設計軸力 ≤ 極限握裹力／FSb"
+      },
+      {
+        "key": "inclination",
+        "name": "地錨傾角",
+        "ok": true,
+        "detail": "θ > 10°；沿用原準則的施工建議"
+      },
+      {
+        "key": "spacing",
+        "name": "錨碇段中心距",
+        "ok": true,
+        "detail": "a ≥ max(4D, 150 cm)；須另查群錨與鑽孔偏差"
+      },
+      {
+        "key": "free",
+        "name": "自由段與破壞面",
+        "ok": true,
+        "detail": "Lf ≥ 最小自由段且 ≥ 破壞面交點距離＋後退長度"
+      },
+      {
+        "key": "length",
+        "name": "錨碇段最小長度",
+        "ok": true,
+        "detail": "La ≥ 300 cm（02492 §1.5.3）"
+      },
+      {
+        "key": "factors",
+        "name": "安全係數基準",
+        "ok": true,
+        "detail": "採用的 FS 不低於 02492 表列參考值"
+      },
+      {
+        "key": "lock",
+        "name": "FHWA 鎖定荷重上限",
+        "ok": true,
+        "detail": "鎖定荷重 ≤ 0.70 × 抗張材極限拉力"
+      },
+      {
+        "key": "test",
+        "name": "FHWA 試驗荷重上限",
+        "ok": true,
+        "detail": "試驗荷重 ≤ 0.80 × 抗張材極限拉力"
+      }
+    ],
+    "warnings": [
+      "平面破壞面僅適用均質、水平地表及近似垂直牆的初步幾何；分層土、邊坡及圓弧破壞應輸入外部分析交點。"
+    ],
+    "controlling": "抗張材抗拉",
+    "requiredN": 7,
+    "requiredLaGround": 374.08491144163634,
+    "requiredLaBond": 439.9198774495162,
+    "elongation": 40.1262053893111,
+    "utilization": 0.8579616283898757,
+    "pass": true
+  }
+}

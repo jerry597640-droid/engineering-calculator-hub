@@ -1,0 +1,64 @@
+(function(root){
+'use strict';
+const rad=d=>d*Math.PI/180;
+const defaults={project:'示範地錨 A1',period:'temporary',profile:'tw',loadMode:'horizontal',loadUnit:'tf',load:63.5,method:'interface',areaMode:'strand',diameter:1.27,area:0.987,number:7,stressBasis:'ultimate',strength:19000,bond:11,tau:5,nFactor:40,phi:30,alpha:0.3,cu:10,D:23,La:915,Lf:800,L1:252,L2:1158,spacing:200,theta:20,phiSlip:30,slipMode:'rankine',slipDistance:450,buffer:150,fsSteel:1.6,fsGround:2,fsBond:2,fhwa:true,lockFactor:1,testFactor:1.33,E:1950000};
+function factors(period,profile){return period==='permanent'?[2,3,3]:profile==='legacy'?[1.6,2.5,2.5]:[1.6,2,2]}
+function calculate(p){
+ const errors=[];const positive=['load','diameter','number','strength','bond','D','La','Lf','L2','spacing','fsSteel','fsGround','fsBond','E','testFactor'];
+ if(p.areaMode!=='solid')positive.push('area');
+ if(p.method==='interface')positive.push('tau');if(p.method==='sand')positive.push('nFactor');if(p.method==='clay')positive.push('cu','alpha');if(p.slipMode==='custom')positive.push('slipDistance');
+ for(const k of positive)if(!Number.isFinite(p[k])||p[k]<=0)errors.push(k+' 必須大於 0');
+ for(const k of ['theta','phiSlip','L1','buffer','lockFactor'])if(!Number.isFinite(p[k])||p[k]<0)errors.push(k+' 不得為負值');
+ if(!(p.theta>=0&&p.theta<80))errors.push('θ 必須介於 0 至小於 80°');
+ if(!(p.phiSlip>=0&&p.phiSlip<60))errors.push('φs 必須介於 0 至小於 60°');
+ if(p.method==='sand'&&!(p.phi>0&&p.phi<60))errors.push('砂土 φ 必須介於大於 0 至小於 60°');
+ if(p.method==='clay'&&p.alpha>1)errors.push('α 不得大於 1');
+ if(p.L1>=p.L2)errors.push('L1 必須小於 L2');
+ if(!Number.isInteger(p.number)||p.number>200)errors.push('抗張材支數須為 1 至 200 整數');
+ if(p.fsSteel<1||p.fsGround<1||p.fsBond<1)errors.push('安全係數不得小於 1');
+ if(p.testFactor<1||p.testFactor>3)errors.push('最大試驗荷重倍率須介於 1 至 3');
+ if(p.lockFactor<=0||p.lockFactor>2)errors.push('鎖定荷重倍率須大於 0 且不大於 2');
+ if(p.D<=p.diameter)errors.push('錨碇直徑 D 必須大於抗張材直徑 Dt');
+ for(const [k,allowed] of Object.entries({period:['temporary','permanent'],profile:['tw','legacy','custom'],loadMode:['horizontal','axial'],loadUnit:['tf','kgf','kN'],method:['interface','sand','clay'],areaMode:['strand','solid','custom'],stressBasis:['ultimate','allowable'],slipMode:['rankine','custom']}))if(!allowed.includes(p[k]))errors.push(k+' 選项無效');
+ if(errors.length)return {errors};
+ const c=Math.cos(rad(p.theta)),s=Math.sin(rad(p.theta));const loadTf=p.load*(p.loadUnit==='kgf'?0.001:p.loadUnit==='kN'?1/9.80665:1);
+ const T=p.loadMode==='horizontal'?loadTf/c:loadTf;const H=T*c,V=T*s;
+ const A=p.areaMode==='solid'?Math.PI*p.diameter**2/4:p.area,At=A*p.number;
+ const ultimate=p.stressBasis==='ultimate'?At*p.strength/1000:null;
+ let steel=At*p.strength/1000/(p.stressBasis==='ultimate'?p.fsSteel:1);
+ if(p.fhwa&&ultimate!==null)steel=Math.min(steel,0.6*ultimate);
+ const ground=p.method==='interface'?Math.PI*p.D*p.La*p.tau/1000:p.method==='sand'?p.La/100*p.nFactor*Math.tan(rad(p.phi)):Math.PI*p.D*p.La*p.alpha*p.cu/1000;
+ const grout=Math.PI*p.diameter*p.La*p.number*p.bond/1000;
+ const caps=[steel,ground/p.fsGround,grout/p.fsBond];
+ const beta=45+p.phiSlip/2;
+ const slip=p.slipMode==='rankine'?(p.L2-p.L1)/(s+c*Math.tan(rad(beta))):p.slipDistance;
+ const buffer=p.fhwa?Math.max(p.buffer,150,p.L2/5):p.buffer;
+ const minLf=p.fhwa&&p.areaMode!=='solid'?450:400;
+ const requiredLf=Math.max(minLf,slip+buffer);
+ const axialCapacity=Math.min(...caps),horizontalCapacity=axialCapacity*c;
+ const checks=[];const ck=(key,name,ok,detail)=>checks.push({key,name,ok,detail});
+ ck('steel','抗張材抗拉',T<=steel+1e-10,'設計軸力 ≤ 抗張材容許軸力');
+ ck('ground','地層／漿體抗拔',T<=caps[1]+1e-10,'設計軸力 ≤ 極限抗拔力／FSg');
+ ck('grout','漿體／抗張材握裹',T<=caps[2]+1e-10,'設計軸力 ≤ 極限握裹力／FSb');
+ ck('inclination','地錨傾角',p.theta>10,'θ > 10°；沿用原準則的施工建議');
+ ck('spacing','錨碇段中心距',p.spacing>=Math.max(4*p.D,150),'a ≥ max(4D, 150 cm)；須另查群錨與鑽孔偏差');
+ ck('free','自由段與破壞面',p.Lf+1e-9>=requiredLf,'Lf ≥ 最小自由段且 ≥ 破壞面交點距離＋後退長度');
+ ck('length','錨碇段最小長度',p.La>=300,'La ≥ 300 cm（02492 §1.5.3）');
+ const floor=factors(p.period,'tw');ck('factors','安全係數基準',p.fsSteel>=floor[0]&&p.fsGround>=floor[1]&&p.fsBond>=floor[2],'採用的 FS 不低於 02492 表列參考值');
+ if(p.fhwa&&ultimate!==null){ck('lock','FHWA 鎖定荷重上限',p.lockFactor*T<=0.7*ultimate+1e-10,'鎖定荷重 ≤ 0.70 × 抗張材極限拉力');ck('test','FHWA 試驗荷重上限',p.testFactor*T<=0.8*ultimate+1e-10,'試驗荷重 ≤ 0.80 × 抗張材極限拉力');}
+ const warnings=[];
+ if(p.profile==='legacy')warnings.push('原版係數模式用於追溯；原程式的 σas 名稱混淆容許與極限強度，請依材料文件設定強度性質。');
+ if(p.stressBasis==='allowable')warnings.push('使用直接容許應力：不再除以 FSsteel；FHWA 極限強度比例與試驗上限未計算，需另補 fpu 檢核。');
+ if(p.La>1000)warnings.push('錨碇段超過原版 10 m 建議值，不能假定承載力持續線性增加，須由現地試驗確認有效長度。');
+ if(p.theta>45)warnings.push('θ > 45°，須確認鑽孔施工性、垂直反力及錨頭設計。');
+ if(p.method==='sand')warnings.push('砂土 n 為原程式的經驗綜合因子（tf/m），不是 SPT N 值；須以同工法證明試驗校正，不宣稱為現行規範通用公式。');
+ if(p.method==='clay')warnings.push('αCu 為原程式黏土介面估算；黏土潛變、擾動及灌漿效果須以現地試驗驗證。');
+ if(p.slipMode==='rankine')warnings.push('平面破壞面僅適用均質、水平地表及近似垂直牆的初步幾何；分層土、邊坡及圓弧破壞應輸入外部分析交點。');
+ const controlling=['抗張材抗拉','地層／漿體抗拔','漿體／抗張材握裹'][caps.indexOf(axialCapacity)];
+ const requiredLaGround=p.La*T/caps[1],requiredLaBond=p.La*T/caps[2];
+ const requiredN=Math.ceil(T/(steel/p.number)-1e-12);
+ const elongation=T*1000*p.Lf/At/p.E*10;
+ return {errors:[],T,H,V,A,At,ultimate,steel,ground,grout,caps,axialCapacity,horizontalCapacity,beta,slip,buffer,minLf,requiredLf,checks,warnings,controlling,requiredN,requiredLaGround,requiredLaBond,elongation,utilization:T/axialCapacity,pass:checks.every(x=>x.ok)};
+}
+const api={defaults,calculate,factors,rad};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.AnchorEngine=api;
+})(typeof globalThis!=='undefined'?globalThis:this);

@@ -1,0 +1,39 @@
+{
+  "offline": true,
+  "checks": [
+    {
+      "viewport": 1440,
+      "overflow": false
+    },
+    {
+      "viewport": 1024,
+      "overflow": false
+    },
+    {
+      "viewport": 768,
+      "overflow": false
+    },
+    {
+      "viewport": 390,
+      "overflow": false
+    },
+    {
+      "viewport": 320,
+      "overflow": false
+    }
+  ],
+  "functions": [
+    "欄位說明",
+    "載入三例",
+    "安全係數切換",
+    "動態欄位",
+    "三單位換算",
+    "無效輸入阻擋",
+    "JSON保存匯入",
+    "離線頁另開",
+    "靜態計算書下載",
+    "列印PDF",
+    "10项內建自檢"
+  ],
+  "pageErrors": []
+}
