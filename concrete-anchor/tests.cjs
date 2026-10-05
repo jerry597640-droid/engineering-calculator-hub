@@ -1,0 +1,35 @@
+const assert=require('node:assert/strict');
+const E=require('./engine.js');
+let count=0;const checks=[];
+function check(name,fn){fn();count++;checks.push(name);console.log('PASS '+name);}
+function close(a,b,tol=1e-8){assert.ok(Math.abs(a-b)<=tol*Math.max(1,Math.abs(b)),`${a} != ${b}`);}
+const row=(r,k)=>r.rows.find(x=>x.key===k);
+const def=()=>structuredClone(E.DEFAULT);
+check('鋼材強度、螺牙有效面積與單位',()=>{const r=E.calculate(def());close(row(r,'steelN').capacity,7350);close(row(r,'steelV').capacity,3822);assert.equal(r.totalN,8000);});
+check('剛性錨栓群六分量平衡',()=>{const r=E.calculate(def()),a=r.anchors,S=f=>a.reduce((t,q)=>t+f(q),0);close(S(q=>q.N),8000);close(S(q=>q.N*q.y),30000);close(S(q=>q.N*q.x),20000);close(S(q=>q.vx),1200);close(S(q=>q.vy),600);close(S(q=>q.x*q.vy-q.y*q.vx),10000);assert.deepEqual(a.map(q=>q.N),[750,1750,2250,3250]);});
+check('混凝土群錨面積與四邊裁切',()=>{const p=def(),a=E.points(p),b=E.bounds(p),t=E.tensileConcrete(p,a,b,()=>1);close(t.A,4900);close(t.A0,3600);close(t.Nb,14966.629547095767);close(t.ed,.95);close(t.nominal,4900/3600*.95*14966.629547095767);});
+check('單支近邊拉破手算',()=>{const p={...def(),nx:1,ny:1,hef:20,cL:10,cR:80,cB:80,cT:80},t=E.tensileConcrete(p,E.points(p),E.bounds(p),()=>1);close(t.A,40*60);close(t.ed,.8);close(t.nominal,2400/3600*.8*10*Math.sqrt(280)*20**1.5);});
+check('投影矩形聯集無重複計入',()=>{close(E.unionArea([[0,3,0,3],[1,4,1,4]]),14);close(E.unionArea([[0,3,0,3],[5,8,0,3]]),18);});
+check('雙向拉力偏心修正',()=>{const p=def(),a=E.points(p).map(q=>({...q,N:q.id*1000})),t=E.tensileConcrete(p,a,E.bounds(p),q=>q.N);close(t.ex,2);close(t.ey,4);close(t.ec,1/(1+2/30)/(1+4/30));});
+check('擴頭拔出與彎鉤長度範圍',()=>{close(row(E.calculate(def()),'pullout').capacity,.7*8*8*280);assert.ok(E.calculate({...def(),type:'hook',eh:2}).errors.length>0);});
+check('鋼材極限強度上限與脆性φ',()=>{const r=E.calculate({...def(),fu:10000,fy:3000,ductile:false});close(r.fuUsed,5700);close(row(r,'steelN').capacity,.65*2.45*5700);close(row(r,'steelV').capacity,.60*.6*2.45*5700);});
+check('後置分類的拉破／拔出φ，撬破φ固定0.70',()=>{const p={...def(),type:'torque',category:3};const f=E.factors(p);close(f.conN,.45);close(f.pull,.45);close(f.pry,.7);close(f.conV,.7);});
+check('黏結握裹與cNa採未開裂參數',()=>{const p={...def(),type:'adhesive',tauCr:50,tauUn:100},a=E.points(p),t=E.adhesive(p,a,E.bounds(p),()=>1);close(t.cNa,20*Math.sqrt(100/77));close(t.Nba,50*Math.PI*2*20);close(t.A0,4*t.cNa**2);});
+check('持續拉力0.55φNba與安裝齡期',()=>{const p={...def(),type:'adhesive',tauCr:50,tauUn:100,sustained:.5},r=E.calculate(p);close(row(r,'sustained').capacity,.55*.65*50*Math.PI*2*20);close(row(r,'sustained').demand,1625);assert.ok(E.calculate({...p,age:20}).errors.some(x=>x.includes('21')));});
+check('黏結式資料缺漏不產生合格',()=>{const r=E.calculate({...def(),type:'adhesive'});assert.equal(row(r,'bond').capacity,null);assert.equal(row(r,'pry').capacity,null);assert.equal(r.missing,true);assert.notEqual(r.status,'已計算項目符合');});
+check('單支剪破基本強度及投影',()=>{const p={...def(),nx:1,ny:1,cR:15,cL:100,cB:100,cT:100,ha:40,hef:15},a=[{id:1,x:0,y:0,vx:1000,vy:0,V:1000}],v=E.edgeCapacity(p,a,E.bounds(p),'R'),Vb=Math.min(1.86*(7.5)**.2*Math.sqrt(2),3.8)*Math.sqrt(280)*15**1.5;close(v.A,4.5*15**2);close(v.A0,v.A);close(v.nominal,Vb);close(v.ec,1);close(v.h,1);});
+check('純平行剪力容量二倍，剪破邊距修正為1',()=>{const p={...def(),nx:1,ny:1,cR:15,cL:100,cB:100,cT:100,ha:40,hef:15},b=E.bounds(p),v=E.edgeCapacity(p,[{id:1,x:0,y:0,vx:0,vy:1000,V:1000}],b,'R'),u=E.edgeCapacity(p,[{id:1,x:0,y:0,vx:1000,vy:0,V:1000}],b,'R');close(v.nominal,2*u.nominal);});
+check('灌漿層0.8剪力與6.5cm撬破分界',()=>{const p={...def(),grout:true};close(row(E.calculate(p),'steelV').capacity,3822*.8);const q=E.calculate({...def(),nx:1,ny:1,Mx:0,My:0,Tz:0,hef:6,ha:30,cL:30,cR:30,cB:30,cT:30});close(row(q,'pry').detail.kcp,1);const z=E.calculate({...q.p,hef:6.5});close(row(z,'pry').detail.kcp,2);});
+check('耐震混凝土拉力0.75，剪力未一律乘0.75',()=>{const r=E.calculate(def()),s=E.calculate({...def(),seismic:true,seisPath:true});close(row(s,'breakoutN').capacity,row(r,'breakoutN').capacity*.75);close(row(s,'pullout').capacity,row(r,'pullout').capacity*.75);close(row(s,'steelN').capacity,row(r,'steelN').capacity);close(row(s,'pry').capacity,row(r,'pry').capacity);close(row(s,'breakoutV').capacity,row(r,'breakoutV').capacity);});
+check('耐震路徑與塑鉸區不得誤判完成',()=>{assert.ok(E.calculate({...def(),seismic:true}).pending.length>0);assert.ok(E.calculate({...def(),seismic:true,plasticHinge:true,seisPath:true}).missing);});
+check('底板接觸壓力截斷只供診斷，禁止合格',()=>{const r=E.calculate({...def(),N:.5,Mx:2,My:0});assert.ok(r.pending.some(x=>x.includes('接觸')));assert.notEqual(r.status,'已計算項目符合');});
+check('零载重無NaN，互制可忽略',()=>{const r=E.calculate({...def(),N:0,Mx:0,My:0,Vx:0,Vy:0,Tz:0});close(r.nR,0);close(r.vR,0);close(r.interaction,0);assert.equal(r.status,'已計算項目符合');});
+check('逐支資料與持續拉力輸入檢核',()=>{const p={...def(),mode:'manual',manual:Array.from({length:4},()=>({N:1,vx:.2,vy:0,Ns:.2}))},r=E.calculate(p);close(r.totalN,4000);close(r.totalV,800);assert.equal(r.errors.length,0);assert.ok(E.calculate({...p,manual:[{N:1,vx:.2,vy:0,Ns:.2}]}).errors.length>0);p.manual[0].Ns=2;assert.ok(E.calculate(p).errors.length>0);});
+check('無效支數、空數值、負面積、無力臂彎矩',()=>{for(const p of [{nx:0},{ny:4},{fc:NaN},{AsN:-1},{N:-1},{nx:1,ny:1,Mx:1},{hef:40}])assert.ok(E.calculate({...def(),...p}).errors.length>0);});
+check('狹窄三面近邊與薄構材防誤判',()=>{const r=E.calculate({...def(),cL:8,cR:8,cB:8,cT:8});assert.ok(r.pending.some(x=>x.includes('近邊')));});
+check('9支子群檢核與轉向對稱',()=>{const p={...def(),nx:3,ny:3,sx:20,sy:20,N:12,Mx:0,My:0,Tz:0},r=E.calculate(p);assert.equal(r.combinations,1022);assert.equal(r.errors.length,0);const s=E.calculate({...p,Vx:p.Vy,Vy:p.Vx});close(r.vR,s.vR);});
+check('互制須同時滿足個別容量，不能靠另一側餘量掩蓋',()=>{const r=E.calculate({...def(),N:40,Mx:0,My:0,Vx:0,Vy:0,Tz:0});assert.ok(r.nR>1);assert.ok(r.interaction>1);assert.ok(r.failed);});
+check('不同常重混凝土強度的sqrt與群面積獨立',()=>{const p=def(),a=E.points(p),b=E.bounds(p),t=E.tensileConcrete(p,a,b,()=>1),u=E.tensileConcrete({...p,fc:560},a,b,()=>1);close(u.nominal/t.nominal,Math.SQRT2);});
+console.log(`Validated ${count} engineering checks.`);
+const out={date:'2026-10-05',version:E.VERSION,count,checks,defaultSummary:((r)=>({status:r.status,nR:r.nR,vR:r.vR,interaction:r.interaction,anchors:r.anchors,rows:r.rows}))(E.calculate(def()))};
+require('node:fs').writeFileSync(__dirname+'/validation-results.json',JSON.stringify(out,null,2));
