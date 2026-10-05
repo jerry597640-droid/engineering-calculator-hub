@@ -41,4 +41,37 @@ assert(C.counterweight({...p,w0:0,Q:0,w3:20}).scenarios[1].empty);cases++;
 assert(C.counterweight({...p,w0:0,Q:10,hook:0}).scenarios[2].empty);cases++;
 near(C.counterweight({...cp,w3:0}).cwMoment,0);cases++;
 
+// Actual support geometry: hand calculations, independent one-variable bounds,
+// equilibrium, contact, rigid rotations and continuous angular envelope.
+const rectActual={...p,positionMode:'actual',ax:4,ay:3,bx:4,by:-3,legCx:-4,legCy:3,dx:-4,dy:-3};
+C.validate(rectActual);
+for(const t of [0,19,90,210,360]){const a=C.state(rectActual,t),b=C.state(p,t);a.reaction.forEach((v,i)=>near(v,b.reaction[i]));a.ranges.forEach((v,i)=>v.forEach((x,j)=>near(x,b.ranges[i][j])));cases++;}
+near(C.envelope(rectActual).max,55);cases++;
+const trap={...rectActual,legCy:2,dy:-2};let st=C.state(trap,0);st.reaction.forEach((v,i)=>near(v,[28.75,28.75,16.25,16.25][i]));
+st=C.state(trap,90);st.reaction.forEach((v,i)=>near(v,[22.5+300/26,22.5-300/26,22.5+200/26,22.5-200/26][i]));cases++;
+const rotated={...rectActual,ax:-3,ay:4,bx:3,by:4,legCx:-3,legCy:-4,dx:3,dy:-4};C.state(rotated,90).reaction.forEach((v,i)=>near(v,C.state(p,0).reaction[i]));near(C.envelope(rotated).max,55);cases++;
+const tripleEdge={...rectActual,Q:0,w0:100,x0:0,y0:0,ax:-4,ay:0,bx:0,by:0,legCx:4,legCy:0,dx:0,dy:4};const edge=C.state(tripleEdge,0);assert(edge.stable&&edge.edge&&!edge.reaction);cases++;
+const interior={...rectActual,Q:0,w0:100,x0:0,y0:0,ax:-4,ay:-4,bx:4,by:-4,legCx:0,legCy:4,dx:0,dy:0};const ins=C.state(interior,0);assert(ins.stable&&!ins.edge&&ins.reaction);near(ins.reaction.reduce((a,b)=>a+b),100);cases++;
+for(let j=0;j<300;j++){
+ const q={...rectActual,w3:rand()*30,r3:-rand()*4,w2:rand()*10,r2:rand()*6,Q:rand()*25,radius:rand()*16,x0:rand()*2-1,y0:rand()*2-1,kA:.3+rand()*3,kB:.3+rand()*3,kC:.3+rand()*3,kD:.3+rand()*3,ax:2+rand()*4,ay:2+rand()*3,bx:2+rand()*4,by:-2-rand()*3,legCx:-2-rand()*4,legCy:2+rand()*3,dx:-2-rand()*4,dy:-2-rand()*3};
+ const t=rand()*360,g=C.geometry(q),s=C.state(q,t);
+ // Independently parameterize the nonnegative equilibrium solution by R_D=u.
+ const A=[[1,1,1],[q.ax,q.bx,q.legCx],[q.ay,q.by,q.legCy]],base=C.solve3(A,[s.W,s.sx,s.sy]),slope=C.solve3(A,[-1,-q.dx,-q.dy]);let low=0,high=Infinity;
+ for(let i=0;i<3;i++){if(Math.abs(slope[i])<1e-12){if(base[i]<-1e-8)high=-Infinity;}else if(slope[i]>0)low=Math.max(low,-base[i]/slope[i]);else high=Math.min(high,-base[i]/slope[i]);}
+ const feasible=high>=low-1e-7;assert.equal(s.stable,feasible);
+ if(feasible){const endpoints=[0,1,2].map(i=>[base[i]+slope[i]*low,base[i]+slope[i]*high].sort((a,b)=>a-b));endpoints.push([low,high]);s.ranges.forEach((r,i)=>r.forEach((v,k)=>near(v,Math.max(0,endpoints[i][k]),1e-6)));}
+ if(s.stable&&!s.edge){assert(s.reaction);near(s.reaction.reduce((v,r)=>v+r),s.W,1e-6);near(s.reaction.reduce((v,r,i)=>v+r*g.pts[i][0],0),s.sx,1e-6);near(s.reaction.reduce((v,r,i)=>v+r*g.pts[i][1],0),s.sy,1e-6);s.reaction.forEach((v,i)=>assert(v>=s.ranges[i][0]-1e-6&&v<=s.ranges[i][1]+1e-6));}
+ const z=C.counterweight({...q,theta:t,start:t,end:t});z.edges.forEach((v,i)=>near(v.margin,g.edges[i].h*s.W-g.edges[i].nx*s.sx-g.edges[i].ny*s.sy,1e-6));cases++;
+}
+for(let j=0;j<20;j++){
+ const q={...trap,ax:3+rand()*3,by:-2-rand()*3,dx:-3-rand()*3,Q:rand()*20,radius:rand()*17,w3:rand()*40,start:rand()*250,end:0};q.end=q.start+rand()*360;const e=C.envelope(q);let sampled=-Infinity,unstable=false;
+ for(let i=0;i<=1800;i++){const t=q.start+(q.end-q.start)*i/1800,s=C.state(q,t);if(s.stable){const mx=Math.max(...s.ranges.map(v=>v[1]));assert(mx<=e.max+1e-6);sampled=Math.max(sampled,mx);}else unstable=true;}
+ if(Number.isFinite(sampled))assert(e.max-sampled<.1);if(unstable)assert(e.unstable);cases++;
+}
+for(const bad of [{bx:4,by:3},{ax:0,ay:0,bx:1,by:1,legCx:2,legCy:2,dx:3,dy:3},{ax:NaN}])assert.throws(()=>C.validate({...rectActual,...bad}));cases+=3;
+const only=C.envelope({...trap,start:47,end:47});near(only.max,Math.max(...C.state(trap,47).ranges.map(v=>v[1])));cases++;
+const crossing=C.envelope({...trap,start:300,end:420});let scan=-Infinity;for(let i=300;i<=420;i+=.1){const s=C.state(trap,i);if(s.stable)scan=Math.max(scan,...s.ranges.map(v=>v[1]));}assert(crossing.max>=scan&&crossing.max-scan<.05);cases++;
+assert(C.envelope({...trap,w0:10,Q:100,radius:30}).unstable);cases++;
+console.log('Actual support geometry checks passed.');
+
 console.log(JSON.stringify({passed:true,cases,randomThreeLegCases:contact3,example:s.C,scope:'mechanics, balance, bounds, contact, analytical angular extrema'}));
