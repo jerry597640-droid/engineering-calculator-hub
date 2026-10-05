@@ -1,0 +1,355 @@
+[
+  {
+    "name": "A 簡支樓版",
+    "mode": "one",
+    "state": {},
+    "expected": {
+      "d": 17.365,
+      "As": 8.446666666666665,
+      "ls": 1,
+      "Vc": 10437.420654153291,
+      "capacity": 7.828065490614969,
+      "demand": 2.5861116
+    },
+    "error": false
+  },
+  {
+    "name": "A 支承面不折減",
+    "mode": "one",
+    "state": {
+      "eligible": false
+    },
+    "expected": {
+      "d": 17.365,
+      "As": 8.446666666666665,
+      "ls": 1,
+      "Vc": 10437.420654153291,
+      "capacity": 7.828065490614969,
+      "demand": 2.832
+    },
+    "error": false
+  },
+  {
+    "name": "懸臂樓版",
+    "mode": "one",
+    "state": {
+      "support": "cantilever"
+    },
+    "expected": {
+      "d": 17.365,
+      "As": 8.446666666666665,
+      "ls": 1,
+      "Vc": 10437.420654153291,
+      "capacity": 7.828065490614969,
+      "demand": 5.4181116
+    },
+    "error": false
+  },
+  {
+    "name": "厚版尺寸效應",
+    "mode": "one",
+    "state": {
+      "h": 60,
+      "dmode": "manual",
+      "dmanual": 55,
+      "asmode": "manual",
+      "Asmanual": 20
+    },
+    "expected": {
+      "d": 55,
+      "As": 20,
+      "ls": 0.7905694150420949,
+      "Vc": 23719.562635673843,
+      "capacity": 17.78967197675538,
+      "demand": 3.7236
+    },
+    "error": false
+  },
+  {
+    "name": "軸壓貢獻上限",
+    "mode": "one",
+    "state": {
+      "Nu": 1000
+    },
+    "expected": {
+      "d": 17.365,
+      "As": 8.446666666666665,
+      "ls": 1,
+      "Vc": 34748.42065415329,
+      "capacity": 26.06131549061497,
+      "demand": 2.5861116
+    },
+    "error": false
+  },
+  {
+    "name": "軸拉使 Vc 取零",
+    "mode": "one",
+    "state": {
+      "Nu": -200
+    },
+    "expected": {
+      "d": 17.365,
+      "As": 8.446666666666665,
+      "ls": 1,
+      "Vc": 0,
+      "capacity": 0.0,
+      "demand": 2.5861116
+    },
+    "error": false
+  },
+  {
+    "name": "高強混凝土開根號上限",
+    "mode": "one",
+    "state": {
+      "fc": 1000
+    },
+    "expected": {
+      "d": 17.365,
+      "As": 8.446666666666665,
+      "ls": 1,
+      "Vc": 16529.512499889774,
+      "capacity": 12.39713437491733,
+      "demand": 2.5861116
+    },
+    "error": false
+  },
+  {
+    "name": "B 內柱沖切",
+    "mode": "punch",
+    "state": {
+      "h": 25,
+      "dx": 22,
+      "dy": 20.4
+    },
+    "expected": {
+      "d": 21.2,
+      "ls": 1,
+      "b0": 244.8,
+      "vc": 17.737192562522402,
+      "capacity": 13.302894421891802,
+      "demand": 8.670921198668147,
+      "net": 45,
+      "Jx": 3336842.688,
+      "Jy": 3336842.688
+    },
+    "error": false
+  },
+  {
+    "name": "內柱雙軸彎矩",
+    "mode": "punch",
+    "state": {
+      "h": 25,
+      "dx": 22,
+      "dy": 20.4,
+      "Mx": 12,
+      "My": -8
+    },
+    "expected": {
+      "d": 21.2,
+      "ls": 1,
+      "b0": 244.8,
+      "vc": 17.737192562522402,
+      "capacity": 13.302894421891802,
+      "demand": 16.007197520004873,
+      "net": 45,
+      "Jx": 3336842.688,
+      "Jy": 3336842.688
+    },
+    "error": false
+  },
+  {
+    "name": "矩形長柱 β 控制",
+    "mode": "punch",
+    "state": {
+      "h": 25,
+      "dx": 22,
+      "dy": 20.4,
+      "cy": 160
+    },
+    "expected": {
+      "d": 21.2,
+      "ls": 1,
+      "b0": 484.79999999999995,
+      "vc": 13.302894421891802,
+      "capacity": 9.977170816418852,
+      "demand": 4.378385951802728,
+      "net": 45,
+      "Jx": 42608740.28799999,
+      "Jy": 8101042.368000001
+    },
+    "error": false
+  },
+  {
+    "name": "大支承面周界控制",
+    "mode": "punch",
+    "state": {
+      "h": 25,
+      "dx": 22,
+      "dy": 20.4,
+      "cx": 300,
+      "cy": 300
+    },
+    "expected": {
+      "d": 21.2,
+      "ls": 1,
+      "b0": 1284.8,
+      "vc": 11.795343497368572,
+      "capacity": 8.84650762302643,
+      "demand": 1.652118235860805,
+      "net": 45,
+      "Jx": 468860813.4613333,
+      "Jy": 468860813.4613333
+    },
+    "error": false
+  },
+  {
+    "name": "厚版沖切尺寸效應",
+    "mode": "punch",
+    "state": {
+      "h": 60,
+      "dx": 55,
+      "dy": 53
+    },
+    "expected": {
+      "d": 54.0,
+      "ls": 0.79555728417573,
+      "b0": 376.0,
+      "vc": 14.110952743942281,
+      "capacity": 10.583214557956712,
+      "demand": 2.2163120567375887,
+      "net": 45,
+      "Jx": 32367960.0,
+      "Jy": 32367960.0
+    },
+    "error": false
+  },
+  {
+    "name": "邊柱完整 vu 輸入",
+    "mode": "punch",
+    "state": {
+      "h": 25,
+      "dx": 22,
+      "dy": 20.4,
+      "position": "edge",
+      "stressmode": "direct",
+      "vmax": 18
+    },
+    "expected": {
+      "d": 21.2,
+      "ls": 1,
+      "b0": 162.4,
+      "vc": 17.737192562522402,
+      "capacity": 13.302894421891802,
+      "demand": 18,
+      "net": 45,
+      "Jx": 2916005.0496000005,
+      "Jy": 2199068.8485333333
+    },
+    "error": false
+  },
+  {
+    "name": "角柱完整 vu 輸入",
+    "mode": "punch",
+    "state": {
+      "h": 25,
+      "dx": 22,
+      "dy": 20.4,
+      "position": "corner",
+      "stressmode": "direct",
+      "vmax": 24
+    },
+    "expected": {
+      "d": 21.2,
+      "ls": 1,
+      "b0": 101.2,
+      "vc": 17.737192562522402,
+      "capacity": 13.302894421891802,
+      "demand": 24,
+      "net": 45,
+      "Jx": 1911386.7989333335,
+      "Jy": 1911386.7989333335
+    },
+    "error": false
+  },
+  {
+    "name": "同組合 Ru 與 qu",
+    "mode": "punch",
+    "state": {
+      "h": 25,
+      "dx": 22,
+      "dy": 20.4,
+      "punchmode": "reaction",
+      "Ru": 46,
+      "pqu": 1.2
+    },
+    "expected": {
+      "d": 21.2,
+      "ls": 1,
+      "b0": 244.8,
+      "vc": 17.737192562522402,
+      "capacity": 13.302894421891802,
+      "demand": 8.77700456283142,
+      "net": 45.5505472,
+      "Jx": 3336842.688,
+      "Jy": 3336842.688
+    },
+    "error": false
+  },
+  {
+    "name": "零間距停止",
+    "mode": "one",
+    "state": {
+      "spacing": 0
+    },
+    "expected": {},
+    "error": true
+  },
+  {
+    "name": "d 大於 h 停止",
+    "mode": "one",
+    "state": {
+      "dmode": "manual",
+      "dmanual": 25
+    },
+    "expected": {},
+    "error": true
+  },
+  {
+    "name": "缺少邊柱完整應力停止",
+    "mode": "punch",
+    "state": {
+      "position": "edge"
+    },
+    "expected": {},
+    "error": true
+  },
+  {
+    "name": "特殊幾何停止",
+    "mode": "punch",
+    "state": {
+      "special": true
+    },
+    "expected": {},
+    "error": true
+  },
+  {
+    "name": "反力不足停止",
+    "mode": "punch",
+    "state": {
+      "punchmode": "reaction",
+      "Ru": 0
+    },
+    "expected": {},
+    "error": true
+  },
+  {
+    "name": "最大應力小於平均停止",
+    "mode": "punch",
+    "state": {
+      "stressmode": "direct",
+      "vmax": 0.01
+    },
+    "expected": {},
+    "error": true
+  }
+]
