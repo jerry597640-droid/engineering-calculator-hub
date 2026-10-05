@@ -31,6 +31,22 @@
     "environment": "inside",
     "second": false,
     "layout": "custom",
+    "inputMode": "custom",
+    "layerConfig": [
+      {
+        "bar": "D25",
+        "nx": 4,
+        "ny": 4,
+        "clear": 0
+      },
+      {
+        "bar": "D25",
+        "nx": 4,
+        "ny": 4,
+        "clear": 4
+      }
+    ],
+    "layerDraft": false,
     "supported": false,
     "customBars": [
       {

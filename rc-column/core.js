@@ -1,4 +1,4 @@
-/* RC Column Workbench 1.2 · Taiwan 112 corrected edition · kgf, cm.
+/* RC Column Workbench 1.3 · Taiwan 112 corrected edition · kgf, cm.
    Geometry-integrated concrete block and center-strain steel.
    No section capacities are increased by confinement. */
 const RCC = (() => {
@@ -23,7 +23,7 @@ const RCC = (() => {
       if(!Array.isArray(s.customBars)||!s.customBars.length||s.customBars.length>200)errors.push('實際配筋需填入1～200列');
       else{
         let n=0;
-        s.customBars.forEach((r,i)=>{if(!r||!BARS[r.bar]||!Number.isInteger(r.n)||r.n<1||r.n>50||['x1','y1'].concat(r?.n>1?['x2','y2']:[]).some(k=>!Number.isFinite(r[k])))errors.push(`配筋第${i+1}列：筋徑、根數或座標無效`);else n+=r.n;});
+        s.customBars.forEach((r,i)=>{if(!r||!BARS[r.bar]||!Number.isInteger(r.n)||r.n<1||r.n>50||['x1','y1'].concat(r?.n>1?['x2','y2']:[]).some(k=>!Number.isFinite(r[k])))errors.push(`配筋第${i+1}列：筋徑、根數或座標無效`);else n+=r.n;if(r?.layer!=null&&(!Number.isInteger(r.layer)||r.layer<1||r.layer>6))errors.push(`配筋第${i+1}列：來源層須為1～6整數`);});
         if(n<4||n>200)errors.push('總主筋數須為4～200根（不含束筋）');
       }
       for(const [k,lo,hi] of [['tieLegsX',2,30],['tieLegsY',2,30],['dX',1,s.b],['dY',1,s.h],['hx',1,100]])if(!Number.isFinite(s[k])||s[k]<lo||s[k]>hi)errors.push(`${k} 必須介於 ${lo}～${hi}`);
@@ -40,7 +40,7 @@ const RCC = (() => {
   function geometry(s) {
     if(custom(s)){
       const bars=[];
-      s.customBars.forEach((r,row)=>{const rb=BARS[r.bar];for(let i=0;i<r.n;i++){const t=r.n===1?0:i/(r.n-1);bars.push({x:r.x1+(r.n===1?0:t*(r.x2-r.x1))-s.b/2,y:r.y1+(r.n===1?0:t*(r.y2-r.y1))-s.h/2,a:rb.a,d:rb.d,bar:r.bar,row:row+1});}});
+      s.customBars.forEach((r,row)=>{const rb=BARS[r.bar];for(let i=0;i<r.n;i++){const t=r.n===1?0:i/(r.n-1);bars.push({x:r.x1+(r.n===1?0:t*(r.x2-r.x1))-s.b/2,y:r.y1+(r.n===1?0:t*(r.y2-r.y1))-s.h/2,a:rb.a,d:rb.d,bar:r.bar,layer:Number.isInteger(r.layer)?r.layer:null,row:row+1});}});
       const xs=bars.map(p=>p.x),ys=bars.map(p=>p.y),maxDb=Math.max(...bars.map(p=>p.d)),minDb=Math.min(...bars.map(p=>p.d));
       const minx=Math.min(...xs),maxx=Math.max(...xs),miny=Math.min(...ys),maxy=Math.max(...ys);
       let clear=Infinity,spacingOK=true,duplicates=false,minMargin=Infinity;
@@ -185,7 +185,7 @@ const RCC = (() => {
     const interact=sx.ratio>.5&&sy.ratio>.5?(sx.ratio+sy.ratio)/1.5:Math.max(sx.ratio,sy.ratio);
       return {load:l,...sec,sx,sy,shearInteraction:interact,allPass:sec.pass&&sx.pass&&sy.pass&&interact<=1+1e-8};});
     const worst=cases.reduce((a,b)=>b.ratio>a.ratio?b:a);
-    return {s,loads,g,det,cases,worst,pass:det.pass&&cases.every(c=>c.allPass),pendingSeismic:s.mode==='seismic',version:'1.2.0'};
+    return {s,loads,g,det,cases,worst,pass:det.pass&&cases.every(c=>c.allPass),pendingSeismic:s.mode==='seismic',version:'1.3.0'};
   }
   function designCandidates(s,loads){
     if(custom(s))return [];
@@ -213,6 +213,25 @@ const RCC = (() => {
     }
     return [...positive,...negative.reverse()];
   }
-  return {BARS,beta,phi,validate,geometry,clip,moments,state,capacityAtP,section,axisSlice,shear,detailing,evaluate,designCandidates};
+  function buildLayers(s,layers){
+    if(!Array.isArray(layers)||layers.length<2||layers.length>6)throw new Error('多層配置需2～6層');
+    if(!Number.isFinite(s.b)||!Number.isFinite(s.h)||s.b<20||s.b>200||s.h<20||s.h>200||!Number.isFinite(s.cover)||s.cover<4||s.cover>15||!BARS[s.tie])throw new Error('請先修正柱尺寸、保護層或箍筋');
+    const rows=[],info=[];let offset=0,total=0,previous=null;
+    layers.forEach((l,i)=>{
+      if(!l||!BARS[l.bar]||!Number.isInteger(l.nx)||!Number.isInteger(l.ny)||l.nx<2||l.nx>12||l.ny<2||l.ny>12)throw new Error(`第${i+1}層筋徑或每邊根數無效（2～12）`);
+      if(i&&(!Number.isFinite(l.clear)||l.clear<.1||l.clear>30))throw new Error(`第${i+1}層與前層淨距須為0.1～30 cm`);
+      const d=BARS[l.bar].d;
+      offset=i?offset+(previous+d)/2+l.clear:s.cover+BARS[s.tie].d+d/2;
+      const width=s.b-2*offset,depth=s.h-2*offset,N=2*l.nx+2*l.ny-4;
+      if(width<=0||depth<=0)throw new Error(`第${i+1}層無法容納於柱內，請減少層數／淨距或增大斷面`);
+      total+=N;if(total>200)throw new Error('多層總主筋數不得超過200根');
+      const layer=i+1,yStep=depth/(l.ny-1);
+      rows.push({layer,bar:l.bar,n:l.nx,x1:offset,y1:offset,x2:s.b-offset,y2:offset},{layer,bar:l.bar,n:l.nx,x1:offset,y1:s.h-offset,x2:s.b-offset,y2:s.h-offset});
+      if(l.ny>2){const n=l.ny-2,y1=offset+yStep,y2=n===1?y1:s.h-offset-yStep;rows.push({layer,bar:l.bar,n,x1:offset,y1,x2:offset,y2},{layer,bar:l.bar,n,x1:s.b-offset,y1,x2:s.b-offset,y2});}
+      info.push({layer,bar:l.bar,nx:l.nx,ny:l.ny,clear:i?l.clear:0,offset,width,depth,N,Ast:N*BARS[l.bar].a});previous=d;
+    });
+    return {rows,info,total,Ast:info.reduce((a,l)=>a+l.Ast,0)};
+  }
+  return {BARS,beta,phi,validate,geometry,clip,moments,state,capacityAtP,section,axisSlice,shear,detailing,evaluate,designCandidates,buildLayers};
 })();
 if(typeof module!=='undefined')module.exports=RCC;

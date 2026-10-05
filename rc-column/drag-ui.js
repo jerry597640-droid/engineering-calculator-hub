@@ -13,7 +13,7 @@ function dragCoordinates(e,svg,v){
   const p=new DOMPoint(e.clientX,e.clientY).matrixTransform(matrix.inverse());
   return {x:(p.x-v.ox)/v.scale+v.s.b/2,y:(v.oy-p.y)/v.scale+v.s.h/2,sx:p.x,sy:p.y};
 }
-function flattenedBars(v){return v.g.bars.map(p=>({bar:p.bar,n:1,x1:Number((p.x+v.s.b/2).toFixed(8)),y1:Number((p.y+v.s.h/2).toFixed(8)),x2:Number((p.x+v.s.b/2).toFixed(8)),y2:Number((p.y+v.s.h/2).toFixed(8))}));}
+function flattenedBars(v){return v.g.bars.map(p=>({bar:p.bar,...(p.layer?{layer:p.layer}:{}),n:1,x1:Number((p.x+v.s.b/2).toFixed(8)),y1:Number((p.y+v.s.h/2).toFixed(8)),x2:Number((p.x+v.s.b/2).toFixed(8)),y2:Number((p.y+v.s.h/2).toFixed(8))}));}
 function rememberGraphicEdit(before){dragUndo=before;dragUndoAfter=JSON.stringify(customRows);$('undoDrag').disabled=false;}
 function updateDragInfo(v=dragGeometry()){
   if(!v)return;
@@ -21,7 +21,7 @@ function updateDragInfo(v=dragGeometry()){
   $('dragInfo').textContent='第 '+(dragSelected+1)+' 根 '+p.bar+' · X '+fmt(p.x+v.s.b/2,2)+' / Y '+fmt(p.y+v.s.h/2,2)+' cm';
 }
 function drawDragEditor(){
-  if(dragState)return;
+  if(dragState)return;updateLayerSummary();
   const v=dragGeometry();$('undoDrag').disabled=!dragUndo||dragUndoAfter!==JSON.stringify(customRows);
   $('expandBars').disabled=!v||!customRows.some(r=>r.n>1);
   if(!v){$('dragCanvas').innerHTML='<p class="help" style="padding:16px">請先填入有效柱尺寸、筋徑、整數根數及座標，以顯示拖曳圖。</p>';$('dragBarSelect').innerHTML='';$('dragInfo').textContent='';return;}
@@ -32,10 +32,10 @@ function drawDragEditor(){
   const p=g.bars[dragSelected],px=X(p.x+s.b/2),py=Y(p.y+s.h/2);
   svg+='<g stroke="#2465b4" stroke-width="1" stroke-dasharray="4 4" pointer-events="none"><line id="dragCrossX" x1="'+px+'" x2="'+px+'" y1="'+top+'" y2="'+bottom+'"/><line id="dragCrossY" x1="'+left+'" x2="'+right+'" y1="'+py+'" y2="'+py+'"/></g>';
   g.bars.forEach((bar,i)=>{const x=X(bar.x+s.b/2),y=Y(bar.y+s.h/2),r=Math.max(4,bar.d*scale/2),active=i===dragSelected;
-    svg+='<g data-dragbar="'+i+'" transform="translate('+x+' '+y+')"><circle r="'+Math.max(14,r+6)+'" fill="transparent"/><circle r="'+r+'" fill="'+(active?'#2465b4':'#cf7918')+'" stroke="'+(active?'#0f3e72':'white')+'" stroke-width="'+(active?2:1)+'"/><text y="'+(-r-5)+'" text-anchor="middle" font-size="10" fill="#354b65" pointer-events="none">'+(i+1)+'</text><title>第'+(i+1)+'根 '+bar.bar+'；X '+fmt(bar.x+s.b/2)+'，Y '+fmt(bar.y+s.h/2)+' cm</title></g>';});
-  svg+='<g fill="#354b65" font-size="13" font-family="system-ui"><text x="240" y="35" text-anchor="middle">b = '+s.b+' cm</text><text x="24" y="235" text-anchor="middle" transform="rotate(-90 24 235)">h = '+s.h+' cm</text><text x="'+left+'" y="'+(bottom+25)+'">(0, 0) 左下角</text><text x="'+right+'" y="'+(bottom+25)+'" text-anchor="end">X → / Y ↑</text><text x="240" y="450" text-anchor="middle">橙色主筋可拖曳 · 藍色為選取筋及外框箍</text></g></svg>';
+    svg+='<g data-dragbar="'+i+'" transform="translate('+x+' '+y+')"><circle r="'+Math.max(14,r+6)+'" fill="transparent"/><circle r="'+r+'" fill="'+(active?'#2465b4':layerColor(bar.layer))+'" stroke="'+(active?'#0f3e72':'white')+'" stroke-width="'+(active?2:1)+'"/><text y="'+(-r-5)+'" text-anchor="middle" font-size="10" fill="#354b65" pointer-events="none">'+(i+1)+'</text><title>第'+(i+1)+'根 '+bar.bar+'；X '+fmt(bar.x+s.b/2)+'，Y '+fmt(bar.y+s.h/2)+' cm</title></g>';});
+  svg+='<g fill="#354b65" font-size="13" font-family="system-ui"><text x="240" y="35" text-anchor="middle">b = '+s.b+' cm</text><text x="24" y="235" text-anchor="middle" transform="rotate(-90 24 235)">h = '+s.h+' cm</text><text x="'+left+'" y="'+(bottom+25)+'">(0, 0) 左下角</text><text x="'+right+'" y="'+(bottom+25)+'" text-anchor="end">X → / Y ↑</text><text x="240" y="450" text-anchor="middle">主筋圓點可拖曳 · 藍色為選取筋及外框箍</text></g></svg>';
   $('dragCanvas').innerHTML=svg;
-  $('dragBarSelect').innerHTML=g.bars.map((b,i)=>'<option value="'+i+'" '+(i===dragSelected?'selected':'')+'>第 '+(i+1)+' 根 · '+b.bar+'</option>').join('');updateDragInfo(v);
+  $('dragBarSelect').innerHTML=g.bars.map((b,i)=>'<option value="'+i+'" '+(i===dragSelected?'selected':'')+'>第 '+(i+1)+' 根 · '+(b.layer?'L'+b.layer+' · ':'')+b.bar+'</option>').join('');updateDragInfo(v);
   const root=$('dragSvg');root.onpointerdown=startBarDrag;root.onpointermove=moveBarDrag;root.onpointerup=e=>finishBarDrag(e,false);root.onpointercancel=e=>finishBarDrag(e,true);root.onlostpointercapture=e=>{if(dragState&&e.pointerId===dragState.id)finishBarDrag(e,true);};root.onkeydown=keyBarMove;
 }
 function clearGraphicResults(){
@@ -59,7 +59,7 @@ function startBarDrag(e){
   if(customRows.some(r=>r.n>1)){customRows=flattenedBars(v);barEditor();$('dragMessage').textContent='整排配置已展開為逐根；其餘鋼筋位置保持相同。';}
   for(const id of ['undoDrag','expandBars','dragBarSelect','dragSnap'])$(id).disabled=true;
   svg.setPointerCapture(e.pointerId);svg.classList.add('dragging');svg.focus({preventScroll:true});clearGraphicResults();
-  for(const el of svg.querySelectorAll('[data-dragbar]')){const active=Number(el.dataset.dragbar)===nearest,c=el.querySelectorAll('circle')[1];c.setAttribute('fill',active?'#2465b4':'#cf7918');c.setAttribute('stroke',active?'#0f3e72':'white');}
+  for(const el of svg.querySelectorAll('[data-dragbar]')){const active=Number(el.dataset.dragbar)===nearest,c=el.querySelectorAll('circle')[1];c.setAttribute('fill',active?'#2465b4':layerColor(v.g.bars[Number(el.dataset.dragbar)].layer));c.setAttribute('stroke',active?'#0f3e72':'white');}
   $('dragBarSelect').value=String(nearest);updateDragInfo(v);
 }
 function clampedDragPosition(x,y,v,min){

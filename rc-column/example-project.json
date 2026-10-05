@@ -18,13 +18,37 @@
     "ky": 1,
     "ratioX": -1,
     "ratioY": -1,
+    "tieLegsX": 4,
+    "tieLegsY": 4,
+    "dX": 53.46,
+    "dY": 53.46,
+    "hx": 15.64,
     "name": "C1",
     "mode": "normal",
     "frame": "braced",
     "bar": "D25",
     "tie": "D13",
     "environment": "inside",
-    "second": false
+    "second": false,
+    "layout": "uniform",
+    "inputMode": "uniform",
+    "layerConfig": [
+      {
+        "bar": "D25",
+        "nx": 4,
+        "ny": 4,
+        "clear": 0
+      },
+      {
+        "bar": "D25",
+        "nx": 4,
+        "ny": 4,
+        "clear": 4
+      }
+    ],
+    "layerDraft": false,
+    "supported": false,
+    "customBars": []
   },
   "loads": [
     {

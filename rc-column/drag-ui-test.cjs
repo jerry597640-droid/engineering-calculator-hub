@@ -1,0 +1,45 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),R=require('./core.js');
+const pw=require(require.resolve('playwright',{paths:[process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES]}));
+(async()=>{
+ const cr=(await import('../qa-tools/node_modules/@sparticuz/chromium/build/index.js')).default;
+ const browser=await pw.chromium.launch({executablePath:await cr.executablePath(),args:cr.args,headless:true});
+ const ctx=await browser.newContext({viewport:{width:1440,height:1000},acceptDownloads:true});await ctx.setOffline(true);
+ const page=await ctx.newPage(),errors=[],requests=[],checks=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().startsWith('http'))requests.push(r.url());});
+ const input=()=>page.evaluate(()=>read());
+ const point=async(p,x,y)=>p.evaluate(({x,y})=>{const svg=document.querySelector('#dragSvg'),s=read(),scale=330/Math.max(s.b,s.h);const q=new DOMPoint(240+(x-s.b/2)*scale,235-(y-s.h/2)*scale).matrixTransform(svg.getScreenCTM());return {x:q.x,y:q.y};},{x,y});
+ async function mouseDrag(x,y,tx,ty,finish=true){await page.locator('#dragSvg').scrollIntoViewIfNeeded();const a=await point(page,x,y),b=await point(page,tx,ty);await page.mouse.move(a.x,a.y);await page.mouse.down();assert((await page.locator('#resultSummary').innerText()).includes('編輯中'));await page.mouse.move(b.x,b.y,{steps:5});if(finish)await page.mouse.up();}
+ await page.goto('file://'+path.resolve(__dirname,'dist/index.html'));await page.locator('#layout').selectOption('custom');await page.locator('#customExample').click();
+ const initial=await input(),initialRatio=await page.evaluate(()=>result.worst.ratio);
+ await page.locator('#supported').check();await page.waitForTimeout(200);
+ await mouseDrag(16,16,18,18);let s=await input();assert.equal(s.customBars[8].x1,18);assert.equal(s.customBars[8].y1,18);
+ for(let i=0;i<12;i++)if(i!==8)assert.deepEqual(s.customBars[i],initial.customBars[i]);assert.equal(R.geometry(s).Ast,51.99600000000001);
+ assert(!s.supported);const changed=await page.evaluate(()=>result.worst.ratio);assert(Math.abs(changed-initialRatio)>.00001);checks.push('實際滑鼠拖曳同步逐根座標、容量與側撐確認');
+ await page.locator('#undoDrag').click();assert.deepEqual((await input()).customBars,initial.customBars);checks.push('復原圖形操作');
+ await mouseDrag(16,16,18.26,17.74);s=await input();assert.equal(s.customBars[8].x1,18.5);assert.equal(s.customBars[8].y1,17.5);checks.push('0.5 cm吸附');await page.locator('#undoDrag').click();
+ await mouseDrag(16,16,19,19,false);await page.keyboard.press('Escape');await page.mouse.up();assert.deepEqual((await input()).customBars,initial.customBars);checks.push('Esc取消拖曳還原座標');
+ await mouseDrag(16,16,-10,20);s=await input();assert.equal(s.customBars[8].x1,6.225);assert.equal(s.customBars[8].y1,20);checks.push('保護層及箍筋內緣邊界限制');await page.locator('#undoDrag').click();
+ await page.locator('#dragSnap').selectOption('0');await mouseDrag(16,16,6.54,6.54);assert(await page.locator('#error').isVisible());assert.equal(await page.locator('#dragSvg').count(),1);assert.equal(await page.locator('#sectionSvg').innerText(),'');
+ await page.locator('#undoDrag').click();assert(!(await page.locator('#error').isVisible()));checks.push('重疊時清空計算結果、保留編輯圖且可復原');
+ await page.locator('#dragSnap').selectOption('0.5');await page.locator('#dragBarSelect').selectOption('8');await page.locator('#dragSvg').focus();await page.keyboard.press('ArrowRight');assert.equal((await input()).customBars[8].x1,16.5);await page.keyboard.press('Shift+ArrowUp');assert.equal((await input()).customBars[8].y1,21);checks.push('鍵盤微調及Shift加速');
+ const rows=[{bar:'D25',n:4,x1:6.54,y1:6.54,x2:53.46,y2:6.54},{bar:'D25',n:4,x1:6.54,y1:53.46,x2:53.46,y2:53.46},{bar:'D25',n:2,x1:6.54,y1:22.18,x2:6.54,y2:37.82},{bar:'D25',n:2,x1:53.46,y1:22.18,x2:53.46,y2:37.82}];
+ const grouped={format:'rc-column-project',version:1,s:{...initial,customBars:rows,dX:53.46,dY:53.46,hx:15.64},loads:await page.evaluate(()=>loads)};
+ const loadProject=async data=>{await page.locator('#projectFile').setInputFiles({name:'graphical-test.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});await page.waitForTimeout(100);};
+ await loadProject(grouped);const g=R.geometry(grouped.s);await mouseDrag(22.18,6.54,24,9);s=await input();assert.equal(s.customBars.length,12);assert(s.customBars.every(r=>r.n===1));assert.equal(s.customBars[1].x1,24);assert.equal(s.customBars[1].y1,9);
+ for(let i=0;i<12;i++)if(i!==1){assert(Math.abs(s.customBars[i].x1-(g.bars[i].x+30))<1e-7);assert(Math.abs(s.customBars[i].y1-(g.bars[i].y+30))<1e-7);}checks.push('整排首次拖曳自動展開、根數與其他鋼筋保持');
+ await page.locator('#undoDrag').click();assert.deepEqual((await input()).customBars,rows);
+ await page.locator('#expandBars').click();assert.equal((await input()).customBars.length,12);assert(Math.abs(R.geometry(await input()).Ast-60.804)<1e-8);checks.push('手動展開整排及復原原分組');
+ await loadProject({...grouped,s:{...grouped.s,customBars:[6.54,22.18,37.82,53.46].map(y=>({bar:'D10',n:50,x1:6.54,y1:y,x2:53.46,y2:y})),dX:50,dY:50}});await page.locator('#expandBars').click();assert.equal((await input()).customBars.length,200);assert.equal(await page.locator('#dragCanvas [data-dragbar]').count(),200);checks.push('200根配置可完整展開與編輯');
+ await page.locator('#customExample').click();await mouseDrag(16,16,18,18);
+ const dEvent=page.waitForEvent('download');await page.locator('#offlineTop').click();const d=await dEvent,offline=path.resolve(__dirname,'drag-downloaded-offline.html');await d.saveAs(offline);
+ const p2=await ctx.newPage();await p2.goto('file://'+offline);assert.equal(await p2.locator('#dragSvg').count(),1);assert.equal(await p2.locator('[data-row="8"][data-key="x1"]').inputValue(),'18');await p2.close();checks.push('離線下載保存拖曳座標與可編輯圖');
+ await page.locator('.drag-layout').screenshot({path:path.resolve(__dirname,'drag-desktop.png')});
+ for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:900});const size=await page.evaluate(()=>({w:document.documentElement.clientWidth,sw:document.documentElement.scrollWidth}));assert(size.sw<=size.w+1);checks.push(width+'px拖曳區無全頁水平溢出');}
+ const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,acceptDownloads:true});await mobile.setOffline(true);const mp=await mobile.newPage();mp.on('pageerror',e=>errors.push(e.message));await mp.goto('file://'+path.resolve(__dirname,'dist/index.html'));await mp.locator('#layout').selectOption('custom');await mp.locator('#customExample').click();await mp.locator('#dragSvg').scrollIntoViewIfNeeded();
+ const session=await mobile.newCDPSession(mp),a=await point(mp,16,16),b=await point(mp,18,18),beforeScroll=await mp.evaluate(()=>scrollY);
+ await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:a.x,y:a.y,id:1}]});for(let i=1;i<=5;i++)await session.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:a.x+(b.x-a.x)*i/5,y:a.y+(b.y-a.y)*i/5,id:1}]});await session.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ assert.equal(await mp.locator('[data-row="8"][data-key="x1"]').inputValue(),'18');assert.equal(await mp.locator('[data-row="8"][data-key="y1"]').inputValue(),'18');assert.equal(await mp.evaluate(()=>scrollY),beforeScroll);checks.push('真實觸控拖曳、不誤捲動頁面');
+ const ma=await point(mp,18,18),mb=await point(mp,20,20);await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:ma.x,y:ma.y,id:1}]});await session.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:mb.x,y:mb.y,id:1}]});await session.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});assert.equal(await mp.locator('[data-row="8"][data-key="x1"]').inputValue(),'18');checks.push('觸控中斷取消當次移動');
+ await mp.locator('#dragSvg').screenshot({path:path.resolve(__dirname,'drag-mobile.png')});
+ assert.equal(errors.length,0,JSON.stringify(errors));assert.equal(requests.length,0);checks.push('零執行錯誤與零外部資源依賴');
+ const report={version:'1.3.0',date:'2026-10-05',checks,errors,externalRequests:requests};fs.writeFileSync(path.resolve(__dirname,'drag-validation.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});
