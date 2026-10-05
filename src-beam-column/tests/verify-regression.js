@@ -1,0 +1,28 @@
+const fs=require('fs'),assert=require('assert'),s=fs.readFileSync(require('path').join(__dirname,'../index.html'),'utf8');
+for(const m of s.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g))if(!m[1].includes('application/json')&&m[2].includes('(function(root)'))eval(m[2]);
+const tests=[];function test(name,fn){fn();tests.push({name,expected:'符合指定數值／防錯行為',actual:'通過',pass:true});}const p=SRCC.defaults(),clone=x=>JSON.parse(JSON.stringify(x));
+test('柱範例材料、幾何及P–M條件',()=>{let r=SRCC.calculate(p);assert(r.valid&&r.maxRatio<1);});
+test('柱大彎矩顯示強度不足',()=>assert(SRCC.calculate({...p,Mx:600,My:200},false).maxRatio>1));
+test('純軸壓工況不產生假中性軸',()=>{let r=SRCC.calculate({...p,Mx:0,My:0},false);assert.equal(r.boundary,null);assert.equal(r.rcBendRatio,0);});
+test('零軸力雙向彎矩可平衡',()=>{let r=SRCC.calculate({...p,Pu:0},false);assert(Math.abs(r.boundary.P)<1e-6);assert(Number.isFinite(r.rcRatio));});
+test('強軸單向工況',()=>{let r=SRCC.calculate({...p,My:0},false);assert(Math.abs(r.boundary.My)<1e-6);});
+test('弱軸單向工況',()=>{let r=SRCC.calculate({...p,Mx:0},false);assert(Math.abs(r.boundary.Mx)<1e-6);});
+test('軸拉輸入拒絕',()=>assert.throws(()=>SRCC.calculate({...p,Pu:-1},false)));
+test('扭矩輸入拒絕',()=>assert.throws(()=>SRCC.calculate({...p,T:1},false)));
+test('不對稱主筋輸入拒絕',()=>{let q=clone(p);q.bars[0].x+=1;assert.throws(()=>SRCC.calculate(q,false));});
+test('空白非數值輸入拒絕',()=>assert.throws(()=>SRCC.calculate({...p,Pu:NaN},false)));
+test('一階樓層穩定分母失效拒絕',()=>assert.throws(()=>SRCC.calculate({...p,order:'first',thetaX:1},false)));
+test('一階構材Euler分母失效拒絕',()=>assert.throws(()=>SRCC.calculate({...p,order:'first',Pu:30000},false)));
+test('鋼骨比不足阻擋合格',()=>{let r=SRCC.calculate({...p,bf:10,hs:20,tf:1,tw:.5},false);assert(!r.valid);});
+test('柱箍筋間距過大阻擋合格',()=>assert(!SRCC.calculate({...p,s:30},false).valid));
+test('高強度混凝土超出範圍阻擋合格',()=>assert(!SRCC.calculate({...p,fc:560},false).valid));
+test('λc>1.5採Euler型分支',()=>{let g=SRCC.props(p),a=SRCC.axial({...p,L:10000},g);for(let x of a.axes){assert(x.lambda>1.5);assert(Math.abs(x.Pns-.877*p.Fy*g.As/(1000*x.lambda**2))<1e-8);}});
+test('梁正負對稱容量相等',()=>{let r=SRC.calculate(SRC.defaults());assert(Math.abs(r.pos.capacity-r.neg.capacity)<1e-8);});
+test('梁RC剪力摩擦控制',()=>{let q=SRC.defaults();q.mu=.35;q.Avf=0;let r=SRC.calculate(q);assert(r.sp.friction<r.sp.normal);assert.equal(r.sp.Vrc,r.sp.friction);});
+test('梁剪力需求分配守恆',()=>{let q=SRC.defaults(),r=SRC.calculate(q);assert(Math.abs(r.sp.ds+r.sp.dr-q.vp)<1e-8);});
+test('梁D10主筋阻擋合格',()=>{let q=SRC.defaults();q.layers.forEach(l=>l.bar='D10');assert(!SRC.calculate(q).valid);});
+fs.writeFileSync(require('path').join(__dirname,'regression.json'),JSON.stringify(tests,null,2));console.log(`${tests.length} regression tests passed`);
+
+const examples=[{name:'柱範例',p:SRCC.defaults()},{name:'一階分析',p:{...SRCC.defaults(),order:'first'}},{name:'長柱',p:{...SRCC.defaults(),L:2200}}].map(t=>({...t,r:SRCC.calculate(t.p,false)}));
+fs.writeFileSync(require('path').join(__dirname,'check-cases.json'),JSON.stringify(examples,null,2));
+fs.writeFileSync(require('path').join(__dirname,'beam-result.json'),JSON.stringify(SRC.calculate(SRC.defaults()),null,2));
