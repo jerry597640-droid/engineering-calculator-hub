@@ -12,8 +12,12 @@ layers=json.loads((root/'layers-validation.json').read_text()) if (root/'layers-
 layerui=json.loads((root/'layers-ui-validation.json').read_text()) if (root/'layers-ui-validation.json').exists() else None
 if layers:validation+='<p><strong>v1.3 多層配置：'+str(len(layers["checks"]))+' 組數值檢核通過</strong>。驗證2～6層尺寸、根數、面積、混合筋徑、人工座標容量等價、軸壓手算、淨距不足、200根上限與方向收斂。</p>'
 if layerui:validation+='<p><strong>多層操作：'+str(len(layerui["checks"]))+' 組測試通過</strong>。包含模板草稿與座標區分、拖曳、JSON及離線重開、Word報表、錯誤處理與320～1440px手機／桌面版面。</p>'
-s=(root/'page.html').read_text().replace('/*CORE*/',(root/'core.js').read_text()).replace('/*LAYERS_UI*/',(root/'layers-ui.js').read_text()).replace('/*DRAG_UI*/',(root/'drag-ui.js').read_text()).replace("'/*VALIDATION*/'",json.dumps(validation,ensure_ascii=False))
-assert all(x not in s for x in ['/*CORE*/','/*DRAG_UI*/','/*LAYERS_UI*/','/*VALIDATION*/'])
+audit=json.loads((root/'audit-validation.json').read_text()) if (root/'audit-validation.json').exists() else None
+auditui=json.loads((root/'audit-ui-validation.json').read_text()) if (root/'audit-ui-validation.json').exists() else None
+if audit:validation+='<p><strong>v1.3.1 逐步明細：'+str(len(audit["checks"]))+' 組數值檢核通過</strong>。逐根淨力及兩方向力矩加總回復核心值，半圓占用面積與形心修正獨立公式、包絡插值及純軸力／耐震分支均驗證。</p>'
+if auditui:validation+='<p><strong>逐步明細操作：'+str(len(auditui["checks"]))+' 組測試通過</strong>。逐筋表格顯示加總與核心一致、全部載重組合報表匯出、手機／桌面明細無全頁水平溢出。</p>'
+s=(root/'page.html').read_text().replace('/*CORE*/',(root/'core.js').read_text()).replace('/*AUDIT_UI*/',(root/'audit-ui.js').read_text()).replace('/*LAYERS_UI*/',(root/'layers-ui.js').read_text()).replace('/*DRAG_UI*/',(root/'drag-ui.js').read_text()).replace("'/*VALIDATION*/'",json.dumps(validation,ensure_ascii=False))
+assert all(x not in s for x in ['/*CORE*/','/*AUDIT_UI*/','/*DRAG_UI*/','/*LAYERS_UI*/','/*VALIDATION*/'])
 (root/'dist').mkdir(exist_ok=True)
 (root/'dist/index.html').write_text(s)
 # Separate printable manual, with the same authoritative input guide.
@@ -34,5 +38,7 @@ md+='\n## 實際座標模式\n\n'+'\n'.join('- '+x for x in custom['checks'])+'\
 if drag:md+='\n## 圖面拖曳\n\n'+'\n'.join('- '+x for x in drag['checks'])+'\n\n實際滑鼠與CDP觸控事件驗證，計算結果與更新後座標一致；原核心公式不變。\n'
 if layers:md+='\n## 多層數值驗證\n\n'+'\n'.join('- '+x for x in layers['checks'])+'\n\n'+json.dumps(layers['numbers'],ensure_ascii=False,indent=2)+'\n\n執行 `node layers-verify.cjs` 更新紀錄。\n'
 if layerui:md+='\n## 多層操作驗證\n\n'+'\n'.join('- '+x for x in layerui['checks'])+'\n'
+if audit:md+='\n## 詳細計算核算\n\n'+'\n'.join('- '+x for x in audit['checks'])+'\n'
+if auditui:md+='\n## 詳細計算操作\n\n'+'\n'.join('- '+x for x in auditui['checks'])+'\n'
 (root/'VALIDATION.md').write_text(md)
 print('built',len(s.encode()),'bytes')

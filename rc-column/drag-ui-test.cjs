@@ -41,5 +41,5 @@ const pw=require(require.resolve('playwright',{paths:[process.env.CODEX_PRIMARY_
  const ma=await point(mp,18,18),mb=await point(mp,20,20);await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:ma.x,y:ma.y,id:1}]});await session.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:mb.x,y:mb.y,id:1}]});await session.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});assert.equal(await mp.locator('[data-row="8"][data-key="x1"]').inputValue(),'18');checks.push('觸控中斷取消當次移動');
  await mp.locator('#dragSvg').screenshot({path:path.resolve(__dirname,'drag-mobile.png')});
  assert.equal(errors.length,0,JSON.stringify(errors));assert.equal(requests.length,0);checks.push('零執行錯誤與零外部資源依賴');
- const report={version:'1.3.0',date:'2026-10-05',checks,errors,externalRequests:requests};fs.writeFileSync(path.resolve(__dirname,'drag-validation.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));await browser.close();
+ const report={version:'1.3.1',date:'2026-10-05',checks,errors,externalRequests:requests};fs.writeFileSync(path.resolve(__dirname,'drag-validation.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});

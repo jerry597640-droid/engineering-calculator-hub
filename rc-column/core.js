@@ -84,10 +84,10 @@ const RCC = (() => {
       const first=bar.a/(Math.PI*radius*radius)*(2/3)*radius**3*root**3;
       const Fs=bar.a*fs-stress*subArea;
       P+=Fs;Mx+=bar.a*fs*bar.y-stress*(subArea*bar.y+first*ny);My+=bar.a*fs*bar.x-stress*(subArea*bar.x+first*nx);
-      if(details)rows.push({...bar,depth,eps,fs,Fs,subArea});
+      if(details)rows.push({...bar,depth,eps,fs,Fs,subArea,first,steelForce:bar.a*fs,concreteForce:stress*subArea,netMx:bar.a*fs*bar.y-stress*(subArea*bar.y+first*ny),netMy:bar.a*fs*bar.x-stress*(subArea*bar.x+first*nx)});
     }
     const ph=phi(et,s.fy,s.Es);
-    return {P,Mx,My,phi:ph,dp:ph*P/1000,mx:ph*Mx/100000,my:ph*My/100000,theta,c,a,et,poly,rows,concrete:cm.area*stress/1000};
+    return {P,Mx,My,phi:ph,dp:ph*P/1000,mx:ph*Mx/100000,my:ph*My/100000,theta,c,a,et,poly,rows,concreteArea:cm.area,concreteMx:cm.Qy*stress/100000,concreteMy:cm.Qx*stress/100000,concrete:cm.area*stress/1000};
   }
   function capacityAtP(s,g,theta,pu){
     let lo=Math.max(s.b,s.h)*1e-8,hi=Math.max(s.b,s.h)*1e5;
@@ -108,14 +108,14 @@ const RCC = (() => {
     const envelope=[];
     if(load.P>=-Tmax+1e-6&&load.P<=Pmax+1e-7){for(let i=0;i<angles;i++){const r=capacityAtP(s,g,i*2*Math.PI/angles,load.P);if(r)envelope.push(r);}}
     const norm=Math.hypot(load.Mx,load.My),axialOK=load.P<=Pmax+1e-7&&load.P>=-Tmax-1e-7;
-    let capacity=0,witness=null;
+    let capacity=0,witness=null,boundary=null;
     if(norm>1e-10){
       const ux=load.Mx/norm,uy=load.My/norm;
       for(let i=0;i<envelope.length;i++){
         const p=envelope[i],r=envelope[(i+1)%envelope.length];
         const cp=p.mx*uy-p.my*ux,cr=r.mx*uy-r.my*ux;
         if(cp*cr<=0&&Math.abs(cp-cr)>1e-12){const t=cp/(cp-cr),mx=p.mx+t*(r.mx-p.mx),my=p.my+t*(r.my-p.my),len=mx*ux+my*uy;
-          if(len>capacity){capacity=len;witness=Math.abs(cp)<Math.abs(cr)?p:r;}}
+          if(len>capacity){capacity=len;witness=Math.abs(cp)<Math.abs(cr)?p:r;boundary={t,mx,my,ux,uy,start:{theta:p.theta,dp:p.dp,mx:p.mx,my:p.my},end:{theta:r.theta,dp:r.dp,mx:r.mx,my:r.my}};}}
       }
     }
     // With asymmetric reinforcement the fixed-P envelope need not contain the origin.
@@ -129,7 +129,7 @@ const RCC = (() => {
     const originInside=custom(s)?pointInside(0,0):true;
     let ratio=norm<1e-10?(axialOK?Math.max(load.P>=0?load.P/Pmax:-load.P/Tmax,0):Infinity):(capacity>0?norm/capacity:Infinity);
     if(custom(s)&&!inside&&(!originInside||norm<1e-10))ratio=Infinity;
-    return {g,P0,Pmax,Tmax,envelope,ratio,capacity,axialOK,witness,inside,originInside,pass:axialOK&&(custom(s)?inside:ratio<=1+1e-8)};
+    return {g,P0,Pmax,Tmax,envelope,ratio,capacity,axialOK,witness,boundary,inside,originInside,pass:axialOK&&(custom(s)?inside:ratio<=1+1e-8)};
   }
   function shear(s,g,load,dir){
     const isX=dir==='x',bw=isX?s.h:s.b,d=isX?g.dX:g.dY,legs=isX?g.legsX:g.legsY;
@@ -185,7 +185,7 @@ const RCC = (() => {
     const interact=sx.ratio>.5&&sy.ratio>.5?(sx.ratio+sy.ratio)/1.5:Math.max(sx.ratio,sy.ratio);
       return {load:l,...sec,sx,sy,shearInteraction:interact,allPass:sec.pass&&sx.pass&&sy.pass&&interact<=1+1e-8};});
     const worst=cases.reduce((a,b)=>b.ratio>a.ratio?b:a);
-    return {s,loads,g,det,cases,worst,pass:det.pass&&cases.every(c=>c.allPass),pendingSeismic:s.mode==='seismic',version:'1.3.0'};
+    return {s,loads,g,det,cases,worst,pass:det.pass&&cases.every(c=>c.allPass),pendingSeismic:s.mode==='seismic',version:'1.3.1'};
   }
   function designCandidates(s,loads){
     if(custom(s))return [];
