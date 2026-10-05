@@ -1,0 +1,284 @@
+[
+  {
+    "name": "鋼骨面積：板塊獨立手算",
+    "expected": "210.84000000",
+    "actual": "210.84000000；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "混凝土淨面積：扣除鋼骨及主筋",
+    "expected": "6128.35600000",
+    "actual": "6128.35600000；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "強軸慣性矩：平行軸定理",
+    "expected": "78395.68520000",
+    "actual": "78395.68520000；相對差 3.712e-16",
+    "pass": true
+  },
+  {
+    "name": "弱軸慣性矩：板塊幾何",
+    "expected": "15730.11720000",
+    "actual": "15730.11720000；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "x 軸有效迴轉半徑",
+    "expected": "23.90157905",
+    "actual": "23.90157905；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "x 軸鋼骨抗壓",
+    "expected": "726.18953580",
+    "actual": "726.18953580；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "x 軸 RC Euler 上限",
+    "expected": "10439.11551064",
+    "actual": "10439.11551064；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "y 軸有效迴轉半徑",
+    "expected": "17.87513245",
+    "actual": "17.87513245；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "y 軸鋼骨抗壓",
+    "expected": "717.06273999",
+    "actual": "717.06273999；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "y 軸 RC Euler 上限",
+    "expected": "10439.11551064",
+    "actual": "10439.11551064；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "軸力分配：相對剛度獨立公式",
+    "expected": "137.42146482",
+    "actual": "137.42146482；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "分配軸力守恆",
+    "expected": "400.00000000",
+    "actual": "400.00000000；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "分配強軸彎矩守恆",
+    "expected": "60.00000000",
+    "actual": "60.00000000；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "分配弱軸彎矩守恆",
+    "expected": "20.00000000",
+    "actual": "20.00000000；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "RC 雙向壓力區：0.02cm 獨立網格積分",
+    "expected": "1861.31120000",
+    "actual": "1861.26974290；相對差 2.227e-05",
+    "pass": true
+  },
+  {
+    "name": "RC 雙向軸力：獨立網格／逐筋力平衡",
+    "expected": "403.97684399",
+    "actual": "403.96697720；相對差 2.442e-05",
+    "pass": true
+  },
+  {
+    "name": "RC 雙向 Mx：獨立網格積分",
+    "expected": "157.91406765",
+    "actual": "157.91127596；相對差 1.768e-05",
+    "pass": true
+  },
+  {
+    "name": "RC 雙向 My：獨立網格積分",
+    "expected": "73.44652377",
+    "actual": "73.44538929；相對差 1.545e-05",
+    "pass": true
+  },
+  {
+    "name": "RC 折減軸力殘差",
+    "expected": "262.57853518",
+    "actual": "262.57853518；相對差 2.430e-12",
+    "pass": true
+  },
+  {
+    "name": "RC 抗彎邊界方向相容",
+    "expected": "2.15005023",
+    "actual": "2.15005023；相對差 4.090e-12",
+    "pass": true
+  },
+  {
+    "name": "一階 x 軸 B1/B2 放大彎矩",
+    "expected": "61.32039963",
+    "actual": "61.32039963；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "一階 y 軸 B1/B2 放大彎矩",
+    "expected": "20.65881829",
+    "actual": "20.65881829；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "長柱 x RC取Euler控制",
+    "expected": "279.52672938",
+    "actual": "279.52672938；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "長柱 y RC取Euler控制",
+    "expected": "279.52672938",
+    "actual": "279.52672938；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "梁鋼骨抗彎：Z Fys",
+    "expected": "73.37260000",
+    "actual": "73.37260000；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "梁鋼骨剪力：0.6Fyw tw hs",
+    "expected": "105.00000000",
+    "actual": "105.00000000；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "梁RC一般剪力：0.53√fc bd + AvFyh d/s",
+    "expected": "63.23457717",
+    "actual": "63.23457717；相對差 0.000e+00",
+    "pass": true
+  },
+  {
+    "name": "柱範例材料、幾何及P–M條件",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "柱大彎矩顯示強度不足",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "純軸壓工況不產生假中性軸",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "零軸力雙向彎矩可平衡",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "強軸單向工況",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "弱軸單向工況",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "軸拉輸入拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "扭矩輸入拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "不對稱主筋輸入拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "空白非數值輸入拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "一階樓層穩定分母失效拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "一階構材Euler分母失效拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "鋼骨比不足阻擋合格",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "柱箍筋間距過大阻擋合格",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "高強度混凝土超出範圍阻擋合格",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "λc>1.5採Euler型分支",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "梁正負對稱容量相等",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "梁RC剪力摩擦控制",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "梁剪力需求分配守恆",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "梁D10主筋阻擋合格",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  }
+]
