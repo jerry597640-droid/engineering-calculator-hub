@@ -1,0 +1,20 @@
+PASS 均勻砂土獨立手算：Qs Qb Qa 浮重 拉拔
+PASS 分層 SPT 精確摩擦積分
+PASS 鑽掘樁尖上下1D平均，跨層加權
+PASS 打入樁上4D 下1D平均
+PASS N̄上限50 摩擦上限15
+PASS 方樁截面與浮重
+PASS 水位位於樁頭上方
+PASS 參數黏土 αSu 與NcSu
+PASS 砂土靜力法跨水位精確積分，臨界8m
+PASS 靜力砂土不同單位重跨層
+PASS 原程式典型砂土法解析式
+PASS 原詳細法 φ=30° 對應鑽掘Nq=10
+PASS α0 α200 Nc0 Nc4邊界不越界
+PASS 步距不影響樁尖結果
+PASS 負摩擦需求扣減
+PASS 擴底自重仍依樁身 拉拔不判合格
+PASS 現行黏土SPT、資料不足、平均範圍黏土 拒絕
+PASS 安全係數不足不誤判符合
+PASS 無效深度/數值/選項/土層均拒絕
+19 verification groups passed.
