@@ -1,4 +1,4 @@
-/* RC Column Workbench 1.1 · Taiwan 112 corrected edition · kgf, cm.
+/* RC Column Workbench 1.2 · Taiwan 112 corrected edition · kgf, cm.
    Geometry-integrated concrete block and center-strain steel.
    No section capacities are increased by confinement. */
 const RCC = (() => {
@@ -20,7 +20,7 @@ const RCC = (() => {
     if(s.mode==='seismic'&&(s.fc<280||![4200,5000,5600].includes(s.fy))) errors.push('本版特殊抗彎矩構架支援 fc′ ≥ 280，fy 為 4200、5000 或 5600');
     if(!['inside','exposed','soil'].includes(s.environment)) errors.push('暴露環境無效');
     if(custom(s)){
-      if(!Array.isArray(s.customBars)||!s.customBars.length||s.customBars.length>60)errors.push('實際配筋需填入1～60列');
+      if(!Array.isArray(s.customBars)||!s.customBars.length||s.customBars.length>200)errors.push('實際配筋需填入1～200列');
       else{
         let n=0;
         s.customBars.forEach((r,i)=>{if(!r||!BARS[r.bar]||!Number.isInteger(r.n)||r.n<1||r.n>50||['x1','y1'].concat(r?.n>1?['x2','y2']:[]).some(k=>!Number.isFinite(r[k])))errors.push(`配筋第${i+1}列：筋徑、根數或座標無效`);else n+=r.n;});
@@ -185,7 +185,7 @@ const RCC = (() => {
     const interact=sx.ratio>.5&&sy.ratio>.5?(sx.ratio+sy.ratio)/1.5:Math.max(sx.ratio,sy.ratio);
       return {load:l,...sec,sx,sy,shearInteraction:interact,allPass:sec.pass&&sx.pass&&sy.pass&&interact<=1+1e-8};});
     const worst=cases.reduce((a,b)=>b.ratio>a.ratio?b:a);
-    return {s,loads,g,det,cases,worst,pass:det.pass&&cases.every(c=>c.allPass),pendingSeismic:s.mode==='seismic',version:'1.1.0'};
+    return {s,loads,g,det,cases,worst,pass:det.pass&&cases.every(c=>c.allPass),pendingSeismic:s.mode==='seismic',version:'1.2.0'};
   }
   function designCandidates(s,loads){
     if(custom(s))return [];
