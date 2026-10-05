@@ -21,12 +21,13 @@ function calculate(p){
  if(p.D<=p.diameter)errors.push('錨碇直徑 D 必須大於抗張材直徑 Dt');
  for(const [k,allowed] of Object.entries({period:['temporary','permanent'],profile:['tw','legacy','custom'],loadMode:['horizontal','axial'],loadUnit:['tf','kgf','kN'],method:['interface','sand','clay'],areaMode:['strand','solid','custom'],stressBasis:['ultimate','allowable'],slipMode:['rankine','custom']}))if(!allowed.includes(p[k]))errors.push(k+' 選项無效');
  if(errors.length)return {errors};
- const c=Math.cos(rad(p.theta)),s=Math.sin(rad(p.theta));const loadTf=p.load*(p.loadUnit==='kgf'?0.001:p.loadUnit==='kN'?1/9.80665:1);
+ const c=Math.cos(rad(p.theta)),s=Math.sin(rad(p.theta));const loadFactor=p.loadUnit==='kgf'?0.001:p.loadUnit==='kN'?1/9.80665:1;const loadTf=p.load*loadFactor;
  const T=p.loadMode==='horizontal'?loadTf/c:loadTf;const H=T*c,V=T*s;
  const A=p.areaMode==='solid'?Math.PI*p.diameter**2/4:p.area,At=A*p.number;
  const ultimate=p.stressBasis==='ultimate'?At*p.strength/1000:null;
  let steel=At*p.strength/1000/(p.stressBasis==='ultimate'?p.fsSteel:1);
- if(p.fhwa&&ultimate!==null)steel=Math.min(steel,0.6*ultimate);
+ const steelRaw=steel,steelLimit=ultimate!==null?0.6*ultimate:null;
+ if(p.fhwa&&ultimate!==null)steel=Math.min(steel,steelLimit);
  const ground=p.method==='interface'?Math.PI*p.D*p.La*p.tau/1000:p.method==='sand'?p.La/100*p.nFactor*Math.tan(rad(p.phi)):Math.PI*p.D*p.La*p.alpha*p.cu/1000;
  const grout=Math.PI*p.diameter*p.La*p.number*p.bond/1000;
  const caps=[steel,ground/p.fsGround,grout/p.fsBond];
@@ -36,16 +37,17 @@ function calculate(p){
  const minLf=p.fhwa&&p.areaMode!=='solid'?450:400;
  const requiredLf=Math.max(minLf,slip+buffer);
  const axialCapacity=Math.min(...caps),horizontalCapacity=axialCapacity*c;
+ const spacingMin=Math.max(4*p.D,150);const lockLoad=p.lockFactor*T,testLoad=p.testFactor*T,lockLimit=ultimate!==null?0.7*ultimate:null,testLimit=ultimate!==null?0.8*ultimate:null;
  const checks=[];const ck=(key,name,ok,detail)=>checks.push({key,name,ok,detail});
  ck('steel','抗張材抗拉',T<=steel+1e-10,'設計軸力 ≤ 抗張材容許軸力');
  ck('ground','地層／漿體抗拔',T<=caps[1]+1e-10,'設計軸力 ≤ 極限抗拔力／FSg');
  ck('grout','漿體／抗張材握裹',T<=caps[2]+1e-10,'設計軸力 ≤ 極限握裹力／FSb');
  ck('inclination','地錨傾角',p.theta>10,'θ > 10°；沿用原準則的施工建議');
- ck('spacing','錨碇段中心距',p.spacing>=Math.max(4*p.D,150),'a ≥ max(4D, 150 cm)；須另查群錨與鑽孔偏差');
+ ck('spacing','錨碇段中心距',p.spacing>=spacingMin,'a ≥ max(4D, 150 cm)；須另查群錨與鑽孔偏差');
  ck('free','自由段與破壞面',p.Lf+1e-9>=requiredLf,'Lf ≥ 最小自由段且 ≥ 破壞面交點距離＋後退長度');
  ck('length','錨碇段最小長度',p.La>=300,'La ≥ 300 cm（02492 §1.5.3）');
  const floor=factors(p.period,'tw');ck('factors','安全係數基準',p.fsSteel>=floor[0]&&p.fsGround>=floor[1]&&p.fsBond>=floor[2],'採用的 FS 不低於 02492 表列參考值');
- if(p.fhwa&&ultimate!==null){ck('lock','FHWA 鎖定荷重上限',p.lockFactor*T<=0.7*ultimate+1e-10,'鎖定荷重 ≤ 0.70 × 抗張材極限拉力');ck('test','FHWA 試驗荷重上限',p.testFactor*T<=0.8*ultimate+1e-10,'試驗荷重 ≤ 0.80 × 抗張材極限拉力');}
+ if(p.fhwa&&ultimate!==null){ck('lock','FHWA 鎖定荷重上限',lockLoad<=lockLimit+1e-10,'鎖定荷重 ≤ 0.70 × 抗張材極限拉力');ck('test','FHWA 試驗荷重上限',testLoad<=testLimit+1e-10,'試驗荷重 ≤ 0.80 × 抗張材極限拉力');}
  const warnings=[];
  if(p.profile==='legacy')warnings.push('原版係數模式用於追溯；原程式的 σas 名稱混淆容許與極限強度，請依材料文件設定強度性質。');
  if(p.stressBasis==='allowable')warnings.push('使用直接容許應力：不再除以 FSsteel；FHWA 極限強度比例與試驗上限未計算，需另補 fpu 檢核。');
@@ -58,7 +60,42 @@ function calculate(p){
  const requiredLaGround=p.La*T/caps[1],requiredLaBond=p.La*T/caps[2];
  const requiredN=Math.ceil(T/(steel/p.number)-1e-12);
  const elongation=T*1000*p.Lf/At/p.E*10;
- return {errors:[],T,H,V,A,At,ultimate,steel,ground,grout,caps,axialCapacity,horizontalCapacity,beta,slip,buffer,minLf,requiredLf,checks,warnings,controlling,requiredN,requiredLaGround,requiredLaBond,elongation,utilization:T/axialCapacity,pass:checks.every(x=>x.ok)};
+ const checkValues={steel:`${T} ≤ ${steel}+1e-10 tf`,ground:`${T} ≤ ${caps[1]}+1e-10 tf`,grout:`${T} ≤ ${caps[2]}+1e-10 tf`,inclination:`${p.theta} > 10°`,spacing:`${p.spacing} ≥ ${spacingMin} cm`,free:`${p.Lf}+1e-9 ≥ ${requiredLf} cm`,length:`${p.La} ≥ 300 cm`,factors:`[${p.fsSteel},${p.fsGround},${p.fsBond}] ≥ [${floor}]`,lock:`${lockLoad} ≤ ${lockLimit}+1e-10 tf`,test:`${testLoad} ≤ ${testLimit}+1e-10 tf`};
+ const trace=[];const step=(title,formula,substitution,result,unit='',condition='',source='原版 AnchorEngine.calculate；均勻界面應力與有效長度假設')=>trace.push({title,formula,substitution,result,unit,condition,source});
+ step('角度與荷重單位換算','θrad = θ × π / 180；Ptf = P × k',`${p.theta} × π / 180；cosθ=${c}；sinθ=${s}；${p.load} × ${loadFactor}`,loadTf,'tf',`輸入力方向 ${p.loadMode}；1 tf = 1000 kgf = 9.80665 kN`);
+ step('設計軸力',p.loadMode==='horizontal'?'T = Ptf / cosθ':'T = Ptf',p.loadMode==='horizontal'?`${loadTf} / ${c}`:`${loadTf}`,T,'tf');
+ step('水平分力','H = T cosθ',`${T} × ${c}`,H,'tf');step('垂直分力','V = T sinθ',`${T} × ${s}`,V,'tf');
+ step('單支材料面積',p.areaMode==='solid'?'A = πDt²/4':'A = 材料面積輸入',p.areaMode==='solid'?`π × ${p.diameter}² / 4`:`${p.area}`,A,'cm²',`面積模式 ${p.areaMode}；鋼絞線不能以外徑實心圓代替證明面積`);
+ step('總面積','At = A × N',`${A} × ${p.number}`,At,'cm²');
+ if(ultimate!==null)step('材料極限拉力','Tu = At fpu / 1000',`${At} × ${p.strength} / 1000`,ultimate,'tf');
+ step('抗張材原始容許力',p.stressBasis==='ultimate'?'Tas = Tu / FSs':'Tas = At fa / 1000',p.stressBasis==='ultimate'?`${ultimate} / ${p.fsSteel}`:`${At} × ${p.strength} / 1000`,steelRaw,'tf',p.stressBasis==='allowable'?'直接容許應力；不再除FS，無fpu故不計FHWA極限比例上限':`FSs=${p.fsSteel}`);
+ step('抗張材容許力採用',p.fhwa&&ultimate!==null?'Ta = min(Tas, 0.60Tu)':'Ta = Tas',p.fhwa&&ultimate!==null?`min(${steelRaw}, ${steelLimit})`:`${steelRaw}`,steel,'tf',p.fhwa&&ultimate!==null?'採最小值；FHWA補充60%極限拉力限制':'未啟用FHWA極限比例限制','原版公式與勾選 FHWA 補充条件');
+ const gf=p.method==='interface'?'Tug = π D La τu / 1000':p.method==='sand'?'Tug = (La / 100) n tanφ':'Tug = π D La α Cu / 1000';
+ const gs=p.method==='interface'?`π × ${p.D} × ${p.La} × ${p.tau} / 1000`:p.method==='sand'?`${p.La} / 100 × ${p.nFactor} × tan(${p.phi}°)`:`π × ${p.D} × ${p.La} × ${p.alpha} × ${p.cu} / 1000`;
+ step('地層極限抗拔力',gf,gs,ground,'tf',p.method==='sand'?'n為經驗綜合因子tf/m，非SPT N；須現地試驗校正':p.method==='clay'?'αCu為原程式黏土界面估算，須確認潛變與擾動':'界面極限剪應力由地質／試驗提供');
+ step('地層容許抗拔力','Tag = Tug / FSg',`${ground} / ${p.fsGround}`,caps[1],'tf');
+ step('極限握裹力','Tbu = π Dt La N τb / 1000',`π × ${p.diameter} × ${p.La} × ${p.number} × ${p.bond} / 1000`,grout,'tf');
+ step('容許握裹力','Tab = Tbu / FSb',`${grout} / ${p.fsBond}`,caps[2],'tf');
+ step('控制容許軸力','Tallow = min(Ta, Tag, Tab)',`min(${caps.join(', ')})`,axialCapacity,'tf',`控制：${controlling}；同值時採候選順序首項`);
+ step('容許水平力','Hallow = Tallow cosθ',`${axialCapacity} × ${c}`,horizontalCapacity,'tf');
+ step('強度利用率','u = T / Tallow',`${T} / ${axialCapacity}`,T/axialCapacity,'', '容許值判定各自保留原引擎 1e-10 tf 比較容差');
+ step('破壞面角度','β = 45 + φs/2',`45 + ${p.phiSlip}/2`,beta,'°',p.slipMode==='custom'?'自訂交點模式不以β求交點':'水平地表、均質土、垂直牆初步平面破壞面');
+ step('破壞面交點',p.slipMode==='rankine'?'s0 = (L2-L1)/(sinθ+cosθ tanβ)':'s0 = 外部分析交點',p.slipMode==='rankine'?`(${p.L2}-${p.L1}) / (${s}+${c} × tan(${beta}°))`:`${p.slipDistance}`,slip,'cm');
+ step('破壞面後退長度',p.fhwa?'b = max(b輸入, 150, L2/5)':'b = b輸入',p.fhwa?`max(${p.buffer},150,${p.L2}/5)`:`${p.buffer}`,buffer,'cm','FHWA勾選時保留原引擎修正');
+ step('最小自由段','Lf,min = FHWA且非實心 ? 450 : 400',`FHWA=${p.fhwa}；面積模式=${p.areaMode}`,minLf,'cm');
+ step('自由段需求','Lf,req = max(Lf,min, s0+b)',`max(${minLf}, ${slip}+${buffer})`,requiredLf,'cm',`已設Lf=${p.Lf}；原比較容差1e-9 cm`);
+ step('中心距下限','a,min = max(4D,150)',`max(4 × ${p.D},150)`,spacingMin,'cm',`已設a=${p.spacing}`);
+ step('安全係數來源列','FS參考 = factors(period, tw)',`period=${p.period}；採用=[${p.fsSteel},${p.fsGround},${p.fsBond}]`,floor.join(' / '),'', '檢核以臺北基準列，legacy/custom仍須比對最低值','02492 表列參考：臨時列 [1.6,2,2]；永久列 [2,3,3]；欄依序 抗張材／地層／握裹；原版legacy臨時列[1.6,2.5,2.5]');
+ step('所需抗張材支數','Nreq = ceil(T/(Ta/N)-1e-12)',`ceil(${T}/(${steel}/${p.number})-1e-12)`,requiredN,'支','向上取整；扣1e-12防浮點邊界跳號；僅抗拉需求');
+ step('地層所需有效長度','La,g = La T / Tag',`${p.La} × ${T} / ${caps[1]}`,requiredLaGround,'cm','同一界面應力，未取整；超長有效性須試驗確認');
+ step('握裹所需有效長度','La,b = La T / Tab',`${p.La} × ${T} / ${caps[2]}`,requiredLaBond,'cm','未取整；不取代其他配置檢核');
+ step('鎖定荷重','Tlock = klock T',`${p.lockFactor} × ${T}`,lockLoad,'tf',p.fhwa&&ultimate!==null?`上限0.70Tu=${lockLimit} tf`:'未計FHWA比例上限');
+ step('試驗荷重','Ttest = ktest T',`${p.testFactor} × ${T}`,testLoad,'tf',p.fhwa&&ultimate!==null?`上限0.80Tu=${testLimit} tf`:'未計FHWA比例上限');
+ step('自由段彈性伸長','Δ = T × 1000 × Lf / At / E × 10',`${T} × 1000 × ${p.Lf} / ${At} / ${p.E} × 10`,elongation,'mm','tf→kgf乘1000；cm→mm乘10；未取整');
+ checks.forEach(check=>step('檢核 '+check.name,check.detail,checkValues[check.key]||check.detail,check.ok?'通過':'未通過','','全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成'));
+
+ return {errors:[],trace,inputSnapshot:JSON.stringify(p),T,H,V,A,At,ultimate,steel,ground,grout,caps,axialCapacity,horizontalCapacity,beta,slip,buffer,minLf,requiredLf,checks,warnings,controlling,requiredN,requiredLaGround,requiredLaBond,elongation,utilization:T/axialCapacity,pass:checks.every(x=>x.ok)};
 }
 const api={defaults,calculate,factors,rad};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.AnchorEngine=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
+
