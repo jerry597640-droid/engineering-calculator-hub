@@ -110,3 +110,4 @@ function selfTest(){let rows=[],check=(label,v,w,tol=1e-7)=>rows.push({label,pas
 $('run-tests').onclick=()=>{let rows=selfTest();$('test-output').textContent=rows.map(v=>(v.pass?'PASS':'FAIL')+'　'+v.label+(v.actual!==undefined?'：'+n(v.actual,6)+'（預期 '+n(v.expected,6)+'）':'')).join('\n')+'\n'+rows.filter(v=>v.pass).length+'/'+rows.length+' 通過';};
 $('validation-info').innerHTML='/*VALIDATION*/';
 fill();run();
+
