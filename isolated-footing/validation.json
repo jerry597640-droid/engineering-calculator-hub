@@ -1,0 +1,40 @@
+Warning: truncated output (original token count: 574)
+Total output lines: 41
+
+{
+  "verified_on": "2026-10-05",
+  "engineering_groups": 20,
+  "test_output": [
+    "PASS Uniform pressure: N/A",
+    "PASS Full contact: exact biaxial elastic formula",
+    "PASS Uniaxial lift-off: analytical triangular contact",
+    "PASS Biaxial triangular corner contact: barycentric centroid",
+    "PASS Mirror signs preserve area and peak pressure",
+    "PASS Near overturning: eccentricity 1.95 m",
+    "PASS No finite contact when resultant outside base",
+    "PASS Old weight correction includes thickness",
+    "PASS Centric footing: independent hand integration of M and V",
+    "PASS Punching subtracts internal reaction, kgf conversion",
+    "PASS No-stirrup shear follows 22.5.5.1(c), not old 0.53",
+    "PASS Thickness-adjusted example passes listed checks",
+    "PASS Groundwater: gross effective force + net hydrostatic force balance",
+    "PASS Load pairing: minimum N is not mixed with maximum moment",
+    "PASS Moment/eccentricity signs match right-hand axes",
+    "PASS Toe resi…74 tokens truncated…distribution 13.3.3.3",
+    "Verified 20 engineering test groups."
+  ],
+  "offline_external_dependencies": [],
+  "embedded_engine_matches_source": true,
+  "embedded_ui_matches_source": true,
+  "browser_observations": {
+    "desktop": "Published app, source NG, thickness example PASS, invalid input blocked; no console errors",
+    "mobile": "375px content width equals scroll width; stacked form and horizontal navigation observed",
+    "hub": "Tool card and correct destination observed"
+  },
+  "verification_limits": [
+    "Local file URL execution could not be tested in the cloud browser. All runtime dependencies are embedded and the core was tested with Node.",
+    "Browser download event was not returned by the cloud browser. The identical standalone HTML is included directly in this release.",
+    "Actual device filesystem opening and hardcopy printing should be confirmed on the target device."
+  ],
+  "sha256_html": "201661ac17ddb97ffaeeecb85d417b841a81d1d1c9e24785486ef8eb20ce4364"
+}
