@@ -1,0 +1,23 @@
+{
+  "viewports": [
+    320,
+    390,
+    768,
+    1440
+  ],
+  "tabs": 6,
+  "noPageOverflow": true,
+  "exampleStatuses": {
+    "source": "已列檢核通過",
+    "safe": "已列檢核通過",
+    "ecc": "需專案複核",
+    "partial": "檢核未通過",
+    "thin": "檢核未通過"
+  },
+  "offlineNetworkRequests": 0,
+  "consoleErrors": [],
+  "liveInvalidInput": true,
+  "jsonRoundtrip": true,
+  "malformedJsonRejected": true,
+  "printReport": true
+}

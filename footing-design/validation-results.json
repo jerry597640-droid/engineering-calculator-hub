@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-05",
+  "checks": 528,
+  "groups": [
+    "均佈土壓 / 一、二階矩解析解",
+    "全接觸雙向偏心解析角點",
+    "單軸部分接觸三角形解析解 / 正負X、Y",
+    "80組雙向偏心 / 獨立積分平衡與不承拉",
+    "置中基腳自重、有效深度、柱面Mu、單向Vu與新版Vc",
+    "沖切周界、扣除內部反力、三式容量及高沖切最小量",
+    "底筋伸展25.4.2.4、矩形短向全寬增量及較小d選項",
+    "地下水獨立係數 / 有效土壓與淨反力平衡",
+    "ACI官方範例：柱面Mu、d剪力與d/2沖切幾何（只比較需求）",
+    "材料／幾何／JSON／荷載錯誤與無接觸不假合格"
+  ],
+  "maxContactResidual": 8.833307233582754e-11,
+  "defaultResult": {
+    "status": "PASS",
+    "wc": 14.039999999999997,
+    "ws": 10.108800000000002,
+    "serviceQ": 22.6832,
+    "dx": 56.23,
+    "dy": 53.69,
+    "Asx": 96.273,
+    "Asy": 96.273,
+    "U1": {
+      "Mu": 59.8786944,
+      "shearRatio": 0.7090846864145273,
+      "punchRatio": 0.633126965793077
+    },
+    "ld": 72.86113602502465
+  },
+  "sources": [
+    "https://www.nlma.gov.tw/filesys/file/EMMA/c1130219-1.pdf",
+    "https://www.nlma.gov.tw/filesys/file/EMMA/a1120620.pdf",
+    "https://www.concrete.org/Portals/0/Files/PDF/318-Example-1_RF_R1.pdf"
+  ],
+  "scope": "Algorithm and listed checks only; no complete geotechnical, seismic or local connection design approval"
+}
