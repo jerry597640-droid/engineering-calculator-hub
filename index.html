@@ -277,6 +277,15 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
     "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/footing-design/",
     "code": "FTG",
     "favorite": false
+  },
+  {
+    "id": "rc-corbel",
+    "name": "RC 托架與梁托設計檢核",
+    "category": "構材分析設計",
+    "description": "112年規範16.5：主筋、閉合箍、剪力摩擦、束制拉力與局部承壓；詳細公式、受力配筋圖、範例、操作說明與離線版。",
+    "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/rc-corbel/",
+    "code": "COR",
+    "favorite": false
   }
 ]</script>
 <script>
@@ -351,6 +360,9 @@ try{const marker='engineering-calculator-hub.rebar-development.v1';if(!localStor
 // Add unit conversion without replacing personal names, URLs, colors or favorites.
 try{const marker='engineering-calculator-hub.unit-converter.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='unit-converter');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='單位換算工具已載入；請匯出清單保存新增項目。';}
 try{const marker='engineering-calculator-hub.shear-friction.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='shear-friction');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='剪力摩擦工具已載入；請匯出清單保存新增項目。';}
+
+// Add RC corbel without replacing personal entries.
+try{const marker='engineering-calculator-hub.rc-corbel.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='rc-corbel');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='RC托架及梁托工具已載入；請匯出清單保存新增項目。';}
 render();if(startupWarning)notify(startupWarning);
 </script>
 <script id="theme-data" type="application/json">{"navy":"#12243b","paper":"#f4f7fa","surface":"#ffffff","ink":"#192c42","accent":"#efb64e","blue":"#225a83"}</script>
