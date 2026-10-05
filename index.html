@@ -286,6 +286,15 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
     "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/rc-corbel/",
     "code": "COR",
     "favorite": false
+  },
+  {
+    "id": "src-beam-column",
+    "name": "SRC 梁柱構材分析設計",
+    "category": "構材分析設計",
+    "description": "梁抗彎剪力、柱／梁柱雙向 P–M 與二階效應；逐步代入、主筋內力、嵌入說明及離線版。",
+    "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/src-beam-column/",
+    "code": "SRC",
+    "favorite": false
   }
 ]</script>
 <script>
@@ -363,6 +372,8 @@ try{const marker='engineering-calculator-hub.shear-friction.v1';if(!localStorage
 
 // Add RC corbel without replacing personal entries.
 try{const marker='engineering-calculator-hub.rc-corbel.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='rc-corbel');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='RC托架及梁托工具已載入；請匯出清單保存新增項目。';}
+// Add SRC beam-column while preserving personal entries.
+try{const marker='engineering-calculator-hub.src-beam-column.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='src-beam-column');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='SRC 梁柱工具已載入；請匯出清單保存新增項目。';}
 render();if(startupWarning)notify(startupWarning);
 </script>
 <script id="theme-data" type="application/json">{"navy":"#12243b","paper":"#f4f7fa","surface":"#ffffff","ink":"#192c42","accent":"#efb64e","blue":"#225a83"}</script>
