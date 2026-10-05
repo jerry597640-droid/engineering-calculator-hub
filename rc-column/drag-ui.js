@@ -100,3 +100,4 @@ $('dragBarSelect').onchange=()=>{dragSelected=Number($('dragBarSelect').value);d
 $('expandBars').onclick=()=>{const v=dragGeometry();if(!v||!customRows.some(r=>r.n>1))return;const before=copyBarRows();customRows=flattenedBars(v);rememberGraphicEdit(before);barEditor();recalc();$('dragMessage').textContent='已展開為逐根，根數、筋徑與位置保持相同。';};
 $('undoDrag').onclick=()=>{if(!dragUndo||dragUndoAfter!==JSON.stringify(customRows))return;customRows=dragUndo;dragUndo=null;dragUndoAfter='';$('supported').checked=false;barEditor();recalc();$('dragMessage').textContent='已復原上次圖形操作；請重新核對側撐。';};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&dragState){e.preventDefault();finishBarDrag({pointerId:dragState.id},true);}});
+

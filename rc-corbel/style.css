@@ -3,3 +3,4 @@
 .diagram-mobile{display:none}.mobile-diagram-label{font-size:12px;padding:15px 10px;color:#405b71;line-height:1.6}@media(max-width:720px){.diagram-wide{display:none}.diagram-mobile{display:block}.diagram-mobile svg+div+svg{max-width:270px;margin:0 auto}.diagram-mobile svg{width:100%;height:auto}}
 
 aside,nav{min-width:0}
+

@@ -1,0 +1,1 @@
+const fs=require('fs'),path=require('path');const dir=__dirname;const source=fs.readFileSync(path.join(dir,'source-template.html'));fs.writeFileSync(path.join(dir,'index.html'),source);console.log('Built complete offline crane tool from canonical source-template.html');

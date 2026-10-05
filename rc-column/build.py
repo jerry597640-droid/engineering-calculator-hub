@@ -1,25 +1,25 @@
 from pathlib import Path
 import json,html
 root=Path(__file__).parent
-r=json.loads((root/'validation-results.json').read_text())
+r=json.loads((root/'validation-results.json').read_text(encoding='utf-8'))
 rows=''.join('<tr><td>'+html.escape(x['name'])+'</td><td>'+f"{x['expected']:.5f}"+'</td><td>'+f"{x['actual']:.5f}"+'</td><td>'+f"{x['errorPercent']:.5f}%"+'</td></tr>' for x in r['benchmarkComparisons'][:13])
 validation='<p><strong>8 組驗證項目通過</strong>｜19項數值對照。公開案例最大相對差異 '+f"{max(x['errorPercent'] for x in r['benchmarkComparisons'][:13]):.5f}"+'%。120角度與720角度在5種受力情況比較，D/C差異小於0.3%。</p><div class="table-wrap"><table><thead><tr><th>案例／數值</th><th>公開值</th><th>本核心</th><th>差異</th></tr></thead><tbody>'+rows+'</tbody></table></div><p>單向軸力單位kip、彎矩kip·ft；雙向為未折減名義強度。測試涵蓋剪力、軸壓超限、無效輸入、長細篩選、對稱性與配筋搜尋。外部案例於主筋與壓力塊交界的面積扣除方式及原文約整造成小幅差異。</p>'
-custom=json.loads((root/'custom-validation.json').read_text())
+custom=json.loads((root/'custom-validation.json').read_text(encoding='utf-8'))
 validation+='<p><strong>v1.3 實際座標模式：'+str(len(custom['checks']))+' 組檢核通過</strong>。均勻配置轉座標後數值相同；另驗證混合筋徑、非對稱鏡射、逐筋手算、偏心純拉端點、實際單向切片、重疊越界、箍筋與方向收斂。這些為程式驗證，不表示所有工程條件皆已完成設計。</p>'
-drag=json.loads((root/'drag-validation.json').read_text()) if (root/'drag-validation.json').exists() else None
+drag=json.loads((root/'drag-validation.json').read_text(encoding='utf-8')) if (root/'drag-validation.json').exists() else None
 if drag:validation+='<p><strong>v1.3 圖面拖曳：'+str(len(drag['checks']))+' 組測試通過</strong>。涵蓋實際滑鼠與觸控、座標吸附、側撐確認失效、整排展開、200根配置、邊界、重疊、復原及取消、鍵盤、離線保存與手機版面。</p>'
-layers=json.loads((root/'layers-validation.json').read_text()) if (root/'layers-validation.json').exists() else None
-layerui=json.loads((root/'layers-ui-validation.json').read_text()) if (root/'layers-ui-validation.json').exists() else None
+layers=json.loads((root/'layers-validation.json').read_text(encoding='utf-8')) if (root/'layers-validation.json').exists() else None
+layerui=json.loads((root/'layers-ui-validation.json').read_text(encoding='utf-8')) if (root/'layers-ui-validation.json').exists() else None
 if layers:validation+='<p><strong>v1.3 多層配置：'+str(len(layers["checks"]))+' 組數值檢核通過</strong>。驗證2～6層尺寸、根數、面積、混合筋徑、人工座標容量等價、軸壓手算、淨距不足、200根上限與方向收斂。</p>'
 if layerui:validation+='<p><strong>多層操作：'+str(len(layerui["checks"]))+' 組測試通過</strong>。包含模板草稿與座標區分、拖曳、JSON及離線重開、Word報表、錯誤處理與320～1440px手機／桌面版面。</p>'
-audit=json.loads((root/'audit-validation.json').read_text()) if (root/'audit-validation.json').exists() else None
-auditui=json.loads((root/'audit-ui-validation.json').read_text()) if (root/'audit-ui-validation.json').exists() else None
+audit=json.loads((root/'audit-validation.json').read_text(encoding='utf-8')) if (root/'audit-validation.json').exists() else None
+auditui=json.loads((root/'audit-ui-validation.json').read_text(encoding='utf-8')) if (root/'audit-ui-validation.json').exists() else None
 if audit:validation+='<p><strong>v1.3.1 逐步明細：'+str(len(audit["checks"]))+' 組數值檢核通過</strong>。逐根淨力及兩方向力矩加總回復核心值，半圓占用面積與形心修正獨立公式、包絡插值及純軸力／耐震分支均驗證。</p>'
 if auditui:validation+='<p><strong>逐步明細操作：'+str(len(auditui["checks"]))+' 組測試通過</strong>。逐筋表格顯示加總與核心一致、全部載重組合報表匯出、手機／桌面明細無全頁水平溢出。</p>'
-s=(root/'page.html').read_text().replace('/*CORE*/',(root/'core.js').read_text()).replace('/*AUDIT_UI*/',(root/'audit-ui.js').read_text()).replace('/*LAYERS_UI*/',(root/'layers-ui.js').read_text()).replace('/*DRAG_UI*/',(root/'drag-ui.js').read_text()).replace("'/*VALIDATION*/'",json.dumps(validation,ensure_ascii=False))
+s=(root/'page.html').read_text(encoding='utf-8').replace('/*DOCX_VENDOR*/',(root.parent/'vendor/docx/docx-9.6.1.iife.js').read_text(encoding='utf-8').replace('</script','<\\/script')).replace('/*DOCX_CORE*/',(root.parent/'shared/calculation-docx.js').read_text(encoding='utf-8')).replace('/*CORE*/',(root/'core.js').read_text(encoding='utf-8')).replace('/*AUDIT_UI*/',(root/'audit-ui.js').read_text(encoding='utf-8')).replace('/*LAYERS_UI*/',(root/'layers-ui.js').read_text(encoding='utf-8')).replace('/*DRAG_UI*/',(root/'drag-ui.js').read_text(encoding='utf-8')).replace("'/*VALIDATION*/'",json.dumps(validation,ensure_ascii=False))
 assert all(x not in s for x in ['/*CORE*/','/*AUDIT_UI*/','/*DRAG_UI*/','/*LAYERS_UI*/','/*VALIDATION*/'])
 (root/'dist').mkdir(exist_ok=True)
-(root/'dist/index.html').write_text(s)
+(root/'dist/index.html').write_text(s,encoding='utf-8')
 # Separate printable manual, with the same authoritative input guide.
 guide=s.split('<section id="guidePanel"')[1].split('</section>')[0]
 guide='<section '+guide.split('>',1)[1]
@@ -30,7 +30,7 @@ import re
 content=re.sub(r'<button[^>]*>.*?</button>','',content)
 css=s.split('<style>')[1].split('</style>')[0]
 manual='<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RC柱操作說明</title><style>'+css+' body{padding:24px}.guide{margin:auto} details{break-inside:avoid}</style><h1 style="max-width:1100px;margin:0 auto 20px">RC 柱配筋工作台 — 操作說明 v1.3</h1>'+content+'</html>'
-(root/'dist/manual.html').write_text(manual)
+(root/'dist/manual.html').write_text(manual,encoding='utf-8')
 md='# RC 柱數值驗證 v1.3\n\n查核日期：2026-10-05。\n\n| 項目 | 公開值 | 本核心 | 相對差異 % |\n|---|---:|---:|---:|\n'
 for x in r['benchmarkComparisons']:md+=f"|{x['name']}|{x['expected']:.8f}|{x['actual']:.8f}|{x['errorPercent']:.8f}|\n"
 md+='\n驗證項目：\n\n'+'\n'.join('- '+x for x in r['checks'])+'\n\n'+'\n'.join(r['notes'])+'\n\n來源與可照輸入範例均見程式內「操作說明」。執行 `node verify.cjs` 重新產生紀錄；`python3 build.py` 重建單一 HTML。\n'
@@ -40,5 +40,6 @@ if layers:md+='\n## 多層數值驗證\n\n'+'\n'.join('- '+x for x in layers['ch
 if layerui:md+='\n## 多層操作驗證\n\n'+'\n'.join('- '+x for x in layerui['checks'])+'\n'
 if audit:md+='\n## 詳細計算核算\n\n'+'\n'.join('- '+x for x in audit['checks'])+'\n'
 if auditui:md+='\n## 詳細計算操作\n\n'+'\n'.join('- '+x for x in auditui['checks'])+'\n'
-(root/'VALIDATION.md').write_text(md)
+(root/'VALIDATION.md').write_text(md,encoding='utf-8')
 print('built',len(s.encode()),'bytes')
+

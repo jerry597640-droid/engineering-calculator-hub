@@ -43,3 +43,4 @@ $('layerCount').onchange=changeLayerCount;$('layerCustomCount').oninput=changeLa
 $('layerEditor').oninput=e=>{const el=e.target;if(el.dataset.layer===undefined)return;const k=el.dataset.field;layerDefs[Number(el.dataset.layer)][k]=k==='bar'?el.value:el.value.trim()===''?NaN:Number(el.value);layerDirty=true;updateLayerSummary();};
 $('generateLayers').onclick=generateLayerCoordinates;
 $('layerExample').onclick=()=>{example();$('b').value=80;$('h').value=80;$('layout').value='layers';layerDefs=defaultLayerConfig(3);layerDefs.forEach(l=>{l.bar='D25';l.nx=l.ny=4;});layerDirty=false;layerEditor();generateLayerCoordinates();toast('已載入3層範例：36-D25；各層側撐、肢數與有效深度須依詳圖確認。');};
+

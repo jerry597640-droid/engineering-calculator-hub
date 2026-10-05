@@ -92,11 +92,11 @@ const RCC = (() => {
   function capacityAtP(s,g,theta,pu){
     let lo=Math.max(s.b,s.h)*1e-8,hi=Math.max(s.b,s.h)*1e5;
     if(pu<-.9*g.Ast*s.fy/1000-1e-7||pu>.65*(.85*s.fc*(g.Ag-g.Ast)+s.fy*g.Ast)/1000) return null;
-    let v;
-    for(let i=0;i<65;i++){const c=(lo+hi)/2;v=state(s,g,theta,c);if(v.dp<pu)lo=c;else hi=c;}
+    let v;const solverHistory=[];
+    for(let i=0;i<65;i++){const c=(lo+hi)/2;v=state(s,g,theta,c);solverHistory.push({i,lo,hi,c,dp:v.dp,branch:v.dp<pu?'lo=c':'hi=c'});if(v.dp<pu)lo=c;else hi=c;}
     v=state(s,g,theta,(lo+hi)/2,true);
     if(Math.abs(v.dp-pu)>1e-5*Math.max(1,Math.abs(pu))) return null;
-    return v;
+    v.solverHistory=solverHistory;return v;
   }
   function section(s,load,angles=120){
     const g=geometry(s),P0=(.85*s.fc*(g.Ag-g.Ast)+s.fy*g.Ast)/1000,Pmax=.8*.65*P0,Tmax=.9*s.fy*g.Ast/1000;
@@ -144,7 +144,8 @@ const RCC = (() => {
     const demand=Math.abs(isX?load.Vx:load.Vy),minRequired=demand>.75*.265*Math.sqrt(s.fc)*bw*d/1000;
     const spacing=Math.min(d/2,60); // 10.7.6.5; higher Vs requires d/4, 30 cm.
     const shearS=Vs>1.06*Math.sqrt(s.fc)*bw*d?Math.min(d/4,30):spacing;
-    return {bw,d,legs,Av,Avmin,fytUsed,Vc:Vc/1000,Vs:Vs/1000,cap,demand,ratio:demand/cap,pass:demand<=cap+1e-8&&(!minRequired||Av>=Avmin)&&s.s<=shearS+1e-8,case:s.mode==='seismic'?'Vc = 0（耐震保守值）':custom(s)&&Av<Avmin?'Vc = 0（座標配置且Av不足之保守值）':Av>=Avmin?'22.5.5.1(a)':'22.5.5.1(c)',minRequired,shearS};
+    const result={bw,d,legs,Av,Avmin,fytUsed,Vc:Vc/1000,Vs:Vs/1000,cap,demand,ratio:demand/cap,pass:demand<=cap+1e-8&&(!minRequired||Av>=Avmin)&&s.s<=shearS+1e-8,case:s.mode==='seismic'?'Vc = 0（耐震保守值）':custom(s)&&Av<Avmin?'Vc = 0（座標配置且Av不足之保守值）':Av>=Avmin?'22.5.5.1(a)':'22.5.5.1(c)',minRequired,shearS};
+    result.trace=[{title:'剪力 '+dir+'向',formula:'fyt=min(fyt,模式上限)；Av=肢數Ai；Av,min=max(.2√fc,3.5)bw s/fyt；Vc=clamp(raw bw d,0,1.33√fc bw d)；φV=.75min(Vc+Vs,Vc+2.12√fc bw d)/1000',substitution:`fyt=${s.fyt}→${fytUsed}；bw=${bw},d=${d},legs=${legs},Av=${Av},Avmin=${Avmin}；Nu=${Nu},ax=min(${Nu}/(6×${g.Ag}),.05×${s.fc})=${ax}；ρ=${rho},λs=${lambdaS},raw=${raw},zeroVc=${zeroVc}；Vc=${Vc},Vs=${Vs} kgf；候選${Vc+Vs}與${Vc+2.12*Math.sqrt(s.fc)*bw*d} kgf`,result:cap,unit:'tf',condition:`分支=${result.case}；需求=${demand},D/C=${result.ratio}；最小筋觸發門檻=${.75*.265*Math.sqrt(s.fc)*bw*d/1000}；minRequired=${minRequired}；Vs高於${1.06*Math.sqrt(s.fc)*bw*d} kgf則間距min(d/4,30)，否則min(d/2,60)；採${shearS}cm；通過=${result.pass}`,source:'22.5.5、10.7.6.5；原工具耐震或custom筋不足保守Vc=0'}];return result;
   }
   function detailing(s,g,maxP){
     const minClear=Math.max(4,1.5*g.maxDb,4*s.agg/3),rho=g.Ast/g.Ag,bcx=s.b-2*s.cover,bcy=s.h-2*s.cover,Ach=bcx*bcy;
@@ -173,7 +174,8 @@ const RCC = (() => {
       {name:'平行 X 箍筋 Ash,x',value:AshX,unit:'cm²',limit:'≥ '+reqX.toFixed(3),pass:AshX>=reqX,ref:'表18.4.5.4'},
       {name:'平行 Y 箍筋 Ash,y',value:AshY,unit:'cm²',limit:'≥ '+reqY.toFixed(3),pass:AshY>=reqY,ref:'表18.4.5.4'}
     );
-    return {checks,rho,minClear,smax,slx,sly,limX,limY,slender,lo:Math.max(s.b,s.h,s.L/6,45),AshX,AshY,reqX,reqY,Ach,high,pass:checks.every(c=>c.pass||c.info)};
+    const result={checks,rho,minClear,smax,slx,sly,limX,limY,slender,lo:Math.max(s.b,s.h,s.L/6,45),AshX,AshY,reqX,reqY,Ach,high,pass:checks.every(c=>c.pass||c.info)};
+    result.trace=traceDetail(s,g,{minClear,rho,bcx,bcy,Ach,generalS,barLimit,so,smax,kn,kf,high,confRatio,reqX,reqY,rx,ry,slx,sly,limX,limY,checks,maxP,AshX,AshY});return result;
   }
   function evaluate(s,loads,angles=120){
     const errors=validate(s);
@@ -183,21 +185,22 @@ const RCC = (() => {
     const g=geometry(s),det=detailing(s,g,Math.max(...loads.map(l=>l.P),0));
     const cases=loads.map(l=>{const sec=section(s,l,angles),sx=shear(s,g,l,'x'),sy=shear(s,g,l,'y');
     const interact=sx.ratio>.5&&sy.ratio>.5?(sx.ratio+sy.ratio)/1.5:Math.max(sx.ratio,sy.ratio);
-      return {load:l,...sec,sx,sy,shearInteraction:interact,allPass:sec.pass&&sx.pass&&sy.pass&&interact<=1+1e-8};});
+      sec.load=l;sec.trace=traceSection(s,sec,angles);return {load:l,...sec,sx,sy,shearInteraction:interact,allPass:sec.pass&&sx.pass&&sy.pass&&interact<=1+1e-8};});
     const worst=cases.reduce((a,b)=>b.ratio>a.ratio?b:a);
-    return {s,loads,g,det,cases,worst,pass:det.pass&&cases.every(c=>c.allPass),pendingSeismic:s.mode==='seismic',version:'1.3.1'};
+    const trace=[{title:'主筋查表與座標展開',formula:'Ast=ΣAi；Ag=b h；x=X-b/2,y=Y-h/2；均勻配置o=cover+dt+db/2',substitution:`採用主筋=${g.bars.map(b=>b.bar||s.bar).join(',')}；Ast=${g.Ast}；Ag=${s.b}×${s.h}；o=${g.o} cm；共${g.bars.length}根；每根Ai/db/x/y由同geometry結果列於表格`,result:g.Ast,unit:'cm²',condition:'整排N=1只取起點；N>1逐根插值；多層或拖曳後以目前實際座標權威，不把未套用模板當成結果',source:'核心BARS固定表查筋徑列a(cm²)、d(cm)欄；座標同核心geometry展開'},...det.trace,...cases.flatMap((c,i)=>[{title:`組合 ${i+1} ${c.load.name}`,formula:'載重為同時發生設計內力',substitution:JSON.stringify(c.load),result:c.allPass?'通過':'未通過',source:'本次輸入'},...c.trace,...c.sx.trace,...c.sy.trace,{title:'雙向剪力交互作用',formula:'rx、ry均>.5 ? (rx+ry)/1.5 : max(rx,ry)',substitution:`rx=${c.sx.ratio},ry=${c.sy.ratio}`,result:String(c.shearInteraction),condition:'≤1；原容差1e-8',source:'原核心交互作用篩選'}])];
+    return {trace,inputSnapshot:JSON.stringify({s,loads}),s,loads,g,det,cases,worst,pass:det.pass&&cases.every(c=>c.allPass),pendingSeismic:s.mode==='seismic',version:'1.3.1'};
   }
   function designCandidates(s,loads){
     if(custom(s))return [];
-    const list=[];
+    const list=[];const searchAudit=[];
     for(const bar of ['D19','D22','D25','D29','D32','D36'])for(let nx=2;nx<=10;nx++)for(let ny=2;ny<=10;ny++){
-      const ss={...s,bar,nx,ny},g=geometry(ss);if(validate(ss).length)continue;
+      const ss={...s,bar,nx,ny},g=geometry(ss);const errors=validate(ss),record={bar,nx,ny,Ast:g.Ast,geometry:g.bars.length,stage:'輸入範圍',detail:errors.join('；')};searchAudit.push(record);if(errors.length)continue;
       const d=detailing(ss,g,Math.max(...loads.map(l=>l.P),0));
-      if(!d.pass)continue;const maxP=.52*(.85*s.fc*(g.Ag-g.Ast)+s.fy*g.Ast)/1000;
-      if(loads.some(l=>l.P>maxP||-l.P>.9*g.Ast*s.fy/1000))continue;
+      record.stage='構造';record.detail=d.checks.map(c=>`${c.name}:${c.value}${c.unit} ${c.limit} → ${c.pass||c.info}`).join('；');if(!d.pass)continue;const maxP=.52*(.85*s.fc*(g.Ag-g.Ast)+s.fy*g.Ast)/1000;
+      record.stage='軸力上下限';record.detail=`Pmax=${maxP},Tmax=${.9*g.Ast*s.fy/1000} tf；輸入P=${loads.map(l=>l.P)}`;if(loads.some(l=>l.P>maxP||-l.P>.9*g.Ast*s.fy/1000))continue;record.stage='進入排序待逐案檢核';
       list.push({ss,Ast:g.Ast});
     }
-    return list.sort((a,b)=>a.Ast-b.Ast||geometry(a.ss).bars.length-geometry(b.ss).bars.length);
+    list.sort((a,b)=>a.Ast-b.Ast||geometry(a.ss).bars.length-geometry(b.ss).bars.length);list.searchAudit=searchAudit;return list;
   }
   function axisSlice(s,axis,steps=64,angles=120){
     const g=geometry(s),Pmax=.52*(.85*s.fc*(g.Ag-g.Ast)+s.fy*g.Ast)/1000,Tmax=.9*s.fy*g.Ast/1000;
@@ -232,6 +235,26 @@ const RCC = (() => {
     });
     return {rows,info,total,Ast:info.reduce((a,l)=>a+l.Ast,0)};
   }
+function traceDetail(s,g,values){const {minClear,rho,bcx,bcy,Ach,generalS,barLimit,so,smax,kn,kf,high,confRatio,reqX,reqY,rx,ry,slx,sly,limX,limY,checks}=values,t=[];const add=(title,formula,substitution,result,unit='',condition='',source='臺灣112年混凝土規範含113勘誤；既有核心')=>t.push({title,formula,substitution,result,unit,condition,source});
+ add('配筋與主筋淨距','ρ=Ast/Ag；淨距要求=max(4,1.5db,max,4dagg/3)',`${g.Ast}/${g.Ag}；max(4,1.5×${g.maxDb},4×${s.agg}/3)`,`ρ=${rho}；最小要求=${minClear}`,'cm','混合筋徑／跨層逐對間距以原geometry判定','10.6、25.2.3');
+ add('箍筋一般間距','sg=min(16db,min,48dt,b,h)',`min(${16*g.minDb},${48*g.dt},${s.b},${s.h})`,generalS,'cm','','25.7.2.1');
+ add('耐震間距候選','smax=min(sg,min(b,h)/4,kbar db,min,so)；so=clamp(10+(35-hx)/3,10,15)',`sg=${generalS}；短邊/4=${Math.min(s.b,s.h)/4}；kbar=${barLimit}×${g.minDb}；so=${so}`,smax,'cm',`mode=${s.mode}；一般模式只採sg`,'18.4.5.3');
+ add('核心圍束面積','bcx=b-2cover；bcy=h-2cover；Ach=bcx bcy',`${s.b}-2×${s.cover}=${bcx}；${s.h}-2×${s.cover}=${bcy}`,Ach,'cm²','僅箍筋需求，不增加斷面承載強度');
+ add('圍束三候選最大值','ρconf=max(.3(Ag/Ach-1)fc/fyt,.09fc/fyt,high?.2kf kn Pmax/(fyt Ach):0)',`候選=${.3*(g.Ag/Ach-1)*s.fc/s.fyt},${.09*s.fc/s.fyt},${high?.2*kf*kn*values.maxP*1000/(s.fyt*Ach):0}；kf=${kf}；kn=${kn}；高軸力=${high}`,confRatio,'',`high比較：${values.maxP}×1000>.3×${g.Ag}×${s.fc}`,'表18.4.5.4，候選欄原引擎採最大值');
+ add('箍筋面積需求','Ash,x,req=ρconf s bcy；Ash,y,req=ρconf s bcx',`${confRatio}×${s.s}×${bcy}；${confRatio}×${s.s}×${bcx}`,`X=${reqX}；Y=${reqY}`,'cm²',`實配X=${values.AshX}；Y=${values.AshY}`);
+ add('長細篩選','rx=h/√12,ry=b/√12；λx=kxL/rx,λy=kyL/ry',`rx=${rx},ry=${ry}；${s.kx}×${s.L}/${rx}；${s.ky}×${s.L}/${ry}`,`λx=${slx},λy=${sly}`,'',`限值X=${limX},Y=${limY}；無側移min(40,34+12M1/M2)；有側移22；勾選second只確認外部內力，不替引擎放大`,'6.2.5');
+ checks.forEach(c=>add('構造檢核 '+c.name,c.limit,`${c.value} ${c.unit}`,c.pass?'通過':c.info?'外部二階分析已確認':'未通過','',c.info?'超限但外部二階效應已確認':'保留原引擎容差與判定',c.ref));return t;}
+function traceSection(s,c,angles){const t=[];const add=(title,formula,substitution,result,unit='',condition='',source='同一次RCC.section，臺灣112年混凝土規範')=>t.push({title,formula,substitution,result,unit,condition,source}),g=c.g,l=c.load||{};
+ add('材料係數上下限','β1=clamp(.85-.05(fc-280)/70,.65,.85)；εy=fy/Es',`clamp(.85-.05×(${s.fc}-280)/70,.65,.85)；${s.fy}/${s.Es}`,`β1=${beta(s.fc)}；εy=${s.fy/s.Es}`,'','允許betaOverride驗算時保留原覆盖值');
+ add('名義軸壓及設計上下限','P0=[.85fc(Ag-Ast)+fyAst]/1000；Pmax=.8×.65P0；Tmax=.9fyAst/1000',`[.85×${s.fc}×(${g.Ag}-${g.Ast})+${s.fy}×${g.Ast}]/1000`, `P0=${c.P0}；Pmax=${c.Pmax}；Tmax=${c.Tmax}`,'tf',`Pu=${l.P}；軸力界限通過=${c.axialOK}`);
+ const w=c.witness;if(w){add('實際鄰近邊界求解','固定θ，以65次二分使φPn=Pu',w.solverHistory.map(z=>`i=${z.i},lo=${z.lo},hi=${z.hi},c=${z.c},φPn=${z.dp},更新=${z.branch}`).join('\n'),w.c,'cm',`角度=${w.theta} rad；角度樣本=${angles}；最終殘差=${w.dp-l.P} tf，求解接受容差1e-5max(1,|Pu|)`);
+ add('壓力塊與折減','a=β1c；top=|nx|b/2+|ny|h/2；φ=.65+.25clamp((εt-εy)/.003,0,1)',`θ=${w.theta}；a=${w.a}；c=${w.c}；εt=${w.et}`,w.phi,'',`保留半平面nx x+ny y≥top-a；Ac=${w.concreteArea}；毛壓力=${w.concrete} tf`);
+ w.rows.forEach((bar,i)=>add(`逐筋 ${i+1}${bar.layer?' 層'+bar.layer:''}`, 'ε=.003(1-d/c)；fs=clamp(Es ε,-fy,fy)；F=Ai fs-.85fc Aci',`bar=${bar.bar}；x=${bar.x},y=${bar.y},Ai=${bar.a},d=${bar.depth}；ε=${bar.eps}；fs=${bar.fs}；Aci=${bar.subArea}；Q=${bar.first}`,`鋼筋力=${bar.steelForce},扣除混凝土=${bar.concreteForce},淨力=${bar.Fs}；Mx=${bar.netMx},My=${bar.netMy}`,'kgf／kgf·cm','圓筋占用面積t=clamp((top-a-z)/(db/2),-1,1)，Aci=Ai[acos(t)-t√(1-t²)]/π；形心Q修正納入兩軸力矩'));
+ add('斷面合力','Pn=Cc+ΣFi；Mn,c+ΣMi；φPn=φPn',`毛混凝土=${w.concrete} tf；Σ筋=${w.rows.reduce((a,b)=>a+b.Fs,0)/1000} tf；Pn=${w.P/1000}；Mnx=${w.Mx/100000},Mny=${w.My/100000}`,`φPn=${w.dp}；φMnx=${w.mx}；φMny=${w.my}`,'tf／tf·m','kgf→tf除1000；kgf·cm→tf·m除100000');}
+ if(c.boundary){const b=c.boundary,cp=b.start.mx*b.uy-b.start.my*b.ux,cr=b.end.mx*b.uy-b.end.my*b.ux;add('包絡插值控制','t=kA/(kA-kB)；R=A+t(B-A)；Rc=R·u',`A=(${b.start.mx},${b.start.my}),B=(${b.end.mx},${b.end.my})；u=(${b.ux},${b.uy})；kA=${cp},kB=${cr}；t=${b.t}`,c.capacity,'tf·m',`交點R=(${b.mx},${b.my})；取需求正向最大交點`);}
+ add('軸彎判定','D/C=|Mu|/Rc；純軸力採Pu/Pmax或|Pu|/Tmax',`Pu=${l.P},Mx=${l.Mx},My=${l.My}；容量=${c.capacity}`,String(c.ratio),'',`通過=${c.pass}；custom實際需求點inside=${c.inside},originInside=${c.originInside}；不是只看外側射線；無有效解不虛列逐筋表`);return t;}
+
   return {BARS,beta,phi,validate,geometry,clip,moments,state,capacityAtP,section,axisSlice,shear,detailing,evaluate,designCandidates,buildLayers};
 })();
 if(typeof module!=='undefined')module.exports=RCC;
+

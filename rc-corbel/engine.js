@@ -6,10 +6,10 @@ const EPS=1e-8,PHI=.75,ES=2040000;
 function flexural(As,p,d){
  const beta=Math.max(.65,.85-.05*Math.max(0,p.fc-280)/70);
  if(As<=0)return {Mn:0,c:0,a:0,eps:0,fs:0,beta};
- let lo=1e-10,hi=d;
- for(let i=0;i<100;i++){const c=(lo+hi)/2,a=beta*c,eps=.003*(d-c)/c,fs=Math.min(p.fy,ES*eps);if(.85*p.fc*p.bw*a>As*fs)hi=c;else lo=c;}
+ let lo=1e-10,hi=d;const iterations=[];
+ for(let i=0;i<100;i++){const c=(lo+hi)/2,a=beta*c,eps=.003*(d-c)/c,fs=Math.min(p.fy,ES*eps);iterations.push({iteration:i+1,lo,hi,c,a,eps,fs,C:.85*p.fc*p.bw*a,T:As*fs,branch:.85*p.fc*p.bw*a>As*fs?'hi=c':'lo=c'});if(.85*p.fc*p.bw*a>As*fs)hi=c;else lo=c;}
  const c=(lo+hi)/2,a=beta*c,eps=.003*(d-c)/c,fs=Math.min(p.fy,ES*eps);
- return {Mn:As*fs*(d-a/2),c,a,eps,fs,beta};
+ return {Mn:As*fs*(d-a/2),c,a,eps,fs,beta,iterations};
 }
 function calculate(input){
  const p={...DEFAULT,...input},errors=[];
@@ -60,7 +60,8 @@ function calculate(input){
  const layerClear=Math.min(pitch-bh.d,pitch-(bm.d+bh.d)/2),layerMin=Math.max(2.5,4*p.agg/3);
  check('閉合箍筋層間淨距',layerClear+EPS>=layerMin,layerMin,layerClear,'cm','25.2.2','檢查主筋到首道箍及箍筋間；另保守考慮4/3骨材粒徑');
  const applicable=ratio<=1+EPS&&Nuc<=Vu+EPS,passed=applicable&&checks.every(c=>c.ok),details=['front','support','bearing','durability'].every(k=>p[k]===true);
- return {valid:true,p,errors:[],d,lambda,mu,Vu,Nuc,Mu,An,Avf,Amin,Af,reqYield,AscReq,Asc,Ah,AhReq,flex,vDim,vInterface,vSteel,vCap,bCap,hOuter,clear,clearMin,pitch,layerClear,layerMin,beta,AsBal,capTerms,sfTerms,checks,applicable,passed,details,status:!applicable?'超出方法適用範圍':!passed?'有項目未通過':!details?'數值通過・細部待確認':'數值通過・細部已確認'};
+ return {valid:true,p,errors:[],d,lambda,mu,Vu,Nuc,Mu,An,Avf,Amin,Af,reqYield,AscReq,Asc,Ah,AhReq,flex,vDim,vInterface,vSteel,vCap,bCap,hOuter,clear,clearMin,pitch,layerClear,layerMin,beta,AsBal,capTerms,sfTerms,checks,applicable,passed,details,traceScalars:{ratio,disc,aBal,NucInput:p.Nu*1000,NucPad:p.nMode==='direct'?0:1.6*(p.nMode==='pad'?.2:Math.min(.2,p.muPad))*p.Rs*1000},status:!applicable?'超出方法適用範圍':!passed?'有項目未通過':!details?'數值通過・細部待確認':'數值通過・細部已確認'};
 }
 const api={BARS,DEFAULT,PHI,ES,calculate,flexural};if(typeof module!=='undefined'&&module.exports)module.exports=api;root.CorbelEngine=api;
 })(typeof window!=='undefined'?window:globalThis);
+

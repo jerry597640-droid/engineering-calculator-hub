@@ -1,0 +1,110 @@
+{
+  "version": "1.2",
+  "baseline": "f347f55ded4dc35aad3647b1c898e7234c646644",
+  "built": "2026-10-05",
+  "originalChecks": 528,
+  "traceComparisons": 3784,
+  "formulaChanged": false,
+  "files": [
+    {
+      "path": "置中基腳_計算範例.pdf",
+      "bytes": 988706,
+      "sha256": "e4ffbc5308ba4e64e60fd3496e51e36237bbfe3a2befeb400344f70a9126d402"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4413,
+      "sha256": "315cea1f2cb69aa19dcd7cbda84849d062cd72f41f57a92447e98835bef2c475"
+    },
+    {
+      "path": "engine.cjs",
+      "bytes": 34055,
+      "sha256": "09593e685c0d334f248c01035a601b5bf901d84655069529f58ce564e839893f"
+    },
+    {
+      "path": "index.html",
+      "bytes": 955534,
+      "sha256": "325c85fc3c411f1ef53859607ab4032b0bd0fc690cece59e70d6d2f745034622"
+    },
+    {
+      "path": "verify.cjs",
+      "bytes": 6950,
+      "sha256": "188b07dca1f2f2b0001d498d5004049f1ec6a840bcfef4e2d01508e531b81901"
+    },
+    {
+      "path": "validation-results.json",
+      "bytes": 1441,
+      "sha256": "b271a3bd4548db4e9cf6aea9308465a0dd73898e92792484534499df395cb100"
+    },
+    {
+      "path": "驗算與操作說明.html",
+      "bytes": 30387,
+      "sha256": "a2a0571fdfaeb70290dc0621936e600d7d283c61bf4034ee7f20f172b125e49e"
+    },
+    {
+      "path": "ui.js",
+      "bytes": 40435,
+      "sha256": "bb28b38afb86a3668950529418670a9bb438534fd47252d4eeecefcb09fcdf33"
+    },
+    {
+      "path": "template.html",
+      "bytes": 16176,
+      "sha256": "7c74afb62c5395049ed54f432f6b2fef2c5223e27c4eeb3bc681ee74b0ebf201"
+    },
+    {
+      "path": "build.cjs",
+      "bytes": 658,
+      "sha256": "a76f461b794cf4cf2ec81dda91145bcc853f1e4ff7abbd9cc4dc50814c839e20"
+    },
+    {
+      "path": "qa-baseline-engine.cjs",
+      "bytes": 14518,
+      "sha256": "38b6e8e8d4cf0090746294fbaefe9f238b83ce153c2645ac214e00238b494a75"
+    },
+    {
+      "path": "verify-trace.cjs",
+      "bytes": 2828,
+      "sha256": "ca24551f75df7c96afb58ac2173deda1c8234e83a2d99d524216073b465dbb00"
+    },
+    {
+      "path": "trace-validation.json",
+      "bytes": 195,
+      "sha256": "54e583237ceb7fad128c398d2f04fbe1419570dd6ccec1faa7819967ad9553c7"
+    },
+    {
+      "path": "browser-validation.json",
+      "bytes": 435,
+      "sha256": "aad6b88c8c0c08397cbf6dc017f8c13bfe73ff3258e5a0392026673a247d50ea"
+    },
+    {
+      "path": "ui-validation.json",
+      "bytes": 435,
+      "sha256": "aad6b88c8c0c08397cbf6dc017f8c13bfe73ff3258e5a0392026673a247d50ea"
+    },
+    {
+      "path": "shared/calculation-docx.js",
+      "bytes": 7202,
+      "sha256": "76dc18fcb376b96f87bd741c4d2a27577efd3fc44d42d443ee6b8fd06c25e2cb"
+    },
+    {
+      "path": "vendor/docx/docx-9.6.1.iife.js",
+      "bytes": 857630,
+      "sha256": "ecef72931c98461fc327aa6e95867820aced5db4c3d971ac5ad38ccda21dd360"
+    },
+    {
+      "path": "vendor/docx/LICENSE",
+      "bytes": 1072,
+      "sha256": "b5b2364c0c95a26b2a2399d7e706a61acac680be1d5b180b00592ee85830bffb"
+    },
+    {
+      "path": "矩形基腳_詳細計算範例.pdf",
+      "bytes": 3468512,
+      "sha256": "d753b2f40c342c3c9e2d61ed5b718ab8bfc7499b14e141454691df6e0412f208"
+    },
+    {
+      "path": "置中基腳_詳細計算書.docx",
+      "bytes": 126376,
+      "sha256": "33776165827442ddcd1755f63146ad25f96bb1ac213a9192ef347f02dde8051b"
+    }
+  ]
+}
