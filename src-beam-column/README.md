@@ -45,3 +45,7 @@
 - SRC第6章 https://www.nlma.gov.tw/uploads/files/c0ec0fcd843b9fc64ed10865c5f03741.pdf
 - SRC第7章 https://www.nlma.gov.tw/uploads/files/de33d9841890f8f82630e6bb88f3acd2.pdf
 - RC112年版 https://www.nlma.gov.tw/uploads/files/34f8103d5ef2b7f82dde347c52758207.pdf
+
+## 可重現驗算
+
+以 Node.js 執行 `node tests/verify-regression.js`（20項測試並產生核對輸入），再以已安裝 NumPy 的 Python 執行 `python3 tests/verify-independent.py`（27項独立計算）。不需其他JavaScript套件。獨立網格驗算採0.02cm間距，可能需數秒及較多記憶體。`tests/mobile-preview.html` 提供390px寬度響應式預覽。
