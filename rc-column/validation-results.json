@@ -1,0 +1,165 @@
+{
+  "date": "2026-10-05",
+  "version": "1.0.0",
+  "checks": [
+    "公開案例：單向P–M控制點",
+    "公開案例：雙向彎矩",
+    "台灣公式獨立代入",
+    "剪力與雙向剪力交互作用",
+    "軸力超限、長細與耐震待辦",
+    "無效输入不得產生有效結果",
+    "對稱與120角度收斂",
+    "配筋搜尋最小Ast可行候選"
+  ],
+  "benchmarkComparisons": [
+    {
+      "name": "單向φP εt=0.000000",
+      "expected": 622.31,
+      "actual": 622.3099999653389,
+      "errorPercent": 5.569743449123707e-9,
+      "tolerancePercent": 0.001
+    },
+    {
+      "name": "單向φM εt=0.000000",
+      "expected": 169.8634,
+      "actual": 169.86341665720568,
+      "errorPercent": 0.000009806235871173898,
+      "tolerancePercent": 0.001
+    },
+    {
+      "name": "單向φP εt=0.001034",
+      "expected": 421.91,
+      "actual": 421.90999997650044,
+      "errorPercent": 5.569808951631338e-9,
+      "tolerancePercent": 0.001
+    },
+    {
+      "name": "單向φM εt=0.001034",
+      "expected": 220.05034,
+      "actual": 220.05033973133345,
+      "errorPercent": 1.220932237110502e-7,
+      "tolerancePercent": 0.001
+    },
+    {
+      "name": "單向φP εt=0.002069",
+      "expected": 270.8914,
+      "actual": 270.8914058806037,
+      "errorPercent": 0.0000021708344145646717,
+      "tolerancePercent": 0.001
+    },
+    {
+      "name": "單向φM εt=0.002069",
+      "expected": 250.77437,
+      "actual": 250.77437026770522,
+      "errorPercent": 1.0675142678789406e-7,
+      "tolerancePercent": 0.001
+    },
+    {
+      "name": "單向φP εt=0.005069",
+      "expected": 171.64154,
+      "actual": 171.64153845197842,
+      "errorPercent": 9.01892148172208e-7,
+      "tolerancePercent": 0.001
+    },
+    {
+      "name": "單向φM εt=0.005069",
+      "expected": 286.75074,
+      "actual": 286.750742587579,
+      "errorPercent": 9.02379184858413e-7,
+      "tolerancePercent": 0.001
+    },
+    {
+      "name": "單向純彎矩 spColumn",
+      "expected": 213.91,
+      "actual": 213.77906987460653,
+      "errorPercent": 0.061208043286177384,
+      "tolerancePercent": 0.1
+    },
+    {
+      "name": "最大設計軸壓力",
+      "expected": 797.68,
+      "actual": 797.6799999555711,
+      "errorPercent": 5.569754310200525e-9,
+      "tolerancePercent": 0.00001
+    },
+    {
+      "name": "雙向Pn",
+      "expected": 485.54,
+      "actual": 485.6356296046584,
+      "errorPercent": 0.01969551523218895,
+      "tolerancePercent": 0.1
+    },
+    {
+      "name": "雙向Mnx",
+      "expected": 197.11,
+      "actual": 197.17588777318906,
+      "errorPercent": 0.03342690537722441,
+      "tolerancePercent": 0.1
+    },
+    {
+      "name": "雙向Mny",
+      "expected": 95.56,
+      "actual": 95.49732576941119,
+      "errorPercent": 0.06558626055756749,
+      "tolerancePercent": 0.1
+    },
+    {
+      "name": "Ast cm²",
+      "expected": 60.804,
+      "actual": 60.804,
+      "errorPercent": 0,
+      "tolerancePercent": 0.000001
+    },
+    {
+      "name": "P0 tf",
+      "expected": 1097.705448,
+      "actual": 1097.705448,
+      "errorPercent": 0,
+      "tolerancePercent": 0.000001
+    },
+    {
+      "name": "最大軸壓 tf",
+      "expected": 570.80683296,
+      "actual": 570.80683296,
+      "errorPercent": 0,
+      "tolerancePercent": 0.000001
+    },
+    {
+      "name": "長細比",
+      "expected": 17.32050807568877,
+      "actual": 17.32050807568877,
+      "errorPercent": 0,
+      "tolerancePercent": 0.000001
+    },
+    {
+      "name": "Vc tf",
+      "expected": 71.38564064954464,
+      "actual": 71.38564064954464,
+      "errorPercent": 0,
+      "tolerancePercent": 0.000001
+    },
+    {
+      "name": "Vs tf",
+      "expected": 113.79281759999999,
+      "actual": 113.79281759999999,
+      "errorPercent": 0,
+      "tolerancePercent": 0.000001
+    }
+  ],
+  "example": {
+    "Ast": 60.804,
+    "rhoPercent": 1.6890000000000003,
+    "P0": 1097.705448,
+    "Pmax": 570.80683296,
+    "bendingRatios": [
+      0.3843874743905577,
+      0.6472314086460372
+    ],
+    "implementedChecksPass": true
+  },
+  "notes": [
+    "外部案例採原始美制材料換算；台灣UI使用mks與台灣規範。",
+    "混凝土扣除主筋面積採連續圓弓形積分；與原文點面積法在邊界穿過主筋時有小幅差異。",
+    "驗證有限案例與本版項目，不代表完整耐震、接頭或二階構架設計已完成。"
+  ]
+}

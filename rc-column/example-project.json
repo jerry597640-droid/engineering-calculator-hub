@@ -1,0 +1,47 @@
+{
+  "format": "rc-column-project",
+  "version": 1,
+  "s": {
+    "b": 60,
+    "h": 60,
+    "fc": 280,
+    "fy": 4200,
+    "fyt": 4200,
+    "Es": 2040000,
+    "cover": 4,
+    "agg": 2,
+    "nx": 4,
+    "ny": 4,
+    "s": 10,
+    "L": 300,
+    "kx": 1,
+    "ky": 1,
+    "ratioX": -1,
+    "ratioY": -1,
+    "name": "C1",
+    "mode": "normal",
+    "frame": "braced",
+    "bar": "D25",
+    "tie": "D13",
+    "environment": "inside",
+    "second": false
+  },
+  "loads": [
+    {
+      "name": "U1 · 重力組合",
+      "P": 300,
+      "Mx": 20,
+      "My": 10,
+      "Vx": 15,
+      "Vy": 15
+    },
+    {
+      "name": "U2 · 側力組合",
+      "P": 220,
+      "Mx": 35,
+      "My": -18,
+      "Vx": 20,
+      "Vy": 10
+    }
+  ]
+}
