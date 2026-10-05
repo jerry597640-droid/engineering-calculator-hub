@@ -1,0 +1,21 @@
+{
+  "categoriesExercised": 27,
+  "viewportWidths": [
+    320,
+    390,
+    768,
+    1440
+  ],
+  "views": [
+    "work",
+    "help",
+    "audit"
+  ],
+  "errors": 0,
+  "externalRequests": 0,
+  "offlineReload": true,
+  "csvDownload": true,
+  "invalidAndTemperatureInputs": true,
+  "unitSwapAndFilter": true,
+  "status": "PASS"
+}
