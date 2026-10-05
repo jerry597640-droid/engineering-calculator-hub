@@ -1,0 +1,212 @@
+[
+  {
+    "name": "H 鋼 Z：分塊一次矩手算",
+    "expected": "2096.36000000",
+    "actual": "2096.36000000；差 0.00e+0",
+    "pass": true
+  },
+  {
+    "name": "鋼骨標稱彎矩 Fys Z",
+    "expected": "73.37260000",
+    "actual": "73.37260000；差 0.00e+0",
+    "pass": true
+  },
+  {
+    "name": "RC c：0.001 cm 切片積分獨立解",
+    "expected": "12.08560124",
+    "actual": "12.08560095；差 2.95e-7",
+    "pass": true
+  },
+  {
+    "name": "RC Mnrc：獨立切片積分",
+    "expected": "87.92526778",
+    "actual": "87.92526803；差 2.53e-7",
+    "pass": true
+  },
+  {
+    "name": "SRC 折減抗彎強度",
+    "expected": "145.16808100",
+    "actual": "145.16808123；差 2.28e-7",
+    "pass": true
+  },
+  {
+    "name": "鋼骨剪力：全深度 Aw",
+    "expected": "105.00000000",
+    "actual": "105.00000000；差 0.00e+0",
+    "pass": true
+  },
+  {
+    "name": "RC 混凝土剪力單位係數",
+    "expected": "30.59665717",
+    "actual": "30.59665717；差 0.00e+0",
+    "pass": true
+  },
+  {
+    "name": "箍筋剪力 Av Fyh d/s",
+    "expected": "32.63792000",
+    "actual": "32.63792000；差 0.00e+0",
+    "pass": true
+  },
+  {
+    "name": "剪力摩擦獨立公式",
+    "expected": "84.07033600",
+    "actual": "84.07033600；差 0.00e+0",
+    "pass": true
+  },
+  {
+    "name": "RC 設計剪力較小值",
+    "expected": "47.42593288",
+    "actual": "47.42593288；差 0.00e+0",
+    "pass": true
+  },
+  {
+    "name": "RC 有效深度為受拉面主筋形心",
+    "expected": "69.00000000",
+    "actual": "69.00000000；差 0.00e+0",
+    "pass": true
+  },
+  {
+    "name": "對稱斷面正負容量一致",
+    "expected": "145.16808123",
+    "actual": "145.16808123；差 0.00e+0",
+    "pass": true
+  },
+  {
+    "name": "RC 軸力平衡殘差",
+    "expected": "0.00000000",
+    "actual": "-0.00000000；差 2.91e-11",
+    "pass": true
+  },
+  {
+    "name": "分層與逐支輸入結果一致",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "不對稱配筋可分別求正負強度",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "負彎矩反轉：鏡射後等於原正彎矩",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "剪力分配守恆",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "剪力摩擦成為控制模式",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "箍筋貢獻上限 2.12 √fc′ bd",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "超額需求顯示強度不足",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "鋼骨保護層不足不可顯示通過",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "鋼筋與鋼骨碰撞檢查",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "箍筋間距低於 7.5 cm 不通過",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "鋼材超出 SRC 強度範圍不通過",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "未錨定主筋不計入 RC 抗彎",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "耐震用途顯示需補充檢核",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "未充分施工支撐顯示需補充檢核",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "空白材料參數會阻擋",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "零腹板厚會阻擋",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "非整數主筋支數會阻擋",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "鋼骨位於斷面外會阻擋",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "Avf 超過 Av會阻擋",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "負值需求會阻擋",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "主筋位於混凝土外會阻擋",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  },
+  {
+    "name": "配筋候選皆符合強度與構造條件",
+    "expected": "應符合定義",
+    "actual": "結果符合",
+    "pass": true
+  }
+]
