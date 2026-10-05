@@ -16,4 +16,29 @@ for(const bad of [{L:0},{phi:.5},{Q:-1},{end:800},{start:350,end:300},{qa:-1},{t
 assert(!C.pathContact(p).issue);assert(C.pathContact({...p,w0:100,Q:0,x0:3,y0:2}).issue);cases+=2;
 const wrap=C.envelope({...p,start:300,end:420});near(wrap.max,55);cases++;
 const one=C.envelope({...p,start:47,end:47});near(one.max,C.state(p,47).ranges.reduce((m,r)=>Math.max(m,r[1]),0));cases++;
+// Independent checks of the counterweight contribution and support-edge moments.
+const cp={...p,w0:38,x0:-.4,w1:12,w2:8,r2:4,w3:20,r3:-2.5,hook:1,phi:1.1,radius:12,B:7};
+const cw=C.counterweight(cp);
+near(cw.cwMoment,-50);
+near(cw.edges[0].MR,345.2);near(cw.edges[0].MO,96.8);
+near(cw.edges[0].margin,248.4);near(cw.edges[0].cwSigned,130);
+cw.scenarios[1].state.reaction.forEach((v,i)=>near(v,[27.65,27.65,7.4,7.4][i]));
+cw.scenarios[2].state.reaction.forEach((v,i)=>near(v,[18.525,18.525,21.025,21.025][i]));
+near(Math.max(...cw.scenarios[0].state.reaction)-Math.max(...cw.scenarios[1].state.reaction),1.875);cases++;
+for(let j=0;j<1000;j++){
+  const q={...cp,w3:rand()*200,r3:-rand()*15,cx:rand()*3-1.5,cy:rand()*3-1.5,theta:rand()*360,start:0,end:0};q.start=q.end=q.theta;
+  const z=C.counterweight(q),s=C.state(q,q.theta),a=q.theta*Math.PI/180;
+  // Independent sum of first moments about each actual support edge.
+  const expected=[s.W*(q.cx+q.L/2)-s.sx,s.W*(-q.cx+q.L/2)+s.sx,s.W*(q.cy+q.B/2)-s.sy,s.W*(-q.cy+q.B/2)+s.sy];
+  const cwExpected=[q.w3*(q.cx+q.L/2-q.r3*Math.cos(a)),q.w3*(-q.cx+q.L/2+q.r3*Math.cos(a)),q.w3*(q.cy+q.B/2-q.r3*Math.sin(a)),q.w3*(-q.cy+q.B/2+q.r3*Math.sin(a))];
+  z.edges.forEach((e,i)=>{near(e.margin,expected[i],1e-7);near(e.cwSigned,cwExpected[i]);assert(e.MR>=0&&e.MO>=0);});
+  const removed=z.scenarios[1].state;near(s.W-removed.W,q.w3);near(s.sx-removed.sx,q.w3*q.r3*Math.cos(a));near(s.sy-removed.sy,q.w3*q.r3*Math.sin(a));
+  const empty=z.scenarios[2].state;near(s.W-empty.W,q.phi*q.Q);near(s.sx-empty.sx,q.phi*q.Q*q.radius*Math.cos(a));near(s.sy-empty.sy,q.phi*q.Q*q.radius*Math.sin(a));cases++;
+}
+const heavy=C.counterweight({...cp,w3:200,r3:-10,Q:0,start:0,end:0});
+assert(!heavy.scenarios[2].state.stable);assert(heavy.edges[1].cwSigned<0);assert(heavy.edges[1].margin<0);cases++;
+assert(C.counterweight({...p,w0:0,Q:0,w3:20}).scenarios[1].empty);cases++;
+assert(C.counterweight({...p,w0:0,Q:10,hook:0}).scenarios[2].empty);cases++;
+near(C.counterweight({...cp,w3:0}).cwMoment,0);cases++;
+
 console.log(JSON.stringify({passed:true,cases,randomThreeLegCases:contact3,example:s.C,scope:'mechanics, balance, bounds, contact, analytical angular extrema'}));
