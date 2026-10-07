@@ -1,68 +1,131 @@
-/* Offline Canvas 3D viewer. Drawing never changes section-strength checks. */
-let pm3dModel=null,pm3dKey='',pm3dJob=null,pm3dEpoch=0,pm3dFrame=0,pm3dYaw=-.72,pm3dPitch=.42,pm3dZoom=1,pm3dHits=[],pm3dPointers=new Map(),pm3dMoved=false,pm3dStale=false;
+/* Offline professional 3D viewer: presentation and slice exploration never change load checks. */
+let pm3dModel=null,pm3dKey='',pm3dJob=null,pm3dEpoch=0,pm3dFrame=0,pm3dYaw=-.72,pm3dPitch=.42,pm3dZoom=1,pm3dPan={x:0,y:0},pm3dHits=[],pm3dVertices=[],pm3dPointers=new Map(),pm3dMoved=false,pm3dGesture=false,pm3dStale=false,pm3dHover=null,pm3dHoverPinned=false,pm3dSliceData=null,pm3dSliceJob=null,pm3dSliceEpoch=0,pm3dSliceTimer=0,pm3dSliceKey='',pm3dSavedFocus=null;
 const pm3dCanvas=$('pm3dCanvas'),pm3dContext=pm3dCanvas.getContext('2d');
 function pm3dQuality(){return $('pm3dQuality').value==='high'?{levels:44,angles:120}:{levels:28,angles:60};}
+function pm3dNumber(v,n=2){return Number.isFinite(v)?fmt(v,n):'∞';}
+function pm3dHideHover(){pm3dHover=null;pm3dHoverPinned=false;$('pm3dTooltip').hidden=true;}
+function pm3dCancelSlice(){clearTimeout(pm3dSliceTimer);pm3dSliceEpoch++;pm3dSliceJob=null;pm3dSliceData=null;pm3dSliceKey='';}
 function clearSurface3D(message='輸入無效，3D圖已清除。'){
- pm3dEpoch++;pm3dStale=true;pm3dJob=null;pm3dModel=null;pm3dKey='';pm3dHits=[];$('pm3dReadout').textContent='';$('pm3dCaption').textContent='';$('pm3dStatus').textContent=message;$('pm3dPNG').disabled=true;$('pm3dProgress').hidden=true;paintSurface3D();
+ pm3dEpoch++;pm3dStale=true;pm3dJob=null;pm3dModel=null;pm3dKey='';pm3dHits=[];pm3dVertices=[];pm3dCancelSlice();pm3dHideHover();$('pm3dReadout').textContent='';$('pm3dCaption').textContent='';$('pm3dCaseList').textContent='';$('pm3dSliceInfo').textContent='等待有效斷面與載重。';$('pm3dLoadBadge').textContent='未計算';$('pm3dDCBar').style.width='0%';$('pm3dColorLabels').textContent='';$('pm3dStatus').textContent=message;$('pm3dPNG').disabled=true;$('pm3dProgress').hidden=true;paintSurface3D();paintSliceMini();
 }
-function pauseSurface3D(){pm3dStale=true;pm3dEpoch++;pm3dJob=null;if(!pm3dModel)pm3dKey='';$('pm3dPNG').disabled=true;$('pm3dProgress').hidden=true;$('pm3dReadout').textContent='';$('pm3dStatus').textContent='輸入正在變更，等待重新計算。';queueSurface3D();}
+function pauseSurface3D(){pm3dStale=true;pm3dEpoch++;pm3dJob=null;pm3dCancelSlice();pm3dHideHover();if(!pm3dModel)pm3dKey='';$('pm3dPNG').disabled=true;$('pm3dProgress').hidden=true;$('pm3dReadout').textContent='';$('pm3dCaseList').textContent='';$('pm3dSliceInfo').textContent='輸入變更中，等待重新計算。';$('pm3dStatus').textContent='輸入正在變更，等待重新計算。';queueSurface3D();}
+function pm3dSummary(){
+ if(!result)return;const c=result.cases[selected],l=c.load;
+ $('pm3dReadout').innerHTML='<span class="pm3d-load-name">'+esc(l.name)+'</span><div class="pm3d-stat-grid"><div><span>Pu · tf</span><b>'+fmt(l.P,2)+'</b></div><div><span>軸彎 D/C</span><b>'+pm3dNumber(c.ratio,4)+'</b></div><div><span>Mx · tf·m</span><b>'+fmt(l.Mx,2)+'</b></div><div><span>My · tf·m</span><b>'+fmt(l.My,2)+'</b></div></div>';
+ $('pm3dLoadBadge').textContent=c.pass?'軸彎容量內':'軸彎容量外';$('pm3dLoadBadge').classList.toggle('outside',!c.pass);$('pm3dDCBar').style.width=Math.min(100,Math.max(0,c.ratio*100))+'%';$('pm3dDCBar').classList.toggle('fail',!c.pass);
+ $('pm3dCaseList').innerHTML=result.cases.map((v,i)=>'<button data-pm-case="'+i+'" aria-pressed="'+(i===selected)+'"><span>'+esc(v.load.name)+'</span><small class="'+(v.pass?'pass':'fail-text')+'">'+(v.pass?'容量內':'容量外')+' · '+pm3dNumber(v.ratio,3)+'</small></button>').join('');
+}
+function pm3dSyncSlice(){
+ if(!result||!pm3dModel||pm3dStale)return;
+ const follow=$('pm3dSliceMode').value==='load',c=result.cases[selected];$('pm3dSliceP').disabled=follow;
+ $('pm3dSliceRange').min=-pm3dModel.Tmax;$('pm3dSliceRange').max=pm3dModel.Pmax;$('pm3dSliceRange').step=(pm3dModel.Pmax+pm3dModel.Tmax)/1000;
+ if(follow){clearTimeout(pm3dSliceTimer);pm3dSliceEpoch++;pm3dSliceJob=null;$('pm3dSliceP').value=c.load.P;$('pm3dSliceRange').value=c.load.P;pm3dSliceData={P:c.load.P,points:c.envelope.map(v=>({P:c.load.P,mx:v.mx,my:v.my,phi:v.phi,theta:v.theta})),valid:c.envelope.length>0,reason:''};if(Math.abs(c.load.P+pm3dModel.Tmax)<1e-7)pm3dSliceData={P:c.load.P,points:[{...pm3dModel.pole}],valid:true,reason:''};pm3dSliceKey='load:'+selected+':'+c.load.P;pm3dSliceInfo();queueSurface3D();return;}
+ const raw=$('pm3dSliceP').value,P=raw.trim()===''?NaN:Number(raw),key=pm3dModel.key+':'+P;
+ if(key===pm3dSliceKey&&pm3dSliceData){pm3dSliceInfo();return;}
+ clearTimeout(pm3dSliceTimer);const epoch=++pm3dSliceEpoch;pm3dSliceJob=null;pm3dSliceData=null;pm3dSliceKey=key;pm3dHideHover();$('pm3dSliceRange').value=Number.isFinite(P)?P:0;$('pm3dSliceInfo').textContent='正在求解自由 P 的120方向精確輪廓…';queueSurface3D();
+ if(!Number.isFinite(P)){pm3dSliceData={P,points:[],valid:false,reason:'請輸入有限軸力 P。'};pm3dSliceInfo();return;}
+ pm3dSliceTimer=setTimeout(()=>{
+  if(epoch!==pm3dSliceEpoch)return;pm3dSliceJob=RCSurface.slice(RCC,result.s,P,{angles:120});
+  const step=()=>{if(epoch!==pm3dSliceEpoch||pm3dStale)return;try{let q;const start=performance.now();do{q=pm3dSliceJob.next();if(q.done)break;}while(performance.now()-start<15);
+   if(q.done){pm3dSliceData=q.value;pm3dSliceJob=null;pm3dSliceInfo();queueSurface3D();}else setTimeout(step,0);
+  }catch(e){pm3dSliceJob=null;pm3dSliceData={P,points:[],valid:false,reason:'切片求解失敗：'+e.message};pm3dSliceInfo();queueSurface3D();}};step();
+ },110);
+}
+function pm3dSliceInfo(){
+ const v=pm3dSliceData;if(!v){paintSliceMini();return;}
+ if(!v.valid){$('pm3dSliceInfo').textContent=v.reason||'超出軸力容量範圍，無可用切片。';paintSliceMini();return;}
+ const mx=v.points.map(p=>p.mx),my=v.points.map(p=>p.my),follow=$('pm3dSliceMode').value==='load';
+ $('pm3dSliceInfo').textContent=(follow?'載重':'自由')+' P='+fmt(v.P,2)+' tf · '+(Math.abs(v.P+pm3dModel.Tmax)<1e-7?'純拉端點':v.points.length+'方向')+'；Mx ['+fmt(Math.min(...mx),2)+', '+fmt(Math.max(...mx),2)+']；My ['+fmt(Math.min(...my),2)+', '+fmt(Math.max(...my),2)+'] tf·m。';paintSliceMini();
+}
 function updateSurface3D(){
  if(!result){clearSurface3D();return;}
- pm3dStale=false;const opt=pm3dQuality(),key=RCSurface.key(result.s,opt.levels,opt.angles);
- $('pm3dCase').innerHTML=result.cases.map((c,i)=>'<option value="'+i+'" '+(i===selected?'selected':'')+'>'+esc(c.load.name)+'</option>').join('');
- if(key===pm3dKey){if(pm3dModel){$('pm3dPNG').disabled=false;$('pm3dStatus').textContent='設計強度曲面：'+(pm3dModel.levels+1)+'個軸力層 × '+pm3dModel.angles+'個法向角；φPn,max '+fmt(pm3dModel.Pmax,2)+' tf。';queueSurface3D();}return;}
- const epoch=++pm3dEpoch;pm3dKey=key;pm3dModel=null;pm3dHits=[];$('pm3dPNG').disabled=true;$('pm3dProgress').hidden=false;$('pm3dProgress').value=0;$('pm3dStatus').textContent='正在建立設計強度曲面…';
+ pm3dStale=false;const opt=pm3dQuality(),key=RCSurface.key(result.s,opt.levels,opt.angles);pm3dHideHover();
+ $('pm3dCase').innerHTML=result.cases.map((c,i)=>'<option value="'+i+'" '+(i===selected?'selected':'')+'>'+esc(c.load.name)+'</option>').join('');pm3dSummary();
+ if(key===pm3dKey&&pm3dModel){$('pm3dPNG').disabled=false;pm3dReadyStatus();pm3dSyncSlice();queueSurface3D();return;}
+ if(key===pm3dKey&&pm3dJob)return;
+ const epoch=++pm3dEpoch;pm3dKey=key;pm3dModel=null;pm3dHits=[];pm3dVertices=[];pm3dCancelSlice();$('pm3dPNG').disabled=true;$('pm3dProgress').hidden=false;$('pm3dProgress').value=0;$('pm3dStatus').textContent='正在建立設計強度曲面…';
  pm3dJob=RCSurface.generate(RCC,result.s,opt);queueSurface3D();
- const step=()=>{
-  if(epoch!==pm3dEpoch)return;
-  try{const start=performance.now();let next;do{next=pm3dJob.next();if(next.done)break;$('pm3dProgress').value=next.value.progress;}while(performance.now()-start<18);
-   if(next.done){pm3dModel=next.value;pm3dJob=null;$('pm3dProgress').hidden=true;$('pm3dPNG').disabled=false;$('pm3dStatus').textContent='設計強度曲面：'+(opt.levels+1)+'個軸力層 × '+opt.angles+'個法向角；φPn,max '+fmt(pm3dModel.Pmax,2)+' tf。';queueSurface3D();}
-   else setTimeout(step,0);
-  }catch(e){clearSurface3D('無法繪製3D圖：'+e.message);}
- };setTimeout(step,0);
+ const step=()=>{if(epoch!==pm3dEpoch)return;try{const start=performance.now();let next;do{next=pm3dJob.next();if(next.done)break;$('pm3dProgress').value=next.value.progress;}while(performance.now()-start<18);
+  if(next.done){pm3dModel=next.value;pm3dJob=null;$('pm3dProgress').hidden=true;$('pm3dPNG').disabled=false;pm3dReadyStatus();pm3dSyncSlice();queueSurface3D();}else setTimeout(step,0);
+ }catch(e){clearSurface3D('無法繪製3D圖：'+e.message);}};setTimeout(step,0);
 }
+function pm3dReadyStatus(){const m=pm3dModel;$('pm3dStatus').textContent='設計曲面 '+(m.levels+1)+'層 × '+m.angles+'角（'+m.points+'點）｜φPn,max '+fmt(m.Pmax,2)+' tf｜主筋 '+result.g.bars.length+'根／Ast '+fmt(result.g.Ast,2)+' cm²。';$('pm3dColorLabels').innerHTML='<span>純拉端 '+fmt(-m.Tmax,2)+' tf</span><span>顏色：設計軸力 P</span><span>最大軸壓 '+fmt(m.Pmax,2)+' tf</span>';}
 function queueSurface3D(){if(pm3dFrame)return;pm3dFrame=requestAnimationFrame(()=>{pm3dFrame=0;paintSurface3D();});}
+function pm3dNiceStep(range,count=4){const raw=Math.max(1e-9,range/count),e=10**Math.floor(Math.log10(raw)),f=raw/e;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*e;}
 function paintSurface3D(){
- const box=pm3dCanvas.getBoundingClientRect(),width=Math.max(250,box.width||800),height=width<500?350:520,dpr=Math.min(2,devicePixelRatio||1);
+ const box=pm3dCanvas.getBoundingClientRect(),width=Math.max(250,box.width||800),maximized=$('surfaceCard').classList.contains('pm3d-maximized'),height=maximized?Math.max(310,Math.min(900,innerHeight-$('surfaceCard').querySelector('.card-head').offsetHeight-$('surfaceCard').querySelector('.pm3d-toolbar').offsetHeight-200)):width<500?430:560,dpr=Math.min(2,devicePixelRatio||1);
  pm3dCanvas.style.height=height+'px';if(pm3dCanvas.width!==Math.round(width*dpr)||pm3dCanvas.height!==Math.round(height*dpr)){pm3dCanvas.width=Math.round(width*dpr);pm3dCanvas.height=Math.round(height*dpr);}
- const ctx=pm3dContext;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);ctx.fillStyle='#f8fbff';ctx.fillRect(0,0,width,height);pm3dHits=[];
- if(!pm3dModel||!result||pm3dStale){ctx.fillStyle='#61738a';ctx.font='14px system-ui';ctx.textAlign='center';ctx.fillText(pm3dJob?'正在建立容量曲面…':pm3dStale&&result?'等待重新計算…':'請填入有效斷面與主筋資料。',width/2,height/2);return;}
+ const ctx=pm3dContext,dark=$('pm3dTheme').value==='dark',text=dark?'#b8cce1':'#52697f',grid=dark?'#2d4157':'#d5e0ea',mxColor=dark?'#fb9e92':'#ab5249',myColor=dark?'#7ed6b6':'#268065',pColor=dark?'#a9bafa':'#4567a1';ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);const bg=ctx.createLinearGradient(0,0,0,height);bg.addColorStop(0,dark?'#12253b':'#f9fcff');bg.addColorStop(1,dark?'#0b1726':'#edf3f8');ctx.fillStyle=bg;ctx.fillRect(0,0,width,height);pm3dHits=[];pm3dVertices=[];
+ if(!pm3dModel||!result||pm3dStale){ctx.fillStyle=text;ctx.font='14px system-ui';ctx.textAlign='center';ctx.fillText(pm3dJob?'正在建立容量曲面…':pm3dStale&&result?'等待重新計算…':'請填入有效斷面與主筋資料。',width/2,height/2);paintSliceMini();return;}
  const model=pm3dModel,c=result.cases[selected],visible=$('pm3dAll').checked?result.cases:[c],vertices=model.rings.flat(),all=[...vertices,...visible.map(v=>({mx:v.load.Mx,my:v.load.My,P:v.load.P}))];
- const mmax=Math.max(1,...all.map(v=>Math.max(Math.abs(v.mx),Math.abs(v.my))))*1.12,pmin=Math.min(-model.Tmax,...visible.map(v=>v.load.P)),pmax=Math.max(model.Pmax,...visible.map(v=>v.load.P)),prange=Math.max(1,pmax-pmin),pcenter=(pmax+pmin)/2,scale=Math.min(width/(width<500?3.1:3.9),height/3.4)*pm3dZoom;
- const cy=Math.cos(pm3dYaw),sy=Math.sin(pm3dYaw),cp=Math.cos(pm3dPitch),sp=Math.sin(pm3dPitch);
- const project=p=>{const x=p.mx/mmax,y=p.my/mmax,z=(p.P-pcenter)/prange*2,u=cy*x-sy*y,v=sy*x+cy*y;return {x:width/2+scale*u,y:height/2+12-scale*(cp*z-sp*v),depth:cp*v+sp*z};};
+ const mm=Math.max(1,...all.map(v=>Math.max(Math.abs(v.mx),Math.abs(v.my))))*1.08,mstep=pm3dNiceStep(mm*2,6),mmax=Math.ceil(mm/mstep)*mstep,pstep=pm3dNiceStep(Math.max(model.Pmax,...visible.map(v=>v.load.P))-Math.min(-model.Tmax,...visible.map(v=>v.load.P)),5),pmin=Math.floor(Math.min(-model.Tmax,...visible.map(v=>v.load.P))/pstep)*pstep,pmax=Math.ceil(Math.max(model.Pmax,...visible.map(v=>v.load.P))/pstep)*pstep,prange=Math.max(1,pmax-pmin),pcenter=(pmax+pmin)/2,scale=Math.min((width-60)/2.75,(height-120)/2.9)*pm3dZoom;
+ const cy=Math.cos(pm3dYaw),sy=Math.sin(pm3dYaw),cp=Math.cos(pm3dPitch),sp=Math.sin(pm3dPitch),center={x:width/2+pm3dPan.x,y:height/2+17+pm3dPan.y};
+ const project=p=>{const x=p.mx/mmax,y=p.my/mmax,z=(p.P-pcenter)/prange*2,u=cy*x-sy*y,v=sy*x+cy*y;return {x:center.x+scale*u,y:center.y-scale*(cp*z-sp*v),depth:cp*v+sp*z};};
  const path=(ps,color,line,width_=1,dash=[])=>{ctx.beginPath();ps.forEach((p,i)=>{const q=project(p);if(i)ctx.lineTo(q.x,q.y);else ctx.moveTo(q.x,q.y)});if(color){ctx.closePath();ctx.fillStyle=color;ctx.fill();}if(line){ctx.strokeStyle=line;ctx.lineWidth=width_;ctx.setLineDash(dash);ctx.stroke();ctx.setLineDash([]);}};
- const label=(p,text,color='#48617e',align='center',dx=0,dy=0)=>{const q=project(p);ctx.font='12px system-ui';ctx.textAlign=align;ctx.fillStyle=color;ctx.fillText(text,q.x+dx,q.y+dy);};
+ const occupied=[{x:0,y:0,w:width,h:60},{x:0,y:height-43,w:width,h:43}],label=(p,txt,color=text,dx=0,dy=0,bold=false)=>{const q=project(p);ctx.font=(bold?'600 ':'')+'11px system-ui';const w=ctx.measureText(txt).width+8,h=17;let pos=null;for(const oy of [dy,dy-18,dy+18,dy-36]){const x=q.x+dx-w/2,y=q.y+oy-h/2;if(x<6||x+w>width-6||y<60||y+h>height-43)continue;if(occupied.some(v=>x<v.x+v.w&&x+w>v.x&&y<v.y+v.h&&y+h>v.y))continue;pos={x,y,w,h};break;}if(!pos)return;occupied.push(pos);ctx.fillStyle=dark?'#101f30d9':'#f8fbffe8';ctx.fillRect(pos.x,pos.y,pos.w,pos.h);ctx.fillStyle=color;ctx.textAlign='center';ctx.fillText(txt,pos.x+pos.w/2,pos.y+12);};
  const base=pmin;
- for(const k of [-1,-.5,0,.5,1]){path([{mx:-mmax,my:k*mmax,P:base},{mx:mmax,my:k*mmax,P:base}],null,'#d8e2ed');path([{mx:k*mmax,my:-mmax,P:base},{mx:k*mmax,my:mmax,P:base}],null,'#d8e2ed');}
- const faces=[];
+ if($('pm3dGrid').checked){for(let k=-mmax;k<=mmax+.001;k+=mstep){path([{mx:-mmax,my:k,P:base},{mx:mmax,my:k,P:base}],null,grid,.65);path([{mx:k,my:-mmax,P:base},{mx:k,my:mmax,P:base}],null,grid,.65);}for(let P=pmin;P<=pmax+.001;P+=pstep)path([{mx:-mmax,my:mmax,P},{mx:mmax,my:mmax,P},{mx:mmax,my:-mmax,P}],null,grid,.45,[2,5]);}
+ const alpha=Number($('pm3dOpacity').value)/100,faces=[];
  if($('pm3dStyle').value==='surface'){
-  for(let j=0;j<model.levels;j++)for(let i=0;i<model.angles;i++){const k=(i+1)%model.angles,ps=[model.rings[j][i],model.rings[j][k],model.rings[j+1][k],model.rings[j+1][i]],t=j/model.levels;faces.push({ps,depth:ps.reduce((a,p)=>a+project(p).depth,0)/4,color:'hsla('+(218-35*t)+',60%,'+(60-12*t)+'%,.37)'});}
-  const top=model.rings[model.levels];faces.push({ps:top,depth:top.reduce((a,p)=>a+project(p).depth,0)/top.length,color:'rgba(33,133,146,.45)'});faces.sort((a,b)=>a.depth-b.depth);faces.forEach(f=>path(f.ps,f.color,null));
+  for(let j=0;j<model.levels;j++)for(let i=0;i<model.angles;i++){const k=(i+1)%model.angles,ps=[model.rings[j][i],model.rings[j][k],model.rings[j+1][k],model.rings[j+1][i]],t=j/model.levels;faces.push({ps,depth:ps.reduce((a,p)=>a+project(p).depth,0)/4,color:'hsla('+(221-34*t)+',62%,'+(dark?55:52)+'%,'+alpha+')'});}
+  const top=model.rings[model.levels];faces.push({ps:top,depth:top.reduce((a,p)=>a+project(p).depth,0)/top.length,color:'rgba(35,152,172,'+alpha+')'});faces.sort((a,b)=>a.depth-b.depth);faces.forEach(f=>path(f.ps,f.color,null));
  }
- for(let j=1;j<=model.levels;j++)if(j%2===0||j===model.levels){const ring=model.rings[j];path([...ring,ring[0]],null,'#3977a575',.65);}
- for(let i=0;i<model.angles;i+=Math.max(1,Math.floor(model.angles/20)))path(model.rings.map(r=>r[i]),null,'#3977a585',.7);
- path([{mx:-mmax,my:0,P:base},{mx:mmax,my:0,P:base}],null,'#cb6658',1.4);path([{mx:0,my:-mmax,P:base},{mx:0,my:mmax,P:base}],null,'#40927c',1.4);path([{mx:0,my:0,P:pmin},{mx:0,my:0,P:pmax}],null,'#516ca8',1.4);
- for(const k of [-1,1]){label({mx:k*mmax,my:0,P:base},fmt(k*mmax,0),'#ac5046','center',0,14);label({mx:0,my:k*mmax,P:base},fmt(k*mmax,0),'#27816c','center',0,14);}
- label({mx:mmax*1.13,my:0,P:base},'Mx (tf·m)','#ac5046','center',0,-14);label({mx:0,my:mmax*1.13,P:base},'My (tf·m)','#27816c','center',0,-14);
- for(const P of [pmin,0,pmax]){if(P<pmin||P>pmax)continue;label({mx:0,my:0,P},'P='+fmt(P,0),'#47659b','left',8,P===pmin?14:-5);}
- label({mx:0,my:0,P:pmax+prange*.08},'P (tf)','#47659b');
- if($('pm3dSlice').checked&&c.envelope.length){const ring=c.envelope.map(v=>({mx:v.mx,my:v.my,P:c.load.P}));if(ring.length>1)path([...ring,ring[0]],null,'#9450b7',2.4);else {const q=project(ring[0]);ctx.beginPath();ctx.arc(q.x,q.y,4,0,Math.PI*2);ctx.fillStyle='#9450b7';ctx.fill();}}
+ const mesh=dark?'#a7d7ed55':'#3977a566';for(let j=1;j<=model.levels;j++)if(j%2===0||j===model.levels){const ring=model.rings[j];path([...ring,ring[0]],null,mesh,.55);}for(let i=0;i<model.angles;i+=Math.max(1,Math.floor(model.angles/20)))path(model.rings.map(r=>r[i]),null,mesh,.55);
+ // Draw full solved-ring vertices for inspection, not interpolated strengths.
+ pm3dVertices=vertices.map(p=>({...project(p),point:p,type:'capacity'}));
+ const selectedSlice=c.envelope.map(p=>({mx:p.mx,my:p.my,P:c.load.P}));if(Math.abs(c.load.P+model.Tmax)<1e-7&&selectedSlice.length===0)selectedSlice.push({...model.pole});
+ const drawContour=(pts,color,line=2,dash=[])=>{if(pts.length>1&&pts.some(p=>Math.hypot(p.mx-pts[0].mx,p.my-pts[0].my)>1e-8))path([...pts,pts[0]],null,color,line,dash);else if(pts.length){const q=project(pts[0]);ctx.beginPath();ctx.arc(q.x,q.y,4,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}};
+ if($('pm3dSlice').checked){drawContour(selectedSlice,dark?'#d4a4f2':'#9b58bb',2.1);if($('pm3dSliceMode').value==='free'&&pm3dSliceData?.valid){const pts=pm3dSliceData.points;path([{mx:-mmax,my:-mmax,P:pm3dSliceData.P},{mx:mmax,my:-mmax,P:pm3dSliceData.P},{mx:mmax,my:mmax,P:pm3dSliceData.P},{mx:-mmax,my:mmax,P:pm3dSliceData.P}],dark?'#54dbe508':'#299baa08',dark?'#7dd9e75a':'#299baa4d',.65,[4,5]);drawContour(pts,dark?'#76ebed':'#168c9d',2.3,[7,4]);pm3dVertices.push(...pts.map(p=>({...project(p),point:p,type:'slice'})));}}
+ path([{mx:-mmax,my:0,P:base},{mx:mmax,my:0,P:base}],null,mxColor,1.2);path([{mx:0,my:-mmax,P:base},{mx:0,my:mmax,P:base}],null,myColor,1.2);path([{mx:0,my:0,P:pmin},{mx:0,my:0,P:pmax}],null,pColor,1.2);
+ for(let k=-mmax;k<=mmax+.001;k+=mstep){if(Math.abs(k)>1e-6){label({mx:k,my:0,P:base},fmt(k,0),mxColor,0,15);label({mx:0,my:k,P:base},fmt(k,0),myColor,0,15);}}
+ label({mx:mmax*1.09,my:0,P:base},'Mx · tf·m',mxColor,0,-12,true);label({mx:0,my:mmax*1.09,P:base},'My · tf·m',myColor,0,-12,true);
+ for(let P=pmin;P<=pmax+.001;P+=pstep)label({mx:0,my:0,P},fmt(P,0),pColor,22,P===pmin?15:-5);
+ label({mx:0,my:0,P:pmax+prange*.045},'P · tf',pColor,0,-12,true);
+ // The ray is taken from the original exact load section, even while exploring another P.
+ if(c.boundary){path([{mx:0,my:0,P:c.load.P},{mx:c.boundary.mx,my:c.boundary.my,P:c.load.P}],null,dark?'#eedbbf':'#a88861',1,[3,5]);const b=project({mx:c.boundary.mx,my:c.boundary.my,P:c.load.P});ctx.strokeStyle=dark?'#ead0aa':'#a07948';ctx.lineWidth=1.5;ctx.strokeRect(b.x-3,b.y-3,6,6);}
  const dots=visible.map(v=>({v,q:project({mx:v.load.Mx,my:v.load.My,P:v.load.P})})).sort((a,b)=>a.q.depth-b.q.depth);
- for(const {v,q} of dots){const p={mx:v.load.Mx,my:v.load.My,P:v.load.P};path([{...p,P:base},p],null,v.pass?'#18775690':'#b4424290',1,[4,4]);ctx.beginPath();ctx.arc(q.x,q.y,v===c?7:5,0,Math.PI*2);ctx.fillStyle=v.pass?'#187756':'#c34242';ctx.fill();ctx.strokeStyle=v===c?'#112136':'#fff';ctx.lineWidth=v===c?2:1.5;ctx.stroke();pm3dHits.push({x:q.x,y:q.y,case:result.cases.indexOf(v),point:p});}
- ctx.font='12px system-ui';ctx.textAlign='left';ctx.fillStyle='#61738a';ctx.fillText('設計強度 φPn–φMnx–φMny',14,24);ctx.fillText('各軸依範圍縮放；數值單位如軸標',14,height-16);
- $('pm3dReadout').textContent=c.load.name+'：Pu '+fmt(c.load.P,2)+' tf；Mx '+fmt(c.load.Mx,2)+'、My '+fmt(c.load.My,2)+' tf·m；彎矩／軸力 '+(c.pass?'容量內':'容量外')+'；D/C '+fmt(c.ratio,4)+'。';
- $('pm3dCaption').textContent='紫色輪廓為目前 Pu='+fmt(c.load.P,2)+' tf 的精確檢核切片；'+(c.envelope.length?'':'本Pu無可用輪廓。')+'綠／紅點僅表示軸力與彎矩是否符合，剪力及配置細則另看檢核表。';
+ for(const {v,q} of dots){const point={mx:v.load.Mx,my:v.load.My,P:v.load.P};path([{...point,P:base},point],null,v.pass?(dark?'#85e2b366':'#18775680'):(dark?'#ff9e9166':'#b4424280'),1,[3,5]);ctx.beginPath();ctx.arc(q.x,q.y,v===c?7:5,0,Math.PI*2);ctx.fillStyle=v.pass?(dark?'#7fe0af':'#187756'):(dark?'#ff9289':'#c34242');ctx.fill();ctx.strokeStyle=v===c?(dark?'#fff':'#112136'):(dark?'#142a40':'#fff');ctx.lineWidth=v===c?2:1.5;ctx.stroke();pm3dHits.push({x:q.x,y:q.y,depth:q.depth,case:result.cases.indexOf(v),point,type:'demand'});}
+ if($('pm3dLabels').checked){for(const {v} of dots.sort((a,b)=>(b.v===c)-(a.v===c)))label({mx:v.load.Mx,my:v.load.My,P:v.load.P},v.load.name+(v===c?' · '+pm3dNumber(v.ratio,3):''),v.pass?(dark?'#8be9bd':'#187756'):(dark?'#ffaea5':'#b44242'),0,-19,true);}
+ // Orientation triad has no engineering scale; the main chart retains matching Mx/My scales.
+ const gx=width-47,gy=height-65,gs=28;const triad=(x,y,z,txt,color)=>{const u=cy*x-sy*y,v=sy*x+cy*y,dx=gs*u,dy=-gs*(cp*z-sp*v);ctx.strokeStyle=color;ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx+dx,gy+dy);ctx.stroke();ctx.fillStyle=color;ctx.font='600 10px system-ui';ctx.textAlign='center';ctx.fillText(txt,gx+dx*1.2,gy+dy*1.2+3);};triad(1,0,0,'Mx',mxColor);triad(0,1,0,'My',myColor);triad(0,0,1,'P',pColor);
+ ctx.font='11px system-ui';ctx.textAlign='left';ctx.fillStyle=text;ctx.fillText('φPn – φMnx – φMny · 設計強度',12,height-24);ctx.font='10px system-ui';ctx.fillText('Mx/My 同比例；P 依自身範圍縮放 · 正交投影',12,height-9);
+ $('pm3dCamera').textContent='方位 '+fmt((pm3dYaw*180/Math.PI%360+360)%360,0)+'° · 仰角 '+fmt(pm3dPitch*180/Math.PI,0)+'° · '+fmt(pm3dZoom*100,0)+'%';
+ const free=$('pm3dSliceMode').value==='free';$('pm3dCaption').textContent='紫色實線：'+c.load.name+' 的 Pu='+fmt(c.load.P,2)+' tf 精確輪廓。'+(free?'青色虛線：自由 P='+pm3dNumber(pm3dSliceData?.P??Number($('pm3dSliceP').value),2)+' tf 探查切片，載重檢核保持原條件。':'')+'綠／紅點僅代表軸力及彎矩判定。';paintSliceMini();
 }
-function pm3dReset(view='iso'){pm3dYaw=view==='top'?0:view==='x'?0:view==='y'?Math.PI/2:-.72;pm3dPitch=view==='top'?Math.PI/2:view==='iso'?.42:0;pm3dZoom=1;queueSurface3D();}
-function pm3dHit(x,y){const q=pm3dHits.filter(p=>Math.hypot(p.x-x,p.y-y)<20).sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y))[0];if(q){selected=q.case;render();}}
-pm3dCanvas.addEventListener('pointerdown',e=>{if(e.button&&e.pointerType==='mouse')return;pm3dCanvas.setPointerCapture(e.pointerId);pm3dPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});pm3dMoved=false;});
-pm3dCanvas.addEventListener('pointermove',e=>{const last=pm3dPointers.get(e.pointerId);if(!last)return;const dx=e.clientX-last.x,dy=e.clientY-last.y;if(Math.abs(dx)+Math.abs(dy)>1)pm3dMoved=true;if(pm3dPointers.size===1){pm3dYaw+=dx*.009;pm3dPitch=Math.max(-1.5,Math.min(1.5,pm3dPitch+dy*.009));}else {const other=[...pm3dPointers.entries()].find(([id])=>id!==e.pointerId)[1],before=Math.hypot(last.x-other.x,last.y-other.y),after=Math.hypot(e.clientX-other.x,e.clientY-other.y);if(before>1)pm3dZoom=Math.max(.45,Math.min(2.5,pm3dZoom*after/before));}pm3dPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});queueSurface3D();});
-for(const event of ['pointerup','pointercancel','lostpointercapture'])pm3dCanvas.addEventListener(event,e=>{if(event==='pointerup'&&!pm3dMoved&&pm3dPointers.size===1){const box=pm3dCanvas.getBoundingClientRect();pm3dHit(e.clientX-box.left,e.clientY-box.top);}pm3dPointers.delete(e.pointerId);});
-pm3dCanvas.addEventListener('wheel',e=>{e.preventDefault();pm3dZoom=Math.max(.45,Math.min(2.5,pm3dZoom*Math.exp(-e.deltaY*.001)));queueSurface3D();},{passive:false});
-pm3dCanvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','0'].includes(e.key))return;e.preventDefault();if(e.key==='0')return pm3dReset();if(e.key==='+'||e.key==='-')pm3dZoom=Math.max(.45,Math.min(2.5,pm3dZoom*(e.key==='+'?1.1:1/1.1)));else if(e.key.includes('Left')||e.key.includes('Right'))pm3dYaw+=e.key==='ArrowRight'?.1:-.1;else pm3dPitch=Math.max(-1.5,Math.min(1.5,pm3dPitch+(e.key==='ArrowDown'?.1:-.1)));queueSurface3D();});
-$('pm3dCase').onchange=()=>{selected=Number($('pm3dCase').value);render();};$('pm3dQuality').onchange=updateSurface3D;$('pm3dView').onchange=()=>pm3dReset($('pm3dView').value);$('pm3dReset').onclick=()=>{$('pm3dView').value='iso';pm3dReset();};
-for(const id of ['pm3dStyle','pm3dAll','pm3dSlice'])$(id).onchange=queueSurface3D;
-$('pm3dPlus').onclick=()=>{pm3dZoom=Math.min(2.5,pm3dZoom*1.15);queueSurface3D();};$('pm3dMinus').onclick=()=>{pm3dZoom=Math.max(.45,pm3dZoom/1.15);queueSurface3D();};
-$('pm3dPNG').onclick=()=>{if(!pm3dModel)return;paintSurface3D();const a=document.createElement('a');a.href=pm3dCanvas.toDataURL('image/png');a.download='RC柱_3D_P-M互制圖.png';a.click();};
-new ResizeObserver(queueSurface3D).observe(pm3dCanvas.parentElement);
+function paintSliceMini(){
+ const canvas=$('pm3dSliceMini'),ctx=canvas.getContext('2d'),w=Math.max(220,canvas.getBoundingClientRect().width||240),h=155,dpr=Math.min(2,devicePixelRatio||1);canvas.width=Math.round(w*dpr);canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.font='10px system-ui';ctx.fillStyle='#718198';ctx.textAlign='center';
+ if(!pm3dSliceData?.valid||pm3dStale||!result){ctx.fillText(pm3dSliceJob?'切片求解中…':'無可用切片',w/2,h/2);return;}
+ const pts=pm3dSliceData.points,c=result.cases[selected],aligned=Math.abs(pm3dSliceData.P-c.load.P)<1e-7,all=aligned?[...pts,{mx:c.load.Mx,my:c.load.My}]:pts,m=Math.max(1,...all.map(p=>Math.max(Math.abs(p.mx),Math.abs(p.my)))),scale=Math.min(w-50,h-40)/2/m,cx=w/2,cy=h/2+3,proj=p=>({x:cx+p.mx*scale,y:cy-p.my*scale});ctx.strokeStyle='#dfe7ef';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(14,cy);ctx.lineTo(w-14,cy);ctx.moveTo(cx,15);ctx.lineTo(cx,h-13);ctx.stroke();ctx.fillText('Mx',w-13,cy-5);ctx.fillText('My',cx+16,31);ctx.fillText('0',cx-6,cy+12);ctx.fillText('±'+fmt(m,1)+' tf·m',47,h-7);ctx.fillText('P '+fmt(pm3dSliceData.P,2)+' tf',w/2,14);
+ ctx.beginPath();pts.forEach((p,i)=>{const q=proj(p);if(i)ctx.lineTo(q.x,q.y);else ctx.moveTo(q.x,q.y)});ctx.closePath();ctx.fillStyle=aligned?'#b788d319':'#2194ab18';ctx.fill();ctx.strokeStyle=$('pm3dSliceMode').value==='load'?'#9854b8':'#168c9d';ctx.lineWidth=1.8;ctx.stroke();if(!pts.some(p=>Math.hypot(p.mx-pts[0].mx,p.my-pts[0].my)>1e-8)){const q=proj(pts[0]);ctx.beginPath();ctx.arc(q.x,q.y,3,0,Math.PI*2);ctx.fillStyle='#9854b8';ctx.fill();}if(aligned){const q=proj({mx:c.load.Mx,my:c.load.My});ctx.beginPath();ctx.arc(q.x,q.y,4,0,Math.PI*2);ctx.fillStyle=c.pass?'#187756':'#c34242';ctx.fill();}
+}
+function pm3dFit(){pm3dZoom=1;pm3dPan={x:0,y:0};pm3dHideHover();queueSurface3D();}
+function pm3dReset(view='iso'){pm3dYaw=view==='top'?0:view==='x'?0:view==='y'?Math.PI/2:-.72;pm3dPitch=view==='top'?Math.PI/2:view==='iso'?.42:0;$('pm3dView').value=view;document.querySelectorAll('[data-pm-view]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.pmView===view)));pm3dFit();}
+function pm3dClosest(x,y,capacity=true){const demands=pm3dHits.filter(p=>Math.hypot(p.x-x,p.y-y)<17).sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y));if(demands.length)return demands[0];if(!capacity)return null;return pm3dVertices.filter(p=>Math.hypot(p.x-x,p.y-y)<7).sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y)||b.depth-a.depth)[0]||null;}
+function pm3dTooltip(q,pinned=false){if(!q){if(!pm3dHoverPinned)pm3dHideHover();return;}pm3dHover=q;pm3dHoverPinned=pinned;const tip=$('pm3dTooltip'),p=q.point;
+ if(q.type==='demand'){const c=result.cases[q.case];tip.textContent=c.load.name+' · '+(c.pass?'軸彎容量內':'軸彎容量外')+'\nPu '+fmt(p.P,2)+' tf\nMx '+fmt(p.mx,2)+' / My '+fmt(p.my,2)+' tf·m\nD/C '+pm3dNumber(c.ratio,4);}
+ else tip.textContent=(q.type==='slice'?'精確自由切片點':'容量取樣點')+'\nφPn '+fmt(p.P,2)+' tf\nφMnx '+fmt(p.mx,2)+' / φMny '+fmt(p.my,2)+' tf·m\nφ '+pm3dNumber(p.phi,4)+' · 中性軸法向角 '+pm3dNumber(p.theta*180/Math.PI,1)+'°';
+ tip.hidden=false;tip.style.left=Math.max(8,Math.min(pm3dCanvas.getBoundingClientRect().width-tip.offsetWidth-8,q.x+14))+'px';tip.style.top=Math.max(55,Math.min(pm3dCanvas.getBoundingClientRect().height-tip.offsetHeight-8,q.y-30))+'px';
+}
+function pm3dHit(x,y){const q=pm3dClosest(x,y,false);if(q){selected=q.case;render();requestAnimationFrame(()=>{const p=pm3dHits.find(v=>v.case===q.case);if(p)pm3dTooltip(p,true);});}else{const p=pm3dClosest(x,y);pm3dTooltip(p,true);}}
+function pm3dMaximize(close=false){const card=$('surfaceCard'),on=close?false:!card.classList.contains('pm3d-maximized');if(on)pm3dSavedFocus=document.activeElement;card.classList.toggle('pm3d-maximized',on);document.body.classList.toggle('pm3d-body-locked',on);$('pm3dMaximize').textContent=on?'返回總覽':'展開工作台';$('pm3dMaximize').setAttribute('aria-pressed',String(on));if(on){card.setAttribute('role','dialog');card.setAttribute('aria-modal','true');$('pm3dMaximize').focus();}else{card.removeAttribute('role');card.removeAttribute('aria-modal');pm3dSavedFocus?.focus?.({preventScroll:true});}pm3dHideHover();queueSurface3D();}
+pm3dCanvas.addEventListener('contextmenu',e=>e.preventDefault());
+pm3dCanvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0&&e.button!==2)return;if(pm3dPointers.size===0){pm3dMoved=false;pm3dGesture=false;}pm3dHideHover();pm3dCanvas.setPointerCapture(e.pointerId);pm3dPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,pan:e.shiftKey||e.button===2||$('pm3dTool').value==='pan'});if(pm3dPointers.size>1)pm3dGesture=true;});
+pm3dCanvas.addEventListener('pointermove',e=>{const last=pm3dPointers.get(e.pointerId);if(!last){if(e.pointerType==='mouse'&&!pm3dHoverPinned){const r=pm3dCanvas.getBoundingClientRect();pm3dTooltip(pm3dClosest(e.clientX-r.left,e.clientY-r.top));}return;}const dx=e.clientX-last.x,dy=e.clientY-last.y;if(Math.hypot(e.clientX-last.startX,e.clientY-last.startY)>4)pm3dMoved=true;
+ if(pm3dPointers.size===1){if(last.pan){pm3dPan.x+=dx;pm3dPan.y+=dy;}else{pm3dYaw+=dx*.009;pm3dPitch=Math.max(-1.5,Math.min(1.5,pm3dPitch+dy*.009));}}
+ else{const other=[...pm3dPointers.entries()].find(([id])=>id!==e.pointerId)[1],before=Math.hypot(last.x-other.x,last.y-other.y),after=Math.hypot(e.clientX-other.x,e.clientY-other.y);if(before>1)pm3dZoom=Math.max(.45,Math.min(3.5,pm3dZoom*after/before));pm3dPan.x+=dx/2;pm3dPan.y+=dy/2;}
+ pm3dPointers.set(e.pointerId,{...last,x:e.clientX,y:e.clientY});queueSurface3D();});
+pm3dCanvas.addEventListener('pointerleave',()=>{if(!pm3dHoverPinned&&!pm3dPointers.size)pm3dHideHover();});
+for(const event of ['pointerup','pointercancel','lostpointercapture'])pm3dCanvas.addEventListener(event,e=>{if(event==='pointerup'&&!pm3dMoved&&!pm3dGesture&&pm3dPointers.size===1&&e.button===0){const box=pm3dCanvas.getBoundingClientRect();pm3dHit(e.clientX-box.left,e.clientY-box.top);}pm3dPointers.delete(e.pointerId);if(pm3dPointers.size===0)pm3dGesture=false;});
+pm3dCanvas.addEventListener('wheel',e=>{e.preventDefault();pm3dHideHover();pm3dZoom=Math.max(.45,Math.min(3.5,pm3dZoom*Math.exp(-e.deltaY*.001)));queueSurface3D();},{passive:false});
+pm3dCanvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','0'].includes(e.key))return;e.preventDefault();if(e.key==='0')return pm3dReset();pm3dHideHover();if(e.key==='+'||e.key==='-')pm3dZoom=Math.max(.45,Math.min(3.5,pm3dZoom*(e.key==='+'?1.1:1/1.1)));else if(e.shiftKey){pm3dPan.x+=e.key==='ArrowRight'?10:e.key==='ArrowLeft'?-10:0;pm3dPan.y+=e.key==='ArrowDown'?10:e.key==='ArrowUp'?-10:0;}else if(e.key.includes('Left')||e.key.includes('Right'))pm3dYaw+=e.key==='ArrowRight'?.1:-.1;else pm3dPitch=Math.max(-1.5,Math.min(1.5,pm3dPitch+(e.key==='ArrowDown'?.1:-.1)));queueSurface3D();});
+document.addEventListener('keydown',e=>{if(!$('surfaceCard').classList.contains('pm3d-maximized'))return;if(e.key==='Escape'){e.preventDefault();pm3dMaximize(true);}if(e.key==='Tab'){const els=[...$('surfaceCard').querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,canvas[tabindex]')].filter(el=>el.getClientRects().length);if(!els.length)return;const i=els.indexOf(document.activeElement);if(e.shiftKey&&(i<=0)){e.preventDefault();els.at(-1).focus();}else if(!e.shiftKey&&(i===els.length-1||i<0)){e.preventDefault();els[0].focus();}}});
+$('pm3dCase').onchange=()=>{selected=Number($('pm3dCase').value);render();};$('pm3dCaseList').onclick=e=>{const b=e.target.closest('[data-pm-case]');if(b){selected=Number(b.dataset.pmCase);render();}};
+$('pm3dQuality').onchange=updateSurface3D;$('pm3dView').onchange=()=>pm3dReset($('pm3dView').value);document.querySelectorAll('[data-pm-view]').forEach(el=>el.onclick=()=>pm3dReset(el.dataset.pmView));$('pm3dReset').onclick=()=>pm3dReset();$('pm3dFit').onclick=pm3dFit;$('pm3dMaximize').onclick=()=>pm3dMaximize();
+for(const id of ['pm3dStyle','pm3dAll','pm3dSlice','pm3dTheme','pm3dGrid','pm3dLabels'])$(id).onchange=()=>{pm3dHideHover();queueSurface3D();};$('pm3dOpacity').oninput=queueSurface3D;
+$('pm3dSliceMode').onchange=pm3dSyncSlice;$('pm3dSliceP').oninput=pm3dSyncSlice;$('pm3dSliceRange').oninput=()=>{$('pm3dSliceMode').value='free';$('pm3dSliceP').value=$('pm3dSliceRange').value;pm3dSyncSlice();};$('pm3dSliceReset').onclick=()=>{$('pm3dSliceMode').value='load';pm3dSyncSlice();};
+$('pm3dPlus').onclick=()=>{pm3dZoom=Math.min(3.5,pm3dZoom*1.15);pm3dHideHover();queueSurface3D();};$('pm3dMinus').onclick=()=>{pm3dZoom=Math.max(.45,pm3dZoom/1.15);pm3dHideHover();queueSurface3D();};
+$('pm3dPNG').onclick=()=>{
+ if(!pm3dModel||pm3dStale||!result)return;paintSurface3D();const out=document.createElement('canvas'),w=Math.max(2000,pm3dCanvas.width),r=w/pm3dCanvas.width,head=230,foot=110,plotH=Math.round(pm3dCanvas.height*r);out.width=w;out.height=head+plotH+foot;const ctx=out.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,out.height);ctx.fillStyle='#15304b';ctx.font='600 32px system-ui';ctx.fillText('RC柱 3D P–Mx–My 設計強度互制圖 · PRO',36,54);const s=result.s,c=result.cases[selected],g=result.g;ctx.font='24px system-ui';
+ const lines=[s.name+'｜'+s.b+' × '+s.h+' cm｜f′c '+s.fc+'、fy '+s.fy+' kgf/cm²｜'+g.bars.length+'根主筋／Ast '+fmt(g.Ast,2)+' cm²',c.load.name+'｜Pu '+fmt(c.load.P,2)+' tf｜Mx '+fmt(c.load.Mx,2)+'、My '+fmt(c.load.My,2)+' tf·m｜D/C '+pm3dNumber(c.ratio,4)+'（'+(c.pass?'軸彎容量內':'軸彎容量外')+'）',($('pm3dSliceMode').value==='free'?'自由':'載重')+'切片 P='+pm3dNumber(pm3dSliceData?.P??Number($('pm3dSliceP').value),2)+' tf｜'+(pm3dSliceData?.valid?'精確輪廓':'無可用輪廓')+'｜3D取樣 '+(pm3dModel.levels+1)+'層 × '+pm3dModel.angles+'角'];lines.forEach((t,i)=>ctx.fillText(t,36,102+i*42,w-72));ctx.drawImage(pm3dCanvas,0,head,w,plotH);ctx.fillStyle='#52687d';ctx.font='22px system-ui';ctx.fillText('設計強度 φPn / φMnx / φMny；壓縮正、拉力負；Mx/My同尺度，P依自身範圍縮放。',36,head+plotH+43,w-72);ctx.fillText('綠／紅點僅表示軸彎判定；剪力、長細與配筋另看檢核表。圖形取樣不能代替精確數值檢核。',36,head+plotH+82,w-72);const a=document.createElement('a');a.href=out.toDataURL('image/png');a.download='RC柱_3D_P-M互制圖_專業版.png';a.click();
+};
+new ResizeObserver(queueSurface3D).observe(pm3dCanvas.parentElement);window.addEventListener('resize',queueSurface3D);

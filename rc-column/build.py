@@ -20,6 +20,10 @@ surface=json.loads((root/'surface-validation.json').read_text(encoding='utf-8'))
 surfaceui=json.loads((root/'surface-ui-validation.json').read_text(encoding='utf-8')) if (root/'surface-ui-validation.json').exists() else None
 if surface:validation+='<p><strong>v1.4 3D曲面：'+str(len(surface["checks"]))+'組數值檢核通過</strong>。固定軸力輪廓與原核心一致；驗證軸力上下限、對稱容量、非對稱純拉形心偏心、多層及分段取消。</p>'
 if surfaceui:validation+='<p><strong>3D操作：'+str(len(surfaceui["checks"]))+'組測試通過</strong>。實際滑鼠與手機單指／雙指、載重點選、視角、PNG、無效輸入、最新條件重建、離線與原生DOCX相容。</p>'
+surfacepro=json.loads((root/'surface-pro-validation.json').read_text(encoding='utf-8')) if (root/'surface-pro-validation.json').exists() else None
+surfaceproui=json.loads((root/'surface-pro-ui-validation.json').read_text(encoding='utf-8')) if (root/'surface-pro-ui-validation.json').exists() else None
+if surfacepro:validation+='<p><strong>v1.5 PRO 精確切片：'+str(len(surfacepro["checks"]))+'組數值檢核通過</strong>。任意P直接120方向求解與原核心一致；軸力超界不截斷，純拉偏心、多層混合配筋與取消／未收斂處理通過。</p>'
+if surfaceproui:validation+='<p><strong>專業版操作：'+str(len(surfaceproui["checks"]))+'組測試通過</strong>。平移、最大化、讀值、自由切片、連續輸入取消、手機觸控、2000px圖形匯出、離線及原生DOCX相容，零外部資源與零JavaScript錯誤。</p>'
 s=(root/'page.html').read_text(encoding='utf-8').replace('/*DOCX_VENDOR*/',(root.parent/'vendor/docx/docx-9.6.1.iife.js').read_text(encoding='utf-8').replace('</script','<\\/script')).replace('/*DOCX_CORE*/',(root.parent/'shared/calculation-docx.js').read_text(encoding='utf-8')).replace('/*CORE*/',(root/'core.js').read_text(encoding='utf-8')).replace('/*SURFACE_CORE*/',(root/'surface-core.js').read_text(encoding='utf-8')).replace('/*SURFACE_UI*/',(root/'surface-ui.js').read_text(encoding='utf-8')).replace('/*AUDIT_UI*/',(root/'audit-ui.js').read_text(encoding='utf-8')).replace('/*LAYERS_UI*/',(root/'layers-ui.js').read_text(encoding='utf-8')).replace('/*DRAG_UI*/',(root/'drag-ui.js').read_text(encoding='utf-8')).replace("'/*VALIDATION*/'",json.dumps(validation,ensure_ascii=False))
 assert all(x not in s for x in ['/*SURFACE_CORE*/','/*SURFACE_UI*/','/*CORE*/','/*AUDIT_UI*/','/*DRAG_UI*/','/*LAYERS_UI*/','/*VALIDATION*/'])
 (root/'dist').mkdir(exist_ok=True)
@@ -33,7 +37,7 @@ content=content.replace('<div id="validationSummary" class="notice">驗算結果
 import re
 content=re.sub(r'<button[^>]*>.*?</button>','',content)
 css=s.split('<style>')[1].split('</style>')[0]
-manual='<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RC柱操作說明</title><style>'+css+' body{padding:24px}.guide{margin:auto} details{break-inside:avoid}</style><h1 style="max-width:1100px;margin:0 auto 20px">RC 柱配筋工作台 — 操作說明 v1.4</h1>'+content+'</html>'
+manual='<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RC柱操作說明</title><style>'+css+' body{padding:24px}.guide{margin:auto} details{break-inside:avoid}</style><h1 style="max-width:1100px;margin:0 auto 20px">RC 柱配筋工作台 — 操作說明 v1.5 PRO</h1>'+content+'</html>'
 (root/'dist/manual.html').write_text(manual,encoding='utf-8')
 md='# RC 柱數值驗證 v1.3\n\n查核日期：2026-10-05。\n\n| 項目 | 公開值 | 本核心 | 相對差異 % |\n|---|---:|---:|---:|\n'
 for x in r['benchmarkComparisons']:md+=f"|{x['name']}|{x['expected']:.8f}|{x['actual']:.8f}|{x['errorPercent']:.8f}|\n"
@@ -46,6 +50,8 @@ if audit:md+='\n## 詳細計算核算\n\n'+'\n'.join('- '+x for x in audit['chec
 if auditui:md+='\n## 詳細計算操作\n\n'+'\n'.join('- '+x for x in auditui['checks'])+'\n'
 if surface:md+='\n## 3D曲面數值驗證 2026-10-07\n\n'+'\n'.join('- '+x for x in surface['checks'])+'\n'
 if surfaceui:md+='\n## 3D介面操作驗證\n\n'+'\n'.join('- '+x for x in surfaceui['checks'])+'\n'
+if surfacepro:md+='\n## 專業版精確切片 2026-10-07\n\n'+'\n'.join('- '+x for x in surfacepro['checks'])+'\n\n'+json.dumps(surfacepro['numbers'],ensure_ascii=False,indent=2)+'\n'
+if surfaceproui:md+='\n## 專業版操作驗證\n\n'+'\n'.join('- '+x for x in surfaceproui['checks'])+'\n'
 (root/'VALIDATION.md').write_text(md,encoding='utf-8')
 print('built',len(s.encode()),'bytes')
 

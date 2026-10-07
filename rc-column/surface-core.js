@@ -18,6 +18,26 @@ const RCSurface=(()=>{
   return {rings,P0,Pmax,Tmax,pole,levels,angles,key:key(s,levels,angles),points:rings.flat().length};
  }
  function build(R,s,options){const job=generate(R,s,options);let q;do{q=job.next()}while(!q.done);return q.value;}
- return {key,generate,build};
+ /* A user-selected axial force is solved directly, never interpolated from the surface rings. */
+ function* slice(R,s,P,{angles=120}={}){
+  const errors=R.validate(s);if(errors.length)throw Error(errors.join('；'));
+  if(!Number.isFinite(P))throw Error('切片軸力 P 必須為有限數值（tf）');
+  if(!Number.isInteger(angles)||angles<12||angles>720)throw Error('切片方向數必須為 12～720 整數');
+  const g=R.geometry(s),P0=(.85*s.fc*(g.Ag-g.Ast)+s.fy*g.Ast)/1000,Pmax=.52*P0,Tmax=.9*s.fy*g.Ast/1000;
+  if(P<-Tmax||P>Pmax)return {P,points:[],valid:false,reason:`軸力超出設計容量範圍：${(-Tmax).toFixed(4)} ≤ P ≤ ${Pmax.toFixed(4)} tf`};
+  const points=[],pureTension=P===-Tmax;
+  for(let i=0;i<angles;i++){
+   const theta=2*Math.PI*i/angles;
+   if(pureTension)points.push({P,mx:P*g.cy/100,my:P*g.cx/100,phi:.9,theta});
+   else{
+    const v=R.capacityAtP(s,g,theta,P);
+    if(!v||![v.mx,v.my,v.dp,v.phi,v.theta].every(Number.isFinite))throw Error('切片容量邊界求解未收斂；停止繪圖以避免顯示不完整輪廓');
+    points.push({P,mx:v.mx,my:v.my,phi:v.phi,theta:v.theta});
+   }
+   if(i%6===5)yield {progress:(i+1)/angles};
+  }
+  return {P,points,valid:true,reason:''};
+ }
+ return {key,generate,build,slice};
 })();
 if(typeof module!=='undefined')module.exports=RCSurface;
