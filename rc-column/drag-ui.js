@@ -39,7 +39,7 @@ function drawDragEditor(){
   const root=$('dragSvg');root.onpointerdown=startBarDrag;root.onpointermove=moveBarDrag;root.onpointerup=e=>finishBarDrag(e,false);root.onpointercancel=e=>finishBarDrag(e,true);root.onlostpointercapture=e=>{if(dragState&&e.pointerId===dragState.id)finishBarDrag(e,true);};root.onkeydown=keyBarMove;
 }
 function clearGraphicResults(){
-  result=null;clearTimeout(timer);invalidateDesign();$('error').classList.add('hidden');
+  result=null;clearSurface3D('主筋位置編輯中，放開後重建3D圖。');clearTimeout(timer);invalidateDesign();$('error').classList.add('hidden');
   for(const k of ['sectionSvg','chartSvg','checks','caseResults','calculation','sectionMini'])$(k).innerHTML='';
   $('resultSummary').innerHTML='<div class="status-card pending"><strong>主筋位置編輯中</strong>放開後依更新座標重算，請勿使用前一配置的結果。</div>';
   $('scopeNotice').textContent='主筋位置編輯中，放開後重新檢核。';

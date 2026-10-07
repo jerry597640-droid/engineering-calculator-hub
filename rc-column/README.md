@@ -52,3 +52,15 @@ Node.js執行 `node verify.cjs` 及 `node custom-verify.cjs`；Python 3執行 `p
 逐筋狀態取鄰近需求方向的一個邊界解，D/C採兩相鄰解連線交點，兩者不混用。表格分為應變／應力及力／力矩兩張，手機在表內橫向滑動；匯出計算書包含所有載重組合的完整明細。顯示值約整，計算採完整精度。
 
 `audit-ui.js`為唯讀明細呈現；`audit-verify.cjs`验证力與力矩加總、半圓形心及邊界交點，`audit-ui-validation.json`保存介面驗證。核心數值公式未改變，新增的是既有計算的追查資料。
+
+## 3D P–Mx–My互制圖（v1.4）
+
+「分析總覽」自動顯示設計強度φPn–φMnx–φMny曲面、全部載重點及目前Pu切片。滑鼠拖曳旋轉與滾輪縮放；手機單指旋轉、雙指縮放。可切換立體、俯視、P–Mx正視、P–My側視、曲面／線框、標準或精細取樣。點載重點或選單可切換組合，PNG保存目前視角。
+
+曲面使用原RCC.capacityAtP逐個固定設計軸力建立全方向輪廓；標準29軸力層×60角，精細45層×120角。頂層是φPn,max的實際輪廓與水平蓋面，不把超過軸壓上限的曲線投影回上限；底部純拉端點保留非對稱主筋形心的偏心彎矩。繪圖不改變原120方向需求檢核；紫色切片直接採目前組合的原核心包絡。
+
+綠／紅點僅代表軸力及雙向彎矩容量內／外，不包含剪力、穩定與配置細則。不同軸依數值範圍縮放，半透明曲面供檢視，以數值檢核判定。輸入或拖曳主筋變更時取消舊生成任務、清除舊結果，並依新斷面重建；無效或求解未收斂時不顯示不完整曲面。離線版無外部繪圖資源依賴。
+
+`surface-core.js`為可分段中止的曲面取樣器；`surface-ui.js`為Canvas互動呈現；`surface-verify.cjs`验证原核心輪廓等價、正負對稱、純拉偏心、多層與取消，`surface-ui-test.cjs`驗證實際滑鼠／觸控、載重選取、無效資料、離線、PNG、版面及原生DOCX匯出相容。
+
+繪圖方法參考：https://structurepoint.org/publication/html/Biaxial-Bending-Interaction-Diagrams-for-Rectangular-Reinforced-Concrete-Column-Design-ACI-318-19/Biaxial_Rectangular_Pincheira/2._spColumn_Software/2._spColumn_Software.htm

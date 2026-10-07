@@ -7,7 +7,7 @@ const pw=require(require.resolve('playwright',{paths:[process.env.CODEX_PRIMARY_
  const page=await ctx.newPage(),errors=[],requests=[],checks=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().startsWith('http'))requests.push(r.url());});
  const input=()=>page.evaluate(()=>read());
  const point=async(p,x,y)=>p.evaluate(({x,y})=>{const svg=document.querySelector('#dragSvg'),s=read(),scale=330/Math.max(s.b,s.h);const q=new DOMPoint(240+(x-s.b/2)*scale,235-(y-s.h/2)*scale).matrixTransform(svg.getScreenCTM());return {x:q.x,y:q.y};},{x,y});
- async function mouseDrag(x,y,tx,ty,finish=true){await page.locator('#dragSvg').scrollIntoViewIfNeeded();const a=await point(page,x,y),b=await point(page,tx,ty);await page.mouse.move(a.x,a.y);await page.mouse.down();assert((await page.locator('#resultSummary').innerText()).includes('編輯中'));await page.mouse.move(b.x,b.y,{steps:5});if(finish)await page.mouse.up();}
+ async function mouseDrag(x,y,tx,ty,finish=true){await page.waitForFunction(()=>pm3dModel&&!pm3dJob&&!pm3dStale);await page.locator('#dragSvg').scrollIntoViewIfNeeded();const a=await point(page,x,y),b=await point(page,tx,ty);await page.mouse.move(a.x,a.y);await page.mouse.down();assert((await page.locator('#resultSummary').innerText()).includes('編輯中'));await page.mouse.move(b.x,b.y,{steps:5});if(finish)await page.mouse.up();}
  await page.goto('file://'+path.resolve(__dirname,'dist/index.html'));await page.locator('#layout').selectOption('custom');await page.locator('#customExample').click();
  const initial=await input(),initialRatio=await page.evaluate(()=>result.worst.ratio);
  await page.locator('#supported').check();await page.waitForTimeout(200);
