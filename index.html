@@ -34,7 +34,8 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
 <dialog id="help-dialog" aria-labelledby="help-title"><div class="dialog-header"><h2 id="help-title">操作說明</h2><button data-close="help-dialog" aria-label="關閉">×</button></div><div class="dialog-content help"><p>這裡收納你提供的工程工具，並可持續新增。點選工具圖示或名稱，會在新分頁開啟原網站。</p><h3>日常使用</h3><ol><li>選擇左側分類，或輸入工具名稱與用途搜尋。</li><li>點星號加入常用，從「常用收藏」快速找到工具。</li><li>點「編輯」可修改任何工具名稱、網址、分類與說明。</li><li>點「新增工具」，輸入資料並儲存。分類欄可直接輸入新名稱。</li></ol><h3>調整顏色</h3><p>點上方「外觀設定」，可選預設配色或自訂側欄、頁面背景、卡片背景、主要文字、強調色及圖示色。即時預覽後，點「儲存配色」保留；「取消」會還原。配色存在目前瀏覽器，下載離線入口頁也會帶入當下配色。</p><h3>每個欄位填什麼？</h3><p><strong>工具名稱：</strong>你習慣使用的名稱。<br><strong>工具網址：</strong>從瀏覽器網址列複製的完整網址。<br><strong>分類：</strong>依工作需求分組，可自行建立。<br><strong>用途說明：</strong>工具用途或便於搜尋的關鍵字，可留白。</p><h3>備份與離線使用</h3><p>個人清單存在目前網址的瀏覽器，清除網站資料、換裝置或換瀏覽器不會自動帶入。請使用「清單備份」匯出 JSON，再在另一裝置匯入。匯入採合併：同一識別碼更新，其餘新增。</p><p>「下載離線入口頁」會保留下載當下的工具清單。入口頁可離線瀏覽、編輯；開啟線上計算工具仍需要網路。各工具的離線版須從原工具另行下載。</p><p class="inline-note">分類與名稱只改變收納清單。計算內容、公式與適用範圍以各工具網站為準。</p></div><div class="dialog-actions"><button class="primary" data-close="help-dialog">了解</button></div></dialog>
 <dialog id="backup-dialog" aria-labelledby="backup-title"><div class="dialog-header"><h2 id="backup-title">清單備份與搬移</h2><button data-close="backup-dialog" aria-label="關閉">×</button></div><div class="dialog-content"><p>匯出名稱、網址、分類、說明與收藏設定，保留日後擴充的工具。</p><div class="backup-actions"><button class="primary" id="export-json">匯出 JSON 清單</button><button id="import-json">選擇 JSON 備份</button></div><input id="import-file" type="file" accept=".json,application/json" hidden><p id="import-summary" class="import-summary" aria-live="polite"></p><p class="inline-note">匯入前會先顯示預覽，確認後才合併清單；不會刪除其他工具。</p><button id="confirm-import" class="primary" hidden>確認合併清單</button><p class="error" id="import-error" role="alert"></p></div><div class="dialog-actions"><button data-close="backup-dialog">關閉</button></div></dialog>
 <dialog id="delete-dialog" aria-labelledby="delete-title"><div class="dialog-header"><h2 id="delete-title">移除這項工具？</h2></div><div class="dialog-content"><p>只會移除收納清單中的項目，原計算網站保持可用。</p><p id="delete-name"></p></div><div class="dialog-actions"><button data-close="delete-dialog">取消</button><button class="primary" id="confirm-delete">確認移除</button></div></dialog><div id="toast" class="toast" role="status" hidden></div>
-<script id="seed-data" type="application/json">[
+<script id="seed-data" type="application/json">
+[
   {
     "id": "rebar",
     "name": "鋼筋與鋼線網互換",
@@ -69,6 +70,15 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
     "description": "RC 梁斷面、多排主筋、彎矩與剪力分析。",
     "url": "https://jerry597640-droid.github.io/rc-beam-design-calculator/",
     "code": "RC",
+    "favorite": false
+  },
+  {
+    "id": "slab-analysis",
+    "name": "樓板分析設計",
+    "category": "構材分析設計",
+    "description": "樓板自重、彎矩、配筋、板厚及剪力檢核；含操作說明、詳細公式與 Word 計算書，現行規範差異另列核對。",
+    "url": "https://jerry597640-droid.github.io/slab-analysis-design/",
+    "code": "SLAB",
     "favorite": false
   },
   {
@@ -305,7 +315,8 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
     "code": "CONC",
     "favorite": false
   }
-]</script>
+]
+</script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id),KEY='engineering-calculator-hub.v1',SEED=JSON.parse($('seed-data').textContent);let tools=structuredClone(SEED),current='all',pendingImport=null,toastTimer;
@@ -317,11 +328,15 @@ iconPaths['shear-friction']='<path d="M3 16h26M9 5v22M16 5v22M23 5v22M4 8h6m-3-3
 iconPaths['src-beam']='<rect x="3" y="3" width="26" height="26" rx="2"/><path d="M10 8h12v3h-4v10h4v3H10v-3h4V11h-4z"/><circle cx="7" cy="7" r="1"/><circle cx="25" cy="7" r="1"/><circle cx="7" cy="25" r="1"/><circle cx="25" cy="25" r="1"/>';
 iconPaths['rc-wall']='<rect x="4" y="5" width="24" height="22"/><path d="M9 5v22M16 5v22M23 5v22M4 11h24M4 21h24"/>';
 iconPaths['concrete-strength']='<path d="M4 3v25h25M7 24l5-9 7-5 9-3"/><circle cx="19" cy="10" r="2"/>';
+iconPaths['slab-analysis']='<path d="M3 8h26v16H3zM3 16h26M11 8v16M21 8v16M6 28h20"/>';
 function toolIcon(id){return '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(iconPaths[id]||iconPaths.custom)+'</svg>'}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function validate(items){if(!Array.isArray(items)||items.length>1000)throw Error('備份必須包含工具清單，最多 1000 項。');const ids=new Set();return items.map((t,i)=>{if(!t||typeof t!=='object')throw Error('工具資料格式錯誤。');for(const [k,max]of [['id',100],['name',80],['category',40],['url',2000]])if(typeof t[k]!=='string'||!t[k].trim()||t[k].length>max)throw Error('第 '+(i+1)+' 項工具的名稱、網址或分類無效。');let u;try{u=new URL(t.url)}catch{throw Error('網址格式錯誤。')}if(!['http:','https:'].includes(u.protocol))throw Error('只接受 http 或 https 網址。');if(ids.has(t.id))throw Error('備份內有重複的工具識別碼。');ids.add(t.id);return{id:t.id,name:t.name.trim(),category:t.category.trim(),url:t.url.trim(),description:typeof t.description==='string'?t.description.slice(0,300):'',code:typeof t.code==='string'?t.code.slice(0,8):'TOOL',favorite:t.favorite===true};});}
 let startupWarning='';try{const v=localStorage.getItem(KEY);if(v!==null)tools=validate(JSON.parse(v).tools)}catch{startupWarning='無法讀取個人清單，先顯示預設工具。請檢查備份或瀏覽器儲存設定。'}
 
+
+// Add slab tool once without replacing saved names, favorites or custom links.
+try{const marker='engineering-calculator-hub.slab-analysis.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='slab-analysis');if(addon&&!tools.some(t=>t.id===addon.id||t.url.replace(/\/$/,'')===addon.url.replace(/\/$/,'')))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='樓板工具已載入；請匯出清單保存新增項目。';}
 
 // Add concrete strength once, preserving saved customizations.
 try{const marker='engineering-calculator-hub.concrete-strength.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='concrete-strength');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='混凝土強度發展工具已載入；請匯出清單保存新增項目。';}
