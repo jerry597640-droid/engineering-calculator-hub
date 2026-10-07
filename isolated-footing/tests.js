@@ -24,3 +24,4 @@ check('Input protections: cover, column boundary, paired case types',()=>{assert
 check('Partial contact adds size effect, equilibrium intact',()=>{let d=JSON.parse(JSON.stringify(F.defaults));d.cases[1].My=700;let r=F.calculate(d),c=r.results[1];assert.ok(!c.p.full);assert.ok(c.sides[0].lambda<1);assert.ok(c.netBalance<1e-8)});
 check('Rectangular short-direction distribution 13.3.3.3',()=>{let r=F.calculate({...F.defaults,L:5,B:4});near(r.distFactor,2*1.25/2.25);assert.equal(r.short,'y')});
 console.log(`Verified ${count} engineering test groups.`);
+

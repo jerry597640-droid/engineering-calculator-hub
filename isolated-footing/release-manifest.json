@@ -1,0 +1,20 @@
+{
+  "repository": "jerry597640-droid/engineering-calculator-hub",
+  "path": "isolated-footing",
+  "baseSHA": "6ac0fd7bd73d59a3a62a0d90e45bbcdbad15f32f",
+  "published": false,
+  "files": {
+    "engine.js": "b2ce322382c9dfcf48217db3bda73b197aa9950ab94d0b83494405ed9bc1eecb",
+    "ui.js": "68cd8f989afe772bb124a3045cabc8ddf90721cee6c97e0e03abdab32d57b5f0",
+    "interface.html": "27cd69e602bfaed2a6c5dba441bac0fca5731df4742238319bff4849aca99910",
+    "index.html": "139402ef93e4771f3b5dbf16534dbae75b5c6782befc429785309852d4b1f1c1",
+    "build.py": "78ff68f0cbdacd64b2e76c353b883d2c471e1ceb3f94d99351e19b20da1f451c",
+    "build-offline.cjs": "53e0de47a3bb5105da50d344cf874bc194b1508867dde8c213b76e8fef828e4e",
+    "offline-kit-v1.1.zip": "76e86428c82d296d80683486eff09f18cc44eb43855257e26dfc3a919c021d6a",
+    "FINAL-VALIDATION.md": "3b698c83ef47d145299e665f168a5acc61bd97bb5c4cc76e88a90f80c1e79af1"
+  },
+  "sharedDependencies": {
+    "shared/calculation-docx.js": "76dc18fcb376b96f87bd741c4d2a27577efd3fc44d42d443ee6b8fd06c25e2cb",
+    "vendor/docx/docx-9.6.1.iife.js": "ecef72931c98461fc327aa6e95867820aced5db4c3d971ac5ad38ccda21dd360"
+  }
+}
