@@ -1,0 +1,2 @@
+const fs=require('fs'),path=require('path'),p=__dirname;
+let s=fs.readFileSync(p+'/template.html','utf8');for(const [k,f] of [['ENGINE','engine.js'],['DOCXVENDOR','vendor/docx/docx-9.6.1.iife.js'],['DOCX','shared/calculation-docx.js'],['TRACE','trace-ui.js']])s=s.replace('@@'+k+'@@',()=>fs.readFileSync(path.join(p,f),'utf8'));fs.writeFileSync(p+'/index.html',s);console.log(Buffer.byteLength(s),'bytes');
