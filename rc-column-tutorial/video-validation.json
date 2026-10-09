@@ -1,0 +1,71 @@
+{
+  "version": "1.6 PRO",
+  "date": "2026-10-09",
+  "renderer": "FFmpeg direct composition of reviewed HyperFrames storyboard and real UI recordings",
+  "rendererReason": "Browser frame capture stalled; software composition uses the identical chapter clock and source recordings.",
+  "file": "RC-column-tutorial-v1.6.mp4",
+  "bytes": 12214033,
+  "sha256": "bd20800d610625eee3798257dd9248c075693746a283aab1fef2d6df8b8b5183",
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "24/1",
+        "duration": "180.041667"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "180.044000"
+      },
+      {
+        "codec_name": "mov_text",
+        "codec_type": "subtitle",
+        "r_frame_rate": "0/0",
+        "duration": "179.996000"
+      }
+    ],
+    "format": {
+      "duration": "180.044000",
+      "size": "12214033"
+    }
+  },
+  "chapters": 8,
+  "captionCues": 31,
+  "audioMeanDb": -16.4,
+  "audioPeakDb": -0.4,
+  "burnedCaptions": false,
+  "captionMode": "Embedded optional mov_text track plus standalone VTT and responsive HTML cue overlay",
+  "checks": [
+    "1920×1080 H.264/24fps with AAC narration and optional Traditional Chinese subtitle track",
+    "Final duration equals final narration and player chapter duration: 180.044 seconds",
+    "31 caption cues within media range and no overlaps",
+    "Complete narrated audio is non-silent and has no clipping",
+    "8 chapter real UI recordings: zero page errors and verified DOCX/PNG/JSON/offline downloads",
+    "HyperFrames lint/runtime/motion/layout checks passed; 25/25 contrast text checks passed",
+    "Reviewed all 8 chapter snapshots plus nl input and final transcript views",
+    "Final 12,214,033-byte delivery compared at 12/89/106/178 seconds: readable UI text, inputs, 3D and transcript",
+    "Original and delivery demuxed AAC narration and subtitles are byte-identical"
+  ],
+  "deliveryCompression": {
+    "sourceBytes": 26495561,
+    "deliveredBytes": 12214033,
+    "reductionPercent": 53.902,
+    "encoder": "libx264 / slow / CRF 27 / 120-frame GOP",
+    "sameDimensionsAndFrameRate": true,
+    "audioCopiedWithoutReencoding": true,
+    "optionalSubtitleCopiedWithoutReencoding": true,
+    "comparedFramesSeconds": [
+      12,
+      89,
+      106,
+      178
+    ],
+    "visualReview": "文字、數值、3D 圖及逐字稿可讀，未見影響操作理解的壓縮瑕疵。"
+  }
+}

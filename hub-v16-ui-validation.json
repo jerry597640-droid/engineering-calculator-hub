@@ -1,0 +1,20 @@
+{
+  "version": "1.6.0",
+  "date": "2026-10-09",
+  "source": "hub-updated-v16.html",
+  "sourceBytes": 79696,
+  "seedCount": 31,
+  "checks": [
+    "新使用者RC卡有3D、52項參數及操作影片說明，URL維持原入口且不重複",
+    "預存RC自訂name／description／favorite／category／code和其他工具、順序全部原樣保留，重載仍保留",
+    "只有符合原URL與原預設description的RC卡更新說明，name／favorite／順序及其餘完整工具保持不變",
+    "RC原網址經使用者自訂時，舊description也不強制改寫或新增重複RC",
+    "v16 marker已存在時不重跑migration，後續使用者編輯完整保留",
+    "曾自行刪除RC卡且既有新增標記已存在時，v16 migration不重新加回",
+    "1440px入口搜尋／圖示／清單操作正常且無水平溢出",
+    "390px入口搜尋／圖示／清單操作正常且無水平溢出",
+    "入口migration及桌面／手機操作零執行錯誤、零外部資源請求"
+  ],
+  "errors": [],
+  "requests": []
+}

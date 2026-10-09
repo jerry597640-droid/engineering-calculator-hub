@@ -1,0 +1,432 @@
+{
+  "version": "1.6 PRO",
+  "created": "2026-10-09",
+  "source": "rc-column/dist/index.html",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "timingSource": "rc-column-tutorial/audio/chapters.json",
+  "duration": 180.044,
+  "errors": [],
+  "chapters": [
+    {
+      "id": "start",
+      "title": "快速開始與教學範例",
+      "file": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/01.webm",
+      "raw": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/raw/page@98417acc987a53028ca5884dd7361e85.webm",
+      "duration": 23.444,
+      "recordedDuration": 23.445,
+      "rawDuration": 26,
+      "narrationDuration": 22.944,
+      "trim": 0.56,
+      "closeTime": 34.137,
+      "errors": [],
+      "downloads": [],
+      "steps": [
+        {
+          "at": 0.615,
+          "name": "Inspect current overview"
+        },
+        {
+          "at": 7.065,
+          "name": "Official regulation and implementation scope"
+        },
+        {
+          "at": 11.735,
+          "name": "Load 60 × 60 cm example"
+        },
+        {
+          "at": 18.232,
+          "name": "View factored load combinations"
+        }
+      ],
+      "start": 0.0,
+      "end": 23.444,
+      "expectedDuration": 23.444,
+      "encodedDuration": 23.48,
+      "durationError": 0.036,
+      "bytes": 2275670,
+      "sha256": "d0806a73954b1215b7abb588785fbd846929e7257471fb6e2a5fb8a9c724f6cb",
+      "codec": {
+        "codec_name": "vp9",
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "25/1"
+      }
+    },
+    {
+      "id": "inputs",
+      "title": "輸入資料與來源",
+      "file": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/02.webm",
+      "raw": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/raw/page@a3e14c2164bde47805685da10c6909c0.webm",
+      "duration": 24.5,
+      "recordedDuration": 24.503,
+      "rawDuration": 27.04,
+      "narrationDuration": 24,
+      "trim": 0.56,
+      "closeTime": 32.634,
+      "errors": [],
+      "downloads": [],
+      "steps": [
+        {
+          "at": 4.067,
+          "name": "Dimensions and cover from drawings"
+        },
+        {
+          "at": 8.079,
+          "name": "Concrete and reinforcement strengths"
+        },
+        {
+          "at": 15.517,
+          "name": "Signed concurrent factored forces"
+        },
+        {
+          "at": 17.222,
+          "name": "Slenderness inputs and external second order"
+        },
+        {
+          "at": 22.686,
+          "name": "Searchable parameter definitions"
+        }
+      ],
+      "start": 23.444,
+      "end": 47.944,
+      "expectedDuration": 24.5,
+      "encodedDuration": 24.52,
+      "durationError": 0.02,
+      "bytes": 3150345,
+      "sha256": "7226d0e39e8b7e484f328e46367c121442683fe1d8713571e898bc088cfe3f31",
+      "codec": {
+        "codec_name": "vp9",
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "25/1"
+      }
+    },
+    {
+      "id": "rebar",
+      "title": "主筋配置與拖曳",
+      "file": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/03.webm",
+      "raw": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/raw/page@2095ca977be77d1bae007f820b87ba3b.webm",
+      "duration": 24.452,
+      "recordedDuration": 24.453,
+      "rawDuration": 28.76,
+      "narrationDuration": 23.952,
+      "trim": 0.76,
+      "closeTime": 36.799,
+      "errors": [],
+      "downloads": [],
+      "steps": [
+        {
+          "at": 1.023,
+          "name": "Uniform peripheral bars and corner count"
+        },
+        {
+          "at": 6.692,
+          "name": "Actual coordinate mode"
+        },
+        {
+          "at": 14.285,
+          "name": "Drag a real bar with grid snapping and undo"
+        },
+        {
+          "at": 19.334,
+          "name": "Generate actual three layer coordinates"
+        }
+      ],
+      "start": 47.944,
+      "end": 72.396,
+      "expectedDuration": 24.452,
+      "encodedDuration": 24.48,
+      "durationError": 0.028,
+      "bytes": 2503323,
+      "sha256": "a8afd1741732b4dee24e9298c129a89fd3c9eb217e7dff2668c53adba98bf10c",
+      "codec": {
+        "codec_name": "vp9",
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "25/1"
+      }
+    },
+    {
+      "id": "checks",
+      "title": "軸彎結果與判定範圍",
+      "file": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/04.webm",
+      "raw": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/raw/page@f1fd7cef2fb8f549c78bb0f8f8a2cc63.webm",
+      "duration": 22.892,
+      "recordedDuration": 22.894,
+      "rawDuration": 23.72,
+      "narrationDuration": 22.392,
+      "trim": 0.6,
+      "closeTime": 29.67,
+      "errors": [],
+      "downloads": [],
+      "steps": [
+        {
+          "at": 1.142,
+          "name": "D/C summary across load cases"
+        },
+        {
+          "at": 5.707,
+          "name": "Capacity points distinguish axial moment status"
+        },
+        {
+          "at": 8.036,
+          "name": "Other required section and detailing checks"
+        },
+        {
+          "at": 14.34,
+          "name": "Effective supported perimeter count, not all inner bars"
+        },
+        {
+          "at": 20.668,
+          "name": "Select controlling U2 concurrent combination"
+        }
+      ],
+      "start": 72.396,
+      "end": 95.288,
+      "expectedDuration": 22.892,
+      "encodedDuration": 22.92,
+      "durationError": 0.028,
+      "bytes": 2509449,
+      "sha256": "265ee7cf6704732591d864babe92c0e0330285d88a9e2b9ecd5a709aec040034",
+      "codec": {
+        "codec_name": "vp9",
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "25/1"
+      }
+    },
+    {
+      "id": "3d",
+      "title": "3D專業工作台操作",
+      "file": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/05.webm",
+      "raw": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/raw/page@40fee0f0c674901bc55f3b358a21c534.webm",
+      "duration": 23.516,
+      "recordedDuration": 23.517,
+      "rawDuration": 26.12,
+      "narrationDuration": 23.016,
+      "trim": 0.6,
+      "closeTime": 30.354,
+      "errors": [],
+      "downloads": [],
+      "steps": [
+        {
+          "at": 2.853,
+          "name": "Maximize actual professional 3D workspace"
+        },
+        {
+          "at": 7.021,
+          "name": "Shift drag pan and Fit"
+        },
+        {
+          "at": 12.773,
+          "name": "Quick planar and spatial viewpoints"
+        },
+        {
+          "at": 20.079,
+          "name": "Read real capacity sample and display settings"
+        }
+      ],
+      "start": 95.288,
+      "end": 118.804,
+      "expectedDuration": 23.516,
+      "encodedDuration": 23.52,
+      "durationError": 0.004,
+      "bytes": 1662799,
+      "sha256": "4d1b2b7444cf51384ae554138648f6adedd98ee38c7cdcd7a7a9f1318eff5fcf",
+      "codec": {
+        "codec_name": "vp9",
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "25/1"
+      }
+    },
+    {
+      "id": "slice",
+      "title": "自由軸力與精確切片",
+      "file": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/06.webm",
+      "raw": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/raw/page@c182f17ec4f252c57993babac02a2207.webm",
+      "duration": 24.092,
+      "recordedDuration": 24.094,
+      "rawDuration": 28.16,
+      "narrationDuration": 23.592,
+      "trim": 2.04,
+      "closeTime": 30.718,
+      "errors": [],
+      "downloads": [],
+      "steps": [
+        {
+          "at": 4.696,
+          "name": "Free fixed axial force slice"
+        },
+        {
+          "at": 7.787,
+          "name": "120 exact angular solves and Mx–My projection"
+        },
+        {
+          "at": 14.367,
+          "name": "Explore range without modifying concurrent load"
+        },
+        {
+          "at": 20.445,
+          "name": "Return to selected concurrent load Pu"
+        }
+      ],
+      "start": 118.804,
+      "end": 142.896,
+      "expectedDuration": 24.092,
+      "encodedDuration": 24.12,
+      "durationError": 0.028,
+      "bytes": 986775,
+      "sha256": "be2da533a186d5cb4351e6805ba278d395fb2e3d31beb40d2321a82fca0fce83",
+      "codec": {
+        "codec_name": "vp9",
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "25/1"
+      }
+    },
+    {
+      "id": "report",
+      "title": "計算明細與報告匯出",
+      "file": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/07.webm",
+      "raw": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/raw/page@c15e875b776220cc7b4580e6194f0abf.webm",
+      "duration": 21.524,
+      "recordedDuration": 21.528,
+      "rawDuration": 23.72,
+      "narrationDuration": 21.024,
+      "trim": 2.08,
+      "closeTime": 24.103,
+      "errors": [],
+      "downloads": [
+        {
+          "name": "RC柱_C1_詳細計算.docx",
+          "path": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/07-RC柱_C1_詳細計算.docx",
+          "bytes": 155099,
+          "sha256": "c108d1811a7d317b71fe47a180f8fa4b0aa3fa9a0bd83315a65b10e03e2aed2e",
+          "nativeEditableDocument": true,
+          "documentXMLBytes": 1680093
+        },
+        {
+          "name": "RC柱_3D_P-M互制圖_專業版.png",
+          "path": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/07-RC柱_3D_P-M互制圖_專業版.png",
+          "bytes": 1145013,
+          "sha256": "b3fea325e12ba080035e953007d09231305ee978a35f08cb4686e3bcf9975f54",
+          "dimensions": [
+            2000,
+            2047
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "at": 0.85,
+          "name": "Executed equations and substitutions"
+        },
+        {
+          "at": 3.647,
+          "name": "Per-bar strain, stress and net force integration"
+        },
+        {
+          "at": 7.222,
+          "name": "Download genuine editable DOCX calculation report"
+        },
+        {
+          "at": 13.176,
+          "name": "Download annotated 3D PNG report image"
+        },
+        {
+          "at": 17.899,
+          "name": "Review reported scope and pending checks"
+        }
+      ],
+      "start": 142.896,
+      "end": 164.42,
+      "expectedDuration": 21.524,
+      "encodedDuration": 21.56,
+      "durationError": 0.036,
+      "bytes": 2684456,
+      "sha256": "b871da7bd732e6b7efff35b01e51274512f67afc123e14e254e2751c361d80ea",
+      "codec": {
+        "codec_name": "vp9",
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "25/1"
+      }
+    },
+    {
+      "id": "offline",
+      "title": "離線與專案備份",
+      "file": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/08.webm",
+      "raw": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/raw/page@931119fc31424e28b2c8badfd3322df2.webm",
+      "duration": 15.624,
+      "recordedDuration": 15.625,
+      "rawDuration": 17.56,
+      "narrationDuration": 15.624,
+      "trim": 1.44,
+      "closeTime": 16.327,
+      "errors": [],
+      "downloads": [
+        {
+          "name": "RC柱專案.json",
+          "path": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/08-RC柱專案.json",
+          "bytes": 974,
+          "sha256": "68aaa48e414bfb3282969c34588d34ddc221e4f16a7eedfd565444c124047b80",
+          "projectFormat": "rc-column-project",
+          "loadCases": 2
+        },
+        {
+          "name": "RC柱配筋設計_離線版.html",
+          "path": "/workspace/scratch/bb9f3682f188/rc-column-tutorial/recordings/08-RC柱配筋設計_離線版.html",
+          "bytes": 1260243,
+          "sha256": "3115b9f05afa8d3523b4e1062fd156e96c766222fc2584c0f026bf38f20e5f66",
+          "offlineVersion": "1.6 PRO"
+        }
+      ],
+      "steps": [
+        {
+          "at": 1.236,
+          "name": "Save real JSON project with load and rebar data"
+        },
+        {
+          "at": 7.579,
+          "name": "Download self contained offline computation page"
+        },
+        {
+          "at": 12.17,
+          "name": "Chapter navigator, transcript and offline media instructions"
+        }
+      ],
+      "start": 164.42,
+      "end": 180.044,
+      "expectedDuration": 15.624,
+      "encodedDuration": 15.64,
+      "durationError": 0.016,
+      "bytes": 1361290,
+      "sha256": "f2156d8155ce62d582ce4de76960882b0af2c80104efc77e11e6183a157a1a1e",
+      "codec": {
+        "codec_name": "vp9",
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "25/1"
+      }
+    }
+  ],
+  "checks": [
+    "8 real application recordings at 1280×720",
+    "Zero application page errors across all recordings",
+    "Cue schedule follows finalized 180.044 s narration",
+    "All chapter encoded durations within one 25 fps frame of target",
+    "Visible pointer and click highlight",
+    "Encoded preflight marker used to trim browser setup frames",
+    "Actual rebar drag and undo recorded",
+    "Actual 3D rotation, pan, view selection, capacity hover and exact slice exploration recorded",
+    "Actual cover definition dialog and searchable parameter dictionary recorded",
+    "Actual supported perimeter bar count shown in seismic mode",
+    "Genuine editable DOCX and ≥ 2000 pixel PNG downloaded",
+    "JSON project and self-contained offline HTML downloaded",
+    "Tutorial chapter and transcript display recorded without media autoplay or seek"
+  ]
+}

@@ -4,7 +4,7 @@ const pw=require(require.resolve('playwright',{paths:[process.env.CODEX_PRIMARY_
 
 (async()=>{
  const cr=(await import('../qa-tools/node_modules/@sparticuz/chromium/build/index.js')).default;
- const browser=await pw.chromium.launch({executablePath:await cr.executablePath(),args:cr.args,headless:true});
+ const browser=await pw.chromium.launch({executablePath:'/tmp/chromium',args:['--no-sandbox','--disable-gpu','--disable-dev-shm-usage'],headless:true});
  const scratch=fs.mkdtempSync(path.join(os.tmpdir(),'rc-pm3d-pro-'));
  const errors=[],requests=[],checks=[];
  const ctx=await browser.newContext({viewport:{width:1440,height:1000},acceptDownloads:true});await ctx.setOffline(true);
