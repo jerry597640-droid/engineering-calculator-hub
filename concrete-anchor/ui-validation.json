@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-09",
+  "checks": [
+    "default utilization regression",
+    "responsive tabs 390",
+    "responsive tabs 768",
+    "responsive tabs 1440",
+    "search seismic definition",
+    "context help",
+    "eight dynamic diagrams",
+    "seismic Vsa input and missing guard",
+    "editable Word export",
+    "online Taiwan Mandarin video and synchronized chapters",
+    "download with case while video tab active",
+    "downloaded offline case and Taiwan Mandarin video without network"
+  ],
+  "errors": [],
+  "videoDuration": 103.637
+}

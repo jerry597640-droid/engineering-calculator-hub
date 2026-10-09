@@ -47,7 +47,7 @@ node build.cjs
 
 ## v2 操作與離線影片
 
-新版含參數字典、各欄位「定義與來源」、規範對應表、快速定位與84秒中文旁白操作影片，提供章節跳轉及文字稿。
+新版含參數字典、各欄位「定義與來源」、規範對應表、快速定位與台灣國語旁白操作影片，提供章節跳轉及文字稿。
 
 - 線上版 `index.html` 從同目錄 `tutorial/anchor-tutorial.mp4` 載入影片。
 - `Concrete_Anchor_Offline_v2.html` 是內含影片的單一檔，直接用瀏覽器開啟即可離線播放與計算。
@@ -59,4 +59,7 @@ node build.cjs
 
 `node build.cjs` 重建線上與离線HTML。教學MP4採H.264/AAC，可於手機播放。建置程式由tutorial/anchor-tutorial.mp4產生離線內嵌資料，線上播放器讀取MP4。
 
-影片專案以HyperFrames 0.8.143製作；中文旁白Kokoro zf_xiaoxiao。字幕依實測章節音檔長度及逐句文字比例分段，不作逐字強制對齊宣稱。Source Han Sans TC字型使用子集，原始字型由Adobe以SIL OFL授權。
+影片專案以HyperFrames 0.8.143製作；旁白採Microsoft zh-TW-HsiaoChenNeural台灣國語女聲，語速−5%。字幕依合成時的SentenceBoundary時間戳對齊。Source Han Sans TC字型使用子集，原始字型由Adobe以SIL OFL授權。
+
+## 台灣語音更新（2026-10-09）
+旁白改為zh-TW台灣國語女聲；各章時間、字幕及離線影片同步更新。
