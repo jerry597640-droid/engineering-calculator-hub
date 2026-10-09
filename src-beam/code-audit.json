@@ -1,0 +1,33 @@
+{
+  "checkedOn": "2026-10-09",
+  "calculatorVersion": "1.2",
+  "src": {
+    "publishedVersion": "100-03-24",
+    "effectiveDate": "100-07-01",
+    "source": "https://www.nlma.gov.tw/ch/legislation/regsearch/977"
+  },
+  "rc": {
+    "publishedVersion": "112-08-10",
+    "effectiveDate": "113-01-01",
+    "errataDate": "113-02-19",
+    "source": "https://www.nlma.gov.tw/ch/legislation/regsearch/6874"
+  },
+  "draftResearch": {
+    "source": "https://www.abri.gov.tw/News_Content_Table.aspx?n=807&s=327815",
+    "status": "研究草案，非發布新規範"
+  },
+  "checkedClauses": [
+    "SRC 3.4、3.5 材料及寬厚比",
+    "SRC 4.3–4.5 構造、淨距、保護層",
+    "SRC 5.3、5.4.1 強度疊加與RC子斷面",
+    "SRC 5.5 剪力分擔、RC一般剪力及摩擦",
+    "RC 112 9.3.3.1／表21.2.2 拉力控制"
+  ],
+  "engineChanged": false,
+  "numericalTests": {
+    "count": 35,
+    "failed": 0,
+    "independentReference": "independent_reference.py 0.001cm slicing"
+  },
+  "scope": "完全包覆矩形常重混凝土、單支對稱H、強軸、無軸力扭矩開孔；完整耐震、施工、接頭、錨定、撓度等另核"
+}
