@@ -1,0 +1,49 @@
+{
+  "version": "1.6",
+  "reviewDate": "2026-10-09",
+  "checks": [
+    "獨立解析／5000點積分／旋轉平衡",
+    "kgf/tf及輸入JSON舊版往返",
+    "端點拖曳／剛體平移／吸附／取消／復原",
+    "TW70s及AISC100s分開、共線相接合併、斷續40mm",
+    "四種形式全ASD/LRFD及支援模式獨立代入",
+    "孔槽尺寸、PJP喉厚、WPS與外部母材待確認",
+    "390px與桌面／Word／JSON／離線HTML",
+    "工程工具入口保留其他工具與自訂偏好"
+  ],
+  "teachingExamples": [
+    {
+      "type": "CJP",
+      "areaMm2": 3600,
+      "capacityKgf": 54000,
+      "ratio": 0.09259259259259259,
+      "pass": false
+    },
+    {
+      "type": "PJP",
+      "areaMm2": 1800,
+      "capacityKgf": 26576.030110358828,
+      "ratio": 0.1881394617343956,
+      "pass": false
+    },
+    {
+      "type": "PLUG",
+      "areaMm2": 1385.442360233099,
+      "capacityKgf": 20455.30993428969,
+      "ratio": 0.24443530878104122,
+      "pass": false
+    },
+    {
+      "type": "SLOT",
+      "areaMm2": 4661.442360233099,
+      "capacityKgf": 68823.68473514276,
+      "ratio": 0.07264940869181477,
+      "pass": false
+    }
+  ],
+  "sourcePdfs": [
+    "https://www.nlma.gov.tw/uploads/files/929c321bf62f8ff02a47c4ade411ab58.pdf",
+    "https://www.nlma.gov.tw/uploads/files/6a36dd4ec3c2d38b8cfdddf5baee3d81.pdf"
+  ],
+  "limits": "分析範圍依內嵌說明。AISC2026年9月勘誤全文未取得，不宣稱整合。"
+}

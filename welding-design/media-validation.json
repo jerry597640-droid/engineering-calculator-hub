@@ -1,0 +1,21 @@
+{
+  "version": "1.6",
+  "offline": true,
+  "metadata": {
+    "duration": 141.083333,
+    "w": 1280,
+    "h": 720
+  },
+  "checks": [
+    "390px播放器無溢出",
+    "影片真正載入並可播放",
+    "章節跳轉",
+    "1.25倍播放速度",
+    "離線逐句字幕可見"
+  ],
+  "play": {
+    "paused": false,
+    "current": 93.036733,
+    "err": null
+  }
+}

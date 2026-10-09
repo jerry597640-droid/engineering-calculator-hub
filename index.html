@@ -133,7 +133,7 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
     "id": "welding",
     "name": "焊接分析設計",
     "category": "鋼結構",
-    "description": "填角焊群組彈性分析、九型原版查表比對、ASD / LRFD、內嵌操作手冊與離線計算。",
+    "description": "填角焊拖曳與偏心分析，新增CJP／PJP／塞孔／塞槽焊；含46項參數解釋、kg結果、中文操作影片、規範對照及完整離線版。",
     "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/welding-design/",
     "code": "WELD",
     "favorite": false
@@ -433,6 +433,7 @@ try{const marker='engineering-calculator-hub.steel-sheet-pile.v1';if(!localStora
 try{const marker='engineering-calculator-hub.pile.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='pile');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='基樁工具已載入；請匯出清單保存。';}
 try{const marker='engineering-calculator-hub.rc-column.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='rc-column');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='RC柱工具已載入；請匯出清單保存新增項目。';}
 try{const marker='engineering-calculator-hub.rc-column.v16';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='rc-column');if(addon){tools=tools.map(t=>t.id===addon.id&&t.url===addon.url&&t.description==='矩形RC柱軸力、雙向彎矩、剪力、長細與耐震圍束檢核；含配筋搜尋、操作說明、驗算與離線版。'?{...t,description:addon.description}:t);localStorage.setItem(KEY,JSON.stringify({version:1,tools}));}localStorage.setItem(marker,'1');}}catch{startupWarning='RC柱教學已更新；可由工具卡開啟新版。';}
+try{const marker='engineering-calculator-hub.welding.v16';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='welding');if(addon){tools=tools.map(t=>t.id===addon.id&&t.url===addon.url&&t.description==="填角焊群組彈性分析、九型原版查表比對、ASD / LRFD、內嵌操作手冊與離線計算。"?{...t,description:addon.description}:t);localStorage.setItem(KEY,JSON.stringify({version:1,tools}));}localStorage.setItem(marker,'1');}}catch{startupWarning='焊接工具已更新；可由工具卡開啟新版。';}
 const VIEW_KEY='engineering-calculator-hub.view.v1';
 function setView(mode,persist=true){const list=mode==='list';$('cards').classList.toggle('list-view',list);$('view-grid').setAttribute('aria-pressed',String(!list));$('view-list').setAttribute('aria-pressed',String(list));if(persist)try{localStorage.setItem(VIEW_KEY,list?'list':'grid')}catch{notify('本次顯示方式已套用，但瀏覽器無法儲存偏好。')}}
 $('view-grid').onclick=()=>setView('grid');$('view-list').onclick=()=>setView('list');

@@ -11,4 +11,3 @@ const WeldUnits={
  restore(s){const unit=s.forceUnit||'tf',display=s.displayUnit||'tf';this.factor(unit);this.factor(display);this.output(s.outputUnit||'kgf');return{...s,forceUnit:'tf',displayUnit:display,loads:this.convertLoads(s.loads,unit,'tf')};}
 };
 if(typeof module!=='undefined')module.exports=WeldUnits;
-

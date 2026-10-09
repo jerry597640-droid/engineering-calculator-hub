@@ -19,7 +19,14 @@ function analyze(s){
  // Conservative shared detailing screen; 2022 AISC thinner-part exception is not taken.
  let min=thick<=6?3:thick<=12?5:thick<=19?6:8,max=thin<6?thin:thin-(s.basis==='TW'?1.5:2);
  let checks=[{name:'焊材合成需求 / 可用強度',ok:ratio<=1+1e-10,value:ratio.toFixed(3)+' ≤ 1.000'},{name:'最小焊腳（以較厚板保守檢查）',ok:w>=min,value:w+' ≥ '+min+' mm'},{name:'板邊最大焊腳（未採滿焊例外）',ok:w<=max,value:w+' ≤ '+max.toFixed(2)+' mm'},{name:'每條焊線有效長度 ≥ 4s',ok:radius?L>=4*w:seg.every(a=>a.l>=4*w),value:(radius?L:Math.min(...seg.map(a=>a.l))).toFixed(1)+' ≥ '+4*w+' mm'}];
- const long=!radius&&seg.some(a=>a.l>100*w);if(long&&s.endLoaded)checks.push({name:'端部受力長焊線',ok:false,value:'L > 100s：需另行折減有效長度；本結果不得作通過判定'});
+ // Join touching collinear segments for length screening; splitting a weld is not a waiver.
+ const groups=seg.map((a,i)=>({ids:[i],length:a.l})),parent=seg.map((a,i)=>i),root=i=>parent[i]===i?i:parent[i]=root(parent[i]);
+ for(let i=0;i<seg.length;i++)for(let j=0;j<i;j++){const a=seg[i],b=seg[j],cross=(a.X-a.x)*(b.Y-b.y)-(a.Y-a.y)*(b.X-b.x),touch=Math.min(...[[a.x,a.y],[a.X,a.Y]].flatMap(v=>[[b.x,b.y],[b.X,b.Y]].map(u=>Math.hypot(v[0]-u[0],v[1]-u[1]))));if(Math.abs(cross)<=1e-9*a.l*b.l&&touch<1e-6)parent[root(i)]=root(j);}
+ const chains=[];for(let i=0;i<seg.length;i++){const k=root(i);let g=chains.find(v=>v.key===k);if(!g){g={key:k,ids:[],length:0,parallel:false};chains.push(g);}g.ids.push(i+1);g.length+=seg[i].l;const a=seg[i];g.parallel||=ends.filter(e=>e.i===i+1).some(e=>Math.abs(e.qx*(a.X-a.x)/a.l+e.qy*(a.Y-a.y)/a.l)>1e-8*Math.max(1,e.q));}
+ const longLimit=s.basis==='TW'?70:100,long=!radius&&chains.some(g=>g.length>longLimit*w+1e-8&&(s.basis==='TW'?g.parallel:s.endLoaded));
+ if(long)checks.push({name:s.basis==='TW'?'台灣縱向受力有效長度限制 §10.2.2(7)':'AISC端部受力長焊道 J2.2b',ok:false,value:`連續直線長度 > ${longLimit}s：本次全長分析僅供參考，需另計有效長／折減，不得判為符合`});
+ if(!radius&&s.intermittent)checks.push({name:'斷續焊道每段最小有效長度',ok:seg.every(a=>a.l>=Math.max(4*w,40)-1e-8),value:`最短 ${Math.min(...seg.map(a=>a.l)).toFixed(1)} ≥ max(4s,40) = ${Math.max(4*w,40)} mm`});
+ Object.assign(trace,{chains,longLimit});
  Object.assign(trace,{D,A,B,factor,thin,thick});return {trace,radius,L,cx,cy,Ix,Iy,Ixy,J,px,py,pz,mx,my,mz,fd,throat,capacity,ratio,req,min,max,critical,ends,checks,pass:checks.every(a=>a.ok),seg,long};
 }
 return{analyze};})();
