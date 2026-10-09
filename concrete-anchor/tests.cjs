@@ -30,6 +30,9 @@ check('狹窄三面近邊與薄構材防誤判',()=>{const r=E.calculate({...def
 check('9支子群檢核與轉向對稱',()=>{const p={...def(),nx:3,ny:3,sx:20,sy:20,N:12,Mx:0,My:0,Tz:0},r=E.calculate(p);assert.equal(r.combinations,1022);assert.equal(r.errors.length,0);const s=E.calculate({...p,Vx:p.Vy,Vy:p.Vx});close(r.vR,s.vR);});
 check('互制須同時滿足個別容量，不能靠另一側餘量掩蓋',()=>{const r=E.calculate({...def(),N:40,Mx:0,My:0,Vx:0,Vy:0,Tz:0});assert.ok(r.nR>1);assert.ok(r.interaction>1);assert.ok(r.failed);});
 check('不同常重混凝土強度的sqrt與群面積獨立',()=>{const p=def(),a=E.points(p),b=E.bounds(p),t=E.tensileConcrete(p,a,b,()=>1),u=E.tensileConcrete({...p,fc:560},a,b,()=>1);close(u.nominal/t.nominal,Math.SQRT2);});
+check('後置耐震Vsa缺值阻止完成',()=>{const r=E.calculate({...def(),type:'torque',seismic:true,seisPath:true,seisQualified:true});assert.equal(row(r,'steelV').capacity,null);assert.ok(r.pending.some(x=>x.includes('模擬地震')));assert.notEqual(r.status,'已計算項目符合');});
+check('後置耐震採試驗Vsa及灌漿折減',()=>{const p={...def(),type:'adhesive',seismic:true,vsaSeis:5000,grout:true,tauCr:50,tauUn:100};close(row(E.calculate(p),'steelV').nominal,4000);close(row(E.calculate(p),'steelV').capacity,2600);assert.ok(row(E.calculate(p),'steelV').detail.seismicTest);});
+check('一般剪力不使用耐震試驗輸入',()=>{close(row(E.calculate({...def(),type:'torque',vsaSeis:100,seismic:false}),'steelV').capacity,3822);assert.ok(E.calculate({...def(),vsaSeis:-1}).errors.length);});
 console.log(`Validated ${count} engineering checks.`);
-const out={date:'2026-10-05',version:E.VERSION,count,checks,defaultSummary:((r)=>({status:r.status,nR:r.nR,vR:r.vR,interaction:r.interaction,anchors:r.anchors,rows:r.rows}))(E.calculate(def()))};
+const out={date:'2026-10-09',version:E.VERSION,count,checks,defaultSummary:((r)=>({status:r.status,nR:r.nR,vR:r.vR,interaction:r.interaction,anchors:r.anchors,rows:r.rows}))(E.calculate(def()))};
 require('node:fs').writeFileSync(__dirname+'/validation-results.json',JSON.stringify(out,null,2));

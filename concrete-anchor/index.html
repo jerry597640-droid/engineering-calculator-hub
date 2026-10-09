@@ -23150,13 +23150,14 @@ var __async = (__this, __arguments, generator) => {
   root.CalculationDocx=Object.freeze({build,download,validate});
 })(typeof globalThis!=='undefined'?globalThis:window);
 </script><style>.anchor-type-visual{margin-top:5px;border:1px solid #cbdde7;border-radius:9px;background:#f6fafc;overflow:hidden}.anchor-type-heading{padding:12px 14px;border-bottom:1px solid #dce8ef;display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between}.anchor-type-heading strong{font-size:15px}.anchor-type-badge{font-size:12px;color:var(--teal);background:#e3f1f2;padding:3px 7px;border-radius:4px}.anchor-type-layout{padding:10px 14px 0}.anchor-type-svg{display:block;width:100%;max-width:440px;height:auto;margin:0 auto}.anchor-type-copy{font-size:14px;line-height:1.7}.anchor-type-copy p{margin:8px 0}.anchor-type-copy p:last-child{color:var(--muted)}.anchor-type-disclaimer{padding:10px 14px;background:#edf3f7;font-size:12px;color:var(--muted);line-height:1.6}
-</style></head><body><a class="skip" href="#main">跳至計算工作區</a><div class="app"><aside class="side"><div class="brand"><div class="brand-mark">A</div><div><strong>錨栓設計工作台</strong><small>ANCHOR WORKBENCH</small></div></div><nav class="nav" aria-label="工作區"><button class="active" data-tab="calc" aria-current="page">01　設計與檢核</button><button data-tab="process">02　詳細計算</button><button data-tab="help">03　操作說明</button><button data-tab="validation">04　驗算紀錄</button></nav><div class="side-note"><strong>TW 112 · 第 17 章</strong><div>含 113 年勘誤<br>常重混凝土・強度設計法</div><a class="button" href="https://jerry597640-droid.github.io/engineering-calculator-hub/">回到工程工具</a><div>v1.0 · 2026.10<br>無外部程式庫，可離線計算。</div></div></aside><main id="main"><header class="top"><div><h1>混凝土錨栓設計與檢核</h1><small>配置、受力與各破壞模式，於同一工作區檢視。</small></div><div class="actions"><button id="saveProject">儲存案件</button><button id="loadProject">開啟案件</button><button id="downloadOffline">離線 HTML</button><button id="wordBtn" disabled>匯出可編輯 Word</button><button id="reportBtn">計算報告</button><button id="printBtn">列印／PDF</button><a class="button" href="https://jerry597640-droid.github.io/engineering-calculator-hub/">工程工具入口</a></div></header><div class="workspace"><div class="strip no-print"><select id="examples" aria-label="選擇輸入範例"><option value="">載入可跟做的範例…</option><option value="static">範例 1｜四支 M20 預埋擴頭・靜力</option><option value="single">範例 2｜單支擴頭・近邊剪力</option><option value="adhesive">範例 3｜黏結式・資料待補示範</option><option value="seismic">範例 4｜耐震・超額強度資料待確認</option><option value="contact">範例 5｜底板接觸・適用範圍診斷</option></select><span class="badge">112 年版＋113 年勘誤</span></div><div id="view-calc"><div class="work-grid"><div class="input-col"><section class="panel"><div class="panel-head"><h2><span class="number">1</span>案件與錨栓材料</h2></div><div class="panel-body"><div class="fields" id="materialFields"></div></div></section><section class="panel"><div class="panel-head"><h2><span class="number">2</span>混凝土與錨栓配置</h2></div><div class="panel-body"><div class="fields" id="geometryFields"></div><div class="note">邊距為最外列「錨栓中心」至混凝土自由邊；埋深為有效 hef，並非鑽孔深度。</div></div></section><section class="panel"><div class="panel-head"><h2><span class="number">3</span>因數化載重</h2></div><div class="panel-body"><div class="mode"><button data-mode="global" class="active">整組載重</button><button data-mode="manual">逐支受力</button></div><div id="globalFields" class="fields"></div><div id="manualInputs" hidden><div class="note">輸入外部結構分析所得之各支因數化拉力與剪力。若底板有壓力接觸，該分析應已包含接觸平衡與撬力。</div><div class="table-wrap"><table class="input-table"><thead><tr><th>錨栓</th><th>N（tf）</th><th>Vx（tf）</th><th>Vy（tf）</th><th>Ns（tf）</th></tr></thead><tbody id="manualBody"></tbody></table></div></div><div class="note">輸入為強度設計之完整載重組合，程式不再乘載重因數。Mx 使 +y 錨栓增加拉力；My 使 +x 錨栓增加拉力（正負號依本程式定義）。</div></div></section><section class="panel"><details open><summary class="section-toggle"><span class="number">4</span>產品資料與耐震條件</summary><div class="panel-body"><div class="fields" id="productFields"></div></div></details><details><summary class="section-toggle">細部條件與保護層</summary><div class="panel-body"><div class="fields" id="extraFields"></div></div></details></section><section class="panel"><div class="panel-head"><h2><span class="number">5</span>有效埋深試設計</h2></div><div class="panel-body"><p class="sub">固定直徑、材料、淨承壓面積、支數及位置，尋找目前載重下的第一個可用埋深。產品型式不會自動替換。</p><div class="fields"><div class="field"><label for="scanMin">起始埋深 <small>cm</small></label><input id="scanMin" type="number" min="1" value="5"></div><div class="field"><label for="scanMax">最大埋深 <small>cm</small></label><input id="scanMax" type="number" min="1" value="35"></div></div><button id="designBtn" class="primary" style="margin-top:14px">試算埋深（0.5 cm 間距）</button><div id="designResult" class="design-result" aria-live="polite"></div></div></section></div><div class="results-col sticky"><section class="panel"><div class="panel-head"><h2>檢核總覽</h2><select class="output-select" id="outUnit" aria-label="結果力單位"><option value="tf">tf（公噸力）</option><option value="kgf">kgf（公斤力）</option><option value="kN">kN</option></select></div><div class="panel-body"><h3 id="overall" class="status-title" aria-live="polite"></h3><div class="summary-grid"><div class="metric"><small>拉力控制比 rN</small><strong id="ratioN">—</strong><span>需求／設計容量</span></div><div class="metric"><small>剪力控制比 rV</small><strong id="ratioV">—</strong><span>需求／設計容量</span></div><div class="metric"><small>拉剪互制利用率</small><strong id="ratioI">—</strong><span>≤ 1.00</span></div></div><div id="messages"></div><div class="note">「已計算項目符合」僅涵蓋本版所列強度及配置檢核；完整設計仍須確認底板、附掛物、焊接、構材承載與施工條件。</div></div></section><section class="panel"><div class="panel-head"><h2>配置與錨栓受力</h2><span class="sub" id="countLabel"></span></div><div class="panel-body"><svg id="diagram" viewBox="0 0 500 330" role="img" aria-label="混凝土平面與錨栓中心位置"></svg><div class="legend"><span>錨栓中心</span><span>混凝土自由邊</span></div><div class="table-wrap"><table><thead><tr><th>錨栓／位置 cm</th><th>N</th><th>V</th><th>Ns</th></tr></thead><tbody id="anchorResults"></tbody></table></div></div></section><section class="panel"><div class="panel-head"><h2>各破壞模式</h2><button id="toDetails">查看算式</button></div><div class="table-wrap"><table><thead><tr><th>項目</th><th>需求</th><th>設計容量</th><th>利用率</th></tr></thead><tbody id="checks"></tbody></table></div><div class="panel-body sub">群錨混凝土模式同時檢核各支及子群，顯示最不利包絡。剪破、撬破及邊緣脹破採明列之保守處理。</div></section><section class="panel"><div class="panel-head"><h2>間距、邊距與厚度</h2></div><div class="table-wrap"><table><thead><tr><th>檢核 cm</th><th>實際</th><th>限制</th><th>結果</th></tr></thead><tbody id="geoResults"></tbody></table></div></section></div></div></div><div id="view-process" class="wide" hidden><section class="panel"><div class="panel-head"><h2>詳細計算過程</h2><button id="expandAll">展開全部</button></div><div class="panel-body"><div id="processSummary"></div><div id="details"></div><div id="processNotes"></div></div></section></div><div id="view-help" class="wide help" hidden><section class="panel"><div class="panel-head"><h2>操作說明與適用範圍</h2></div><div class="panel-body"><p>本工具依台灣112年《建築物混凝土結構設計規範》第17章（含113年勘誤）建立，供常重混凝土、矩形等間距錨栓配置（1～9支）的強度檢核及埋深試設計。範例1為非耐震静力比對案例；實際建築物應依17.10確認耐震需求。</p><div class="note warn">本版不求解底板與混凝土之受壓接觸，也不檢核底板撬力、懸空錨栓彎曲、剪力榫、替代錨定鋼筋、輕質混凝土、高周次疲勞／衝擊、塑鉸區錨栓、灌漿錨栓、貫通螺栓及特製預埋件。近三面／四面自由邊或狹窄薄構材会顯示待專項檢核，不作完成判定。</div><h3>建議操作順序</h3><ol><li>先選錨栓型式，選單下方會即時顯示對應構造示意及核對重點；圖形未按比例繪製，實際構造依製造圖／產品認證。再輸入材證、直徑、有效面積與埋深。預埋擴頭須提供淨承壓面積，彎鉤須提供有效伸出長度。</li><li>輸入混凝土強度、厚度、每方向支數、中心間距及四邊距，對照配置圖確認單位與位置。</li><li>輸入完整因數化載重。整組模式只適用全拉力或零拉力之線彈性配置；若出現支點壓力，先以含底板接觸及撬力的外部分析求出錨栓受力，再改用逐支模式。</li><li>後置式產品須填認證報告、安裝敏感度分類及產品尺寸限制；機械式填基本Np，黏結式填τcr及τuncr。不可將已乘φ的「容許／設計容量」當作標稱強度輸入。</li><li>耐震設計勾選耐震；本版採17.10.5.3(d)及17.10.6.3(c)超額強度路徑。須先在外部載重分析中放大地震分量，並輸入所得完整組合；勾選確認條件后仍有混凝土拉力0.75折減。</li><li>檢視所有模式、幾何限制及待補資料。點「詳細計算」可核對公式、φ與控制子群。</li><li>如需試設計，在資料完整且無超出範圍情況下，掃描有效埋深。保持直徑、材料、頭部面積及位置不變；結果不代表自動選定商品型號。</li><li>儲存案件JSON，匯出計算報告HTML，或列印成PDF。離線HTML在Chrome／Edge／Safari開啟即可使用，回工程工具與來源連結需要網路。</li></ol><h3>單位與正負號</h3><p>尺寸：cm；有效面積：cm²；強度：kgf/cm²；輸入力：tf；彎矩／扭矩：tf·m。結果可切換tf／kgf／kN。「kg」為質量單位，本程式明確使用kgf表示公斤力，避免兩者混淆。</p><div class="formula">1 tf=1000 kgf；1 tf·m=100000 kgf·cm；1 kgf=9.80665 N；1 MPa=10.197162 kgf/cm²<br>+x向右、+y向上；Mx使+y錨栓增拉，My使+x錨栓增拉；Tz正值逆時針。</div><h3>每一輸入欄位與資料來源</h3><div class="table-wrap"><table><thead><tr><th>欄位</th><th>填入方式</th><th>資料來源</th></tr></thead><tbody><tr><td>案件名稱<br><span class="sub">name</span></td><td>計算書標題與載重組合識別。</td><td>案件名稱、位置、載重組合編號。</td></tr><tr><td>錨栓型式<br><span class="sub">type</span></td><td>依圖說與產品型式選擇。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>標稱直徑 da<br><span class="sub">da</span></td><td>M20 = 2 cm；螺紋錨栓採認證規定直徑。<br>單位：cm</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>常用公制螺牙截面<br><span class="sub">metric</span></td><td>載入標準粗牙拉應力面積；後置產品仍須核對有效面積。</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>受拉有效面積 Ase,N<br><span class="sub">AsN</span></td><td>材證／產品認證；不可逕用 πd²/4。<br>單位：cm²</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>受剪有效面積 Ase,V<br><span class="sub">AsV</span></td><td>依剪力面是否穿越螺牙或縮頸，查實際有效面積。<br>單位：cm²</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>降伏強度 fya<br><span class="sub">fy</span></td><td>材料試驗證明。<br>單位：kgf/cm²</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>極限強度 futa<br><span class="sub">fu</span></td><td>材證；計算自動限至 min(fu, 1.9fy, 8750)。<br>單位：kgf/cm²</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>符合規範之韌性鋼材<br><span class="sub">ductile</span></td><td>須核對材證之伸長率／斷面縮減率；無資料請取消。</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>有效埋深 hef<br><span class="sub">hef</span></td><td>依錨定位置或產品認證；非鑽孔深度。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>擴頭淨承壓面積 Abrg<br><span class="sub">Ab</span></td><td>頭部承壓面积扣除桿身截面，依製造圖；限擴頭。<br>單位：cm²</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>錨定頭／彎鉤端包絡寬<br><span class="sub">headWidth</span></td><td>製造圖最外端寬度；未受安裝扭力時用於端部淨保護層檢核。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>錨定端超出hef的深度<br><span class="sub">tipExtra</span></td><td>有效錨定點至鋼材最底端的額外尺寸（例如頭部厚度），用於底部保護層。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>彎鉤有效伸出長度 eh<br><span class="sub">eh</span></td><td>J/L 彎鉤承壓有效長度，须為 3da～4.5da。<br>單位：cm</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>混凝土 fc′<br><span class="sub">fc</span></td><td>設計圖說／強度試驗；預埋上限700、後置560。<br>單位：kgf/cm²</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>混凝土厚度 ha<br><span class="sub">ha</span></td><td>沿埋設方向量測至另一自由面，非構材平面尺寸。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>X 向錨栓支數<br><span class="sub">nx</span></td><td>1～3 支；位置對錨栓群中心對稱。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>Y 向錨栓支數<br><span class="sub">ny</span></td><td>1～3 支；本版至多9支。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>X 向中心間距 sx<br><span class="sub">sx</span></td><td>中心至中心；X方向只有1支時不參與幾何。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>Y 向中心間距 sy<br><span class="sub">sy</span></td><td>中心至中心；Y方向只有1支時不參與幾何。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>左邊距 cL<br><span class="sub">cL</span></td><td>左側最外列錨栓中心至自由邊。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>右邊距 cR<br><span class="sub">cR</span></td><td>右側最外列錨栓中心至自由邊。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>下邊距 cB<br><span class="sub">cB</span></td><td>下側最外列錨栓中心至自由邊。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>上邊距 cT<br><span class="sub">cT</span></td><td>上側最外列錨栓中心至自由邊。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>混凝土視為開裂<br><span class="sub">cracked</span></td><td>預設開裂；未開裂須有含收縮與使用載重之分析佐證。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>整組軸拉力 Nu<br><span class="sub">N</span></td><td>拉力為正；使用因數化設計值。<br>單位：tf</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>Mx（使 +y 增拉）<br><span class="sub">Mx</span></td><td>載重對錨栓群中心；剪力作用高度效應須先加入。<br>單位：tf·m</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>My（使 +x 增拉）<br><span class="sub">My</span></td><td>本程式定義為 +x 支增加拉力；與外部軟體符號核對。<br>單位：tf·m</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>整組剪力 Vx<br><span class="sub">Vx</span></td><td>+x 向右；輸入完整載重組合剪力。<br>單位：tf</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>整組剪力 Vy<br><span class="sub">Vy</span></td><td>+y 向上；與平面圖方向一致。<br>單位：tf</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>平面扭矩 Tz<br><span class="sub">Tz</span></td><td>正值為逆時針剪力分布。<br>單位：tf·m</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>持續拉力比例<br><span class="sub">sustained</span></td><td>0～1；整組模式之各支 Ns = N × 比例。實際持續分布不同請用逐支模式。</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>產品安裝敏感度分類<br><span class="sub">category</span></td><td>查認證報告；1/2/3 依表17.5.3。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>基本拔出強度 Np<br><span class="sub">np</span></td><td>機械後置產品認證之基本標稱拔出強度，0 表示未提供；不是已乘φ的容量。<br>單位：kgf</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>開裂特徵握裹應力 τcr<br><span class="sub">tauCr</span></td><td>產品報告適用温度、濕度、持續／地震載重的5%分位值；0表示缺漏。<br>單位：kgf/cm²</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>未開裂特徵握裹應力 τuncr<br><span class="sub">tauUn</span></td><td>產品報告；計算 cNa 時即使開裂仍需 τuncr。<br>單位：kgf/cm²</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>認證臨界邊距 cac<br><span class="sub">cac</span></td><td>0 使用表17.9.5預設值，僅用於劈裂修正。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品最小間距 smin<br><span class="sub">prodS</span></td><td>認證表對應錨栓型號、直徑及埋深；不等於不受群效應之間距。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品最小邊距 cmin<br><span class="sub">prodC</span></td><td>認證表；仍應符合保護層及粒料限制。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品最小厚度 hmin<br><span class="sub">prodH</span></td><td>認證表；須對應指定有效埋深。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品埋深下限<br><span class="sub">prodMinHef</span></td><td>產品認證允許範圍。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品埋深上限<br><span class="sub">prodMaxHef</span></td><td>產品認證允許範圍。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品認證／材證識別<br><span class="sub">report</span></td><td>例如 ESR 編號＋版次／材料規格。不是品牌名稱。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>已核對產品適用安裝及混凝土條件<br><span class="sub">qualified</span></td><td>包括開裂適用、鑽孔、清孔、溫度、濕度、養護及有效面積。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>耐震結構物／耐震設計<br><span class="sub">seismic</span></td><td>實際建築物應依17.10核對；本版耐震路徑採已經Ωo放大地震分量的完整載重。</td><td>結構設計圖與耐震設計說明；確認附掛物傳力及超額強度設計路徑。</td></tr><tr><td>載重已依超額強度路徑完成分析<br><span class="sub">seisPath</span></td><td>17.10.5.3(d)／17.10.6.3(c)；僅放大地震分量，勿將整組載重一律乘Ωo。勾選代表輸入來源已確認。</td><td>結構設計圖與耐震設計說明；確認附掛物傳力及超額強度設計路徑。</td></tr><tr><td>後置產品已有適用耐震認證<br><span class="sub">seisQualified</span></td><td>認證不代表可省略超額強度載重分析。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>位於可能形成塑鉸之區域<br><span class="sub">plasticHinge</span></td><td>此區域超出第17.10.2節，程式顯示待專項檢核。</td><td>結構設計圖與耐震設計說明；確認附掛物傳力及超額強度設計路徑。</td></tr><tr><td>安裝時混凝土齡期<br><span class="sub">age</span></td><td>黏結式至少21日；依澆置與安裝紀錄。<br>單位：日</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>具規範要求之輔助鋼筋<br><span class="sub">supp</span></td><td>須跨越潛在破壞面，並核對配置。本項不代表以錨定鋼筋取代CCD計算。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>混凝土剪破邊緣鋼筋<br><span class="sub">edgeRebar</span></td><td>依17.7.2.5.1核對配置，不以一般樓板鋼筋自動視為符合。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>預埋螺栓施加安裝扭力<br><span class="sub">torqued</span></td><td>有受扭力採6da間距與邊距；無受扭力可採4da間距，仍須保護層。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>要求淨保護層<br><span class="sub">cover</span></td><td>依20.5.1暴露條件及設計圖，本版由使用者指定。中心邊距另加da/2。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>最大粒料尺寸<br><span class="sub">aggregate</span></td><td>混凝土配比／出貨單；後置最小邊距另檢核2倍粒料。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>基板下有灌漿層<br><span class="sub">grout</span></td><td>鋼材剪力乘0.80（17.7.1.2.1）；懸空錨栓彎曲仍須另算。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>剪力載重支承長度模式<br><span class="sub">leMode</span></td><td>一般 le=min(hef,8da)；具分離定距套筒扭力控制產品採2da。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr></tbody></table></div><h3>逐支受力表格</h3><p>A1從左下方開始，先沿+x方向編號，再往+y方向增加列。N為每支因數化拉力（非負），Vx、Vy為剪力分量，Ns為因數化持續拉力；單位均tf。Ns不得超過N。若持續拉力造成不同偏心，直接填入該持續載重組合的逐支Ns，不使用固定比例近似。</p><h3>各檢核表怎麼讀</h3><p>「需求」與「設計容量」皆使用右上角指定力單位；利用率=需求／容量。0～1為已計算模式符合，超過1為不符合，待補不等於0。群錨的控制子群可能不同，各列的需求不能直接相加。互制採最大拉力利用率與最大剪力利用率之保守包絡，不因兩者控制不同子群而放寬。</p><h3>本版保守處理</h3><ul><li>各拉力／剪力子群枚舉，投影面積採矩形聯集及四邊裁切，顯示最高利用率；不採群錨容量等於單支容量×支數。</li><li>邊緣剪破採最近排錨栓的投影容量，对比較群的剪力絕對值總和；斜向剪力以總剪力作保守檢核，純平行方向才採規範允許的2倍容量。</li><li>撬破以剪力絕對值作偏心權重，並取拉破／握裹較小值。邊緣脹破以最小單支脹破容量對全部群拉力，未使用群效應的容量增益。因此可能比產品設計軟體保守。</li><li>本版不以輔助鋼筋代替CCD容量。勾選輔助鋼筋只影響適用的φ／劈裂修正；其配置需要圖說支持。</li></ul><h3>可跟做範例1：四支M20預埋擴頭螺栓</h3><p>選上方「範例1」後直接核對下表。數值為手算示例，不代表已採購螺栓的材證或頭部幾何。</p><div class="table-wrap"><table><thead><tr><th>項目</th><th>輸入</th><th>來源</th></tr></thead><tbody><tr><td>材料</td><td>M20；Ase,N=Ase,V=2.45 cm²；fy=2400；fu=4000 kgf/cm²；韌性鋼材</td><td>示例假定材證／標準粗牙截面</td></tr><tr><td>擴頭</td><td>hef=20cm；Abrg=8cm²</td><td>示例製造圖；實案請自行核對</td></tr><tr><td>混凝土</td><td>fc′=280kgf/cm²；ha=40cm；開裂；無輔助鋼筋</td><td>示例結構／配筋圖</td></tr><tr><td>配置</td><td>2×2支；sx=sy=20cm；四邊距各25cm；保護層4cm；安裝受扭力</td><td>示例平面圖</td></tr><tr><td>載重</td><td>Nu=8tf；Mx=0.3tf·m；My=0.2tf·m；Vx=1.2tf；Vy=0.6tf；Tz=0.1tf·m；持續比例0</td><td>示例因數化組合，非耐震</td></tr><tr><td>逐支拉力</td><td>A1=0.750、A2=1.750、A3=2.250、A4=3.250tf</td><td>Ni=Nu/n+Mx yi/Σy²+My xi/Σx²</td></tr><tr><td>參考結果</td><td>rN=0.719723；rV=0.355864；互制利用率=0.896323</td><td>本版保守模式包絡；詳細計算可追溯</td></tr></tbody></table></div><h3>其他範例的目的</h3><p>範例2為單支近邊剪破，便於手算核對。範例3刻意留空黏結式認證資料，示範「待補」而非合格。範例4顯示耐震超額強度載重來源待確認。範例5顯示底板接觸狀態不適用整組簡易受力分配。</p><h3>施工資料核對</h3><p>後置式認證须對應實際型號與鑽孔／清孔／濕度／溫度／安裝方向／養護時間。黏結式安裝時混凝土齡期至少21日。水平或向上且承受持續拉力之黏結式，另依第26章核對安裝人員資格與特別監造；計算通過不能取代施工品質要求。</p><h3>規範與核對來源</h3><ul><li><a href="https://www.nlma.gov.tw/ch/legislation/regsearch/6874" target="_blank" rel="noopener">國土管理署：建築物混凝土結構設計規範公布頁、112年版及113年勘誤</a>（本版計算依據）。</li><li><a href="https://www.nlma.gov.tw/uploads/files/011d9249cac7d6c5547786aa348e352a.pdf" target="_blank" rel="noopener">官方規範PDF：第17章，17-1～17-45</a>。</li><li><a href="https://files-ask.hilti.com/original/oj/ojhct9bmsl.pdf" target="_blank" rel="noopener">Hilti公開計算案例</a>（公式結構／單位交叉核對；ACI版次、係數與互制選项不同，不作同案容量一致宣稱）。</li><li><a href="https://aciuniversity.concrete.org/Listing/ACI-318-25-Code-Changes-Part-2-%E2%80%93-Reinforcement-Anchorage-and-Shear-2774" target="_blank" rel="noopener">ACI官方318-25更新說明</a>：國際新版與台灣现行法規須分開認定，本版不標示ACI318-25合規。</li></ul></div></section></div><div id="view-validation" class="wide help" hidden><section class="panel"><div class="panel-head"><h2>驗算紀錄與驗證範圍</h2><span class="badge">25項通過</span></div><div class="panel-body"><p>核對日期：2026-10-05。已逐項對照官方第17章計算式及φ表，並以獨立手算數值、力平衡、輸入異常與適用範圍測試檢查程式。以下測試驗證所實作的算式及邊界行為，不能視為全部錨栓型號或所有幾何的第三方認證。</p><h3>手算數值交叉核對</h3><div class="table-wrap"><table><thead><tr><th>檢核</th><th>獨立計算</th><th>程式結果</th></tr></thead><tbody><tr><td>鋼材拉力</td><td>0.75×2.45×4000</td><td>7,350kgf</td></tr><tr><td>鋼材剪力</td><td>0.65×0.6×2.45×4000</td><td>3,822kgf</td></tr><tr><td>基本混凝土拉破</td><td>10√280×20^1.5</td><td>14,966.629547kgf</td></tr><tr><td>四支等拉力群拉破（無偏心）</td><td>ANc=70×70=4900cm²；ANco=3600cm²；ψed=0.95</td><td>標稱19,352.683484kgf；φ=0.70</td></tr><tr><td>擴頭拔出</td><td>0.70×8×8×280</td><td>12,544kgf</td></tr><tr><td>載重平衡</td><td>ΣNi=8tf；ΣNiyi=0.3tf·m；ΣNixi=0.2tf·m</td><td>六分量平衡通過</td></tr></tbody></table></div><h3>公開案例交叉核對</h3><p>Hilti公開案例第4頁採ACI 318-14，hef=4in、fc′=6000psi、kc=17，列示Nb=10,535lb。直接按該案例公式獨立計算為17√6000×4^1.5=10,534.515lb，與報告四捨五入一致。換用台灣kgf/cm公式kc=7所得Nb=10,264.733lb，比該案例低2.565%；差異為兩套規範的單位制係數取值，並非將美制係數17錯用於公分。此核對僅針對基本Nb；該報告之商品參數、投影面積、ACI互制方式未移植為本工具預設。</p><h3>自動化測試清單</h3><ol><li>鋼材強度、螺牙有效面積與單位：通過。</li><li>剛性錨栓群六分量平衡：通過。</li><li>混凝土群錨面積與四邊裁切：通過。</li><li>單支近邊拉破手算：通過。</li><li>投影矩形聯集無重複計入：通過。</li><li>雙向拉力偏心修正：通過。</li><li>擴頭拔出與彎鉤長度範圍：通過。</li><li>鋼材極限強度上限與脆性φ：通過。</li><li>後置分類的拉破／拔出φ，撬破φ固定0.70：通過。</li><li>黏結握裹與cNa採未開裂參數：通過。</li><li>持續拉力0.55φNba與安裝齡期：通過。</li><li>黏結式資料缺漏不產生合格：通過。</li><li>單支剪破基本強度及投影：通過。</li><li>純平行剪力容量二倍，剪破邊距修正為1：通過。</li><li>灌漿層0.8剪力與6.5cm撬破分界：通過。</li><li>耐震混凝土拉力0.75，剪力未一律乘0.75：通過。</li><li>耐震路徑與塑鉸區不得誤判完成：通過。</li><li>底板接觸壓力截斷只供診斷，禁止合格：通過。</li><li>零载重無NaN，互制可忽略：通過。</li><li>逐支資料與持續拉力輸入檢核：通過。</li><li>無效支數、空數值、負面積、無力臂彎矩：通過。</li><li>狹窄三面近邊與薄構材防誤判：通過。</li><li>9支子群檢核與轉向對稱：通過。</li><li>互制須同時滿足個別容量，不能靠另一側餘量掩蓋：通過。</li><li>不同常重混凝土強度的sqrt與群面積獨立：通過。</li></ol><h3>驗證材料</h3><p>原始碼套件內含engine.js、tests.cjs、validation-results.json。安裝Node.js後執行 <code>node tests.cjs</code> 可重現上述檢查。離線HTML本身不需要安裝Node.js。</p><div class="note warn">三／四面近邊、狹窄薄構材、底板接觸及缺少產品認證資料的案例，測試重點是阻止誤判完成。本版尚未完成這些專項設計，不會用測試通過取代其設計要求。</div></div></section></div><footer class="footer">錨栓設計工作台 v1.0.0 · 規範來源核對日期：2026-10-05 · 資料與計算均在本機處理。</footer></div></main></div><input type="file" id="projectFile" accept=".json,application/json" hidden><div class="toast" id="toast" role="status" hidden></div><script>/* TW 112, corrigendum 113. Canonical units cm, kgf, kgf-cm.
+</style><style>.nav{gap:5px}.nav button{font-size:14px}.workflow{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 15px}.workflow button{font-size:14px}.version-line{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px;font-size:13px;color:var(--muted)}.parameter-tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.parameter-tools input,.parameter-tools select{padding:10px;border:1px solid var(--line);border-radius:7px;min-height:44px;max-width:100%}.parameter-tools input{flex:1;min-width:180px}.parameter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.parameter-card{border:1px solid var(--line);border-radius:9px;padding:17px;background:#fff;overflow-wrap:anywhere}.parameter-card h3{margin:0 0 9px;font-size:16px}.parameter-card p{font-size:14px;margin:7px 0}.parameter-card small{color:var(--muted)}.field-help{align-self:flex-end;min-height:44px;padding:5px 10px;font-size:13px;margin-top:0}.field{position:relative}.parameter-dialog{max-width:620px;width:calc(100% - 28px);border:1px solid var(--line);border-radius:12px;padding:23px;color:var(--ink)}.parameter-dialog::backdrop{background:#102a4380}.parameter-dialog p{line-height:1.8}.dialog-actions{display:flex;justify-content:flex-end;gap:10px}.tutorial-video{display:block;width:100%;background:var(--navy);aspect-ratio:16/9;border-radius:9px}.video-commands{display:flex;flex-wrap:wrap;gap:8px;margin:15px 0}.video-commands button{font-size:14px}.transcript-entry{padding:13px 0;border-bottom:1px solid var(--line)}.transcript-entry p{margin:8px 0}.code-table td,.code-table th{text-align:left;white-space:normal}.code-table td{min-width:100px}.step-count{font-size:14px;color:var(--teal)}.code-status{border:1px solid #9ac6c9;border-radius:8px;padding:15px;background:#edf7f8}.return-focus{scroll-margin-top:25px}@media(max-width:720px){.parameter-grid{grid-template-columns:1fr}.parameter-tools{display:grid;grid-template-columns:1fr}.parameter-tools input{min-width:0;width:100%}.workflow{display:grid;grid-template-columns:repeat(3,1fr)}.workflow button{padding:8px 5px}.version-line{font-size:12px}.parameter-dialog{padding:18px}.video-commands button{flex:1 1 42%}.field-help{margin-bottom:0}.nav{scrollbar-width:thin}.side{padding-bottom:8px}}@media print{#view-parameters,#view-tutorial,#view-code,.workflow,.version-line,.parameter-dialog,.field-help{display:none!important}}
+</style></head><body><a class="skip" href="#main">跳至計算工作區</a><div class="app"><aside class="side"><div class="brand"><div class="brand-mark">A</div><div><strong>錨栓設計工作台</strong><small>ANCHOR WORKBENCH</small></div></div><nav class="nav" aria-label="工作區"><button class="active" data-tab="calc" aria-current="page">01　設計與檢核</button><button data-tab="process">02　詳細計算</button><button data-tab="help">03　操作說明</button><button data-tab="validation">04　驗算紀錄</button></nav><div class="side-note"><strong>TW 112 · 第 17 章</strong><div>含 113 年勘誤<br>常重混凝土・強度設計法</div><a class="button" href="https://jerry597640-droid.github.io/engineering-calculator-hub/">回到工程工具</a><div>v1.0 · 2026.10<br>無外部程式庫，可離線計算。</div></div></aside><main id="main"><header class="top"><div><h1>混凝土錨栓設計與檢核</h1><small>配置、受力與各破壞模式，於同一工作區檢視。</small></div><div class="actions"><button id="saveProject">儲存案件</button><button id="loadProject">開啟案件</button><button id="downloadOffline">離線 HTML</button><button id="wordBtn" disabled>匯出可編輯 Word</button><button id="reportBtn">計算報告</button><button id="printBtn">列印／PDF</button><a class="button" href="https://jerry597640-droid.github.io/engineering-calculator-hub/">工程工具入口</a></div></header><div class="workspace"><div class="strip no-print"><select id="examples" aria-label="選擇輸入範例"><option value="">載入可跟做的範例…</option><option value="static">範例 1｜四支 M20 預埋擴頭・靜力</option><option value="single">範例 2｜單支擴頭・近邊剪力</option><option value="adhesive">範例 3｜黏結式・資料待補示範</option><option value="seismic">範例 4｜耐震・超額強度資料待確認</option><option value="contact">範例 5｜底板接觸・適用範圍診斷</option></select><span class="badge">112 年版＋113 年勘誤</span></div><div id="view-calc"><div class="work-grid"><div class="input-col"><section class="panel"><div class="panel-head"><h2><span class="number">1</span>案件與錨栓材料</h2></div><div class="panel-body"><div class="fields" id="materialFields"></div></div></section><section class="panel"><div class="panel-head"><h2><span class="number">2</span>混凝土與錨栓配置</h2></div><div class="panel-body"><div class="fields" id="geometryFields"></div><div class="note">邊距為最外列「錨栓中心」至混凝土自由邊；埋深為有效 hef，並非鑽孔深度。</div></div></section><section class="panel"><div class="panel-head"><h2><span class="number">3</span>因數化載重</h2></div><div class="panel-body"><div class="mode"><button data-mode="global" class="active">整組載重</button><button data-mode="manual">逐支受力</button></div><div id="globalFields" class="fields"></div><div id="manualInputs" hidden><div class="note">輸入外部結構分析所得之各支因數化拉力與剪力。若底板有壓力接觸，該分析應已包含接觸平衡與撬力。</div><div class="table-wrap"><table class="input-table"><thead><tr><th>錨栓</th><th>N（tf）</th><th>Vx（tf）</th><th>Vy（tf）</th><th>Ns（tf）</th></tr></thead><tbody id="manualBody"></tbody></table></div></div><div class="note">輸入為強度設計之完整載重組合，程式不再乘載重因數。Mx 使 +y 錨栓增加拉力；My 使 +x 錨栓增加拉力（正負號依本程式定義）。</div></div></section><section class="panel"><details open><summary class="section-toggle"><span class="number">4</span>產品資料與耐震條件</summary><div class="panel-body"><div class="fields" id="productFields"></div></div></details><details><summary class="section-toggle">細部條件與保護層</summary><div class="panel-body"><div class="fields" id="extraFields"></div></div></details></section><section class="panel"><div class="panel-head"><h2><span class="number">5</span>有效埋深試設計</h2></div><div class="panel-body"><p class="sub">固定直徑、材料、淨承壓面積、支數及位置，尋找目前載重下的第一個可用埋深。產品型式不會自動替換。</p><div class="fields"><div class="field"><label for="scanMin">起始埋深 <small>cm</small></label><input id="scanMin" type="number" min="1" value="5"></div><div class="field"><label for="scanMax">最大埋深 <small>cm</small></label><input id="scanMax" type="number" min="1" value="35"></div></div><button id="designBtn" class="primary" style="margin-top:14px">試算埋深（0.5 cm 間距）</button><div id="designResult" class="design-result" aria-live="polite"></div></div></section></div><div class="results-col sticky"><section class="panel"><div class="panel-head"><h2>檢核總覽</h2><select class="output-select" id="outUnit" aria-label="結果力單位"><option value="tf">tf（公噸力）</option><option value="kgf">kgf（公斤力）</option><option value="kN">kN</option></select></div><div class="panel-body"><h3 id="overall" class="status-title" aria-live="polite"></h3><div class="summary-grid"><div class="metric"><small>拉力控制比 rN</small><strong id="ratioN">—</strong><span>需求／設計容量</span></div><div class="metric"><small>剪力控制比 rV</small><strong id="ratioV">—</strong><span>需求／設計容量</span></div><div class="metric"><small>拉剪互制利用率</small><strong id="ratioI">—</strong><span>≤ 1.00</span></div></div><div id="messages"></div><div class="note">「已計算項目符合」僅涵蓋本版所列強度及配置檢核；完整設計仍須確認底板、附掛物、焊接、構材承載與施工條件。</div></div></section><section class="panel"><div class="panel-head"><h2>配置與錨栓受力</h2><span class="sub" id="countLabel"></span></div><div class="panel-body"><svg id="diagram" viewBox="0 0 500 330" role="img" aria-label="混凝土平面與錨栓中心位置"></svg><div class="legend"><span>錨栓中心</span><span>混凝土自由邊</span></div><div class="table-wrap"><table><thead><tr><th>錨栓／位置 cm</th><th>N</th><th>V</th><th>Ns</th></tr></thead><tbody id="anchorResults"></tbody></table></div></div></section><section class="panel"><div class="panel-head"><h2>各破壞模式</h2><button id="toDetails">查看算式</button></div><div class="table-wrap"><table><thead><tr><th>項目</th><th>需求</th><th>設計容量</th><th>利用率</th></tr></thead><tbody id="checks"></tbody></table></div><div class="panel-body sub">群錨混凝土模式同時檢核各支及子群，顯示最不利包絡。剪破、撬破及邊緣脹破採明列之保守處理。</div></section><section class="panel"><div class="panel-head"><h2>間距、邊距與厚度</h2></div><div class="table-wrap"><table><thead><tr><th>檢核 cm</th><th>實際</th><th>限制</th><th>結果</th></tr></thead><tbody id="geoResults"></tbody></table></div></section></div></div></div><div id="view-process" class="wide" hidden><section class="panel"><div class="panel-head"><h2>詳細計算過程</h2><button id="expandAll">展開全部</button></div><div class="panel-body"><div id="processSummary"></div><div id="details"></div><div id="processNotes"></div></div></section></div><div id="view-help" class="wide help" hidden><section class="panel"><div class="panel-head"><h2>操作說明與適用範圍</h2></div><div class="panel-body"><p>本工具依台灣112年《建築物混凝土結構設計規範》第17章（含113年勘誤）建立，供常重混凝土、矩形等間距錨栓配置（1～9支）的強度檢核及埋深試設計。範例1為非耐震静力比對案例；實際建築物應依17.10確認耐震需求。</p><div class="note warn">本版不求解底板與混凝土之受壓接觸，也不檢核底板撬力、懸空錨栓彎曲、剪力榫、替代錨定鋼筋、輕質混凝土、高周次疲勞／衝擊、塑鉸區錨栓、灌漿錨栓、貫通螺栓及特製預埋件。近三面／四面自由邊或狹窄薄構材会顯示待專項檢核，不作完成判定。</div><h3>建議操作順序</h3><ol><li>先選錨栓型式，選單下方會即時顯示對應構造示意及核對重點；圖形未按比例繪製，實際構造依製造圖／產品認證。再輸入材證、直徑、有效面積與埋深。預埋擴頭須提供淨承壓面積，彎鉤須提供有效伸出長度。</li><li>輸入混凝土強度、厚度、每方向支數、中心間距及四邊距，對照配置圖確認單位與位置。</li><li>輸入完整因數化載重。整組模式只適用全拉力或零拉力之線彈性配置；若出現支點壓力，先以含底板接觸及撬力的外部分析求出錨栓受力，再改用逐支模式。</li><li>後置式產品須填認證報告、安裝敏感度分類及產品尺寸限制；機械式填基本Np，黏結式填τcr及τuncr。不可將已乘φ的「容許／設計容量」當作標稱強度輸入。</li><li>耐震設計勾選耐震；本版採17.10.5.3(d)及17.10.6.3(c)超額強度路徑。須先在外部載重分析中放大地震分量，並輸入所得完整組合；勾選確認條件后仍有混凝土拉力0.75折減。</li><li>檢視所有模式、幾何限制及待補資料。點「詳細計算」可核對公式、φ與控制子群。</li><li>如需試設計，在資料完整且無超出範圍情況下，掃描有效埋深。保持直徑、材料、頭部面積及位置不變；結果不代表自動選定商品型號。</li><li>儲存案件JSON，匯出計算報告HTML，或列印成PDF。離線HTML在Chrome／Edge／Safari開啟即可使用，回工程工具與來源連結需要網路。</li></ol><h3>單位與正負號</h3><p>尺寸：cm；有效面積：cm²；強度：kgf/cm²；輸入力：tf；彎矩／扭矩：tf·m。結果可切換tf／kgf／kN。「kg」為質量單位，本程式明確使用kgf表示公斤力，避免兩者混淆。</p><div class="formula">1 tf=1000 kgf；1 tf·m=100000 kgf·cm；1 kgf=9.80665 N；1 MPa=10.197162 kgf/cm²<br>+x向右、+y向上；Mx使+y錨栓增拉，My使+x錨栓增拉；Tz正值逆時針。</div><h3>每一輸入欄位與資料來源</h3><div class="table-wrap"><table><thead><tr><th>欄位</th><th>填入方式</th><th>資料來源</th></tr></thead><tbody><tr><td>案件名稱<br><span class="sub">name</span></td><td>計算書標題與載重組合識別。</td><td>案件名稱、位置、載重組合編號。</td></tr><tr><td>錨栓型式<br><span class="sub">type</span></td><td>依圖說與產品型式選擇。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>標稱直徑 da<br><span class="sub">da</span></td><td>M20 = 2 cm；螺紋錨栓採認證規定直徑。<br>單位：cm</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>常用公制螺牙截面<br><span class="sub">metric</span></td><td>載入標準粗牙拉應力面積；後置產品仍須核對有效面積。</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>受拉有效面積 Ase,N<br><span class="sub">AsN</span></td><td>材證／產品認證；不可逕用 πd²/4。<br>單位：cm²</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>受剪有效面積 Ase,V<br><span class="sub">AsV</span></td><td>依剪力面是否穿越螺牙或縮頸，查實際有效面積。<br>單位：cm²</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>降伏強度 fya<br><span class="sub">fy</span></td><td>材料試驗證明。<br>單位：kgf/cm²</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>極限強度 futa<br><span class="sub">fu</span></td><td>材證；計算自動限至 min(fu, 1.9fy, 8750)。<br>單位：kgf/cm²</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>符合規範之韌性鋼材<br><span class="sub">ductile</span></td><td>須核對材證之伸長率／斷面縮減率；無資料請取消。</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>有效埋深 hef<br><span class="sub">hef</span></td><td>依錨定位置或產品認證；非鑽孔深度。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>擴頭淨承壓面積 Abrg<br><span class="sub">Ab</span></td><td>頭部承壓面积扣除桿身截面，依製造圖；限擴頭。<br>單位：cm²</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>錨定頭／彎鉤端包絡寬<br><span class="sub">headWidth</span></td><td>製造圖最外端寬度；未受安裝扭力時用於端部淨保護層檢核。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>錨定端超出hef的深度<br><span class="sub">tipExtra</span></td><td>有效錨定點至鋼材最底端的額外尺寸（例如頭部厚度），用於底部保護層。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>彎鉤有效伸出長度 eh<br><span class="sub">eh</span></td><td>J/L 彎鉤承壓有效長度，须為 3da～4.5da。<br>單位：cm</td><td>材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。</td></tr><tr><td>混凝土 fc′<br><span class="sub">fc</span></td><td>設計圖說／強度試驗；預埋上限700、後置560。<br>單位：kgf/cm²</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>混凝土厚度 ha<br><span class="sub">ha</span></td><td>沿埋設方向量測至另一自由面，非構材平面尺寸。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>X 向錨栓支數<br><span class="sub">nx</span></td><td>1～3 支；位置對錨栓群中心對稱。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>Y 向錨栓支數<br><span class="sub">ny</span></td><td>1～3 支；本版至多9支。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>X 向中心間距 sx<br><span class="sub">sx</span></td><td>中心至中心；X方向只有1支時不參與幾何。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>Y 向中心間距 sy<br><span class="sub">sy</span></td><td>中心至中心；Y方向只有1支時不參與幾何。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>左邊距 cL<br><span class="sub">cL</span></td><td>左側最外列錨栓中心至自由邊。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>右邊距 cR<br><span class="sub">cR</span></td><td>右側最外列錨栓中心至自由邊。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>下邊距 cB<br><span class="sub">cB</span></td><td>下側最外列錨栓中心至自由邊。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>上邊距 cT<br><span class="sub">cT</span></td><td>上側最外列錨栓中心至自由邊。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>混凝土視為開裂<br><span class="sub">cracked</span></td><td>預設開裂；未開裂須有含收縮與使用載重之分析佐證。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>整組軸拉力 Nu<br><span class="sub">N</span></td><td>拉力為正；使用因數化設計值。<br>單位：tf</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>Mx（使 +y 增拉）<br><span class="sub">Mx</span></td><td>載重對錨栓群中心；剪力作用高度效應須先加入。<br>單位：tf·m</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>My（使 +x 增拉）<br><span class="sub">My</span></td><td>本程式定義為 +x 支增加拉力；與外部軟體符號核對。<br>單位：tf·m</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>整組剪力 Vx<br><span class="sub">Vx</span></td><td>+x 向右；輸入完整載重組合剪力。<br>單位：tf</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>整組剪力 Vy<br><span class="sub">Vy</span></td><td>+y 向上；與平面圖方向一致。<br>單位：tf</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>平面扭矩 Tz<br><span class="sub">Tz</span></td><td>正值為逆時針剪力分布。<br>單位：tf·m</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>持續拉力比例<br><span class="sub">sustained</span></td><td>0～1；整組模式之各支 Ns = N × 比例。實際持續分布不同請用逐支模式。</td><td>結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。</td></tr><tr><td>產品安裝敏感度分類<br><span class="sub">category</span></td><td>查認證報告；1/2/3 依表17.5.3。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>基本拔出強度 Np<br><span class="sub">np</span></td><td>機械後置產品認證之基本標稱拔出強度，0 表示未提供；不是已乘φ的容量。<br>單位：kgf</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>開裂特徵握裹應力 τcr<br><span class="sub">tauCr</span></td><td>產品報告適用温度、濕度、持續／地震載重的5%分位值；0表示缺漏。<br>單位：kgf/cm²</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>未開裂特徵握裹應力 τuncr<br><span class="sub">tauUn</span></td><td>產品報告；計算 cNa 時即使開裂仍需 τuncr。<br>單位：kgf/cm²</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>認證臨界邊距 cac<br><span class="sub">cac</span></td><td>0 使用表17.9.5預設值，僅用於劈裂修正。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品最小間距 smin<br><span class="sub">prodS</span></td><td>認證表對應錨栓型號、直徑及埋深；不等於不受群效應之間距。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品最小邊距 cmin<br><span class="sub">prodC</span></td><td>認證表；仍應符合保護層及粒料限制。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品最小厚度 hmin<br><span class="sub">prodH</span></td><td>認證表；須對應指定有效埋深。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品埋深下限<br><span class="sub">prodMinHef</span></td><td>產品認證允許範圍。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品埋深上限<br><span class="sub">prodMaxHef</span></td><td>產品認證允許範圍。<br>單位：cm</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>產品認證／材證識別<br><span class="sub">report</span></td><td>例如 ESR 編號＋版次／材料規格。不是品牌名稱。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>已核對產品適用安裝及混凝土條件<br><span class="sub">qualified</span></td><td>包括開裂適用、鑽孔、清孔、溫度、濕度、養護及有效面積。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>耐震結構物／耐震設計<br><span class="sub">seismic</span></td><td>實際建築物應依17.10核對；本版耐震路徑採已經Ωo放大地震分量的完整載重。</td><td>結構設計圖與耐震設計說明；確認附掛物傳力及超額強度設計路徑。</td></tr><tr><td>載重已依超額強度路徑完成分析<br><span class="sub">seisPath</span></td><td>17.10.5.3(d)／17.10.6.3(c)；僅放大地震分量，勿將整組載重一律乘Ωo。勾選代表輸入來源已確認。</td><td>結構設計圖與耐震設計說明；確認附掛物傳力及超額強度設計路徑。</td></tr><tr><td>後置產品已有適用耐震認證<br><span class="sub">seisQualified</span></td><td>認證不代表可省略超額強度載重分析。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>位於可能形成塑鉸之區域<br><span class="sub">plasticHinge</span></td><td>此區域超出第17.10.2節，程式顯示待專項檢核。</td><td>結構設計圖與耐震設計說明；確認附掛物傳力及超額強度設計路徑。</td></tr><tr><td>安裝時混凝土齡期<br><span class="sub">age</span></td><td>黏結式至少21日；依澆置與安裝紀錄。<br>單位：日</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr><tr><td>具規範要求之輔助鋼筋<br><span class="sub">supp</span></td><td>須跨越潛在破壞面，並核對配置。本項不代表以錨定鋼筋取代CCD計算。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>混凝土剪破邊緣鋼筋<br><span class="sub">edgeRebar</span></td><td>依17.7.2.5.1核對配置，不以一般樓板鋼筋自動視為符合。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>預埋螺栓施加安裝扭力<br><span class="sub">torqued</span></td><td>有受扭力採6da間距與邊距；無受扭力可採4da間距，仍須保護層。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>要求淨保護層<br><span class="sub">cover</span></td><td>依20.5.1暴露條件及設計圖，本版由使用者指定。中心邊距另加da/2。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>最大粒料尺寸<br><span class="sub">aggregate</span></td><td>混凝土配比／出貨單；後置最小邊距另檢核2倍粒料。<br>單位：cm</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>基板下有灌漿層<br><span class="sub">grout</span></td><td>鋼材剪力乘0.80（17.7.1.2.1）；懸空錨栓彎曲仍須另算。</td><td>結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。</td></tr><tr><td>剪力載重支承長度模式<br><span class="sub">leMode</span></td><td>一般 le=min(hef,8da)；具分離定距套筒扭力控制產品採2da。</td><td>產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。</td></tr></tbody></table></div><h3>逐支受力表格</h3><p>A1從左下方開始，先沿+x方向編號，再往+y方向增加列。N為每支因數化拉力（非負），Vx、Vy為剪力分量，Ns為因數化持續拉力；單位均tf。Ns不得超過N。若持續拉力造成不同偏心，直接填入該持續載重組合的逐支Ns，不使用固定比例近似。</p><h3>各檢核表怎麼讀</h3><p>「需求」與「設計容量」皆使用右上角指定力單位；利用率=需求／容量。0～1為已計算模式符合，超過1為不符合，待補不等於0。群錨的控制子群可能不同，各列的需求不能直接相加。互制採最大拉力利用率與最大剪力利用率之保守包絡，不因兩者控制不同子群而放寬。</p><h3>本版保守處理</h3><ul><li>各拉力／剪力子群枚舉，投影面積採矩形聯集及四邊裁切，顯示最高利用率；不採群錨容量等於單支容量×支數。</li><li>邊緣剪破採最近排錨栓的投影容量，对比較群的剪力絕對值總和；斜向剪力以總剪力作保守檢核，純平行方向才採規範允許的2倍容量。</li><li>撬破以剪力絕對值作偏心權重，並取拉破／握裹較小值。邊緣脹破以最小單支脹破容量對全部群拉力，未使用群效應的容量增益。因此可能比產品設計軟體保守。</li><li>本版不以輔助鋼筋代替CCD容量。勾選輔助鋼筋只影響適用的φ／劈裂修正；其配置需要圖說支持。</li></ul><h3>可跟做範例1：四支M20預埋擴頭螺栓</h3><p>選上方「範例1」後直接核對下表。數值為手算示例，不代表已採購螺栓的材證或頭部幾何。</p><div class="table-wrap"><table><thead><tr><th>項目</th><th>輸入</th><th>來源</th></tr></thead><tbody><tr><td>材料</td><td>M20；Ase,N=Ase,V=2.45 cm²；fy=2400；fu=4000 kgf/cm²；韌性鋼材</td><td>示例假定材證／標準粗牙截面</td></tr><tr><td>擴頭</td><td>hef=20cm；Abrg=8cm²</td><td>示例製造圖；實案請自行核對</td></tr><tr><td>混凝土</td><td>fc′=280kgf/cm²；ha=40cm；開裂；無輔助鋼筋</td><td>示例結構／配筋圖</td></tr><tr><td>配置</td><td>2×2支；sx=sy=20cm；四邊距各25cm；保護層4cm；安裝受扭力</td><td>示例平面圖</td></tr><tr><td>載重</td><td>Nu=8tf；Mx=0.3tf·m；My=0.2tf·m；Vx=1.2tf；Vy=0.6tf；Tz=0.1tf·m；持續比例0</td><td>示例因數化組合，非耐震</td></tr><tr><td>逐支拉力</td><td>A1=0.750、A2=1.750、A3=2.250、A4=3.250tf</td><td>Ni=Nu/n+Mx yi/Σy²+My xi/Σx²</td></tr><tr><td>參考結果</td><td>rN=0.719723；rV=0.355864；互制利用率=0.896323</td><td>本版保守模式包絡；詳細計算可追溯</td></tr></tbody></table></div><h3>其他範例的目的</h3><p>範例2為單支近邊剪破，便於手算核對。範例3刻意留空黏結式認證資料，示範「待補」而非合格。範例4顯示耐震超額強度載重來源待確認。範例5顯示底板接觸狀態不適用整組簡易受力分配。</p><h3>施工資料核對</h3><p>後置式認證须對應實際型號與鑽孔／清孔／濕度／溫度／安裝方向／養護時間。黏結式安裝時混凝土齡期至少21日。水平或向上且承受持續拉力之黏結式，另依第26章核對安裝人員資格與特別監造；計算通過不能取代施工品質要求。</p><h3>規範與核對來源</h3><ul><li><a href="https://www.nlma.gov.tw/ch/legislation/regsearch/6874" target="_blank" rel="noopener">國土管理署：建築物混凝土結構設計規範公布頁、112年版及113年勘誤</a>（本版計算依據）。</li><li><a href="https://www.nlma.gov.tw/uploads/files/011d9249cac7d6c5547786aa348e352a.pdf" target="_blank" rel="noopener">官方規範PDF：第17章，17-1～17-45</a>。</li><li><a href="https://files-ask.hilti.com/original/oj/ojhct9bmsl.pdf" target="_blank" rel="noopener">Hilti公開計算案例</a>（公式結構／單位交叉核對；ACI版次、係數與互制選项不同，不作同案容量一致宣稱）。</li><li><a href="https://aciuniversity.concrete.org/Listing/ACI-318-25-Code-Changes-Part-2-%E2%80%93-Reinforcement-Anchorage-and-Shear-2774" target="_blank" rel="noopener">ACI官方318-25更新說明</a>：國際新版與台灣现行法規須分開認定，本版不標示ACI318-25合規。</li></ul></div></section></div><div id="view-validation" class="wide help" hidden><section class="panel"><div class="panel-head"><h2>驗算紀錄與驗證範圍</h2><span class="badge">28項通過</span></div><div class="panel-body"><p>核對日期：2026-10-09。已逐項對照官方第17章計算式及φ表，並以獨立手算數值、力平衡、輸入異常與適用範圍測試檢查程式。以下測試驗證所實作的算式及邊界行為，不能視為全部錨栓型號或所有幾何的第三方認證。</p><h3>手算數值交叉核對</h3><div class="table-wrap"><table><thead><tr><th>檢核</th><th>獨立計算</th><th>程式結果</th></tr></thead><tbody><tr><td>鋼材拉力</td><td>0.75×2.45×4000</td><td>7,350kgf</td></tr><tr><td>鋼材剪力</td><td>0.65×0.6×2.45×4000</td><td>3,822kgf</td></tr><tr><td>基本混凝土拉破</td><td>10√280×20^1.5</td><td>14,966.629547kgf</td></tr><tr><td>四支等拉力群拉破（無偏心）</td><td>ANc=70×70=4900cm²；ANco=3600cm²；ψed=0.95</td><td>標稱19,352.683484kgf；φ=0.70</td></tr><tr><td>擴頭拔出</td><td>0.70×8×8×280</td><td>12,544kgf</td></tr><tr><td>載重平衡</td><td>ΣNi=8tf；ΣNiyi=0.3tf·m；ΣNixi=0.2tf·m</td><td>六分量平衡通過</td></tr></tbody></table></div><h3>公開案例交叉核對</h3><p>Hilti公開案例第4頁採ACI 318-14，hef=4in、fc′=6000psi、kc=17，列示Nb=10,535lb。直接按該案例公式獨立計算為17√6000×4^1.5=10,534.515lb，與報告四捨五入一致。換用台灣kgf/cm公式kc=7所得Nb=10,264.733lb，比該案例低2.565%；差異為兩套規範的單位制係數取值，並非將美制係數17錯用於公分。此核對僅針對基本Nb；該報告之商品參數、投影面積、ACI互制方式未移植為本工具預設。</p><h3>自動化測試清單</h3><ol><li>鋼材強度、螺牙有效面積與單位：通過。</li><li>剛性錨栓群六分量平衡：通過。</li><li>混凝土群錨面積與四邊裁切：通過。</li><li>單支近邊拉破手算：通過。</li><li>投影矩形聯集無重複計入：通過。</li><li>雙向拉力偏心修正：通過。</li><li>擴頭拔出與彎鉤長度範圍：通過。</li><li>鋼材極限強度上限與脆性φ：通過。</li><li>後置分類的拉破／拔出φ，撬破φ固定0.70：通過。</li><li>黏結握裹與cNa採未開裂參數：通過。</li><li>持續拉力0.55φNba與安裝齡期：通過。</li><li>黏結式資料缺漏不產生合格：通過。</li><li>單支剪破基本強度及投影：通過。</li><li>純平行剪力容量二倍，剪破邊距修正為1：通過。</li><li>灌漿層0.8剪力與6.5cm撬破分界：通過。</li><li>耐震混凝土拉力0.75，剪力未一律乘0.75：通過。</li><li>耐震路徑與塑鉸區不得誤判完成：通過。</li><li>底板接觸壓力截斷只供診斷，禁止合格：通過。</li><li>零载重無NaN，互制可忽略：通過。</li><li>逐支資料與持續拉力輸入檢核：通過。</li><li>無效支數、空數值、負面積、無力臂彎矩：通過。</li><li>狹窄三面近邊與薄構材防誤判：通過。</li><li>9支子群檢核與轉向對稱：通過。</li><li>互制須同時滿足個別容量，不能靠另一側餘量掩蓋：通過。</li><li>不同常重混凝土強度的sqrt與群面積獨立：通過。</li><li>後置耐震Vsa缺值阻止完成：通過。</li><li>後置耐震採試驗Vsa與灌漿折減：通過。</li><li>非耐震回歸及負值拒絕：通過。</li></ol><h3>驗證材料</h3><p>原始碼套件內含engine.js、tests.cjs、validation-results.json。安裝Node.js後執行 <code>node tests.cjs</code> 可重現上述檢查及後置耐震Vsa缺值／試驗值／非耐震回歸檢查。離線HTML本身不需要安裝Node.js。</p><div class="note warn">三／四面近邊、狹窄薄構材、底板接觸及缺少產品認證資料的案例，測試重點是阻止誤判完成。本版尚未完成這些專項設計，不會用測試通過取代其設計要求。</div></div></section></div><footer class="footer">錨栓設計工作台 v1.0.0 · 規範來源核對日期：2026-10-05 · 資料與計算均在本機處理。</footer></div></main></div><input type="file" id="projectFile" accept=".json,application/json" hidden><div class="toast" id="toast" role="status" hidden></div><script>/* TW 112, corrigendum 113. Canonical units cm, kgf, kgf-cm.
    Conservative screening of rectangular groups; no baseplate contact solution. */
 (function(root){
 'use strict';
-const VERSION='1.0.0';
+const VERSION='2.0.0';
 const TYPES={bolt:'預埋擴頭螺栓',stud:'預埋擴頭錨釘',hook:'預埋 J／L 螺栓',torque:'後置膨脹（扭力控制）',displacement:'後置膨脹（位移控制）',undercut:'後置擴底',screw:'後置螺紋',adhesive:'後置黏結'};
-const DEFAULT={name:'四支 M20 預埋擴頭螺栓・靜力範例',type:'bolt',fc:280,ha:40,da:2,AsN:2.45,AsV:2.45,fy:2400,fu:4000,ductile:true,hef:20,Ab:8,eh:8,headWidth:4,tipExtra:1.5,nx:2,ny:2,sx:20,sy:20,cL:25,cR:25,cB:25,cT:25,cracked:true,supp:false,edgeRebar:0,torqued:true,cover:4,aggregate:2.5,grout:false,leMode:'full',category:1,np:0,tauCr:0,tauUn:0,cac:0,prodS:0,prodC:0,prodH:0,prodMinHef:0,prodMaxHef:0,qualified:false,report:'',seismic:false,seisQualified:false,seisPath:false,plasticHinge:false,sustained:0,age:28,mode:'global',N:8,Mx:0.3,My:0.2,Vx:1.2,Vy:0.6,Tz:0.1,manual:[]};
+const DEFAULT={name:'四支 M20 預埋擴頭螺栓・靜力範例',type:'bolt',fc:280,ha:40,da:2,AsN:2.45,AsV:2.45,fy:2400,fu:4000,ductile:true,hef:20,Ab:8,eh:8,headWidth:4,tipExtra:1.5,nx:2,ny:2,sx:20,sy:20,cL:25,cR:25,cB:25,cT:25,cracked:true,supp:false,edgeRebar:0,torqued:true,cover:4,aggregate:2.5,grout:false,leMode:'full',category:1,np:0,tauCr:0,tauUn:0,cac:0,prodS:0,prodC:0,prodH:0,prodMinHef:0,prodMaxHef:0,qualified:false,report:'',seismic:false,seisQualified:false,vsaSeis:0,seisPath:false,plasticHinge:false,sustained:0,age:28,mode:'global',N:8,Mx:0.3,My:0.2,Vx:1.2,Vy:0.6,Tz:0.1,manual:[]};
 const METRIC={12:0.843,14:1.15,16:1.57,18:1.92,20:2.45,22:3.03,24:3.53,27:4.59,30:5.61,33:6.94,36:8.17};
 const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0),min=a=>Math.min(...a),max=a=>Math.max(...a),near=(a,b)=>Math.abs(a-b)<1e-7;
 function points(p){let a=[];for(let j=0;j<p.ny;j++)for(let i=0;i<p.nx;i++)a.push({id:a.length+1,x:(i-(p.nx-1)/2)*p.sx,y:(j-(p.ny-1)/2)*p.sy});return a;}
@@ -23176,8 +23177,8 @@ const width=unionLength(front.map(a=>[Math.max(lo,trans(a)-r),Math.min(hi,trans(
 const W=sum(g,a=>a.V),center=sum(front,trans)/front.length,ex=W>0?Math.abs(sum(g,a=>trans(a)*a.V)/W-center):0,ec=1/(1+ex/r),normal=g.map(a=>s*(xaxis?a.vx:a.vy)),outward=normal.some(v=>v>1e-8),parallel=normal.every(v=>Math.abs(v)<1e-8),ed=parallel?1:Math.min(1,.7+.3*side/r),c=p.cracked?([1,1.2,1.4][p.edgeRebar]):1.4,h=Math.max(1,Math.sqrt(r/p.ha)),mult=parallel?2:1;
 return {trace:[{title:'邊緣剪破最近排、投影與作用方向',formula:'ca1=min到該邊距離；r=1.5ca1；AVc=最近排橫向投影區間聯集長×min(r,ha)；AVco=4.5ca1²',substitution:'edge='+edge+'；ids='+g.map(q=>q.id)+'；front='+front.map(q=>q.id)+'；ca1='+ca+'；r='+r+'；橫向邊界=['+lo+','+hi+']；區間='+JSON.stringify(front.map(a=>[Math.max(lo,trans(a)-r),Math.min(hi,trans(a)+r)]))+'；width='+width+'；ha='+p.ha,result:A,unit:'cm²',condition:'AVco='+A0+'；outward='+outward+'；parallel='+parallel+'；active='+(outward||parallel)+'；side='+side+'；合計V='+W+'；橫向偏心='+ex},{title:'邊緣剪破基本容量及控制乘積',formula:'le=min(短模式2da或hef,8da)；Vb=min[1.86(le/da)^0.2√da,3.8]√fc ca1^1.5；Vcb=(AVc/AVco)ec ed c h mult Vb',substitution:'leMode='+p.leMode+'；le='+le+'；da='+p.da+'；fc='+p.fc+'；候選係數='+1.86*(le/p.da)**.2*Math.sqrt(p.da)+'、3.8；Vb='+Vb+'；'+A+'/'+A0+'×'+ec+'×'+ed+'×'+c+'×'+h+'×'+mult+'×'+Vb,result:A/A0*ec*ed*c*h*mult*Vb,unit:'kgf',condition:'ec=1/(1+ex/r)='+ec+'；ed='+ed+'；裂縫/邊筋c='+c+'；h=max(1,√(r/ha))='+h+'；平行mult2，其他1；本次='+mult+'；總剪力保守對方向容量'}],nominal:A/A0*ec*ed*c*h*mult*Vb,A,A0,Vb,ec,ed,c,h,le,ca,side,edge,front:front.map(a=>a.id),active:outward||parallel,conservative:g.length>front.length||(!parallel&&g.some(a=>Math.abs(xaxis?a.vy:a.vx)>1e-8)),narrow:side<r&&(hi-max(front.map(trans)))<r&&(min(front.map(trans))-lo)<r&&p.ha<r};}
 function resultString(q){return 'N='+q.N+'；vx='+q.vx+'；vy='+q.vy+'；Ns='+q.Ns+'；V='+q.V;}
-function calculate(input){const p={...DEFAULT,...input},errors=[],pending=[],notes=[],trace=[],candidateAudit=[];const step=(title,formula,substitution,result,unit='',condition='',source='112年RC規範第17章及113勘誤 https://www.nlma.gov.tw/ch/legislation/regsearch/6874')=>trace.push({title,formula,substitution,result,unit,condition,source});const numeric=['fc','ha','da','AsN','AsV','fy','fu','hef','Ab','eh','headWidth','tipExtra','nx','ny','sx','sy','cL','cR','cB','cT','cover','aggregate','category','np','tauCr','tauUn','cac','prodS','prodC','prodH','prodMinHef','prodMaxHef','sustained','age','N','Mx','My','Vx','Vy','Tz','edgeRebar'];for(const k of numeric){p[k]=Number(p[k]);if(!Number.isFinite(p[k]))errors.push(k+' 必須是有限數字');}
-if(!TYPES[p.type])errors.push('未知錨栓型式');if(!['global','manual'].includes(p.mode))errors.push('未知受力模式');for(const k of ['fc','ha','da','AsN','AsV','fy','fu','hef','cL','cR','cB','cT','cover','aggregate'])if(p[k]<=0)errors.push(k+' 必須大於 0');for(const k of ['np','tauCr','tauUn','cac','prodS','prodC','prodH','prodMinHef','prodMaxHef','headWidth','tipExtra'])if(p[k]<0)errors.push(k+' 不得為負值');if(![1,2,3].includes(p.category)||![0,1,2].includes(p.edgeRebar))errors.push('分類參數無效');if(!Number.isInteger(p.nx)||!Number.isInteger(p.ny)||p.nx<1||p.ny<1||p.nx>3||p.ny>3)errors.push('每方向支數須為 1～3 整數');if((p.nx>1&&p.sx<=0)||(p.ny>1&&p.sy<=0))errors.push('多支配置間距須大於 0');if(p.hef>=p.ha)errors.push('有效埋深須小於構材厚度');if(p.da>10)errors.push('直徑超過 10 cm，超出第 17.3.2 節');if(p.sustained<0||p.sustained>1)errors.push('持續拉力比例須為 0～1');if(p.fu<p.fy)errors.push('fu 不得小於 fy');if(p.mode==='global'&&p.N<0)errors.push('整組模式只適用軸拉力；軸壓力請用含接觸分析的逐支受力');if(p.age<0)errors.push('齡期不得小於 0');if(errors.length)return {p,errors,pending,notes,rows:[],anchors:[],status:'輸入錯誤'};
+function calculate(input){const p={...DEFAULT,...input},errors=[],pending=[],notes=[],trace=[],candidateAudit=[];const step=(title,formula,substitution,result,unit='',condition='',source='112年RC規範第17章及113勘誤 https://www.nlma.gov.tw/ch/legislation/regsearch/6874')=>trace.push({title,formula,substitution,result,unit,condition,source});const numeric=['fc','ha','da','AsN','AsV','fy','fu','hef','Ab','eh','headWidth','tipExtra','nx','ny','sx','sy','cL','cR','cB','cT','cover','aggregate','category','np','tauCr','tauUn','cac','prodS','prodC','prodH','prodMinHef','prodMaxHef','sustained','age','N','Mx','My','Vx','Vy','Tz','edgeRebar','vsaSeis'];for(const k of numeric){p[k]=Number(p[k]);if(!Number.isFinite(p[k]))errors.push(k+' 必須是有限數字');}
+if(!TYPES[p.type])errors.push('未知錨栓型式');if(!['global','manual'].includes(p.mode))errors.push('未知受力模式');for(const k of ['fc','ha','da','AsN','AsV','fy','fu','hef','cL','cR','cB','cT','cover','aggregate'])if(p[k]<=0)errors.push(k+' 必須大於 0');for(const k of ['vsaSeis','np','tauCr','tauUn','cac','prodS','prodC','prodH','prodMinHef','prodMaxHef','headWidth','tipExtra'])if(p[k]<0)errors.push(k+' 不得為負值');if(![1,2,3].includes(p.category)||![0,1,2].includes(p.edgeRebar))errors.push('分類參數無效');if(!Number.isInteger(p.nx)||!Number.isInteger(p.ny)||p.nx<1||p.ny<1||p.nx>3||p.ny>3)errors.push('每方向支數須為 1～3 整數');if((p.nx>1&&p.sx<=0)||(p.ny>1&&p.sy<=0))errors.push('多支配置間距須大於 0');if(p.hef>=p.ha)errors.push('有效埋深須小於構材厚度');if(p.da>10)errors.push('直徑超過 10 cm，超出第 17.3.2 節');if(p.sustained<0||p.sustained>1)errors.push('持續拉力比例須為 0～1');if(p.fu<p.fy)errors.push('fu 不得小於 fy');if(p.mode==='global'&&p.N<0)errors.push('整組模式只適用軸拉力；軸壓力請用含接觸分析的逐支受力');if(p.age<0)errors.push('齡期不得小於 0');if(errors.length)return {p,errors,pending,notes,rows:[],anchors:[],status:'輸入錯誤'};
 const f=factors(p),b=bounds(p),a=points(p),n=a.length,XX=sum(a,q=>q.x*q.x),YY=sum(a,q=>q.y*q.y),J=XX+YY;
 if(p.mode==='global'){
  if((Math.abs(p.Mx)>1e-10&&YY===0)||(Math.abs(p.My)>1e-10&&XX===0)||(Math.abs(p.Tz)>1e-10&&J===0))errors.push('此配置無法抵抗指定彎矩／扭矩');
@@ -23196,7 +23197,7 @@ if(['bolt','stud'].includes(p.type)&&p.Ab<=0)errors.push('擴頭淨承壓面積�
 if(p.plasticHinge)pending.push('塑鉸區地震錨栓超出第 17.10.2 節適用範圍');if(p.seismic){if(!p.cracked)pending.push('耐震案例採未開裂混凝土時須另有分析佐證');if(!p.seisPath)pending.push('尚未確認 17.10.5.3(d)／17.10.6.3(c) 的超額強度載重設計路徑：輸入須為已放大地震分量後的完整組合。');if(!f.cast&&!p.seisQualified)pending.push('後置式產品須具有適用的耐震認證。');}
 const rows=[],reduceN=p.seismic?.75:1,fu=Math.min(p.fu,1.9*p.fy,8750),maxN=max(a.map(q=>q.N)),maxV=max(a.map(q=>q.V)),sumN=sum(a,q=>q.N),sumV=sum(a,q=>q.V);
 function add(key,name,ref,demand,nominal,phi,detail={},kind='N'){const capacity=nominal===null?null:nominal*phi,ratio=capacity===null?null:capacity>0?demand/capacity:(demand>0?Infinity:0),r={key,name,ref,demand,nominal,phi,capacity,ratio,detail,kind};rows.push(r);return r;}
-add('steelN','鋼材拉力','17.6.1.2',maxN,p.AsN*fu,f.steelN,{fuUsed:fu,As:p.AsN,anchor:a.find(q=>q.N===maxN)?.id,trace:[{title:'鋼材拉力',formula:'Nsa=AsN min(fu,1.9fy,8750)',substitution:p.AsN+'×min('+p.fu+','+1.9*p.fy+',8750)；fuUsed='+fu,result:p.AsN*fu,unit:'kgf'}]});add('steelV','鋼材剪力','17.7.1.2',maxV,(p.type==='stud'?1:.6)*p.AsV*fu*(p.grout?.8:1),f.steelV,{fuUsed:fu,As:p.AsV,grout:p.grout,trace:[{title:'鋼材剪力',formula:'Vsa=(stud?1:0.6)AsV fuUsed(grout?0.8:1)',substitution:(p.type==='stud'?1:.6)+'×'+p.AsV+'×'+fu+'×'+(p.grout?.8:1),result:(p.type==='stud'?1:.6)*p.AsV*fu*(p.grout?.8:1),unit:'kgf'}]},'V');
+add('steelN','鋼材拉力','17.6.1.2',maxN,p.AsN*fu,f.steelN,{fuUsed:fu,As:p.AsN,anchor:a.find(q=>q.N===maxN)?.id,trace:[{title:'鋼材拉力',formula:'Nsa=AsN min(fu,1.9fy,8750)',substitution:p.AsN+'×min('+p.fu+','+1.9*p.fy+',8750)；fuUsed='+fu,result:p.AsN*fu,unit:'kgf'}]});const testV=p.seismic&&!f.cast;const baseV=testV?(p.vsaSeis>0?p.vsaSeis:null):(p.type==='stud'?1:.6)*p.AsV*fu;const nominalV=baseV===null?null:baseV*(p.grout?.8:1);if(testV&&baseV===null)pending.push('後置式耐震鋼材剪力須填入模擬地震試驗標稱Vsa（17.10.3），不能以一般鋼材公式代替。');add('steelV','鋼材剪力',testV?'17.10.3／17.7.1.2':'17.7.1.2',maxV,nominalV,f.steelV,{fuUsed:fu,As:p.AsV,grout:p.grout,seismicTest:testV,trace:[{title:'鋼材剪力',formula:testV?'Vsa=認證模擬地震試驗標稱Vsa×(grout?0.8:1)':'Vsa=(stud?1:0.6)AsV fuUsed(grout?0.8:1)',substitution:testV?(p.vsaSeis>0?p.vsaSeis:'待補')+'×'+(p.grout?.8:1):(p.type==='stud'?1:.6)+'×'+p.AsV+'×'+fu+'×'+(p.grout?.8:1),result:nominalV,unit:'kgf',condition:testV?'須為本型號、埋深與工況的模擬地震試驗值，未乘φ或灌漿修正。':''}]},'V');
 const active=a.filter(q=>q.N>1e-8),shearActive=a.filter(q=>q.V>1e-8);
 function subsets(arr){const s=[];for(let mask=1;mask<2**arr.length;mask++)s.push(arr.filter((_,i)=>mask&(1<<i)));return s;}
 const tg=subsets(active),vg=subsets(shearActive);let tensionWorst=null,bondWorst=null,pryWorst=null,edgeWorst=null;
@@ -23236,12 +23237,12 @@ if(typeof module!=='undefined'&&module.exports)module.exports=root.AnchorEngine;
 const E=AnchorEngine,$=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=structuredClone(E.DEFAULT),result,activeTab='calc',designCandidate=null;
 const fields={
- name:['案件名稱','','計算書標題與載重組合識別。','text','full'],type:['錨栓型式','','依圖說與產品型式選擇。','select',E.TYPES,'full'],da:['標稱直徑 da','cm','M20 = 2 cm；螺紋錨栓採認證規定直徑。'],metric:['常用公制螺牙截面','','載入標準粗牙拉應力面積；後置產品仍須核對有效面積。','preset'],AsN:['受拉有效面積 Ase,N','cm²','材證／產品認證；不可逕用 πd²/4。'],AsV:['受剪有效面積 Ase,V','cm²','依剪力面是否穿越螺牙或縮頸，查實際有效面積。'],fy:['降伏強度 fya','kgf/cm²','材料試驗證明。'],fu:['極限強度 futa','kgf/cm²','材證；計算自動限至 min(fu, 1.9fy, 8750)。'],ductile:['符合規範之韌性鋼材','','須核對材證之伸長率／斷面縮減率；無資料請取消。','checkbox'],hef:['有效埋深 hef','cm','依錨定位置或產品認證；非鑽孔深度。'],Ab:['擴頭淨承壓面積 Abrg','cm²','頭部承壓面积扣除桿身截面，依製造圖；限擴頭。'],headWidth:['錨定頭／彎鉤端包絡寬','cm','製造圖最外端寬度；未受安裝扭力時用於端部淨保護層檢核。'],tipExtra:['錨定端超出hef的深度','cm','有效錨定點至鋼材最底端的額外尺寸（例如頭部厚度），用於底部保護層。'],eh:['彎鉤有效伸出長度 eh','cm','J/L 彎鉤承壓有效長度，须為 3da～4.5da。'],fc:['混凝土 fc′','kgf/cm²','設計圖說／強度試驗；預埋上限700、後置560。'],ha:['混凝土厚度 ha','cm','沿埋設方向量測至另一自由面，非構材平面尺寸。'],nx:['X 向錨栓支數','','1～3 支；位置對錨栓群中心對稱。'],ny:['Y 向錨栓支數','','1～3 支；本版至多9支。'],sx:['X 向中心間距 sx','cm','中心至中心；X方向只有1支時不參與幾何。'],sy:['Y 向中心間距 sy','cm','中心至中心；Y方向只有1支時不參與幾何。'],cL:['左邊距 cL','cm','左側最外列錨栓中心至自由邊。'],cR:['右邊距 cR','cm','右側最外列錨栓中心至自由邊。'],cB:['下邊距 cB','cm','下側最外列錨栓中心至自由邊。'],cT:['上邊距 cT','cm','上側最外列錨栓中心至自由邊。'],cracked:['混凝土視為開裂','','預設開裂；未開裂須有含收縮與使用載重之分析佐證。','checkbox'],N:['整組軸拉力 Nu','tf','拉力為正；使用因數化設計值。'],Mx:['Mx（使 +y 增拉）','tf·m','載重對錨栓群中心；剪力作用高度效應須先加入。'],My:['My（使 +x 增拉）','tf·m','本程式定義為 +x 支增加拉力；與外部軟體符號核對。'],Vx:['整組剪力 Vx','tf','+x 向右；輸入完整載重組合剪力。'],Vy:['整組剪力 Vy','tf','+y 向上；與平面圖方向一致。'],Tz:['平面扭矩 Tz','tf·m','正值為逆時針剪力分布。'],sustained:['持續拉力比例','','0～1；整組模式之各支 Ns = N × 比例。實際持續分布不同請用逐支模式。'],category:['產品安裝敏感度分類','','查認證報告；1/2/3 依表17.5.3。','select',{1:'分類 1：低敏感度',2:'分類 2：中敏感度',3:'分類 3：高敏感度'}],np:['基本拔出強度 Np','kgf','機械後置產品認證之基本標稱拔出強度，0 表示未提供；不是已乘φ的容量。'],tauCr:['開裂特徵握裹應力 τcr','kgf/cm²','產品報告適用温度、濕度、持續／地震載重的5%分位值；0表示缺漏。'],tauUn:['未開裂特徵握裹應力 τuncr','kgf/cm²','產品報告；計算 cNa 時即使開裂仍需 τuncr。'],cac:['認證臨界邊距 cac','cm','0 使用表17.9.5預設值，僅用於劈裂修正。'],prodS:['產品最小間距 smin','cm','認證表對應錨栓型號、直徑及埋深；不等於不受群效應之間距。'],prodC:['產品最小邊距 cmin','cm','認證表；仍應符合保護層及粒料限制。'],prodH:['產品最小厚度 hmin','cm','認證表；須對應指定有效埋深。'],prodMinHef:['產品埋深下限','cm','產品認證允許範圍。'],prodMaxHef:['產品埋深上限','cm','產品認證允許範圍。'],report:['產品認證／材證識別','','例如 ESR 編號＋版次／材料規格。不是品牌名稱。','text','full'],qualified:['已核對產品適用安裝及混凝土條件','','包括開裂適用、鑽孔、清孔、溫度、濕度、養護及有效面積。','checkbox','full'],seismic:['耐震結構物／耐震設計','','實際建築物應依17.10核對；本版耐震路徑採已經Ωo放大地震分量的完整載重。','checkbox','full'],seisPath:['載重已依超額強度路徑完成分析','','17.10.5.3(d)／17.10.6.3(c)；僅放大地震分量，勿將整組載重一律乘Ωo。勾選代表輸入來源已確認。','checkbox','full'],seisQualified:['後置產品已有適用耐震認證','','認證不代表可省略超額強度載重分析。','checkbox','full'],plasticHinge:['位於可能形成塑鉸之區域','','此區域超出第17.10.2節，程式顯示待專項檢核。','checkbox','full'],age:['安裝時混凝土齡期','日','黏結式至少21日；依澆置與安裝紀錄。'],supp:['具規範要求之輔助鋼筋','','須跨越潛在破壞面，並核對配置。本項不代表以錨定鋼筋取代CCD計算。','checkbox','full'],edgeRebar:['混凝土剪破邊緣鋼筋','','依17.7.2.5.1核對配置，不以一般樓板鋼筋自動視為符合。','select',{0:'無／未確認：ψc,V=1.0',1:'至少 D13 邊緣鋼筋：1.2',2:'D13＋箍筋間距≤10cm：1.4'},'full'],torqued:['預埋螺栓施加安裝扭力','','有受扭力採6da間距與邊距；無受扭力可採4da間距，仍須保護層。','checkbox','full'],cover:['要求淨保護層','cm','依20.5.1暴露條件及設計圖，本版由使用者指定。中心邊距另加da/2。'],aggregate:['最大粒料尺寸','cm','混凝土配比／出貨單；後置最小邊距另檢核2倍粒料。'],grout:['基板下有灌漿層','','鋼材剪力乘0.80（17.7.1.2.1）；懸空錨栓彎曲仍須另算。','checkbox','full'],leMode:['剪力載重支承長度模式','','一般 le=min(hef,8da)；具分離定距套筒扭力控制產品採2da。','select',{full:'全埋設段同勁度',short:'分離定距套筒：2da'},'full']
+ vsaSeis:['耐震試驗鋼材剪力 Vsa','kgf','後置式模擬地震試驗標稱剪力，未乘φ或灌漿修正。0代表待補。'],name:['案件名稱','','計算書標題與載重組合識別。','text','full'],type:['錨栓型式','','依圖說與產品型式選擇。','select',E.TYPES,'full'],da:['標稱直徑 da','cm','M20 = 2 cm；螺紋錨栓採認證規定直徑。'],metric:['常用公制螺牙截面','','載入標準粗牙拉應力面積；後置產品仍須核對有效面積。','preset'],AsN:['受拉有效面積 Ase,N','cm²','材證／產品認證；不可逕用 πd²/4。'],AsV:['受剪有效面積 Ase,V','cm²','依剪力面是否穿越螺牙或縮頸，查實際有效面積。'],fy:['降伏強度 fya','kgf/cm²','材料試驗證明。'],fu:['極限強度 futa','kgf/cm²','材證；計算自動限至 min(fu, 1.9fy, 8750)。'],ductile:['符合規範之韌性鋼材','','須核對材證之伸長率／斷面縮減率；無資料請取消。','checkbox'],hef:['有效埋深 hef','cm','依錨定位置或產品認證；非鑽孔深度。'],Ab:['擴頭淨承壓面積 Abrg','cm²','頭部承壓面积扣除桿身截面，依製造圖；限擴頭。'],headWidth:['錨定頭／彎鉤端包絡寬','cm','製造圖最外端寬度；未受安裝扭力時用於端部淨保護層檢核。'],tipExtra:['錨定端超出hef的深度','cm','有效錨定點至鋼材最底端的額外尺寸（例如頭部厚度），用於底部保護層。'],eh:['彎鉤有效伸出長度 eh','cm','J/L 彎鉤承壓有效長度，须為 3da～4.5da。'],fc:['混凝土 fc′','kgf/cm²','設計圖說／強度試驗；預埋上限700、後置560。'],ha:['混凝土厚度 ha','cm','沿埋設方向量測至另一自由面，非構材平面尺寸。'],nx:['X 向錨栓支數','','1～3 支；位置對錨栓群中心對稱。'],ny:['Y 向錨栓支數','','1～3 支；本版至多9支。'],sx:['X 向中心間距 sx','cm','中心至中心；X方向只有1支時不參與幾何。'],sy:['Y 向中心間距 sy','cm','中心至中心；Y方向只有1支時不參與幾何。'],cL:['左邊距 cL','cm','左側最外列錨栓中心至自由邊。'],cR:['右邊距 cR','cm','右側最外列錨栓中心至自由邊。'],cB:['下邊距 cB','cm','下側最外列錨栓中心至自由邊。'],cT:['上邊距 cT','cm','上側最外列錨栓中心至自由邊。'],cracked:['混凝土視為開裂','','預設開裂；未開裂須有含收縮與使用載重之分析佐證。','checkbox'],N:['整組軸拉力 Nu','tf','拉力為正；使用因數化設計值。'],Mx:['Mx（使 +y 增拉）','tf·m','載重對錨栓群中心；剪力作用高度效應須先加入。'],My:['My（使 +x 增拉）','tf·m','本程式定義為 +x 支增加拉力；與外部軟體符號核對。'],Vx:['整組剪力 Vx','tf','+x 向右；輸入完整載重組合剪力。'],Vy:['整組剪力 Vy','tf','+y 向上；與平面圖方向一致。'],Tz:['平面扭矩 Tz','tf·m','正值為逆時針剪力分布。'],sustained:['持續拉力比例','','0～1；整組模式之各支 Ns = N × 比例。實際持續分布不同請用逐支模式。'],category:['產品安裝敏感度分類','','查認證報告；1/2/3 依表17.5.3。','select',{1:'分類 1：低敏感度',2:'分類 2：中敏感度',3:'分類 3：高敏感度'}],np:['基本拔出強度 Np','kgf','機械後置產品認證之基本標稱拔出強度，0 表示未提供；不是已乘φ的容量。'],tauCr:['開裂特徵握裹應力 τcr','kgf/cm²','產品報告適用温度、濕度、持續／地震載重的5%分位值；0表示缺漏。'],tauUn:['未開裂特徵握裹應力 τuncr','kgf/cm²','產品報告；計算 cNa 時即使開裂仍需 τuncr。'],cac:['認證臨界邊距 cac','cm','0 使用表17.9.5預設值，僅用於劈裂修正。'],prodS:['產品最小間距 smin','cm','認證表對應錨栓型號、直徑及埋深；不等於不受群效應之間距。'],prodC:['產品最小邊距 cmin','cm','認證表；仍應符合保護層及粒料限制。'],prodH:['產品最小厚度 hmin','cm','認證表；須對應指定有效埋深。'],prodMinHef:['產品埋深下限','cm','產品認證允許範圍。'],prodMaxHef:['產品埋深上限','cm','產品認證允許範圍。'],report:['產品認證／材證識別','','例如 ESR 編號＋版次／材料規格。不是品牌名稱。','text','full'],qualified:['已核對產品適用安裝及混凝土條件','','包括開裂適用、鑽孔、清孔、溫度、濕度、養護及有效面積。','checkbox','full'],seismic:['耐震結構物／耐震設計','','實際建築物應依17.10核對；本版耐震路徑採已經Ωo放大地震分量的完整載重。','checkbox','full'],seisPath:['載重已依超額強度路徑完成分析','','17.10.5.3(d)／17.10.6.3(c)；僅放大地震分量，勿將整組載重一律乘Ωo。勾選代表輸入來源已確認。','checkbox','full'],seisQualified:['後置產品已有適用耐震認證','','認證不代表可省略超額強度載重分析。','checkbox','full'],plasticHinge:['位於可能形成塑鉸之區域','','此區域超出第17.10.2節，程式顯示待專項檢核。','checkbox','full'],age:['安裝時混凝土齡期','日','黏結式至少21日；依澆置與安裝紀錄。'],supp:['具規範要求之輔助鋼筋','','須跨越潛在破壞面，並核對配置。本項不代表以錨定鋼筋取代CCD計算。','checkbox','full'],edgeRebar:['混凝土剪破邊緣鋼筋','','依17.7.2.5.1核對配置，不以一般樓板鋼筋自動視為符合。','select',{0:'無／未確認：ψc,V=1.0',1:'至少 D13 邊緣鋼筋：1.2',2:'D13＋箍筋間距≤10cm：1.4'},'full'],torqued:['預埋螺栓施加安裝扭力','','有受扭力採6da間距與邊距；無受扭力可採4da間距，仍須保護層。','checkbox','full'],cover:['要求淨保護層','cm','依20.5.1暴露條件及設計圖，本版由使用者指定。中心邊距另加da/2。'],aggregate:['最大粒料尺寸','cm','混凝土配比／出貨單；後置最小邊距另檢核2倍粒料。'],grout:['基板下有灌漿層','','鋼材剪力乘0.80（17.7.1.2.1）；懸空錨栓彎曲仍須另算。','checkbox','full'],leMode:['剪力載重支承長度模式','','一般 le=min(hef,8da)；具分離定距套筒扭力控制產品採2da。','select',{full:'全埋設段同勁度',short:'分離定距套筒：2da'},'full']
 };
 function makeField(key){const spec=fields[key],[label,unit,hint,type='number']=spec;let control='';if(type==='checkbox')control=`<label class="check-label" for="${key}"><input type="checkbox" id="${key}">${esc(label)}</label>`;else if(type==='select')control=`<label for="${key}">${esc(label)} <small>${esc(unit)}</small></label><select id="${key}">${Object.entries(spec[4]).map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join('')}</select>`;else if(type==='preset')control=`<label for="${key}">${esc(label)}</label><select id="${key}"><option value="">自訂截面</option>${Object.entries(E.METRIC).map(([d,A])=>`<option value="${d}">M${d}｜${A} cm²</option>`).join('')}</select>`;else control=`<label for="${key}">${esc(label)} <small>${esc(unit)}</small></label><input type="${type==='text'?'text':'number'}" ${type==='number'?'step="any"':''} id="${key}" ${type==='text'?'maxlength="180"':''}>`;return `<div class="field ${spec.includes('full')?'full':''}" data-field="${key}">${control}<div class="hint">${esc(hint)}</div></div>`;}
-for(const [id,keys]of Object.entries({materialFields:['name','type','metric','da','AsN','AsV','fy','fu','ductile','hef','Ab','eh'],geometryFields:['fc','ha','nx','ny','sx','sy','cL','cR','cB','cT','cracked'],globalFields:['N','Mx','My','Vx','Vy','Tz','sustained'],productFields:['report','category','np','tauCr','tauUn','cac','prodS','prodC','prodH','prodMinHef','prodMaxHef','qualified','seismic','seisPath','seisQualified','plasticHinge','age'],extraFields:['supp','edgeRebar','torqued','headWidth','tipExtra','cover','aggregate','grout','leMode']}))$(id).innerHTML=keys.map(makeField).join('');
+for(const [id,keys]of Object.entries({materialFields:['name','type','metric','da','AsN','AsV','fy','fu','ductile','hef','Ab','eh'],geometryFields:['fc','ha','nx','ny','sx','sy','cL','cR','cB','cT','cracked'],globalFields:['N','Mx','My','Vx','Vy','Tz','sustained'],productFields:['report','category','np','tauCr','tauUn','cac','prodS','prodC','prodH','prodMinHef','prodMaxHef','qualified','seismic','seisPath','seisQualified','vsaSeis','plasticHinge','age'],extraFields:['supp','edgeRebar','torqued','headWidth','tipExtra','cover','aggregate','grout','leMode']}))$(id).innerHTML=keys.map(makeField).join('');
 function fill(){for(const [k,v]of Object.entries(state)){if(!$(k)||k==='manual')continue;$(k).type==='checkbox'?$(k).checked=!!v:$(k).value=v;}updateManual();updateVisibility();}
-function updateVisibility(){const cast=['bolt','stud','hook'].includes(state.type),ad=state.type==='adhesive';const show=(k,v)=>document.querySelector(`[data-field="${k}"]`).hidden=!v;show('Ab',['bolt','stud'].includes(state.type));show('eh',state.type==='hook');for(const k of ['category','cac','prodS','prodC','prodH','prodMinHef','prodMaxHef','qualified'])show(k,!cast);show('np',!cast&&!ad);show('tauCr',ad);show('tauUn',ad);show('age',ad);show('torqued',cast);show('headWidth',cast);show('tipExtra',cast);show('seisPath',state.seismic);show('seisQualified',state.seismic&&!cast);$('globalFields').hidden=state.mode==='manual';$('manualInputs').hidden=state.mode!=='manual';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.mode));}
+function updateVisibility(){const cast=['bolt','stud','hook'].includes(state.type),ad=state.type==='adhesive';const show=(k,v)=>document.querySelector(`[data-field="${k}"]`).hidden=!v;show('Ab',['bolt','stud'].includes(state.type));show('eh',state.type==='hook');for(const k of ['category','cac','prodS','prodC','prodH','prodMinHef','prodMaxHef','qualified'])show(k,!cast);show('np',!cast&&!ad);show('tauCr',ad);show('tauUn',ad);show('age',ad);show('torqued',cast);show('headWidth',cast);show('tipExtra',cast);show('seisPath',state.seismic);show('seisQualified',state.seismic&&!cast);show('vsaSeis',state.seismic&&!cast);$('globalFields').hidden=state.mode==='manual';$('manualInputs').hidden=state.mode!=='manual';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.mode));}
 function updateManual(){const n=Number(state.nx)*Number(state.ny);if(!Number.isInteger(n)||n<1||n>9)return;const old=state.manual;state.manual=Array.from({length:n},(_,i)=>old[i]||{N:Math.max(0,Number(state.N)/n),vx:Number(state.Vx)/n,vy:Number(state.Vy)/n,Ns:0});$('manualBody').innerHTML=state.manual.map((q,i)=>`<tr><td>A${i+1}</td>${['N','vx','vy','Ns'].map(k=>`<td><input type="number" step="any" data-manual="${i}" data-k="${k}" aria-label="A${i+1} ${k} tf" value="${esc(q[k])}"></td>`).join('')}</tr>`).join('');}
 let timer;function notify(msg){$('toast').textContent=msg;$('toast').hidden=false;clearTimeout(timer);timer=setTimeout(()=>$('toast').hidden=true,4500);}
 function unit(){return $('outUnit').value;}function force(v){if(v===null||v===undefined)return '待補';if(!Number.isFinite(v))return v===Infinity?'∞':'—';return(v*(unit()==='tf'?.001:unit()==='kN'?.00980665:1)).toLocaleString('en-US',{minimumFractionDigits:unit()==='kgf'?0:3,maximumFractionDigits:unit()==='kgf'?1:3});}function fmt(v,d=3){return Number.isFinite(v)?v.toLocaleString('en-US',{maximumFractionDigits:d}):v===Infinity?'∞':'—';}
@@ -23331,6 +23332,441 @@ function renderAnchorType(){
 const anchorBaseUpdateVisibility=updateVisibility;
 updateVisibility=function(){anchorBaseUpdateVisibility();renderAnchorType();};
 renderAnchorType();
+</script><script>const FIELD_SOURCE_DATA={
+  "name": {
+    "label": "案件名稱",
+    "unit": "",
+    "instruction": "計算書標題與載重組合識別。",
+    "source": "案件名稱、位置、載重組合編號。"
+  },
+  "type": {
+    "label": "錨栓型式",
+    "unit": "",
+    "instruction": "依圖說與產品型式選擇。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "da": {
+    "label": "標稱直徑 da",
+    "unit": "cm",
+    "instruction": "M20 = 2 cm；螺紋錨栓採認證規定直徑。",
+    "source": "材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。"
+  },
+  "metric": {
+    "label": "常用公制螺牙截面",
+    "unit": "",
+    "instruction": "載入標準粗牙拉應力面積；後置產品仍須核對有效面積。",
+    "source": "材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。"
+  },
+  "AsN": {
+    "label": "受拉有效面積 Ase,N",
+    "unit": "cm²",
+    "instruction": "材證／產品認證；不可逕用 πd²/4。",
+    "source": "材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。"
+  },
+  "AsV": {
+    "label": "受剪有效面積 Ase,V",
+    "unit": "cm²",
+    "instruction": "依剪力面是否穿越螺牙或縮頸，查實際有效面積。",
+    "source": "材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。"
+  },
+  "fy": {
+    "label": "降伏強度 fya",
+    "unit": "kgf/cm²",
+    "instruction": "材料試驗證明。",
+    "source": "材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。"
+  },
+  "fu": {
+    "label": "極限強度 futa",
+    "unit": "kgf/cm²",
+    "instruction": "材證；計算自動限至 min(fu, 1.9fy, 8750)。",
+    "source": "材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。"
+  },
+  "ductile": {
+    "label": "符合規範之韌性鋼材",
+    "unit": "",
+    "instruction": "須核對材證之伸長率／斷面縮減率；無資料請取消。",
+    "source": "材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。"
+  },
+  "hef": {
+    "label": "有效埋深 hef",
+    "unit": "cm",
+    "instruction": "依錨定位置或產品認證；非鑽孔深度。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "Ab": {
+    "label": "擴頭淨承壓面積 Abrg",
+    "unit": "cm²",
+    "instruction": "頭部承壓面积扣除桿身截面，依製造圖；限擴頭。",
+    "source": "材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。"
+  },
+  "headWidth": {
+    "label": "錨定頭／彎鉤端包絡寬",
+    "unit": "cm",
+    "instruction": "製造圖最外端寬度；未受安裝扭力時用於端部淨保護層檢核。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "tipExtra": {
+    "label": "錨定端超出hef的深度",
+    "unit": "cm",
+    "instruction": "有效錨定點至鋼材最底端的額外尺寸（例如頭部厚度），用於底部保護層。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "eh": {
+    "label": "彎鉤有效伸出長度 eh",
+    "unit": "cm",
+    "instruction": "J/L 彎鉤承壓有效長度，须為 3da～4.5da。",
+    "source": "材料試驗證明、錨栓製造圖、有效斷面資料；標準粗牙面積僅供選填。"
+  },
+  "fc": {
+    "label": "混凝土 fc′",
+    "unit": "kgf/cm²",
+    "instruction": "設計圖說／強度試驗；預埋上限700、後置560。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "ha": {
+    "label": "混凝土厚度 ha",
+    "unit": "cm",
+    "instruction": "沿埋設方向量測至另一自由面，非構材平面尺寸。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "nx": {
+    "label": "X 向錨栓支數",
+    "unit": "",
+    "instruction": "1～3 支；位置對錨栓群中心對稱。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "ny": {
+    "label": "Y 向錨栓支數",
+    "unit": "",
+    "instruction": "1～3 支；本版至多9支。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "sx": {
+    "label": "X 向中心間距 sx",
+    "unit": "cm",
+    "instruction": "中心至中心；X方向只有1支時不參與幾何。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "sy": {
+    "label": "Y 向中心間距 sy",
+    "unit": "cm",
+    "instruction": "中心至中心；Y方向只有1支時不參與幾何。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "cL": {
+    "label": "左邊距 cL",
+    "unit": "cm",
+    "instruction": "左側最外列錨栓中心至自由邊。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "cR": {
+    "label": "右邊距 cR",
+    "unit": "cm",
+    "instruction": "右側最外列錨栓中心至自由邊。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "cB": {
+    "label": "下邊距 cB",
+    "unit": "cm",
+    "instruction": "下側最外列錨栓中心至自由邊。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "cT": {
+    "label": "上邊距 cT",
+    "unit": "cm",
+    "instruction": "上側最外列錨栓中心至自由邊。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "cracked": {
+    "label": "混凝土視為開裂",
+    "unit": "",
+    "instruction": "預設開裂；未開裂須有含收縮與使用載重之分析佐證。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "N": {
+    "label": "整組軸拉力 Nu",
+    "unit": "tf",
+    "instruction": "拉力為正；使用因數化設計值。",
+    "source": "結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。"
+  },
+  "Mx": {
+    "label": "Mx（使 +y 增拉）",
+    "unit": "tf·m",
+    "instruction": "載重對錨栓群中心；剪力作用高度效應須先加入。",
+    "source": "結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。"
+  },
+  "My": {
+    "label": "My（使 +x 增拉）",
+    "unit": "tf·m",
+    "instruction": "本程式定義為 +x 支增加拉力；與外部軟體符號核對。",
+    "source": "結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。"
+  },
+  "Vx": {
+    "label": "整組剪力 Vx",
+    "unit": "tf",
+    "instruction": "+x 向右；輸入完整載重組合剪力。",
+    "source": "結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。"
+  },
+  "Vy": {
+    "label": "整組剪力 Vy",
+    "unit": "tf",
+    "instruction": "+y 向上；與平面圖方向一致。",
+    "source": "結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。"
+  },
+  "Tz": {
+    "label": "平面扭矩 Tz",
+    "unit": "tf·m",
+    "instruction": "正值為逆時針剪力分布。",
+    "source": "結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。"
+  },
+  "sustained": {
+    "label": "持續拉力比例",
+    "unit": "",
+    "instruction": "0～1；整組模式之各支 Ns = N × 比例。實際持續分布不同請用逐支模式。",
+    "source": "結構分析、設備反力、完整因數化載重組合；地震分量按設計路徑放大。"
+  },
+  "category": {
+    "label": "產品安裝敏感度分類",
+    "unit": "",
+    "instruction": "查認證報告；1/2/3 依表17.5.3。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "np": {
+    "label": "基本拔出強度 Np",
+    "unit": "kgf",
+    "instruction": "機械後置產品認證之基本標稱拔出強度，0 表示未提供；不是已乘φ的容量。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "tauCr": {
+    "label": "開裂特徵握裹應力 τcr",
+    "unit": "kgf/cm²",
+    "instruction": "產品報告適用温度、濕度、持續／地震載重的5%分位值；0表示缺漏。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "tauUn": {
+    "label": "未開裂特徵握裹應力 τuncr",
+    "unit": "kgf/cm²",
+    "instruction": "產品報告；計算 cNa 時即使開裂仍需 τuncr。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "cac": {
+    "label": "認證臨界邊距 cac",
+    "unit": "cm",
+    "instruction": "0 使用表17.9.5預設值，僅用於劈裂修正。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "prodS": {
+    "label": "產品最小間距 smin",
+    "unit": "cm",
+    "instruction": "認證表對應錨栓型號、直徑及埋深；不等於不受群效應之間距。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "prodC": {
+    "label": "產品最小邊距 cmin",
+    "unit": "cm",
+    "instruction": "認證表；仍應符合保護層及粒料限制。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "prodH": {
+    "label": "產品最小厚度 hmin",
+    "unit": "cm",
+    "instruction": "認證表；須對應指定有效埋深。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "prodMinHef": {
+    "label": "產品埋深下限",
+    "unit": "cm",
+    "instruction": "產品認證允許範圍。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "prodMaxHef": {
+    "label": "產品埋深上限",
+    "unit": "cm",
+    "instruction": "產品認證允許範圍。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "report": {
+    "label": "产品認證／材證識別",
+    "unit": "",
+    "instruction": "例如 ESR 編號＋版次／材料規格。不是品牌名稱。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "qualified": {
+    "label": "已核對產品適用安裝及混凝土條件",
+    "unit": "",
+    "instruction": "包括開裂適用、鑽孔、清孔、溫度、濕度、養護及有效面積。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "seismic": {
+    "label": "耐震結構物／耐震設計",
+    "unit": "",
+    "instruction": "實際建築物應依17.10核對；本版耐震路徑採已經Ωo放大地震分量的完整載重。",
+    "source": "結構設計圖與耐震設計說明；確認附掛物傳力及超額強度設計路徑。"
+  },
+  "seisPath": {
+    "label": "載重已依超額強度路徑完成分析",
+    "unit": "",
+    "instruction": "17.10.5.3(d)／17.10.6.3(c)；僅放大地震分量，勿將整組載重一律乘Ωo。勾選代表輸入來源已確認。",
+    "source": "結構設計圖與耐震設計說明；確認附掛物傳力及超額強度設計路徑。"
+  },
+  "seisQualified": {
+    "label": "後置產品已有適用耐震認證",
+    "unit": "",
+    "instruction": "認證不代表可省略超額強度載重分析。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "plasticHinge": {
+    "label": "位於可能形成塑鉸之區域",
+    "unit": "",
+    "instruction": "此區域超出第17.10.2節，程式顯示待專項檢核。",
+    "source": "結構設計圖與耐震設計說明；確認附掛物傳力及超額強度設計路徑。"
+  },
+  "age": {
+    "label": "安裝時混凝土齡期",
+    "unit": "日",
+    "instruction": "黏結式至少21日；依澆置與安裝紀錄。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  },
+  "supp": {
+    "label": "具規範要求之輔助鋼筋",
+    "unit": "",
+    "instruction": "須跨越潛在破壞面，並核對配置。本項不代表以錨定鋼筋取代CCD計算。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "edgeRebar": {
+    "label": "混凝土剪破邊緣鋼筋",
+    "unit": "",
+    "instruction": "依17.7.2.5.1核對配置，不以一般樓板鋼筋自動視為符合。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "torqued": {
+    "label": "預埋螺栓施加安裝扭力",
+    "unit": "",
+    "instruction": "有受扭力採6da間距與邊距；無受扭力可採4da間距，仍須保護層。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "cover": {
+    "label": "要求淨保護層",
+    "unit": "cm",
+    "instruction": "依20.5.1暴露條件及設計圖，本版由使用者指定。中心邊距另加da/2。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "aggregate": {
+    "label": "最大粒料尺寸",
+    "unit": "cm",
+    "instruction": "混凝土配比／出貨單；後置最小邊距另檢核2倍粒料。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "grout": {
+    "label": "基板下有灌漿層",
+    "unit": "",
+    "instruction": "鋼材剪力乘0.80（17.7.1.2.1）；懸空錨栓彎曲仍須另算。",
+    "source": "結構／配筋圖、現場量測、混凝土強度及配比資料；以可追溯資料為準。"
+  },
+  "leMode": {
+    "label": "剪力載重支承長度模式",
+    "unit": "",
+    "instruction": "一般 le=min(hef,8da)；具分離定距套筒扭力控制產品採2da。",
+    "source": "產品認證／試驗報告、製造圖、安裝手冊及施工紀錄；须對應實際型號與工況。"
+  }
+};</script><script>window.AnchorTutorialMeta={"chapters": [{"title": "① 載入範例", "text": "歡迎使用混凝土錨栓設計工作台。從上方選擇範例一，載入四支預埋M二十錨栓。先確認計算依據為台灣一百一十二年版規範，含一百一十三年勘誤。", "start": 0, "duration": 15.245, "audio": "assets/voice-0.wav", "image": "assets/01-example.png"}, {"title": "② 材料與配置", "text": "選擇錨栓型式，圖示立即對應。範例直徑填二公分，有效受拉及受剪面積填二點四五平方公分，有效埋深二十公分。邊距從最外列錨栓中心量到混凝土自由邊，並非群錨中心。", "start": 15.245, "duration": 17.357, "audio": "assets/voice-1.wav", "image": "assets/02-material.png"}, {"title": "③ 載重與參數", "text": "點選定義與來源，可查符號、單位、填法與資料出處。範例輸入拉力八噸力、彎矩零點三及零點二噸力公尺、剪力一點二及零點六噸力。請使用完整因數化載重，程式不再乘載重因數。", "start": 32.603, "duration": 16.44, "audio": "assets/voice-2.wav", "image": "assets/03-definition.png"}, {"title": "④ 檢核與計算", "text": "結果即時顯示拉力、剪力與互制利用率。範例互制約零點八九六。點開詳細計算，可查公式、代入數值、折減係數及控制破壞模式。後置式缺少認證值時顯示待補，不代表符合。", "start": 49.043, "duration": 16.717, "audio": "assets/voice-3.wav", "image": "assets/04-process.png"}, {"title": "⑤ 影片與離線", "text": "參數字典可按關鍵字搜尋。操作影片可用章節跳轉，並提供旁白文字稿。按儲存案件保存輸入，下載離線版可保留本案資料及旁白影片。最後匯出Word或計算報告，核對設計與施工條件。", "start": 65.76, "duration": 17.827, "audio": "assets/voice-4.wav", "image": "assets/05-dictionary.png"}], "file": "anchor-tutorial.mp4", "duration": 83.587, "bytes": 2647576, "chunkCount": 11};</script><script>/* v2: source-linked field dictionary, accessible contextual help, narrated tutorial. */
+(()=>{'use strict';
+const sources=FIELD_SOURCE_DATA;
+const detail={
+vsaSeis:['Vsa,seis','產品認證','後置式耐震用鋼材標稱剪力，須取模擬地震試驗值。單位kgf，未乘φ或灌漿0.8；0為缺資料。','適用型號、埋深及工況的產品耐震認證試驗','17.10.3'],
+name:['工程與載重組合識別','案件與材料','例如：設備基座／ULS-01；每一完整組合另存案件。','設計案件清單與結構計算書','識別用途'],
+type:['錨定受力機制','案件與材料','依實際預埋、機械後置或黏結機制選擇，圖示同步切換。','設計詳圖、產品認證與安裝手冊','17.1／17.3'],
+metric:['公制粗牙面積快捷值','案件與材料','M20 載入2cm及2.45cm²；仍應核對產品與剪力面。','螺紋標準及產品有效截面','17.6.1／17.7.1'],
+da:['dₐ','案件與材料','標稱桿徑；20mm應填2cm。不可將mm數字直接填入。','製造圖、型號尺寸表','17.2'],
+AsN:['Ase,N','案件與材料','受拉有效鋼材斷面，扣除螺牙或縮頸影響；M20範例2.45。','材料證明與產品認證有效面積表','17.6.1'],
+AsV:['Ase,V','案件與材料','剪力面上的有效面積；剪力面位於螺牙時須採相應有效斷面。','剪力面位置圖、產品認證','17.7.1'],
+fy:['fya','案件與材料','錨栓鋼材降伏強度。2400kgf/cm²約235.4MPa。','該批鋼材試驗證明','17.6.1'],
+fu:['futa','案件與材料','極限抗拉強度；容量計算限制為min(fu,1.9fy,8750)。','鋼材拉伸試驗證明','17.6.1／17.7.1'],
+ductile:['韌性鋼材條件','案件與材料','是否符合規範韌性條件影響φ。須有伸長率與斷面縮減率依據。','材料試驗與規範韌性定義','17.2／表17.5.3'],
+hef:['hₑf','案件與材料','混凝土表面至有效錨定受力位置的深度；不是總長或鑽孔深度。範例20cm。','錨定詳圖、產品認證與施工尺寸','17.2／17.6'],
+Ab:['Abrg','案件與材料','擴頭抵壓混凝土的淨面積＝頭部承壓面積－桿身截面。範例8cm²。','頭部製造尺寸圖','17.6.3'],
+eh:['eₕ','案件與材料','彎鉤有效伸出長度；本模式檢查3da≤eh≤4.5da。','J/L型彎鉤詳圖','17.6.3'],
+fc:['f′c','混凝土與配置','指定抗壓強度。範例280kgf/cm²約27.46MPa，非280MPa。','結構圖與混凝土強度報告','17.3'],
+ha:['hₐ','混凝土與配置','沿埋設方向至背面自由表面的構材總厚度。範例40cm。','混凝土剖面圖、現場量測','17.2／17.9'],
+nx:['nₓ','混凝土與配置','X向列數1～3；nx×ny為總支數，最多9支。','基板及錨栓平面配置圖','本工具矩形規則群錨'],
+ny:['nᵧ','混凝土與配置','Y向列數1～3；範例nx=ny=2為四支。','基板及錨栓平面配置圖','本工具矩形規則群錨'],
+sx:['sₓ','混凝土與配置','相鄰錨栓X向中心間距，非桿身淨距。單列不作用。範例20cm。','錨栓中心定位圖','17.9'],
+sy:['sᵧ','混凝土與配置','相鄰錨栓Y向中心間距。範例20cm。','錨栓中心定位圖','17.9'],
+cL:['cL','混凝土與配置','最左列錨栓中心至左自由邊；不是群錨中心至邊。範例25cm。','平面尺寸圖與現場量測','17.6／17.7／17.9'],
+cR:['cR','混凝土與配置','最右列錨栓中心至右自由邊。範例25cm。','平面尺寸圖與現場量測','17.6／17.7／17.9'],
+cB:['cB','混凝土與配置','最下列錨栓中心至下自由邊（−y）。範例25cm。','平面尺寸圖與現場量測','17.6／17.7／17.9'],
+cT:['cT','混凝土與配置','最上列錨栓中心至上自由邊（＋y）。範例25cm。','平面尺寸圖與現場量測','17.6／17.7／17.9'],
+cracked:['開裂／未開裂','混凝土與配置','預設開裂。要取消，需證明使用載重及收縮等作用下錨定區不開裂。','結構使用性、收縮與應力分析','17.6／17.7'],
+N:['Nu','因數化載重','整組因數化軸拉力，拉為正；範例8tf。不得再乘載重因數。','結構分析完整載重組合、設備反力','第5章／17.5'],
+Mx:['Mx','因數化載重','對群中心彎矩，正值使＋y側增拉。範例0.3tf·m；包含剪力作用高度效應。','結構分析與荷載作用點轉換','剛性基板彈性分配'],
+My:['My','因數化載重','本工具正值使＋x側增拉。範例0.2tf·m；請核對外部軟體符號。','結構分析與群中心轉換','剛性基板彈性分配'],
+Vx:['Vx','因數化載重','整組剪力，正值向右（＋x）；範例1.2tf。','完整因數化載重組合','17.7'],
+Vy:['Vy','因數化載重','整組剪力，正值向上（＋y）；範例0.6tf。','完整因數化載重組合','17.7'],
+Tz:['Tz','因數化載重','對群中心平面扭矩，正值逆時針。範例0.1tf·m。','完整因數化載重組合及作用點','彈性扭剪分配'],
+sustained:['Ns/N','因數化載重','0～1。整組模式依各支拉力乘此比例求Ns；例如0.6代表60%。不同持續分布用逐支模式。','持續載重分解與長期受力分析','17.6.5／17.5'],
+np:['Np','產品認證','認證基本標稱拔出強度，尚未乘φ。0代表缺資料；不能填產品容許拉力。','對應型號、埋深、開裂狀態之認證表','17.6.3'],
+tauCr:['τcr','產品認證','開裂特徵握裹應力。依適用溫濕度、載重型態取認證值，不能用膠體抗拉強度。','黏結式產品認證特徵握裹表','17.6.5'],
+tauUn:['τuncr','產品認證','未開裂特徵握裹應力；計算cNa仍需要，即使本案選開裂。','同一產品／環境之認證報告','17.6.5'],
+category:['安裝敏感度1／2／3','產品認證','由認證指定，影響拉破及拔出強度折減係數；不能自行選1。','產品認證分類表','表17.5.3'],
+cac:['cac','產品認證','用於劈裂修正的臨界邊距；0使用本版規範預設。不能與產品最小邊距混用。','產品認證及表17.9.5','17.9.5'],
+prodS:['smin','產品認證','允許安裝的最小中心間距；不代表可忽略群錨影響。','對應型號及埋深的認證尺寸表','17.9'],
+prodC:['cmin','產品認證','產品允許最小中心邊距；保護層、粒料及破壞容量另需檢核。','產品認證最小邊距表','17.9'],
+prodH:['hmin','產品認證','產品允許最小構材厚度，須對應指定埋深。','產品認證尺寸表','17.9'],
+prodMinHef:['hef,min','產品認證','該產品認證的有效埋深下限；不可超出認證範圍外插容量。','產品認證埋深範圍表','17.3／17.9'],
+prodMaxHef:['hef,max','產品認證','該产品認證的有效埋深上限；鑽孔長度另按安裝手冊。','產品認證埋深範圍表','17.3／17.9'],
+report:['證明文件識別','產品認證','填報告編號、日期／版次、型號及材料批次，便於追溯。','有效認證報告與材料證明','17.3／第26章'],
+qualified:['適用條件確認','產品認證','逐項確認開裂、鑽清孔、濕度、溫度、方向、養護與有效斷面。勾選不會自動產生產品容量。','產品認證與現場施工紀錄','17.3／第26章'],
+age:['安裝齡期','產品認證','安裝當日距澆置的日數；黏結式至少21日，並符合產品規定。','澆置、強度與安裝紀錄','17.3'],
+seismic:['耐震設計啟用','耐震與細部','依工程設計需求確認。本工具採已放大地震分量的載重路徑，需外部分析。','結構耐震設計說明','17.10'],
+seisPath:['Ωo載重路徑已確認','耐震與細部','只放大地震分量E，再形成完整載重組合。不能將全部N、V一律乘Ωo代替。','耐震載重組合計算書','17.10.5.3(d)／17.10.6.3(c)'],
+seisQualified:['後置耐震資格','耐震與細部','確認認證覆蓋實際產品、混凝土、埋深與耐震條件；仍須分析載重。','產品耐震試驗及認證','17.10.3'],
+plasticHinge:['塑鉸區位置','耐震與細部','可能形成塑鉸區需專項設計，本工具列待檢核而非完成。','結構塑鉸分布與耐震設計圖','17.10.2'],
+supp:['輔助鋼筋條件','耐震與細部','須跨潛在破壞面且有合適錨定與配置。不等同以錨定鋼筋代替混凝土破壞容量。','配筋圖及發展長度計算','17.5'],
+edgeRebar:['ψc,V配置','耐震與細部','無／未確認為1.0；符合D13邊緣筋1.2，並符合密箍條件1.4。不可僅憑有鋼筋就選較大值。','邊緣筋、箍筋與錨定詳圖','17.7.2.5.1'],
+torqued:['安裝扭力條件','耐震與細部','預埋螺栓是否受安裝扭力影響最小间距與邊距；依實際施工程序。','施工扭力規定與紀錄','17.9'],
+headWidth:['錨定端包絡寬','耐震與細部','鋼材錨定端最外尺寸，用於端部保護層檢查。','製造圖及剖面','20.5.1／17.9'],
+tipExtra:['超出有效錨定點深度','耐震與細部','有效受力點至鋼材最底端尺寸，例如頭部厚度；範例1.5cm。','錨定端剖面製造圖','20.5.1／17.9'],
+cover:['淨保護層','耐震與細部','依暴露、接觸土壤等條件指定。中心邊距與淨保護層差半徑等幾何尺寸。','20.5.1與工程圖說','20.5.1'],
+aggregate:['最大粒料','耐震與細部','混凝土配比的最大粒料尺寸；後置最小邊距另檢查2倍粒料。','混凝土配比與出貨單','17.9'],
+grout:['基板灌漿','耐震與細部','基板下灌漿層會使本式鋼材剪力乘0.80；懸空段彎曲須專項處理。','基板剖面與灌漿施工圖','17.7.1.2.1'],
+leMode:['ℓe','耐震與細部','一般模式min(hef,8da)；具分離定距套筒產品採2da。','產品受剪構造圖','17.7.2'],
+manualN:['Ni','逐支與搜尋','逐支因數化拉力，tf，拉力正；外部模型須含底板接觸與撬力。','底板／錨栓非線性或合理分析','17.5'],
+manualV:['Vxi／Vyi','逐支與搜尋','逐支有正負號剪力，tf；合力由程式計算，正向同平面坐標。','外部錨栓受力分析','17.7'],
+manualNs:['Nsi','逐支與搜尋','逐支持續拉力，tf，0≤Ns≤N；不是整組持續拉力。','持續載重組合的逐支分析','17.6.5'],
+scanMin:['搜尋下限','逐支與搜尋','有效埋深搜尋起點cm，須落在認證埋深及構材可用範圍。','允許埋深範圍與厚度圖','每0.5cm搜尋'],
+scanMax:['搜尋上限','逐支與搜尋','有效埋深搜尋終點cm；候選全部檢查幾何、容量及資料完整性。','產品認證與構材尺寸','候選通過後仍需套用'],
+outUnit:['結果顯示單位','逐支與搜尋','tf／kgf／kN僅切換輸出。輸入力仍為tf、彎矩tf·m；1tf=9.80665kN。','精確單位換算','1kgf=9.80665N']
+};
+const defs=Object.entries(detail).map(([key,d])=>({key,symbol:d[0],group:d[1],definition:d[2],source:d[3],reference:d[4],label:fields[key]?.[0]||d[0],unit:fields[key]?.[1]||(['scanMin','scanMax'].includes(key)?'cm':key.startsWith('manual')?'tf':''),hint:sources[key]?.instruction||'',example:Object.hasOwn(E.DEFAULT,key)?(typeof E.DEFAULT[key]==='boolean'?(E.DEFAULT[key]?'勾選':'不勾選'):E.DEFAULT[key]):'依本案資料'}));
+window.AnchorParameterDefinitions=defs;
+const nav=document.querySelector('.nav'),workspace=document.querySelector('.workspace');
+for(const [key,label]of [['parameters','05　參數字典'],['tutorial','06　操作影片'],['code','07　規範依據']]){const b=document.createElement('button');b.dataset.tab=key;b.textContent=label;nav.append(b)}
+workspace.insertAdjacentHTML('afterbegin','<div class="version-line"><span class="badge">工作台 v2.0</span><span>台灣112年版＋113勘誤 · 核對2026-10-09</span><button data-tab="code">查看規範依據</button></div><div class="workflow" aria-label="快速定位"><button data-jump="materialFields">① 材料</button><button data-jump="geometryFields">② 配置</button><button data-jump="globalFields">③ 載重</button><button data-jump="productFields">④ 認證</button><button data-jump="overall">⑤ 結果</button><button data-tab="tutorial">觀看教學</button></div>');
+workspace.insertAdjacentHTML('beforeend',`<div id="view-parameters" class="wide help" hidden><section class="panel"><div class="panel-head"><h2>輸入參數字典</h2><span class="badge">${defs.length}項定義</span></div><div class="panel-body"><p>輸入前查符號、單位、填法與來源。預設值用於教學範例，實案請填入可追溯資料。</p><div class="parameter-tools"><input id="parameterSearch" type="search" aria-label="搜尋參數" placeholder="搜尋：埋深、hef、邊距、認證…"><select id="parameterGroup" aria-label="參數類別"><option value="">全部類別</option>${[...new Set(defs.map(d=>d.group))].map(g=>`<option>${esc(g)}</option>`).join('')}</select></div><p id="parameterCount" role="status" class="step-count"></p><div id="parameterCards" class="parameter-grid"></div></div></section></div><div id="view-tutorial" class="wide help" hidden><section class="panel"><div class="panel-head"><h2>操作影片 · 中文旁白</h2><span class="badge">可按章節跳轉</span></div><div class="panel-body"><video id="tutorialVideo" class="tutorial-video" controls playsinline preload="metadata" aria-label="混凝土錨栓工作台操作教學"></video><div class="video-commands"><button id="loadTutorial" class="primary">載入操作影片</button><button id="saveTutorial">下載MP4</button></div><p id="tutorialStatus" role="status">含中文旁白與畫面字幕；下方提供完整文字稿。首次載入需下載影片資料。</p><div id="tutorialChapters" class="video-commands"></div><details><summary>旁白文字稿與操作步驟</summary><div id="tutorialTranscript"></div></details><div class="note">離線版內含影片，無網路也能播放。教學以預埋M20範例示範；後置式必須另填實際產品認證值。</div></div></section></div><div id="view-code" class="wide help" hidden><section class="panel"><div class="panel-head"><h2>現行規範、版本與實作範圍</h2><span class="badge">2026-10-09核對</span></div><div class="panel-body"><div class="code-status"><strong>計算模式：台灣112年版《建築物混凝土結構設計規範》第17章，含113年勘誤。</strong><p>國土管理署公布頁截至核對日列示112年8月10日修正、113年1月1日施行及113年2月19日勘誤。程式沿用該版本的單位制係數與互制方法。</p></div><h3>規範與計算的對應</h3><div class="table-wrap"><table class="code-table"><thead><tr><th>內容</th><th>章節</th><th>工具行為</th></tr></thead><tbody><tr><td>需求、設計強度與φ</td><td>17.5／表17.5.3</td><td>輸入因數化需求；列示標稱強度、φ與設計強度</td></tr><tr><td>鋼材、拉破、拔出、側面爆裂、握裹</td><td>17.6</td><td>列示逐步公式、幾何投影、群錨與偏心修正</td></tr><tr><td>鋼材剪力、剪破、撬破</td><td>17.7</td><td>剪力方向及子群包絡；灌漿層修正</td></tr><tr><td>拉剪互制</td><td>17.8</td><td>依台灣版門檻、個別容量及互制條件判定</td></tr><tr><td>間距、邊距、厚度</td><td>17.9／20.5.1</td><td>產品認證限制及使用者指定保護層</td></tr><tr><td>耐震</td><td>17.10</td><td>採外部Ωo載重路徑；後置鋼材剪力採認證模擬地震試驗值，缺值待補；塑鉸區另算</td></tr><tr><td>施工與認證</td><td>第26章</td><td>需查產品適用條件與施工紀錄；缺資料列待補</td></tr></tbody></table></div><h3>ACI 318-25 更新追蹤</h3><p>ACI官方更新課程列出拉剪互制、錨定鋼筋及產品資格等更新。ACI 318-25與台灣现行版為不同設計依據，本工具尚未實作完整ACI 318-25計算模式，故不能產出ACI 318-25合規判定。需要該版案件時，應取得完整官方條文及產品資料再作專項分析。</p><h3>適用範圍</h3><p>常重混凝土、規則矩形1～9支群錨；整組模式採剛性底板彈性分配。底板接觸、撬力、錨栓彎曲、剪力榫、錨定鋼筋替代CCD、塑鉸及特殊狹窄幾何需外部專項設計。結果「待補」不等於符合。</p><h3>官方來源</h3><ul><li><a href="https://www.nlma.gov.tw/ch/legislation/regsearch/6874" target="_blank" rel="noopener">國土管理署：公布與勘誤</a></li><li><a href="https://www.nlma.gov.tw/uploads/files/011d9249cac7d6c5547786aa348e352a.pdf" target="_blank" rel="noopener">台灣現行規範全文PDF</a></li><li><a href="https://www.nlma.gov.tw/uploads/files/40e4370d2726960efcc41074b2d99f53.pdf" target="_blank" rel="noopener">113年勘誤PDF</a></li><li><a href="https://aciuniversity.concrete.org/Listing/ACI-318-25-Code-Changes-Part-2-%E2%80%93-Reinforcement-Anchorage-and-Shear-2774" target="_blank" rel="noopener">ACI官方318-25更新：錨栓、鋼筋與剪力</a></li></ul></div></section></div>`);
+const oldSwitch=switchTab;switchTab=function(tab){oldSwitch(tab);for(const t of ['parameters','tutorial','code'])$('view-'+t).hidden=t!==tab;document.querySelector('.workflow').hidden=tab!=='calc';};
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+function jump(key){switchTab('calc');let el=$(key);if(!el)return;for(let p=el.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;el.classList.add('return-focus');el.scrollIntoView({behavior:'smooth',block:'center'});if(el.matches('input,select'))el.focus({preventScroll:true})}
+document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>jump(b.dataset.jump));
+const dialog=document.createElement('dialog');dialog.className='parameter-dialog';dialog.innerHTML='<div id="parameterDialogBody"></div><div class="dialog-actions"><button id="parameterLocate">前往欄位</button><button id="parameterClose" class="primary">關閉</button></div>';document.body.append(dialog);let helpKey;
+function content(d){return `<h3>${esc(d.label)}</h3><p><span class="badge">${esc(d.symbol)}${d.unit?' · '+esc(d.unit):' · 無因次／選項'}</span></p><p><strong>定義與填法</strong><br>${esc(d.definition)}</p><p><strong>資料來源</strong><br>${esc(d.source)}</p><p><strong>範例／預設</strong>：${esc(d.example)}</p><p><strong>對應條文／模型</strong>：${esc(d.reference)}</p>`}
+function showHelp(key){const d=defs.find(d=>d.key===key);if(!d)return;helpKey=key;$('parameterDialogBody').innerHTML=content(d);$('parameterLocate').hidden=!$(key);dialog.showModal()}
+$('parameterClose').onclick=()=>dialog.close();$('parameterLocate').onclick=()=>{dialog.close();jump(helpKey)};
+for(const [key]of Object.entries(fields)){const el=document.querySelector(`[data-field="${key}"]`);if(!el)continue;const b=document.createElement('button');b.type='button';b.className='field-help';b.textContent='ⓘ 定義與來源';b.setAttribute('aria-label',fields[key][0]+'：定義與來源');b.onclick=()=>showHelp(key);el.append(b)}
+for(const k of ['scanMin','scanMax','outUnit']){const el=$(k);const b=document.createElement('button');b.className='field-help';b.textContent='ⓘ';b.setAttribute('aria-label',detail[k][0]+'說明');b.onclick=()=>showHelp(k);el.after(b)}
+$('manualInputs').insertAdjacentHTML('afterbegin','<div class="video-commands"><button data-param="manualN">拉力N定義</button><button data-param="manualV">剪力V定義</button><button data-param="manualNs">持續拉力Ns定義</button></div>');document.querySelectorAll('[data-param]').forEach(b=>b.onclick=()=>showHelp(b.dataset.param));
+function renderDictionary(){const q=$('parameterSearch').value.trim().toLowerCase(),g=$('parameterGroup').value,list=defs.filter(d=>(!g||d.group===g)&&(!q||Object.values(d).join(' ').toLowerCase().includes(q)));$('parameterCount').textContent=`顯示${list.length}／${defs.length}項`;$('parameterCards').innerHTML=list.map(d=>`<article class="parameter-card">${content(d)}<small>${esc(d.group)}</small>${$(d.key)?`<p><button data-locate="${d.key}">前往輸入欄位</button></p>`:''}</article>`).join('')||'<p>查無相符參數；可試「埋深」或「hef」。</p>';document.querySelectorAll('[data-locate]').forEach(b=>b.onclick=()=>jump(b.dataset.locate))}
+$('parameterSearch').oninput=renderDictionary;$('parameterGroup').onchange=renderDictionary;renderDictionary();
+const meta=window.AnchorTutorialMeta||{chapters:[],chunks:[]};$('tutorialTranscript').innerHTML=meta.chapters.map(c=>`<div class="transcript-entry"><strong>${esc(c.title)}</strong><p>${esc(c.text)}</p></div>`).join('');
+$('tutorialVideo').poster='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720"><rect width="1280" height="720" fill="#102a43"/><circle cx="640" cy="300" r="65" fill="#057a85"/><path d="M623 267L623 333L674 300Z" fill="white"/><text x="640" y="445" text-anchor="middle" fill="white" font-family="sans-serif" font-size="42">混凝土錨栓操作教學</text><text x="640" y="512" text-anchor="middle" fill="#ffc65c" font-family="sans-serif" font-size="28">中文旁白 · 五個章節 · 點選下方載入影片</text></svg>');
+let mediaPromise,mediaUrl;
+async function loadMedia(){if(mediaUrl)return mediaUrl;if(mediaPromise)return mediaPromise;mediaPromise=(async()=>{const b=$('loadTutorial');b.disabled=true;$('tutorialStatus').textContent='載入中文旁白影片中…';try{window.AnchorTutorialChunks=window.AnchorTutorialChunks||[];if(!window.AnchorTutorialOffline){const response=await fetch('tutorial/anchor-tutorial.mp4');if(!response.ok)throw Error('影片載入失敗，請連線後重試。');const data=new Uint8Array(await response.arrayBuffer());const encoded=[];for(let offset=0;offset<data.length;offset+=262144){let binary='';for(const value of data.subarray(offset,offset+262144))binary+=String.fromCharCode(value);encoded.push(btoa(binary))}window.AnchorTutorialChunks=encoded};const chunks=window.AnchorTutorialChunks;if(!chunks.length||chunks.length!==meta.chunkCount)throw Error('影片資料不完整');const bytes=chunks.map(x=>Uint8Array.from(atob(x),c=>c.charCodeAt(0)));mediaUrl=URL.createObjectURL(new Blob(bytes,{type:'video/mp4'}));$('tutorialVideo').src=mediaUrl;$('tutorialStatus').textContent='影片已就緒，按播放即可。內含中文旁白與字幕。';return mediaUrl}catch(e){window.AnchorTutorialChunks=[];mediaPromise=null;$('tutorialStatus').textContent=e.message;throw e}finally{b.disabled=false}})();return mediaPromise}
+$('loadTutorial').onclick=()=>loadMedia().then(()=>$('tutorialVideo').play()).catch(()=>{});$('saveTutorial').onclick=()=>loadMedia().then(url=>{const a=document.createElement('a');a.href=url;a.download='Concrete_Anchor_Tutorial_zh-TW.mp4';a.click()}).catch(()=>{});
+$('tutorialChapters').innerHTML=meta.chapters.map((c,i)=>`<button data-chapter="${i}">${esc(c.title)}</button>`).join('');document.querySelectorAll('[data-chapter]').forEach(b=>b.onclick=()=>loadMedia().then(()=>{const v=$('tutorialVideo');v.currentTime=meta.chapters[Number(b.dataset.chapter)].start;return v.play()}).catch(()=>{}));
+$('downloadOffline').onclick=async()=>{const b=$('downloadOffline');b.disabled=true;try{await loadMedia();const clone=document.documentElement.cloneNode(true);clone.querySelectorAll('[data-v2-generated]').forEach(n=>n.remove());clone.querySelector('#toast').hidden=true;clone.querySelector('#downloadOffline').disabled=false;clone.querySelector('#projectFile').value='';for(const t of ['calc','process','help','validation'])clone.querySelector('#view-'+t).hidden=t!=='calc';clone.querySelectorAll('[data-tab]').forEach(n=>{n.classList.toggle('active',n.dataset.tab==='calc');n.removeAttribute('aria-current')});clone.querySelectorAll('dialog').forEach(d=>d.removeAttribute('open'));clone.querySelectorAll('script[src]').forEach(s=>s.remove());clone.querySelectorAll('[data-offline-media]').forEach(s=>s.remove());const seed=clone.querySelector('#offline-case')||document.createElement('script');seed.type='application/json';seed.id='offline-case';seed.textContent=JSON.stringify(state).replace(/</g,'\\u003c');if(!seed.parentNode)clone.querySelector('head').append(seed);const media=document.createElement('script');media.dataset.offlineMedia='true';media.textContent='window.AnchorTutorialOffline=true;window.AnchorTutorialChunks='+JSON.stringify(window.AnchorTutorialChunks)+';';clone.querySelector('head').append(media);download('<!doctype html>\n'+clone.outerHTML,'Concrete_Anchor_Offline_v2.html','text/html;charset=utf-8');notify('離線版已下載，內含本案資料、計算工具與旁白影片。')}catch(e){notify('未下載：'+e.message)}finally{b.disabled=false}};
+document.querySelectorAll('#view-parameters,#view-tutorial,#view-code,.version-line,.workflow,.parameter-dialog,.field-help,[data-param],.nav [data-tab=parameters],.nav [data-tab=tutorial],.nav [data-tab=code]').forEach(n=>n.dataset.v2Generated='true');
+document.querySelector('.side-note div:last-child').innerHTML='v2.0 · 2026.10<br>離線計算與中文旁白教學。';
+document.querySelector('.footer').textContent='錨栓設計工作台 v2.0 · 規範核對2026-10-09 · 本機計算 · 含中文旁白操作影片';
+})();
 </script></body></html>
 
 

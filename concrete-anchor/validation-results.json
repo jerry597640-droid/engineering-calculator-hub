@@ -1,7 +1,7 @@
 {
-  "date": "2026-10-05",
-  "version": "1.0.0",
-  "count": 25,
+  "date": "2026-10-09",
+  "version": "2.0.0",
+  "count": 28,
   "checks": [
     "鋼材強度、螺牙有效面積與單位",
     "剛性錨栓群六分量平衡",
@@ -27,7 +27,10 @@
     "狹窄三面近邊與薄構材防誤判",
     "9支子群檢核與轉向對稱",
     "互制須同時滿足個別容量，不能靠另一側餘量掩蓋",
-    "不同常重混凝土強度的sqrt與群面積獨立"
+    "不同常重混凝土強度的sqrt與群面積獨立",
+    "後置耐震Vsa缺值阻止完成",
+    "後置耐震採試驗Vsa及灌漿折減",
+    "一般剪力不使用耐震試驗輸入"
   ],
   "defaultSummary": {
     "status": "已計算項目符合",
@@ -93,7 +96,16 @@
         "detail": {
           "fuUsed": 4000,
           "As": 2.45,
-          "anchor": 4
+          "anchor": 4,
+          "trace": [
+            {
+              "title": "鋼材拉力",
+              "formula": "Nsa=AsN min(fu,1.9fy,8750)",
+              "substitution": "2.45×min(4000,4560,8750)；fuUsed=4000",
+              "result": 9800,
+              "unit": "kgf"
+            }
+          ]
         },
         "kind": "N"
       },
@@ -109,7 +121,18 @@
         "detail": {
           "fuUsed": 4000,
           "As": 2.45,
-          "grout": false
+          "grout": false,
+          "seismicTest": false,
+          "trace": [
+            {
+              "title": "鋼材剪力",
+              "formula": "Vsa=(stud?1:0.6)AsV fuUsed(grout?0.8:1)",
+              "substitution": "0.6×2.45×4000×1",
+              "result": 5880,
+              "unit": "kgf",
+              "condition": ""
+            }
+          ]
         },
         "kind": "V"
       },
@@ -123,6 +146,24 @@
         "capacity": 11115.387436857334,
         "ratio": 0.7197230007001761,
         "detail": {
+          "trace": [
+            {
+              "title": "混凝土拉破投影、偏心與修正",
+              "formula": "ANc=截邊投影矩形聯集；ANco=9hef²；r=1.5hef；ec=1/(1+ex/r)/(1+ey/r)；ed=min(1,0.7+0.3ca/r)；cp=後置未裂無補強?min(1,max(ca/cac,r/cac)):1",
+              "substitution": "ids=1,2,3,4；bounds={\"L\":-35,\"R\":35,\"B\":-35,\"T\":35}；hef=20；r=30；ANco=3600；W=8000；ex=2.5；ey=3.75；ca=25；cac=80；投影積分切片=[{\"x0\":-35,\"x1\":-20,\"mid\":-27.5,\"intervals\":[[-35,20],[-20,35]],\"length\":70,\"area\":1050},{\"x0\":-20,\"x1\":20,\"mid\":0,\"intervals\":[[-35,20],[-35,20],[-20,35],[-20,35]],\"length\":70,\"area\":2800},{\"x0\":20,\"x1\":35,\"mid\":27.5,\"intervals\":[[-35,20],[-20,35]],\"length\":70,\"area\":1050}]",
+              "result": 4900,
+              "unit": "cm²",
+              "condition": "每片Δx×聯集y長相加；ec=0.8205128205128206；ed=0.95；裂縫係數=1；cp=1"
+            },
+            {
+              "title": "混凝土拉破基本容量及乘積",
+              "formula": "深埋預埋頭28≤hef≤63.5：Nb=5.8√fc hef^(5/3)；其他Nb=kc√fc hef^1.5；Ncb=(ANc/ANco)ec ed c cp Nb",
+              "substitution": "深埋=false；kc=10；fc=280；hef=20；Nb=14966.629547095767；4900/3600×0.8205128205128206×0.95×1×1×14966.629547095767",
+              "result": 15879.124909796194,
+              "unit": "kgf",
+              "condition": "預埋kc10；後置kc7；裂縫/未裂與後置劈裂係數依本次分支"
+            }
+          ],
           "nominal": 15879.124909796194,
           "A": 4900,
           "A0": 3600,
@@ -155,7 +196,17 @@
         "ratio": 0.2590880102040816,
         "detail": {
           "Ab": 8,
-          "eh": 8
+          "eh": 8,
+          "trace": [
+            {
+              "title": "拔出容量與分支",
+              "formula": "預埋頭Np=8Abfc；hook Np=0.9fc eh da；其他採認證np；設計=φpull×地震折減×裂縫係數×Np",
+              "substitution": "type=bolt；Ab=8；fc=280；eh=8；da=2；npInput=0；Np=17920",
+              "result": 17920,
+              "unit": "kgf",
+              "condition": "phiPull=0.7；reduceN=1；裂縫係數=1"
+            }
+          ]
         },
         "kind": "N"
       },
@@ -181,6 +232,32 @@
         "capacity": 23388.898994138446,
         "ratio": 0.06134033471808116,
         "detail": {
+          "trace": [
+            {
+              "title": "混凝土拉破投影、偏心與修正",
+              "formula": "ANc=截邊投影矩形聯集；ANco=9hef²；r=1.5hef；ec=1/(1+ex/r)/(1+ey/r)；ed=min(1,0.7+0.3ca/r)；cp=後置未裂無補強?min(1,max(ca/cac,r/cac)):1",
+              "substitution": "ids=1,2,3,4；bounds={\"L\":-35,\"R\":35,\"B\":-35,\"T\":35}；hef=20；r=30；ANco=3600；W=1434.682892987844；ex=1.6007731410246628；ey=2.9916664091563967；ca=25；cac=80；投影積分切片=[{\"x0\":-35,\"x1\":-20,\"mid\":-27.5,\"intervals\":[[-35,20],[-20,35]],\"length\":70,\"area\":1050},{\"x0\":-20,\"x1\":20,\"mid\":0,\"intervals\":[[-35,20],[-35,20],[-20,35],[-20,35]],\"length\":70,\"area\":2800},{\"x0\":20,\"x1\":35,\"mid\":27.5,\"intervals\":[[-35,20],[-20,35]],\"length\":70,\"area\":1050}]",
+              "result": 4900,
+              "unit": "cm²",
+              "condition": "每片Δx×聯集y長相加；ec=0.8632578752376746；ed=0.95；裂縫係數=1；cp=1"
+            },
+            {
+              "title": "混凝土拉破基本容量及乘積",
+              "formula": "深埋預埋頭28≤hef≤63.5：Nb=5.8√fc hef^(5/3)；其他Nb=kc√fc hef^1.5；Ncb=(ANc/ANco)ec ed c cp Nb",
+              "substitution": "深埋=false；kc=10；fc=280；hef=20；Nb=14966.629547095767；4900/3600×0.8632578752376746×0.95×1×1×14966.629547095767",
+              "result": 16706.356424384605,
+              "unit": "kgf",
+              "condition": "預埋kc10；後置kc7；裂縫/未裂與後置劈裂係數依本次分支"
+            },
+            {
+              "title": "剪力撬破控制值",
+              "formula": "kcp=hef<6.5?1:2；Vcp=kcp×(adhesive?min(Ncb,Nag):Ncb)",
+              "substitution": "hef=20；kcp=2；Ncb=16706.356424384605；Nag=未取得；nom=33412.71284876921",
+              "result": 33412.71284876921,
+              "unit": "kgf",
+              "condition": "需求用子群ΣV=1434.682892987844；黏結缺資料時容量不可採用"
+            }
+          ],
           "nominal": 16706.356424384605,
           "A": 4900,
           "A0": 3600,
@@ -213,6 +290,24 @@
         "capacity": 3534.793606467513,
         "ratio": 0.35586411477876706,
         "detail": {
+          "trace": [
+            {
+              "title": "邊緣剪破最近排、投影與作用方向",
+              "formula": "ca1=min到該邊距離；r=1.5ca1；AVc=最近排橫向投影區間聯集長×min(r,ha)；AVco=4.5ca1²",
+              "substitution": "edge=T；ids=1,2,4；front=4；ca1=25；r=37.5；橫向邊界=[-35,35]；區間=[[-27.5,35]]；width=62.5；ha=40",
+              "result": 2343.75,
+              "unit": "cm²",
+              "condition": "AVco=2812.5；outward=true；parallel=false；active=true；side=25；合計V=1257.9061976912071；橫向偏心=6.768941276059602"
+            },
+            {
+              "title": "邊緣剪破基本容量及控制乘積",
+              "formula": "le=min(短模式2da或hef,8da)；Vb=min[1.86(le/da)^0.2√da,3.8]√fc ca1^1.5；Vcb=(AVc/AVco)ec ed c h mult Vb",
+              "substitution": "leMode=full；le=16；da=2；fc=280；候選係數=3.9869972806350114、3.8；Vb=7948.2702520737175；2343.75/2812.5×0.8470950268756436×0.8999999999999999×1×1×1×7948.2702520737175",
+              "result": 5049.705152096448,
+              "unit": "kgf",
+              "condition": "ec=1/(1+ex/r)=0.8470950268756436；ed=0.8999999999999999；裂縫/邊筋c=1；h=max(1,√(r/ha))=1；平行mult2，其他1；本次=1；總剪力保守對方向容量"
+            }
+          ],
           "nominal": 5049.705152096448,
           "A": 2343.75,
           "A0": 2812.5,
