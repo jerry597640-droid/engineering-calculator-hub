@@ -317,6 +317,15 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
     "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/concrete-strength.html",
     "code": "CONC",
     "favorite": false
+  },
+  {
+    "id": "steel-sections",
+    "name": "台灣型鋼斷面資料庫",
+    "category": "鋼結構",
+    "description": "台灣 H／I／槽鋼型錄與角鋼、C 型鋼、方矩管、圓管：斷面尺寸、截面性質、比較、自訂截面、CSV/Word 匯出與離線版本。",
+    "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/steel-sections/",
+    "code": "SEC",
+    "favorite": false
   }
 ]
 </script>
@@ -332,6 +341,7 @@ iconPaths['src-beam']='<rect x="3" y="3" width="26" height="26" rx="2"/><path d=
 iconPaths['rc-wall']='<rect x="4" y="5" width="24" height="22"/><path d="M9 5v22M16 5v22M23 5v22M4 11h24M4 21h24"/>';
 iconPaths['concrete-strength']='<path d="M4 3v25h25M7 24l5-9 7-5 9-3"/><circle cx="19" cy="10" r="2"/>';
 iconPaths['slab-analysis']='<path d="M3 8h26v16H3zM3 16h26M11 8v16M21 8v16M6 28h20"/>';
+iconPaths['steel-sections']='<path d="M4 8h24v5H19v6h9v5H4v-5h9v-6H4z"/><path d="M4 28h24M16 4v3"/>';
 function toolIcon(id){return '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(iconPaths[id]||iconPaths.custom)+'</svg>'}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function validate(items){if(!Array.isArray(items)||items.length>1000)throw Error('備份必須包含工具清單，最多 1000 項。');const ids=new Set();return items.map((t,i)=>{if(!t||typeof t!=='object')throw Error('工具資料格式錯誤。');for(const [k,max]of [['id',100],['name',80],['category',40],['url',2000]])if(typeof t[k]!=='string'||!t[k].trim()||t[k].length>max)throw Error('第 '+(i+1)+' 項工具的名稱、網址或分類無效。');let u;try{u=new URL(t.url)}catch{throw Error('網址格式錯誤。')}if(!['http:','https:'].includes(u.protocol))throw Error('只接受 http 或 https 網址。');if(ids.has(t.id))throw Error('備份內有重複的工具識別碼。');ids.add(t.id);return{id:t.id,name:t.name.trim(),category:t.category.trim(),url:t.url.trim(),description:typeof t.description==='string'?t.description.slice(0,300):'',code:typeof t.code==='string'?t.code.slice(0,8):'TOOL',favorite:t.favorite===true};});}
@@ -450,6 +460,8 @@ try{const marker='engineering-calculator-hub.shear-friction.v1';if(!localStorage
 try{const marker='engineering-calculator-hub.rc-corbel.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='rc-corbel');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='RC托架及梁托工具已載入；請匯出清單保存新增項目。';}
 // Add SRC beam-column while preserving personal entries.
 try{const marker='engineering-calculator-hub.src-beam-column.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='src-beam-column');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='SRC 梁柱工具已載入；請匯出清單保存新增項目。';}
+// Add Taiwan Steel Section Library while preserving saved personal customizations.
+try{const marker='engineering-calculator-hub.steel-sections.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='steel-sections');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='型鋼斷面資料庫已列入預設工具；請確認瀏覽器允許儲存清單。';}
 render();if(startupWarning)notify(startupWarning);
 </script>
 <script id="theme-data" type="application/json">{"navy":"#12243b","paper":"#f4f7fa","surface":"#ffffff","ink":"#192c42","accent":"#efb64e","blue":"#225a83"}</script>
