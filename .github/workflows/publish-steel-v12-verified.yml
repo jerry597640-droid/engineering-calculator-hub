@@ -1,0 +1,57 @@
+name: Publish verified steel v1.2
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-steel-v12-verified.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: publish-steel-verified-v12
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: steel-sections-v1.2
+          run-id: 38052781385
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ runner.temp }}/steel-v12-verified
+      - name: Verify and copy the tested artifacts
+        env:
+          ARTIFACT: ${{ runner.temp }}/steel-v12-verified
+        run: |
+          python - <<'PY'
+          import os,json,hashlib,shutil
+          from pathlib import Path
+          src=Path(os.environ['ARTIFACT']); dst=Path('steel-sections')
+          r=json.loads((src/'verification-v12.json').read_text())
+          assert r['version']=='1.2.0' and len(r['checks'])==67
+          assert all(x['passed'] for x in r['checks'])
+          assert hashlib.sha256((src/'index.html').read_bytes()).hexdigest()=='a7b5c9d5bb5f70636889f62bd5133875ed737a104f96a6a5e1925cc3c8cebd41'
+          assert hashlib.sha256((src/'media/tutorial-zh-TW.mp4').read_bytes()).hexdigest()=='d6d70660e150c955f6be735094ce8d87a0f76484df36a94000484608747f8a9b'
+          dst.mkdir(exist_ok=True)
+          for name in ['index.html','verification-v12.json','README-v12.md','steel-sections-v1.2-offline.zip']:
+              shutil.copy2(src/name,dst/name)
+          shutil.copytree(src/'media',dst/'media',dirs_exist_ok=True)
+          PY
+      - name: Commit and safely retry concurrent updates
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add steel-sections/index.html steel-sections/media steel-sections/verification-v12.json steel-sections/README-v12.md steel-sections/steel-sections-v1.2-offline.zip
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Publish verified steel v1.2: custom dimensions and Taiwanese female tutorial'
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase origin '${{ github.ref_name }}' || exit 1
+            if git push origin HEAD:'${{ github.ref_name }}'; then exit 0; fi
+            sleep 2
+          done
+          exit 1
