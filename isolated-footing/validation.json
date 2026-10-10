@@ -39,7 +39,7 @@
     "Target-device filesystem opening and hardcopy printing require device confirmation.",
     "PASS covers implemented checks for entered combinations; edge/corner punching, settlement, liquefaction, anchorage and seismic detailing remain outside scope."
   ],
-  "sha256_html": "2366bfa3a60702251e519cf5edf47db55ff5049f9afad645c46150bb1231082f",
+  "sha256_html": "cb1bac9e4eff0f3b87392fb4dfa9e30255ddfef58d5266c60069202e1243eea2",
   "embedded_extensions": true,
   "tutorial": {
     "voice": "zh-TW-HsiaoChenNeural",
