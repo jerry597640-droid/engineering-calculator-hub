@@ -1,0 +1,32 @@
+/* Independent balances, hand geometry and batch completeness checks. */
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const E=require('./engine.js'),C=require('./ccd-model.js');
+const checks=[];
+const close=(a,b,t=1e-8)=>assert.ok(Number.isFinite(a)&&Math.abs(a-b)<=t*Math.max(1,Math.abs(b)),`${a} != ${b}`);
+const def=()=>structuredClone(E.DEFAULT);
+const custom=(coords,p=def())=>({...p,layoutMode:'custom',customAnchors:coords.map(([x,y])=>({x,y,da:p.da,hef:p.hef,AsN:p.AsN,AsV:p.AsV,enabled:true}))});
+const check=(name,fn)=>{fn();checks.push(name);console.log('PASS '+name);};
+const row=(r,key)=>r.rows.find(q=>q.key===key);
+function balances(r,p){assert.equal(r.errors.length,0);assert.ok(r.anchors.every(q=>q.rawN>=0));const S=f=>r.anchors.reduce((s,q)=>s+f(q),0);close(S(q=>q.N),p.N*1000);close(S(q=>q.N*q.x),p.My*100000);close(S(q=>q.N*q.y),p.Mx*100000);close(S(q=>q.vx),p.Vx*1000);close(S(q=>q.vy),p.Vy*1000);close(S(q=>q.x*q.vy-q.y*q.vx),p.Tz*100000);}
+check('相同自由座標與規則矩形的容量及內力一致',()=>{const p=def(),a=E.calculate(p),b=E.calculate(custom(E.points(p).map(q=>[q.x,q.y]),p));for(let i=0;i<a.rows.length;i++){if(a.rows[i].capacity!==null)close(b.rows[i].capacity,a.rows[i].capacity);}for(let i=0;i<a.anchors.length;i++)for(const k of ['N','vx','vy'])close(b.anchors[i][k],a.anchors[i][k]);});
+check('非對稱三角配置的六分量對原點平衡',()=>{const p=custom([[-17,-8],[22,-5],[-4,24]],{...def(),Mx:.25,My:.1,Tz:.13});const r=E.calculate(p);assert.ok(Math.abs(r.distribution.XY)>1);balances(r,p);});
+check('平移配置與轉換外載重後內力維持一致',()=>{const p=def(),dx=31,dy=-19,q=custom(E.points(p).map(a=>[a.x+dx,a.y+dy]),{...p,My:p.My+p.N*dx/100,Mx:p.Mx+p.N*dy/100,Tz:p.Tz+(dx*p.Vy-dy*p.Vx)/100});const r=E.calculate(q),base=E.calculate(p);balances(r,q);for(let i=0;i<r.anchors.length;i++)for(const k of ['N','vx','vy'])close(r.anchors[i][k],base.anchors[i][k]);});
+check('旋轉矩形與XY耦合項保持六分量平衡',()=>{const t=Math.PI/6,c=Math.cos(t),s=Math.sin(t),p=def();p.sx=28;p.sy=16;const q=custom(E.points(p).map(a=>[a.x*c-a.y*s,a.x*s+a.y*c]),{...p,My:p.My*c-p.Mx*s,Mx:p.My*s+p.Mx*c,Vx:p.Vx*c-p.Vy*s,Vy:p.Vx*s+p.Vy*c});balances(E.calculate(q),q);});
+check('共線錨栓可平衡相容彎矩並拒絕不相容彎矩',()=>{const p=custom([[-10,-10],[10,10]],{...def(),Mx:.2,My:.2});balances(E.calculate(p),p);assert.ok(E.calculate({...p,My:.1}).errors.some(x=>x.includes('退化')));});
+check('單支平移位置採原點力矩，無力臂扭矩不得忽略',()=>{const p=custom([[5,7]],{...def(),N:1,Mx:.07,My:.05,Vx:.3,Vy:.2,Tz:-.011});balances(E.calculate(p),p);assert.ok(E.calculate({...p,Tz:0}).errors.some(x=>x.includes('扭矩')));});
+check('矩形重疊、包含與分離投影的手算聯集',()=>{close(C.area([[0,3,0,3],[1,4,1,4]]),14);close(C.area([[0,4,0,4],[1,2,1,2]]),16);close(C.area([[0,3,0,3],[5,8,0,3]]),18);close(C.area([[-2,2,-2,2],[-1,3,-1,3]]),23);});
+check('拉破圖形面積等於控制子群計算面積',()=>{for(const p of [def(),custom([[-18,-12],[18,-12],[0,20]],{...def(),Mx:0,My:0})]){const r=E.calculate(p),g=C.tensionProjection(r);close(g.A,row(r,'breakoutN').detail.A);close(g.A0,9*p.hef*p.hef);close(g.A,C.unionCells(g.rects).reduce((s,q)=>s+(q[1]-q[0])*(q[3]-q[2]),0));}});
+check('剪破圖形面積等於控制自由邊計算面積',()=>{for(const p of [{...def(),Vx:2,Vy:.1},{...def(),Vx:.1,Vy:2,ha:28,cT:20}]){const r=E.calculate(p),g=C.shearProjection(r),d=row(r,'breakoutV').detail;close(g.A,d.A);close(g.A0,d.A0);assert.equal(g.edge,d.edge);}});
+check('無自由邊不裁切拉破，且不產生虛構剪破邊',()=>{const p={...def(),infiniteEdges:['L','R','B','T']},r=E.calculate(p);assert.equal(r.errors.length,0);close(E.tensileConcrete(p,E.points(p),E.bounds(p),()=>1).A,6400);assert.equal(C.shearProjection(r),null);assert.equal(r.geometry[1].actual,Infinity);assert.ok(r.rows.every(q=>q.ratio===null||!Number.isNaN(q.ratio)));});
+check('只忽略指定邊，其他真實剪破邊仍檢核',()=>{const p={...def(),infiniteEdges:['R'],Vx:0,Vy:1,Tz:0},r=E.calculate(p),g=C.shearProjection(r);assert.ok(g&&g.edge!=='R');assert.ok(r.candidateAudit.filter(q=>q.mode==='breakoutV').every(q=>q.edge!=='R'));});
+check('自由配置最小間距取歐氏距離而非規則間距',()=>{const p=custom([[-5,-5],[5,5]],{...def(),Mx:0,My:0,Tz:0,sx:100,sy:100}),r=E.calculate(p);close(r.geometry[0].actual,Math.sqrt(200));});
+check('不納入錨栓不參與容量與平衡，編號仍可追溯',()=>{const p=custom([[-10,-10],[10,-10],[-10,10],[10,10]],{...def(),Mx:0,My:0,Tz:0});p.customAnchors[1].enabled=false;const r=E.calculate(p);assert.deepEqual(r.anchors.map(q=>q.id),[1,3,4]);balances(r,p);});
+check('異規格群錨保留待專項設計，不能宣告完成',()=>{const p=custom([[-10,-10],[10,-10],[-10,10],[10,10]]);p.customAnchors[0].hef=16;const r=E.calculate(p);assert.ok(r.missing);assert.ok(r.pending.some(x=>x.includes('異規格')));assert.notEqual(r.status,'已計算項目符合');});
+check('重疊中心、空配置與非布林勾選均拒絕',()=>{for(const p of [custom([[0,0],[0,0]]),custom([]),{...custom([[-10,0],[10,0]],{...def(),Mx:0}),customAnchors:[{x:0,y:0,da:2,hef:20,AsN:2.45,AsV:2.45,enabled:'false'}]}])assert.ok(E.calculate(p).errors.length);});
+check('底板幾何偏移只改配置圖、不改容量或需求',()=>{const a=E.calculate(def()),b=E.calculate({...def(),plateX:48,plateY:60,plateEx:5,plateEy:-3});close(a.interaction,b.interaction);for(let i=0;i<a.rows.length;i++)if(a.rows[i].capacity!==null)close(a.rows[i].capacity,b.rows[i].capacity);});
+check('多組合自動控制等於逐組獨立計算最大DCR',()=>{const p={...def(),caseBatch:true};p.loadCases=[C.caseFrom(p,'LC1','基本'),{...C.caseFrom(p,'LC2','較大載重'),N:16,Vx:3,Vy:1}];const b=C.calculateCases(p),rs=p.loadCases.map(c=>E.calculate({...p,...c,caseBatch:false}));assert.equal(b.worst.id,'LC2');close(b.worst.dcr,Math.max(...rs.map(r=>r.interaction)));assert.equal(b.entries[1].result.p.name,p.name+'／較大載重');});
+check('非控制組合待補不被控制組合的符合掩蓋',()=>{const p={...def(),caseBatch:true,Mx:0,My:0,Tz:0};p.loadCases=[C.caseFrom(p,'LC1','完整組'),{...C.caseFrom(p,'LC2','接觸待算'),N:.1,Mx:.02,My:0,Vx:0,Vy:0,Tz:0}];const b=C.calculateCases(p);assert.equal(b.worst.id,'LC1');assert.ok(b.hasPending);assert.ok(b.overall.includes('待補'));});
+check('空陣列、超量、重複識別、空載重皆不完成包絡',()=>{const p={...def(),caseBatch:true},c=C.caseFrom(p,'LC1','組合');for(const loadCases of [[],Array(13).fill(c),[c,{...c}],[{...c,N:null}],[{...c,Vx:''}]]){const b=C.calculateCases({...p,loadCases});assert.ok(b.errors.length||b.hasErrors);assert.ok(!b.overall.includes('所有組合已計算項目符合'));}});
+check('mm／kN顯示單位切換不改引擎計算',()=>{const a=E.calculate(def()),b=E.calculate({...def(),ccdUnits:'mm-kN',ccdView:'iso'});close(a.interaction,b.interaction);close(1000*.00980665,9.80665);});
+fs.writeFileSync(__dirname+'/ccd-validation.json',JSON.stringify({date:'2026-10-11',version:E.VERSION,count:checks.length,checks},null,2));
+console.log(`Validated ${checks.length} CCD and load-case checks.`);

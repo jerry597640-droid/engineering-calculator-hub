@@ -34,5 +34,5 @@ check('後置耐震Vsa缺值阻止完成',()=>{const r=E.calculate({...def(),typ
 check('後置耐震採試驗Vsa及灌漿折減',()=>{const p={...def(),type:'adhesive',seismic:true,vsaSeis:5000,grout:true,tauCr:50,tauUn:100};close(row(E.calculate(p),'steelV').nominal,4000);close(row(E.calculate(p),'steelV').capacity,2600);assert.ok(row(E.calculate(p),'steelV').detail.seismicTest);});
 check('一般剪力不使用耐震試驗輸入',()=>{close(row(E.calculate({...def(),type:'torque',vsaSeis:100,seismic:false}),'steelV').capacity,3822);assert.ok(E.calculate({...def(),vsaSeis:-1}).errors.length);});
 console.log(`Validated ${count} engineering checks.`);
-const out={date:'2026-10-09',version:E.VERSION,count,checks,defaultSummary:((r)=>({status:r.status,nR:r.nR,vR:r.vR,interaction:r.interaction,anchors:r.anchors,rows:r.rows}))(E.calculate(def()))};
+const out={date:'2026-10-11',version:E.VERSION,count,checks,defaultSummary:((r)=>({status:r.status,nR:r.nR,vR:r.vR,interaction:r.interaction,anchors:r.anchors,rows:r.rows}))(E.calculate(def()))};
 require('node:fs').writeFileSync(__dirname+'/validation-results.json',JSON.stringify(out,null,2));
