@@ -64,4 +64,4 @@ PASS只代表目前輸入組合與已列檢核通過，不能取代完整基礎�
 
 線上版本以 `media/tutorial-data.js` 按需載入影片；瀏覽與計算不需先下載影片。完整離線版以 `python3 build.py --with-video --output index.html` 建置，影片、旁白及Word功能均內嵌。網站上的下載離線版也會包含當下案例及完整影片。
 
-影片原始專案在 `tutorial-video`：`SCRIPT.md`、`STORYBOARD.md`、`scenes.json`、字級與色彩設計、6章HTML、真實介面截圖及音訊。執行 `npm ci`、`npm run check`，再 `npm run render -- --fps 24`；語音產生腳本需 edge-tts 與連線，觀看與計算則不需要。
+完整離線套件內的影片原始專案在 `tutorial-video`：`SCRIPT.md`、`STORYBOARD.md`、`scenes.json`、字級與色彩設計、6章HTML、真實介面截圖及音訊。執行 `npm ci`、`npm run check`，再 `npm run render -- --fps 24`；語音產生腳本需 edge-tts 與連線，觀看與計算則不需要。
