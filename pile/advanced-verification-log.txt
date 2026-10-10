@@ -1,0 +1,35 @@
+PASS 2x2 reactions hand balance
+PASS cast pile minimum spacing max(2.5D,D+1)
+PASS clay group compares block and pile sum
+PASS group uplift W without safety division
+PASS invalid under spacing cannot pass
+PASS sand bored eta=1 requires contact evidence
+PASS single row zero lever moment rejected
+PASS expanded-base group unsupported rejected
+PASS Vesic independent 3 components
+PASS group 2:1 spread centre stress hand value
+PASS group overconsolidated crossing sigma-p
+PASS recompression only
+PASS normal consolidation with Cr=0
+PASS eccentric group settlement not declared passed
+PASS Cp unsuitable rejects compliance
+PASS settlement invalid compression indices rejected
+PASS RC exact area / pure axial deep foundation phi 0.55
+PASS RC minimum ratio / cover supported
+PASS RC pure tensile limit
+PASS RC compression limit and large moment NG
+PASS RC shear conservative Vc=0 formula
+PASS RC high-strength beta1
+PASS seismic table18.10(e) half/full & full length
+PASS odd/biaxial bars rejected
+PASS Winkler long free head exact y=H/(2EI beta^3)
+PASS Winkler long fixed head exact y=H/(4EI beta^3)
+PASS Winkler free-toe H and M equilibrium
+PASS Winkler 40 to80 mesh convergence, layered
+PASS Winkler cantilever without soil independent closed form
+PASS Winkler sign reversal and linear superposition
+PASS Winkler group equal loads and pm
+PASS Winkler pult limit NG, not reaction clamp
+PASS Winkler invalid incomplete profile/locked moment rejected
+33 advanced independent/boundary tests passed.
+EXAMPLES {"RC":{"As":8107.319665559963,"axial":12047.527987194771,"Mu":1595.888129024211,"V":445.98049310360705},"group":[516.6666666666666,616.6666666666666,583.3333333333334,683.3333333333334],"settlement":{"single":18.091823219566866,"group":58.564930020799174}}

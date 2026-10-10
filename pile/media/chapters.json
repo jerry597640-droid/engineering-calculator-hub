@@ -1,27 +1,27 @@
 [
   {
-    "title": "範例與樁體",
+    "title": "樁身配筋",
     "start": 0,
-    "duration": 27.48
+    "duration": 46.152
   },
   {
-    "title": "鑽探土層",
-    "start": 27.48,
-    "duration": 25.296
+    "title": "群樁與反力",
+    "start": 46.152,
+    "duration": 37.224
   },
   {
-    "title": "結果判讀",
-    "start": 52.775999999999996,
-    "duration": 26.88
+    "title": "沉陷與壓密",
+    "start": 83.376,
+    "duration": 42.264
   },
   {
-    "title": "參數與規範",
-    "start": 79.65599999999999,
-    "duration": 25.968
+    "title": "側向與收斂",
+    "start": 125.64000000000001,
+    "duration": 41.088
   },
   {
-    "title": "保存與離線",
-    "start": 105.624,
-    "duration": 24.984
+    "title": "說明與離線",
+    "start": 166.728,
+    "duration": 38.4
   }
 ]

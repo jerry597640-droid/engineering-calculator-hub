@@ -2,12 +2,12 @@
 (function(){
   const glossary=document.querySelector('#parameter-glossary tbody');
   const entries=[];
-  document.querySelectorAll('#panel-settings label.field').forEach(label=>{
-    const clone=label.cloneNode(true);clone.querySelectorAll('input,select,span').forEach(el=>el.remove());
+  document.querySelectorAll('#panel-settings label.field, [id^=panel-] [data-adv]').forEach(label=>{
+    label=label.closest('label.field')||label;const clone=label.cloneNode(true);clone.querySelectorAll('input,select,span').forEach(el=>el.remove());
     entries.push([clone.textContent.trim(),label.querySelector('span')?.textContent||'']);
   });
   for(const [key,[name,unit,help]] of Object.entries(defs))entries.push([`${name} (${key})`,`${unit}；${help}`]);
-  entries.push(['SPT N 的定義','以標準貫入試驗後30 cm的貫入擊數為N值；資料取鑽探試驗紀錄。代表層值需由地質設計者判定，拒錘與不完整貫入不可直接視為一般N。'],['有效覆土壓 σ′','土層單位重沿深度累加的總應力，減去孔隙水壓；水位以下使用γsat−γw，單位kPa。'],['極限與容許支承力','Qs、Qb為未除安全係數的極限分量；Qa為除係數後的地盤容許量，淨壓力再扣樁浮重及輸入負摩擦需求。'],['N̄平均範圍','D為樁徑；鑽掘樁在樁尖上、下1D；閉口打入樁在上4D、下1D。按涵蓋土層厚度加權，平均N值上限50。'],['樁體結構輸入（另行設計）','f′c混凝土抗壓強度、fy鋼筋降伏強度、鋼筋面積／配置、保護層、設計軸力彎矩剪力。來源為材料規格、結構分析與施工圖；本版未計算樁身強度。']);
+  entries.push(['SPT N 的定義','以標準貫入試驗後30 cm的貫入擊數為N值；資料取鑽探試驗紀錄。代表層值需由地質設計者判定，拒錘與不完整貫入不可直接視為一般N。'],['有效覆土壓 σ′','土層單位重沿深度累加的總應力，減去孔隙水壓；水位以下使用γsat−γw，單位kPa。'],['極限與容許支承力','Qs、Qb為未除安全係數的極限分量；Qa為除係數後的地盤容許量，淨壓力再扣樁浮重及輸入負摩擦需求。'],['N̄平均範圍','D為樁徑；鑽掘樁在樁尖上、下1D；閉口打入樁在上4D、下1D。按涵蓋土層厚度加權，平均N值上限50。'],['樁體結構輸入（另行設計）','f′c混凝土抗壓強度、fy鋼筋降伏強度、鋼筋面積／配置、保護層、設計軸力彎矩剪力。來源為材料規格、結構分析與施工圖；本版於「樁身配筋」計算場鑄圓樁單向P–M與保守剪力；雙軸、長柱與完整錨定搭接另檢核。']);
   const search=document.getElementById('parameter-search');
   function filter(){const q=search.value.trim().toLocaleLowerCase();const found=entries.filter(row=>row.join(' ').toLocaleLowerCase().includes(q));glossary.innerHTML=found.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('');document.getElementById('parameter-count').textContent=`找到 ${found.length} 個項目`;}search.addEventListener('input',filter);filter();
   const video=document.getElementById('tutorial-video');

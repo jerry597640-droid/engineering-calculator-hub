@@ -1,0 +1,1 @@
+PASS desktop/mobile 360/390/768/1440, validation stale-result clearing, layer labels, searchable glossary, all 9 workspaces, advanced persistence, RC blank guard, 40/80 convergence, Word export, 5 video chapters, MP4 metadata/playback, downloaded HTML with network disabled. Duration 205.184

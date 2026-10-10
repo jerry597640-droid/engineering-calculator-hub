@@ -23,3 +23,4 @@ test('現行黏土SPT、資料不足、平均範圍黏土 拒絕',()=>{assert.th
 test('安全係數不足不誤判符合',()=>assert.equal(run({fb:2.5}).fsOK,false));
 test('無效深度/數值/選項/土層均拒絕',()=>{for(const v of [{d:0},{tip:501},{water:-1},{head:10},{fs:0},{d:NaN},{mode:'unknown'}])assert.throws(()=>run(v));assert.throws(()=>run({},[]));});
 console.log(`${passed} verification groups passed.`);
+
