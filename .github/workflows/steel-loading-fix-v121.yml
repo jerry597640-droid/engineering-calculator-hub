@@ -1,0 +1,79 @@
+name: Steel loading repair v1.2.1
+on:
+  push:
+    paths:
+      - '.automation/steel-loading-fix-v121.json'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: steel-loading-fix-v121
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Restore reviewed source files and verify checksums
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, zlib, base64, hashlib
+          bundle=json.loads(Path('.automation/steel-loading-fix-v121.json').read_text())
+          target=Path('.automation/steel-loading-v121')
+          target.mkdir(parents=True,exist_ok=True)
+          for name in ('build_fix.py','test_fix.py'):
+              item=bundle[name]
+              data=zlib.decompress(base64.b64decode(item['zlib_base64']))
+              assert hashlib.sha256(data).hexdigest()==item['sha256'], name
+              (target/name).write_bytes(data)
+          PY
+      - name: Install two browser engines
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium webkit
+      - name: Build startup guard and full no-JavaScript catalog
+        run: python .automation/steel-loading-v121/build_fix.py --base steel-sections/index.html --out steel-sections
+      - name: Verify data, no-JavaScript mode, custom sizes, downloads, and video
+        run: python .automation/steel-loading-v121/test_fix.py --root steel-sections
+      - name: Package only after successful verification
+        run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,'.automation/steel-loading-v121')
+          from build_fix import package
+          package(Path('steel-sections'))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: steel-loading-v1.2.1-repair
+          path: |
+            steel-sections/index.html
+            steel-sections/steel-sections-v1.2.1-offline.html
+            steel-sections/steel-sections-v1.2.1-offline.zip
+            steel-sections/reference-no-script.html
+            steel-sections/verification-v121.json
+            steel-sections/section-data.json
+            steel-sections/fixed-*.png
+            .automation/steel-loading-v121/*.py
+      - name: Publish tested files without overwriting unrelated changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add steel-sections/index.html steel-sections/steel-sections-v1.2.1-offline.html steel-sections/steel-sections-v1.2.1-offline.zip steel-sections/reference-no-script.html steel-sections/verification-v121.json steel-sections/section-data.json steel-sections/README-v121.md steel-sections/fixed-*.png .automation/steel-loading-v121
+          git diff --cached --quiet && exit 0
+          git commit -m 'Fix steel blank loading: complete static data fallback and verified v1.2.1 startup'
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 3
+          done
+          exit 1
