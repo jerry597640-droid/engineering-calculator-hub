@@ -1,6 +1,6 @@
-# 鋼板樁分析設計工作台 v1.0
+# 鋼板樁分析設計工作台 v1.1
 
-直接用瀏覽器開啟 `index.html`，無需安裝或網路。手機版使用相同功能。
+解壓縮完整離線套件，直接用瀏覽器開啟 `index.html`，無需安裝。請保留相鄰的 `media` 資料夾，以離線播放影片。手機版使用相同功能；單檔 HTML 包含計算、文字教學與 Word 匯出，但未內嵌 MP4。
 
 ## 功能
 
@@ -10,14 +10,17 @@
 - 112 年版《建築物基礎構造設計規範》8.8.1 單層地錨強度折減側壓平衡檢核。
 - 詳細計算、剖面、淨土壓、剪力及彎矩圖。
 - 嵌入操作說明、每個欄位定義及資料來源、9 個可一鍵載入的教學範例。
-- JSON 案例儲存／匯入、HTML 計算報告、瀏覽器列印 PDF、單檔離線下載。
+- JSON 案例儲存／匯入、可編輯 Word／HTML 計算報告、瀏覽器列印 PDF、離線下載。
+- 2 分 8 秒操作影片、8 個章節跳轉、完整旁白文字；台灣女性合成語音 zh-TW-HsiaoChenNeural（Microsoft Edge TTS）。
+- 欄位說明對話框、參數搜尋、有效輸入草稿保存與明確恢復、比較基準、手機跳到結果。
+- 資料依據／報告編號欄位，隨案例及 Word 計算報告保存。
 
 ## 使用
 
 1. 先由「跟著做範例」選擇符合土層及單層地錨條件的案例。
 2. 輸入本案施工圖、鑽探資料、現場堆載及供應商有效斷面。
 3. 檢查適用範圍、入土長度、彎曲應力與地錨側壓平衡。
-4. 以「儲存案例」保留輸入，再匯出 HTML 計算報告。
+4. 以「儲存案例」保留輸入，再匯出 Word 或 HTML 計算報告。
 
 ## 適用範圍
 
@@ -33,17 +36,28 @@
 ## 檔案
 
 - `index.html`：完整單檔離線應用，所有程式及說明內嵌。
-- `engine.js`、`app.js`、`sections.js`：可維護的原始碼。
+- `engine.js`、`app.js`、`sections.js`、`trace.js`、`enhancement.js`：可維護的原始碼。
+- `media/tutorial.mp4`、`media/tutorial-poster.jpg`：實際介面教學影片與封面。
+- `tutorial-panel.html`：嵌入影片、章節及旁白文字。
+- `ui-verification.json`、`video-verification.json`：介面及影片檢查紀錄。
 - `verification.json`：9 工況參數、結果與獨立積分殘差。
 - `verify.cjs`：Node.js 數值驗算腳本，執行 `node verify.cjs`。
 - `build.py`：從可維護原始碼重建單檔 HTML；執行 `python3 build.py`。
 
 ## 查證
 
-2026-10-05 核對：
+2026-10-10 核對：
 - 國土署公告：https://www.nlma.gov.tw/ch/legislation/regsearch/962
-- 112 年版全文：https://www.nlma.gov.tw/filesys/file/EMMA/a1120620.pdf
+- 112 年版全文：https://www.nlma.gov.tw/uploads/files/53651dae74223e6599e20838bb8c4f2a.pdf
+- 鋼構容許應力法規範（官方修訂資料，fb 仍須依材料、構件限制與核定準則判定）：https://www.nlma.gov.tw/ch/legislation/regsearch/7176
 - USACE 1994 年手冊（理論交叉參考，非台灣現行法規）：https://www.publications.usace.army.mil/Portals/76/Publications/EngineerManuals/EM_1110-2-2504.pdf
 - Nippon Steel 截面使用與接頭傳力說明：https://www.nipponsteel.com/en/product/construction/list-construction/05.html
 
 數值驗證：68 項通過。9 工況各土壓段獨立中點積分、閉式彎矩與地錨力矩核對、強度折減側壓積分、非法輸入、水位端點及載重敏感度。這確認實作與明示模型一致，不取代工址地工設計及工程師審查。
+
+
+## 規範核對界線
+
+112 年版基礎規範第 8.8.1 節已實作；第 8.7 節側壓／施工階段及第 8.9.1 節構件設計要求已補入適用範圍。臨時擋土構造的容許應力增量不可一律套用地錨，且須確認核定依據，程式不自動增加 25%。未涵蓋的構件、穩定與變形項目列於網頁。
+
+影片旁白以公開教學文字生成，未傳送案例或鑽探資料。影片字時標取自 TTS WordBoundary，非獨立語音辨識逐字驗證。

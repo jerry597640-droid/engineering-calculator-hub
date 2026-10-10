@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-05",
+  "date": "2026-10-10",
   "passed": true,
   "checks": 68,
   "method": "Independent midpoint quadrature 10000 intervals per pressure segment, 100000 intervals for TW 112 §8.8.1 reduced-strength moment, closed-form/source formula checks, invalid inputs and load sensitivity.",

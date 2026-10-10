@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "checks": [
+    "9 examples",
+    "field dialog",
+    "source definitions",
+    "valid draft restoration",
+    "load comparison",
+    "invalid input concealment",
+    "parameter search",
+    "390px mobile overflow",
+    "jump results"
+  ],
+  "pageErrors": []
+}

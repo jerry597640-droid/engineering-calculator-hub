@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-10",
+  "passed": true,
+  "duration": 128.416667,
+  "resolution": "1280x720",
+  "voice": "zh-TW-HsiaoChenNeural",
+  "checks": [
+    "HyperFrames runtime/layout/motion checks passed",
+    "40/40 WCAG AA composition text checks",
+    "H264 video and AAC audio present",
+    "8 chapter buttons seek correct positions",
+    "390px layout without overflow",
+    "local file video metadata and calculator loaded"
+  ],
+  "ttsTimingSource": "WordBoundary; not independently transcribed",
+  "pageErrors": []
+}
