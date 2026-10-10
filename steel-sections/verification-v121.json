@@ -1,0 +1,398 @@
+{
+  "version": "1.2.1",
+  "scope": "In-memory HTML documents; mocked storage for denied/corrupt cases; no physical iPhone test.",
+  "checks": [
+    {
+      "name": "chromium startup displays 129 records",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "chromium ready state",
+      "passed": true
+    },
+    {
+      "name": "chromium no startup exceptions",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "chromium custom module 1.2.1",
+      "passed": true
+    },
+    {
+      "name": "chromium C returns five records",
+      "passed": true
+    },
+    {
+      "name": "chromium C selection opens properties",
+      "passed": true
+    },
+    {
+      "name": "chromium no C catalog explains scope",
+      "passed": true
+    },
+    {
+      "name": "chromium reset restores all records",
+      "passed": true
+    },
+    {
+      "name": "chromium exact dimension search returns one",
+      "passed": true
+    },
+    {
+      "name": "chromium catalog A and W unchanged",
+      "passed": true
+    },
+    {
+      "name": "chromium catalog consistency",
+      "passed": true
+    },
+    {
+      "name": "chromium H theoretical A45.33",
+      "passed": true
+    },
+    {
+      "name": "chromium edited dimensions A28.92",
+      "passed": true
+    },
+    {
+      "name": "chromium mm cm equivalence",
+      "passed": true
+    },
+    {
+      "name": "chromium custom form saves data",
+      "passed": true
+    },
+    {
+      "name": "chromium empty dimension blocks save",
+      "passed": true
+    },
+    {
+      "name": "chromium reading mode has 129 built-ins",
+      "passed": true
+    },
+    {
+      "name": "chromium reading mode returns to app",
+      "passed": true
+    },
+    {
+      "name": "chromium interactive layout fits 360",
+      "passed": true
+    },
+    {
+      "name": "chromium interactive layout fits 390",
+      "passed": true
+    },
+    {
+      "name": "chromium interactive layout fits 768",
+      "passed": true
+    },
+    {
+      "name": "chromium interactive layout fits 1440",
+      "passed": true
+    },
+    {
+      "name": "chromium denied still displays data",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "chromium denied no exception",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "chromium malformed-v1 still displays data",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "chromium malformed-v1 no exception",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "chromium malformed-v2 still displays data",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "chromium malformed-v2 no exception",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "chromium JavaScript disabled shows 129 data rows",
+      "passed": true
+    },
+    {
+      "name": "chromium JavaScript disabled hides nonworking controls",
+      "passed": true
+    },
+    {
+      "name": "chromium JavaScript disabled C shows 5 rows",
+      "passed": true
+    },
+    {
+      "name": "chromium JavaScript disabled no loading message",
+      "passed": true
+    },
+    {
+      "name": "chromium native details work without JavaScript",
+      "passed": true
+    },
+    {
+      "name": "chromium no-script layout fits 360",
+      "passed": true
+    },
+    {
+      "name": "chromium no-script layout fits 390",
+      "passed": true
+    },
+    {
+      "name": "chromium no-script layout fits 768",
+      "passed": true
+    },
+    {
+      "name": "chromium no-script layout fits 1440",
+      "passed": true
+    },
+    {
+      "name": "chromium startup exception preserves readable data",
+      "passed": true
+    },
+    {
+      "name": "chromium startup exception shows diagnosis",
+      "passed": true
+    },
+    {
+      "name": "chromium full offline page starts",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "chromium offline export contains video",
+      "passed": true
+    },
+    {
+      "name": "chromium exported copy starts cleanly",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "chromium exported copy has no duplicate ids",
+      "passed": true
+    },
+    {
+      "name": "chromium video decodes original duration",
+      "passed": true
+    },
+    {
+      "name": "chromium media error does not block queries",
+      "passed": true
+    },
+    {
+      "name": "webkit startup displays 129 records",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "webkit ready state",
+      "passed": true
+    },
+    {
+      "name": "webkit no startup exceptions",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "webkit custom module 1.2.1",
+      "passed": true
+    },
+    {
+      "name": "webkit C returns five records",
+      "passed": true
+    },
+    {
+      "name": "webkit C selection opens properties",
+      "passed": true
+    },
+    {
+      "name": "webkit no C catalog explains scope",
+      "passed": true
+    },
+    {
+      "name": "webkit reset restores all records",
+      "passed": true
+    },
+    {
+      "name": "webkit exact dimension search returns one",
+      "passed": true
+    },
+    {
+      "name": "webkit catalog A and W unchanged",
+      "passed": true
+    },
+    {
+      "name": "webkit catalog consistency",
+      "passed": true
+    },
+    {
+      "name": "webkit H theoretical A45.33",
+      "passed": true
+    },
+    {
+      "name": "webkit edited dimensions A28.92",
+      "passed": true
+    },
+    {
+      "name": "webkit mm cm equivalence",
+      "passed": true
+    },
+    {
+      "name": "webkit custom form saves data",
+      "passed": true
+    },
+    {
+      "name": "webkit empty dimension blocks save",
+      "passed": true
+    },
+    {
+      "name": "webkit reading mode has 129 built-ins",
+      "passed": true
+    },
+    {
+      "name": "webkit reading mode returns to app",
+      "passed": true
+    },
+    {
+      "name": "webkit interactive layout fits 360",
+      "passed": true
+    },
+    {
+      "name": "webkit interactive layout fits 390",
+      "passed": true
+    },
+    {
+      "name": "webkit interactive layout fits 768",
+      "passed": true
+    },
+    {
+      "name": "webkit interactive layout fits 1440",
+      "passed": true
+    },
+    {
+      "name": "webkit denied still displays data",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "webkit denied no exception",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "webkit malformed-v1 still displays data",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "webkit malformed-v1 no exception",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "webkit malformed-v2 still displays data",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "webkit malformed-v2 no exception",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "webkit JavaScript disabled shows 129 data rows",
+      "passed": true
+    },
+    {
+      "name": "webkit JavaScript disabled hides nonworking controls",
+      "passed": true
+    },
+    {
+      "name": "webkit JavaScript disabled C shows 5 rows",
+      "passed": true
+    },
+    {
+      "name": "webkit JavaScript disabled no loading message",
+      "passed": true
+    },
+    {
+      "name": "webkit native details work without JavaScript",
+      "passed": true
+    },
+    {
+      "name": "webkit no-script layout fits 360",
+      "passed": true
+    },
+    {
+      "name": "webkit no-script layout fits 390",
+      "passed": true
+    },
+    {
+      "name": "webkit no-script layout fits 768",
+      "passed": true
+    },
+    {
+      "name": "webkit no-script layout fits 1440",
+      "passed": true
+    },
+    {
+      "name": "webkit startup exception preserves readable data",
+      "passed": true
+    },
+    {
+      "name": "webkit startup exception shows diagnosis",
+      "passed": true
+    },
+    {
+      "name": "webkit full offline page starts",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "webkit offline export contains video",
+      "passed": true
+    },
+    {
+      "name": "webkit exported copy starts cleanly",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "webkit exported copy has no duplicate ids",
+      "passed": true
+    },
+    {
+      "name": "webkit video decodes original duration",
+      "passed": true
+    },
+    {
+      "name": "webkit media error does not block queries",
+      "passed": true
+    }
+  ],
+  "engines": [
+    "Chromium",
+    "WebKit (Linux; not physical iOS Safari)"
+  ],
+  "passed": 90,
+  "failed": 0,
+  "artifacts": {
+    "index.html": "118b167d9a01c6b3d9afa881cd10961926b22a1b79523ac7e55ec4a689578419",
+    "steel-sections-v1.2.1-offline.html": "118da8965f6925504b27478e4b48472388cbdb878a02392e5d871c4eadc58efb",
+    "reference-no-script.html": "40ccb79534d564abeb8a7894bdc8c3f3e2586c4755606ecc149d3a0343b67e82",
+    "media/tutorial-zh-TW.mp4": "d6d70660e150c955f6be735094ce8d87a0f76484df36a94000484608747f8a9b"
+  }
+}
