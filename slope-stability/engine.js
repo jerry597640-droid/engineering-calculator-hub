@@ -82,7 +82,7 @@ for(let round=0;round<3&&best;round++){const seed=best.circle;step/=2;rstep/=2;f
 top.sort((a,b)=>a.fs-b.fs);return {best,count,valid,errors,top:top.slice(0,12)};
 }
 function run(m){validate(m);const results=[];for(const scenario of ['normal','rain','seismic']){let r;if(m.mode==='manual'){const pairs=intersectionPairs(m,m.circle),items=pairs.map(c=>analyzeCircle(m,c,scenario));const ok=items.filter(z=>!z.error).sort((a,b)=>a.fs-b.fs);r={best:ok[0]||null,count:items.length,valid:ok.length,errors:items.reduce((o,z)=>{if(z.error)o[z.error]=(o[z.error]||0)+1;return o;},{}),top:ok.map(z=>({fs:z.fs,circle:z.circle,negative:z.negative}))};}else r=search(m,scenario);const j=['normal','rain','seismic'].indexOf(scenario);results.push({...r,scenario,target:targets(m)[j],strict:m.profile==='foundation-global'||m.profile==='custom'&&m.strict});}
-return {model:m,results,version:'1.1.0',checked:'2026-10-11'};
+return {model:m,results,version:'1.1.1',checked:'2026-10-11'};
 }
 function benchmarks(){const heights=[.8,2.3,3.3,3.9,4.1,3.6,1.65],angles=[-9,.5,9,18.5,28,39,52],pressures=[7.84,22.54,32.34,38.22,40.18,35.28,16.17];return [0,1].map(wet=>{const ss=heights.map((h,i)=>({i:i+1,b:2.5,l:2.5/Math.cos(angles[i]*rad),alpha:angles[i]*rad,W:50*h,Q:0,yg:0,u:wet?pressures[i]:0,c:20,phi:20}));const z=solve(ss,{cy:0,r:1});return {name:wet?'Rocscience 濕坡七切片':'Rocscience 乾坡七切片',expected:wet?1.555:2.113,actual:z.fs,tolerance:.002,pass:Math.abs(z.fs-(wet?1.555:2.113))<=.002,residual:z.residual,rows:z.rows};});}
 const api={interp,parsePoints,validate,targets,waterY,bottom,circleFromEnds,intersectionPairs,slices,solve,solveOrdinary,analyzeCircle,search,run,benchmarks,gw};root.SlopeCore=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;

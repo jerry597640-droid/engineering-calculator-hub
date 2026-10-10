@@ -1,0 +1,45 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path'),app=path.resolve(__dirname,'..'),output=process.env.SLOPE_VERIFY_OUTPUT;
+const write=(name,data)=>{if(output){fs.mkdirSync(output,{recursive:true});fs.writeFileSync(path.join(output,name),data);}};
+const source=fs.readFileSync(path.join(app,'app.js'),'utf8'),C=require(path.join(app,'engine.js')),base=JSON.parse(fs.readFileSync(path.join(app,'example-project.json'))).model;
+const fields=new Map(),inputs={};
+const element=(id,v='')=>({id,value:String(v),checked:false,disabled:false,max:'40',dataset:{},tagName:'INPUT',textContent:'',innerHTML:'',previousElementSibling:{textContent:id},closest:()=>true,setAttribute(k,v){this[k]=v;}});
+for(const [id,v]of Object.entries({...base,geometryMode:'simple',height:10,ratio:1.5,horizontalLength:15,beta:33.6900675,toeLength:15,crestLength:25,datum:0,project:base.name,units:'kn',targetNormal:1.5,targetRain:1.2,targetSeismic:1.1,strict:0,customSource:'',cx:0,cy:15,radius:16,ground:base.ground.map(p=>p.join(',')).join('\n'),waterLine:base.ground.map(p=>[p[0],p[1]-4].join(',')).join('\n'),rainLine:base.ground.map(p=>p.join(',')).join('\n')}))fields.set(id,element(id,v));
+for(const id of ['height-slider','horizontal-slider','beta-slider','horizontal-range','q-position-note','plot','notice','run-status'])fields.set(id,element(id));
+for(const id of ['q-follow','show-details']){fields.set(id,element(id));fields.get(id).checked=true;}
+fields.set('show-candidates',element('show-candidates'));fields.set('scenario',element('scenario','normal'));
+fields.set('layers',{tBodies:[{rows:base.layers.map(l=>({querySelectorAll:()=>Object.entries(l).map(([k,v])=>({dataset:{key:k},value:String(v)}))}))}]});
+const context={C,SCENES:{normal:'常時',rain:'暴雨／最高水位',seismic:'地震'},$:id=>{assert(fields.has(id),'Missing '+id);return fields.get(id);},document:{addEventListener:(name,fn)=>inputs[name]=fn},result:null,worker:null,dirty:true,lastModel:null,lastCrestX:null,flipped:true,view:{x:0,y:0,w:900,h:500},busy:()=>{},notify:()=>{},syncFields:()=>{},renderResults:()=>{},factor:()=>fields.get('units').value==='tf'?C.gw:1,uStress:()=>fields.get('units').value==='tf'?'tf/m²':'kPa',console};
+vm.createContext(context);
+for(const prefix of ['const val=','const fmt='])vm.runInContext(source.split('\n').find(l=>l.startsWith(prefix)),context);
+vm.runInContext(source.slice(source.indexOf('function syncGeometry('),source.indexOf('function fillModel(')),context);
+vm.runInContext(source.split('\n').find(l=>l.startsWith('function markDirty(')),context);
+vm.runInContext(source.split('\n').find(l=>l.startsWith('const numericalInputs=')),context);
+vm.runInContext(source.split('\n').find(l=>l.startsWith("document.addEventListener('input'")),context);
+vm.runInContext(source.slice(source.indexOf('function assessment('),source.indexOf('function renderResults(')),context);
+vm.runInContext(source.slice(source.indexOf('function draw('),source.indexOf('function zoom(')),context);
+vm.runInContext(source.slice(source.indexOf('function sliceSummary('),source.indexOf('function sliceTable(')),context);
+const value=(id,v)=>{fields.get(id).value=String(v);};
+const input=(id,v)=>{value(id,v);inputs.input({target:fields.get(id)});};
+const model=()=>context.readModel();
+const approx=(a,b,e=1e-7)=>assert(Math.abs(a-b)<e,`${a} != ${b}`);
+context.syncGeometry();context.syncLoadPlacement(true);assert.equal(fields.get('horizontalLength').value,'15');assert.equal(model().qa,17);
+let stopped=false;context.result={results:[]};context.worker={terminate:()=>stopped=true};input('horizontalLength',20);let m=model();assert(stopped&&context.result===null);assert.equal(m.qa,22);assert.equal(m.qb,35);assert.equal(m.geometry.ratio,2);approx(Number(fields.get('beta').value),26.5650512);assert.equal(m.ground[2][0],20);assert.equal(m.ground.at(-1)[0],45);
+input('horizontal-slider',15);assert.equal(model().qa,17);assert.equal(model().qb,30);
+fields.get('q-follow').checked=false;input('horizontalLength',20);assert.equal(model().qa,17);assert.equal(model().qb,30);
+input('horizontalLength',15);fields.get('q-follow').checked=true;input('height',12);assert.equal(model().ground[2][0],18);assert.equal(model().qa,20);
+input('beta',45);approx(model().ground[2][0],12);approx(model().geometry.ratio,1);
+input('height',100);assert.equal(Number(fields.get('height-slider').max),100);input('height-slider',80);assert.equal(Number(fields.get('height-slider').max),100);
+input('height',10);input('ratio',1.5);assert.equal(model().ground[2][0],15);
+for(const b of [5,80]){input('beta',b);model();assert(!fields.get('horizontal-slider').disabled);}
+input('ratio',1.5);input('horizontalLength',0);assert.throws(model);input('horizontalLength',15);
+input('crestLength',5);assert.throws(model,/坡頂平台/);input('crestLength',25);assert.equal(model().qa,17);
+value('geometryMode','coordinates');value('ground','-15,0\n0,0\n15,10\n30,10\n40,10');context.syncLoadPlacement(true);assert.equal(context.topPlatform(model().ground).a,15);
+value('ground','-15,0\n0,0\n15,10\n30,9\n40,10');assert.throws(()=>context.syncLoadPlacement());
+value('ground','-15,0\n0,0\n20,10\n35,10\n45,10');context.syncLoadPlacement();assert.equal(model().qa,22);assert.equal(model().qb,35);
+assert.equal(context.topPlatform([]),null);
+value('geometryMode','simple');value('qa',17);value('qb',30);context.syncLoadPlacement(true);const out=C.run(model());context.result=out;context.dirty=false;
+for(const r of out.results){const b=r.best,kh=r.scenario==='seismic'?out.model.kh:0,D=b.rows.reduce((v,s)=>v+s.V*Math.sin(s.alpha)+kh*s.W*(b.circle.cy-s.yg)/b.circle.r,0),R=b.rows.reduce((v,s)=>v+s.R,0);approx(D,b.D,1e-7);approx(R/D,b.fs,1e-7);const table=context.sliceSummary(r,out.model,1);assert(table.includes('高度 h')&&table.includes('合計')&&table.includes((R/D).toFixed(9)));fields.get('scenario').value=r.scenario;context.draw(out.model);const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="1800" height="1000" font-family="Noto Sans CJK TC, sans-serif">'+fields.get('plot').innerHTML+'</svg>';write('new-section-'+r.scenario+'.svg',svg);assert(svg.includes('FS '+b.fs.toFixed(3)));}
+const zeroModel={...out.model,ground:out.model.ground.map(p=>[p[0],p[1]+10]),geometry:{...out.model.geometry,datum:10},mode:'manual',circle:{cx:10,cy:25,r:25},maxDepth:35},zeroResult=C.run(zeroModel);context.result=zeroResult;fields.get('scenario').value='normal';context.draw(zeroResult.model);assert(/<text x="49" y="429"[^>]*>0.0<\/text>/.test(fields.get('plot').innerHTML),'Valid zero elevation must remain in plot bounds');context.result=out;fields.get('scenario').value='seismic';
+fields.get('show-details').checked=false;context.draw(out.model);assert(!fields.get('plot').innerHTML.includes('slope-length-dimension'));assert(fields.get('plot').innerHTML.includes('plot-fs-label'));
+fields.get('show-details').checked=true;context.flipped=false;context.draw(out.model);assert(fields.get('plot').innerHTML.includes('H=15.00 m'));write('new-section-unflipped.svg','<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="1800" height="1000" font-family="Noto Sans CJK TC, sans-serif">'+fields.get('plot').innerHTML+'</svg>');
+write('new-basic-result.json',JSON.stringify(out));console.log('H/height/beta/ratio; q follow/fixed; worker cancellation; invalid geometry recovery; platform width; eight-column W/D/R sums; three-scenario FS/diagram export; detail visibility and mirror checks passed.');

@@ -15,7 +15,7 @@ function image(bytes,label){if(!bytes)return;imageNum++;const id='img'+imageNum,
 const verdict=r=>!r.best?'無有效結果':!(r.strict?r.best.fs>r.target:r.best.fs>=r.target)?'未達門檻':r.best.negative?'須檢討張裂':'達門檻 僅限本模型';
 para('邊坡穩定分析詳細計算書','Title');para(m.name,'Subtitle');
 para('本計算書記錄本剖面之輸入、模型假設、三工況圓弧搜尋、逐片受力及迭代。判定以未四捨五入數值為準。'+out.results.map(r=>names[r.scenario]+' '+verdict(r)).join('；')+'。');
-para('程式版本 '+(out.version||'1.1.0')+'　計算書產生時間 '+(options.date||new Date().toLocaleString('zh-TW'))+'　單位剖面寬度 1 m');
+para('程式版本 '+(out.version||'1.1.1')+'　計算書產生時間 '+(options.date||new Date().toLocaleString('zh-TW'))+'　單位剖面寬度 1 m');
 heading('一 檢核依據與結果');
 para(m.profile==='custom'?'自訂依據 '+m.customSource:m.profile==='foundation-global'?'建築物基礎構造設計規範112年版 第7.4.4節 113年1月1日生效。長期FS>1.5、最高水位FS>1.2、地震FS>1.1。本程式僅套用整體穩定門檻，未建模擋土牆自重、牆體與錨力；完整擋土結構需另行分析。':'水土保持技術規範第73條　114年5月7日修正版本。永久性常時1.5、暴雨1.2、地震1.1；臨時性常時1.2、暴雨1.1、地震1.0。其他類別工程須依案件規範另行設定。');
 table(['工況','計算 FS','要求 FS','判讀','有效／總候選'],out.results.map(r=>[names[r.scenario],n(r.best?.fs,8),(r.strict?'>':'≥')+n(r.target,2),verdict(r),r.valid+'/'+r.count]),[2100,1700,1500,3000,1900]);
@@ -35,6 +35,8 @@ table(['地表點','x m','y m'],m.ground.map((p,i)=>[i+1,...p.map(v=>n(v,4))]),[
 table(['土層','層底 m','c′ '+stress,'φ′ °','γ '+weight,'γsat '+weight],m.layers.map(l=>[l.name,n(l.bottom,4),n(l.c/f,4),n(l.phi,3),n(l.gamma/f,4),n(l.sat/f,4)]),[2500,1540,1540,1540,1540,1540]);
 para('層底為高程而非厚度，依鑽探柱狀圖與地質剖面填列。c′有效凝聚力及φ′有效內摩擦角依直剪或三軸試驗及選定之峰值／殘餘強度；γ天然、γsat飽和單位重依土壤試驗。不得混用總應力不排水強度與有效應力孔隙水壓模型。');
 if(m.waterMode==='line')for(const [key,label]of [['waterLine','常時水位線'],['rainLine','暴雨水位線']])table([label,'x m','y m'],m[key].map((p,i)=>[i+1,...p.map(v=>n(v,4))]),[1800,4200,4200]);
+if(m.geometry?.mode==='simple'){const H=m.ground[2][0]-m.ground[1][0],V=m.ground[2][1]-m.ground[1][1];para('標準坡幾何：垂直坡高 V='+n(V)+' m；坡趾至坡頂水平長 H='+n(H)+' m（不含兩端外延）；坡比 V:H=1:'+n(H/V)+'；β=atan(V/H)='+n(Math.atan2(V,H)*180/Math.PI)+'°。');}
+para('載重定位方式：'+(m.qFollowCrest?'跟隨坡頂平台；本計算以同步後的作用座標求Q。':'固定作用座標x。')+' q起點='+n(m.qa)+' m，終點='+n(m.qb)+' m。');
 heading('三 幾何重量與受力公式');
 for(const t of [
 'yb(x)=cy−√[R²−(x−cx)²]；b=x2−x1；α=asin[(xmid−cx)/R]；l=b/cosα。地表與圓弧相交界定滑動土體；底面材料採切片中點所在層。',
@@ -56,6 +58,11 @@ para('V=(1−'+b.kv+')×'+n(s.W/f)+'+'+n(s.Q/f)+'='+n(s.V/f)+' '+force+'；sinα
 if(m.method==='bishop'){para('mα='+n(cos,9)+'+'+n(sin,9)+'×'+n(tan,9)+'/'+n(b.fs,9)+'='+n(s.m,9)+'。');para('N′=['+n(s.V/f)+'−'+n(s.u/f)+'×'+n(s.b)+'−'+n(s.c/f)+'×'+n(s.l)+'×'+n(sin,9)+'/'+n(b.fs,9)+']/'+n(s.m,9)+'='+n(s.ne/f,9)+' '+force+'。');}else para('N′='+n(s.V/f)+'×'+n(cos,9)+'−'+(r.scenario==='seismic'?m.kh:0)+'×'+n(s.W/f)+'×'+n(sin,9)+'−'+n(s.u/f)+'×'+n(s.l)+'='+n(s.ne/f,9)+' '+force+'。');
 para('R抗剪='+n(s.c/f)+'×'+n(s.l)+'+'+n(s.ne/f,9)+'×'+n(tan,9)+'='+n(s.R/f,9)+' '+force+'；T='+n(s.R/f,9)+'/'+n(b.fs,9)+'='+n(s.T/f,9)+' '+force+'。');
 if(s.weightParts?.length){para('代表切片重量積分分項','Heading2');table(['xk m','wk','下界 m','上界 m','γ '+weight,'ΔW '+force,'分項重心 m'],s.weightParts.map(p=>[n(p.x,4),n(p.weight,6),n(p.lo,4),n(p.hi,4),n(p.gamma/f,4),n(p.dW/f,6),n(p.y,4)]));para('ΣΔW='+n(s.W/f,9)+' '+force+'；yG='+n(s.yg,9)+' m。全部切片Gauss分項可另匯出JSON完整計算資料。');}
+para('詳細切片計算總覽','Heading2');
+const summaryForce=m.units==='tf'?'tf':'kN',drive=s=>s.V*Math.sin(s.alpha)+(r.scenario==='seismic'?m.kh:0)*s.W*(b.circle.cy-s.yg)/b.circle.r,driveSum=b.rows.reduce((v,s)=>v+drive(s),0);
+para('以下表格以1 m剖面寬列總力。h=中點地表高程−中點底面高程；W採逐層Gauss積分。切片按計算座標x遞增編號，圖面鏡射不改編號；負驅動項保留。');
+table(['切片 #','b m','h m','W '+summaryForce,'α °','u '+stress,'驅動Dᵢ '+summaryForce,'抗滑Rᵢ '+summaryForce],[...b.rows.map(s=>[s.i,n(s.b,4),n(s.top-s.y,4),n(s.W/f,4),n(s.alpha*180/Math.PI,4),n(s.u/f,4),n(drive(s)/f,4),n(s.R/f,4)]),['合計','','',n(W/f,6),'','',n(driveSum/f,6),n(rs/f,6)]],[650,1150,1150,1550,1100,1400,1600,1500]);
+para('Dᵢ=Vᵢsinαᵢ+khWᵢ(cy−yGᵢ)/R；Rᵢ=c′ᵢlᵢ+N′ᵢtanφ′ᵢ。FS=ΣR/ΣD='+n(rs/f,9)+'/'+n(driveSum/f,9)+'='+n(rs/driveSum,9)+'。合計使用未四捨五入數值。');
 para('切片幾何與重量明細','Heading2');table(['片','x1 m','x2 m','yb m','α °','b m','l m','W '+force],b.rows.map(s=>[s.i,n(s.x1,4),n(s.x2,4),n(s.y,4),n(s.alpha*180/Math.PI,4),n(s.b,4),n(s.l,4),n(s.W/f,4)]),[600,1350,1350,1350,1500,1100,1200,1750]);
 para('切片水壓與有效法向力明細','Heading2');table(['片','Q '+force,'u '+stress,'c′ '+stress,'φ′ °','V '+force,'mα','N′ '+force],b.rows.map(s=>[s.i,n(s.Q/f,4),n(s.u/f,4),n(s.c/f,4),n(s.phi,3),n(s.V/f,4),n(s.m,6),n(s.ne/f,4)]),[600,1350,1350,1350,1100,1500,1300,1650]);
 para('切片抗剪與驅動力明細','Heading2');table(['片','基底材料','yG m','R抗剪 '+force,'T '+force,'D分項 '+force],b.rows.map(s=>[s.i,s.layer,n(s.yg,4),n(s.R/f,4),n(s.T/f,4),n((s.V*Math.sin(s.alpha)+(r.scenario==='seismic'?m.kh:0)*s.W*(b.circle.cy-s.yg)/b.circle.r)/f,4)]),[600,2200,1500,1950,1800,2150]);
