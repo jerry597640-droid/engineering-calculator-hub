@@ -1,18 +1,20 @@
-name: Steel sections v1.1 build
+name: Steel sections v1.2 build
 on:
   push:
     paths:
       - '.automation/steel-sections-v11.py'
+      - '.automation/custom-v12.js'
+      - '.automation/steel-ui-v12.js'
   workflow_dispatch:
 permissions:
   contents: write
 concurrency:
-  group: steel-sections-v11
+  group: steel-sections-v12
   cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,22 +28,24 @@ jobs:
           python -m playwright install --with-deps chromium
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-noto-cjk
-      - name: Build and test the upgraded tool
+      - name: Build and test custom dimension workspace
         run: python .automation/steel-sections-v11.py --publish
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: steel-sections-v1.1
+          name: steel-sections-v1.2
           path: |
             steel-sections/index.html
             steel-sections/media/
-            steel-sections/verification-v11.json
-            steel-sections/steel-sections-v1.1-offline.zip
+            steel-sections/verification-v12.json
+            steel-sections/steel-sections-v1.2-offline.zip
+            steel-sections/README-v12.md
       - name: Commit only generated steel section files
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add steel-sections/index.html steel-sections/media steel-sections/verification-v11.json steel-sections/steel-sections-v1.1-offline.zip
+          git add steel-sections/index.html steel-sections/media steel-sections/verification-v12.json steel-sections/steel-sections-v1.2-offline.zip steel-sections/README-v12.md
           git diff --cached --quiet && exit 0
-          git commit -m 'Publish steel section v1.1 with verified return navigation and tutorial'
+          git commit -m 'Publish steel v1.2 custom dimensions and zh-TW narrated tutorial'
           git pull --rebase origin '${{ github.ref_name }}'
           git push origin HEAD:'${{ github.ref_name }}'
