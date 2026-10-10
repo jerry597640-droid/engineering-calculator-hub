@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "app": "SlopeWorkbench",
+  "version": "1.1.0",
+  "model": {
+    "name": "10 m 土坡教學範例",
+    "method": "bishop",
+    "profile": "sw-permanent",
+    "ground": [
+      [
+        -15,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        15,
+        10
+      ],
+      [
+        40,
+        10
+      ]
+    ],
+    "layers": [
+      {
+        "name": "均質土層",
+        "bottom": -20,
+        "c": 10,
+        "phi": 30,
+        "gamma": 18,
+        "sat": 20
+      }
+    ],
+    "waterMode": "depth",
+    "waterNormal": 4,
+    "waterRain": 0,
+    "ruNormal": 0.15,
+    "ruRain": 0.35,
+    "gammaWater": 9.80665,
+    "q": 10,
+    "qa": 17,
+    "qb": 30,
+    "kh": 0.1,
+    "kv": 0.05,
+    "slices": 60,
+    "density": 14,
+    "minSpan": 3,
+    "maxDepth": 20,
+    "arcMin": 0.3,
+    "arcMax": 3,
+    "mode": "search",
+    "geometry": {
+      "mode": "simple",
+      "height": 10,
+      "ratio": 1.5,
+      "toe": 15,
+      "crest": 25,
+      "datum": 0
+    }
+  }
+}

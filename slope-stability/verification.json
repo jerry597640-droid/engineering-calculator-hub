@@ -1,0 +1,155 @@
+{
+  "version": "1.1.0",
+  "checked": "2026-10-11",
+  "pass": true,
+  "checks": [
+    {
+      "name": "Independent scipy scalar-root and ordinary equations",
+      "pass": true,
+      "detail": {
+        "maxAbsoluteFSerror": 2.9716811233981844e-09,
+        "cases": 30
+      }
+    },
+    {
+      "name": "Independent 200000-column geometry integration",
+      "pass": true,
+      "detail": {
+        "maxWeightRelativeError": 5.653119972644873e-07,
+        "maxFirstMomentRelativeError": 8.12432267902652e-07
+      }
+    },
+    {
+      "name": "Search and slice refinement",
+      "pass": true,
+      "detail": {
+        "baseFS": [
+          1.5072443770136377,
+          0.8494095215507232,
+          1.2417474637931343
+        ],
+        "fineFS": [
+          1.507250744796495,
+          0.8491338009057466,
+          1.241749191185043
+        ],
+        "relativeChanges": [
+          4.224784616445109e-06,
+          -0.0003246027245765246,
+          1.3910975935050173e-06
+        ],
+        "fineSlices": 120,
+        "fineDensity": 20
+      }
+    },
+    {
+      "name": "Depth and identical piecewise water line",
+      "pass": true,
+      "detail": {
+        "depth": [
+          1.5072443770136383,
+          0.8881295312261688,
+          1.2461129884661823
+        ],
+        "line": [
+          1.5072443770136383,
+          0.8881295312261688,
+          1.2461129884661823
+        ]
+      }
+    },
+    {
+      "name": "Coordinate translation invariance",
+      "pass": true,
+      "detail": {
+        "original": [
+          1.5072443770136383,
+          0.8881295312261688,
+          1.2461129884661823
+        ],
+        "translated": [
+          1.5072443770136408,
+          0.8881295312261704,
+          1.2461129884661835
+        ]
+      }
+    },
+    {
+      "name": "Zero strength gives FS zero",
+      "pass": true,
+      "detail": {}
+    },
+    {
+      "name": "Zero seismic coefficients equal normal case",
+      "pass": true,
+      "detail": {}
+    },
+    {
+      "name": "Invalid inputs rejected",
+      "pass": true,
+      "detail": {
+        "rejected": 6
+      }
+    },
+    {
+      "name": "No intersecting circle produces no result",
+      "pass": true,
+      "detail": {}
+    },
+    {
+      "name": "Rocscience 乾坡七切片",
+      "pass": true,
+      "detail": {
+        "name": "Rocscience 乾坡七切片",
+        "expected": 2.113,
+        "actual": 2.112942660477584,
+        "tolerance": 0.002,
+        "pass": true,
+        "residual": 5.141765766304164e-10
+      }
+    },
+    {
+      "name": "Rocscience 濕坡七切片",
+      "pass": true,
+      "detail": {
+        "name": "Rocscience 濕坡七切片",
+        "expected": 1.555,
+        "actual": 1.5551964312783935,
+        "tolerance": 0.002,
+        "pass": true,
+        "residual": 7.422366963194953e-10
+      }
+    },
+    {
+      "name": "Current water-soil targets",
+      "pass": true,
+      "detail": {}
+    },
+    {
+      "name": "Gauss audit entries sum to slice weight",
+      "pass": true,
+      "detail": {
+        "maxDifferenceKN": 7.105427357601002e-15
+      }
+    },
+    {
+      "name": "Foundation 112 strict comparison",
+      "pass": true,
+      "detail": [
+        {
+          "target": 1.5,
+          "strict": true
+        },
+        {
+          "target": 1.2,
+          "strict": true
+        },
+        {
+          "target": 1.1,
+          "strict": true
+        }
+      ]
+    }
+  ],
+  "scope": "Tests validate formulas and selected cases; not universal design certification."
+}

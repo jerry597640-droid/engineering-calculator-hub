@@ -326,6 +326,15 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
     "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/steel-sections/",
     "code": "SEC",
     "favorite": false
+  },
+  {
+    "id": "slope-stability",
+    "name": "邊坡穩定分析工作台",
+    "category": "大地與基礎",
+    "description": "Bishop／Fellenius 三工況圓弧分析、水平分層、水位與地震；含詳細 Word 計算書、台灣女性操作影片及完整離線版。",
+    "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/slope-stability/",
+    "code": "SLOPE",
+    "favorite": false
   }
 ]
 </script>
@@ -462,6 +471,7 @@ try{const marker='engineering-calculator-hub.rc-corbel.v1';if(!localStorage.getI
 try{const marker='engineering-calculator-hub.src-beam-column.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='src-beam-column');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='SRC 梁柱工具已載入；請匯出清單保存新增項目。';}
 // Add Taiwan Steel Section Library while preserving saved personal customizations.
 try{const marker='engineering-calculator-hub.steel-sections.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='steel-sections');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='型鋼斷面資料庫已列入預設工具；請確認瀏覽器允許儲存清單。';}
+try{const marker='engineering-calculator-hub.slope-stability.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='slope-stability');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='邊坡穩定工具已載入；請匯出清單保存新增項目。';}
 render();if(startupWarning)notify(startupWarning);
 </script>
 <script id="theme-data" type="application/json">{"navy":"#12243b","paper":"#f4f7fa","surface":"#ffffff","ink":"#192c42","accent":"#efb64e","blue":"#225a83"}</script>
@@ -491,4 +501,3 @@ $('theme-save').onclick=()=>{try{const next=validTheme(Object.fromEntries(Object
 applyTheme(themeSaved);
 </script>
 </body></html>
-
