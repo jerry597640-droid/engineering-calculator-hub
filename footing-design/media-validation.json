@@ -1,11 +1,39 @@
 {
   "date": "2026-10-10",
-  "durationSeconds": 189.166667,
+  "version": "1.4",
+  "durationSeconds": 211.7,
   "chapters": 6,
-  "chapterJumpSeconds": 87.667,
+  "chapterJumps": [
+    {
+      "chapter": 1,
+      "expectedSeconds": 0,
+      "actualSeconds": 0.01942
+    },
+    {
+      "chapter": 4,
+      "expectedSeconds": 98.472,
+      "actualSeconds": 98.492042
+    },
+    {
+      "chapter": 6,
+      "expectedSeconds": 171.552,
+      "actualSeconds": 171.572042
+    }
+  ],
   "offlineHttpRequests": [],
   "javascriptErrors": [],
   "offlineVideoMetadata": true,
   "offlinePlayback": true,
-  "voiceStatus": "Subtitle-only; full Taiwan female narration pending explicit external-service authorization"
+  "offlineAudioDecodedBytes": 191700,
+  "embeddedVideoSha256": "536f2271e27631f4abe7e73a31bff8c68840e3422c897c470448f745fcee47ed",
+  "voiceStatus": "Produced and embedded: zh-TW-HsiaoChenNeural, Taiwan female Mandarin",
+  "voiceMetadata": "assets/voice-metadata.json",
+  "fullFileDecode": true,
+  "videoCodec": "h264",
+  "audioCodec": "aac",
+  "resolution": [
+    1280,
+    720
+  ],
+  "captions": 60
 }
