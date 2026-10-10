@@ -1,0 +1,47 @@
+name: Steel sections v1.1 build
+on:
+  push:
+    paths:
+      - '.automation/steel-sections-v11.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: steel-sections-v11
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install media and browser dependencies
+        run: |
+          python -m pip install playwright edge-tts pillow
+          python -m playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-noto-cjk
+      - name: Build and test the upgraded tool
+        run: python .automation/steel-sections-v11.py --publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: steel-sections-v1.1
+          path: |
+            steel-sections/index.html
+            steel-sections/media/
+            steel-sections/verification-v11.json
+            steel-sections/steel-sections-v1.1-offline.zip
+      - name: Commit only generated steel section files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add steel-sections/index.html steel-sections/media steel-sections/verification-v11.json steel-sections/steel-sections-v1.1-offline.zip
+          git diff --cached --quiet && exit 0
+          git commit -m 'Publish steel section v1.1 with verified return navigation and tutorial'
+          git pull --rebase origin '${{ github.ref_name }}'
+          git push origin HEAD:'${{ github.ref_name }}'
