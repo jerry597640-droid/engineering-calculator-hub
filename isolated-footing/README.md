@@ -36,8 +36,10 @@
 ### 現行來源（2026-10-10 核對）
 
 - [國土署：建築物混凝土結構設計規範](https://www.nlma.gov.tw/ch/legislation/regsearch/6874)：112年版、113年1月1日生效，113年2月19日勘誤。
-- [混凝土規範全文](https://www.nlma.gov.tw/uploads/files/34f8103d5ef2b7f82dde347c52758207.pdf)：第13章、8.4、8.6、21.2、22.5、22.6。
+- [混凝土規範全文](https://www.nlma.gov.tw/uploads/files/011d9249cac7d6c5547786aa348e352a.pdf)：第13章、8.4、8.6、21.2、22.5、22.6。
 - [國土署：建築物基礎構造設計規範](https://www.nlma.gov.tw/ch/legislation/law%26regusw/962)：112年版、113年1月1日生效。
+
+- [113年2月19日勘誤表](https://www.nlma.gov.tw/uploads/files/40e4370d2726960efcc41074b2d99f53.pdf)。
 
 ## 驗證
 
