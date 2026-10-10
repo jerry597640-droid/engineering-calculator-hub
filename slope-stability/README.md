@@ -41,6 +41,8 @@ https://www.rocscience.com/help/slide2/verification-theory/verification-manuals
 
 使用者提供的PDF材料示範為另外建立之水平地層，未宣稱重現原A–A等剖面之FS；原文未提供可直接重建的全部數值幾何。
 
+開發者可於完整原始碼目錄執行 `python tests/verify.py` 重跑驗算；需 Node.js 及 Python numpy、scipy。腳本讀取附帶的 `example-project.json`，產生 `verification.json` 與未四捨五入的 `verification-detail.json`，不依賴本次製作的暫存檔。使用網頁計算及 Word 匯出不需要安裝這些開發套件。
+
 ## 建置
 
 `python build.py` 將CSS、求解器、原生Word匯出器及介面JS內嵌成單一index.html。計算不使用CDN、網路API或套件安裝。影片採台灣女性 `zh-TW-HsiaoChenNeural`，有繁體字幕及逐字稿。

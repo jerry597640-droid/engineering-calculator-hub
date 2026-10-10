@@ -5,8 +5,8 @@ import numpy as np
 from scipy.optimize import brentq
 ROOT=Path(__file__).resolve().parents[1]
 script=r'''
-const fs=require('fs'),C=require('./slope-stability/engine.js');
-const m=JSON.parse(fs.readFileSync('output/basic-result.json')).model;
+const fs=require('fs'),C=require('./engine.js');
+const m=JSON.parse(fs.readFileSync('example-project.json')).model;
 const basic=C.run(m),normal=basic.results[0].best.circle;
 const runs=[basic];
 const fine=structuredClone(m);fine.slices=120;fine.density=20;runs.push(C.run(fine));
@@ -24,7 +24,7 @@ const invalid=[];for(const update of [a=>a.layers[0].sat=1,a=>a.ground.reverse()
 const none=structuredClone(fixed);none.circle={cx:200,cy:200,r:1};const nor=C.run(none);
 console.log(JSON.stringify({runs,bench:C.benchmarks(),invalid,none:nor}));
 '''
-data=json.loads(subprocess.check_output(['node','-e',script],cwd=ROOT.parent,text=True))
+data=json.loads(subprocess.check_output(['node','-e',script],cwd=ROOT,text=True))
 checks=[]
 def check(name,ok,detail):
     checks.append({'name':name,'pass':bool(ok),'detail':detail})
@@ -69,10 +69,10 @@ check('Current water-soil targets',data['runs'][0]['results'][1]['target']==1.2 
 # Strength and weights consistency across every selected slice.
 err=max(abs(sum(p['dW'] for p in s['weightParts'])-s['W']) for run in data['runs'] for r in run['results'] for s in r['best']['rows'])
 check('Gauss audit entries sum to slice weight',err<1e-10,{'maxDifferenceKN':err})
-foundation=subprocess.check_output(['node','-e',"const C=require('./slope-stability/engine.js'),m=JSON.parse(require('fs').readFileSync('output/basic-result.json')).model;m.profile='foundation-global';console.log(JSON.stringify(C.run(m).results.map(r=>({target:r.target,strict:r.strict}))))"],cwd=ROOT.parent,text=True)
+foundation=subprocess.check_output(['node','-e',"const C=require('./engine.js'),m=JSON.parse(require('fs').readFileSync('example-project.json')).model;m.profile='foundation-global';console.log(JSON.stringify(C.run(m).results.map(r=>({target:r.target,strict:r.strict}))))"],cwd=ROOT,text=True)
 check('Foundation 112 strict comparison',all(r['strict'] for r in json.loads(foundation)),json.loads(foundation))
 report={'version':'1.1.0','checked':'2026-10-11','pass':all(c['pass'] for c in checks),'checks':checks,'scope':'Tests validate formulas and selected cases; not universal design certification.'}
 (ROOT/'verification.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
-(ROOT.parent/'output/basic-result.json').write_text(json.dumps(data['runs'][0],ensure_ascii=False))
+(ROOT/'verification-detail.json').write_text(json.dumps(data['runs'][0],ensure_ascii=False))
 print(json.dumps(report,ensure_ascii=False,indent=2))
 if not report['pass']:raise SystemExit(1)
