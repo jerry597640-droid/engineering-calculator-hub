@@ -23,5 +23,7 @@ check('Edge critical perimeter never reports interior punching PASS',()=>{let d=
 check('Input protections: cover, column boundary, paired case types',()=>{assert.ok(F.calculate({...F.defaults,cover:1}).errors.length);assert.ok(F.calculate({...F.defaults,ex:3}).errors.length);assert.ok(F.calculate({...F.defaults,cases:[]}).errors.length)});
 check('Partial contact adds size effect, equilibrium intact',()=>{let d=JSON.parse(JSON.stringify(F.defaults));d.cases[1].My=700;let r=F.calculate(d),c=r.results[1];assert.ok(!c.p.full);assert.ok(c.sides[0].lambda<1);assert.ok(c.netBalance<1e-8)});
 check('Rectangular short-direction distribution 13.3.3.3',()=>{let r=F.calculate({...F.defaults,L:5,B:4});near(r.distFactor,2*1.25/2.25);assert.equal(r.short,'y')});
+check('At most 40 complete load combinations; excessive case import rejected',()=>{let d=JSON.parse(JSON.stringify(F.defaults));d.cases=Array.from({length:41},(_,k)=>({...d.cases[k%3]}));assert.ok(F.validate(d).some(e=>e.includes('40')))});
 console.log(`Verified ${count} engineering test groups.`);
+
 
