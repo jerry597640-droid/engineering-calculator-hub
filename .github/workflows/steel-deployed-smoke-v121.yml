@@ -1,0 +1,80 @@
+name: Steel v1.2.1 public website verification
+on:
+  push:
+    paths:
+      - '.github/workflows/steel-deployed-smoke-v121.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install actual browser engines
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium webkit
+      - name: Check public website, data, custom dimensions, no-script mode, and media
+        run: |
+          python - <<'PY'
+          import json,time,hashlib,urllib.request
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          out=Path('public-verification');out.mkdir()
+          base='https://jerry597640-droid.github.io/engineering-calculator-hub/steel-sections/'
+          url=base+'?v=1.2.1&check='+str(int(time.time()))
+          for attempt in range(18):
+              try:
+                  with urllib.request.urlopen(url,timeout=20) as r: body=r.read();status=r.status
+                  if status==200 and b'data-steel-source' in body and b'STEEL_FIX_REPORT' in body:break
+              except Exception:pass
+              time.sleep(10)
+          else:raise RuntimeError('Public site did not publish v1.2.1 within verification window')
+          result={'url':url,'http_status':status,'html_sha256':hashlib.sha256(body).hexdigest(),'checks':[],'scope':'Actual public HTTPS URL, Chromium and WebKit on Linux. Not a physical iPhone test.'}
+          with sync_playwright() as p:
+              for name in ['chromium','webkit']:
+                  b=getattr(p,name).launch(headless=True)
+                  c=b.new_context(viewport={'width':390,'height':844})
+                  page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+                  response=page.goto(url,wait_until='domcontentloaded',timeout=30000)
+                  page.wait_for_function('window.STEEL_BOOT && STEEL_BOOT.ready',timeout=15000)
+                  data=page.evaluate('STEEL_FIX_REPORT()')
+                  assert data['version']=='1.2.1' and data['total']==129 and response.status==200,data
+                  page.select_option('#family','C')
+                  assert page.locator('#mobilelist button').count()==5
+                  page.locator('#mobilelist').scroll_into_view_if_needed()
+                  page.screenshot(path=str(out/(name+'-live-C.png')))
+                  page.locator('#customShortcut').click()
+                  assert abs(page.evaluate('STEEL_V12.getDraft().A')-45.33)<1e-8
+                  page.evaluate("setTab('tutorial');const v=document.getElementById('v11-video');v.muted=true;v.load();")
+                  page.wait_for_function("document.getElementById('v11-video').readyState>=1",timeout=20000)
+                  duration=page.evaluate("document.getElementById('v11-video').duration")
+                  assert abs(duration-157.675)<1
+                  assert not errors,errors
+                  result['checks'].append({'engine':name,'interactive':data,'C_rows':5,'custom_A':45.33,'video_duration':duration,'script_errors':errors,'passed':True})
+                  c.close()
+                  c=b.new_context(java_script_enabled=False,viewport={'width':390,'height':844})
+                  page=c.new_page();page.goto(url,wait_until='domcontentloaded',timeout=30000)
+                  assert page.locator('#steel-reader').is_visible()
+                  assert page.locator('[data-static-id]').count()==129
+                  assert page.locator('#static-C [data-static-id]').count()==5
+                  assert not page.locator('.app').is_visible()
+                  page.locator('#static-C').scroll_into_view_if_needed();page.screenshot(path=str(out/(name+'-no-script-C.png')))
+                  result['checks'].append({'engine':name,'JavaScript':False,'visible_records':129,'C_rows':5,'dead_controls_hidden':True,'passed':True})
+                  c.close();b.close()
+          with urllib.request.urlopen(base+'media/tutorial-zh-TW.mp4',timeout=30) as r: media=r.read()
+          result['video_sha256']=hashlib.sha256(media).hexdigest()
+          assert result['video_sha256']=='d6d70660e150c955f6be735094ce8d87a0f76484df36a94000484608747f8a9b'
+          result['passed']=True
+          (out/'public-verification-v121.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+          print(json.dumps(result,ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: steel-public-website-v1.2.1
+          path: public-verification/
