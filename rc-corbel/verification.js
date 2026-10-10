@@ -27,7 +27,11 @@
  test('拒絕NaN、負載重、空幾何、非整數筋數與未知選項',()=>[{Vu:NaN},{Nu:-1},{bw:0},{mainN:3.5},{interface:'invalid'},{nMode:'pad',Rs:0},{fy:5600}].every(q=>!E.calculate({...E.DEFAULT,...q}).valid));
  test('彎矩需求超出單筋降伏解時須NG，不能誤判OK',()=>{const r=E.calculate({...E.DEFAULT,Vu:500,Nu:500});return !r.reqYield&&!r.passed;});
  test('四项細部確認為真才列細部已確認',()=>E.calculate({...E.DEFAULT,front:true,support:true,bearing:true,durability:true}).details);
+ test('獨立同向外拉力須相加：12 + 12.8＝24.8 tf',()=>near(E.calculate({...E.DEFAULT,nMode:'pad',nCombine:'sum',Nu:12,Rs:40}).Nuc/1000,24.8));
+ test('完整水平力取大避免重複束制：max(12,12.8)＝12.8 tf',()=>near(E.calculate({...E.DEFAULT,nMode:'pad',nCombine:'envelope',Nu:12,Rs:40}).Nuc/1000,12.8));
+ test('直接模式不相加墊材估值；拒絕未知合併選項',()=>near(E.calculate({...E.DEFAULT,nMode:'direct',nCombine:'sum'}).Nuc/1000,12)&&!E.calculate({...E.DEFAULT,nCombine:'invalid'}).valid);
  return out;}
 const api={run};if(typeof module!=='undefined'&&module.exports)module.exports=api;root.CorbelVerification=api;
 })(typeof window!=='undefined'?window:globalThis);
+
 

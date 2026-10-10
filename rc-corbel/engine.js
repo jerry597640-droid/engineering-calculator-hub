@@ -1,7 +1,7 @@
-/* RC Corbel Workbench v1.0.0 — TW 112 / errata 113. kgf, cm. */
+/* RC Corbel Workbench v1.2.0 — TW 112 / errata 113. kgf, cm. */
 (function(root){'use strict';
 const BARS={D10:{d:.953,a:.7133},D13:{d:1.27,a:1.267},D16:{d:1.588,a:1.986},D19:{d:1.905,a:2.865},D22:{d:2.223,a:3.871},D25:{d:2.54,a:5.067},D29:{d:2.865,a:6.469},D32:{d:3.226,a:8.143},D36:{d:3.581,a:10.07}};
-const DEFAULT={project:'RC 托架示範案',member:'C1－托架',kind:'corbel',fc:280,fy:4200,concrete:'normal',interface:'mono',bw:40,h:50,htip:30,L:40,av:20,cover:4,agg:2,bl:20,bb:30,xAnchor:35,Vu:60,Nu:12,nMode:'direct',Rs:40,muPad:.1,mainBar:'D25',mainN:4,hoopBar:'D10',hoopN:6,front:false,support:false,bearing:false,durability:false};
+const DEFAULT={project:'RC 托架示範案',member:'C1－托架',kind:'corbel',fc:280,fy:4200,concrete:'normal',interface:'mono',bw:40,h:50,htip:30,L:40,av:20,cover:4,agg:2,bl:20,bb:30,xAnchor:35,Vu:60,Nu:12,nMode:'direct',nCombine:'envelope',Rs:40,muPad:.1,mainBar:'D25',mainN:4,hoopBar:'D10',hoopN:6,front:false,support:false,bearing:false,durability:false};
 const EPS=1e-8,PHI=.75,ES=2040000;
 function flexural(As,p,d){
  const beta=Math.max(.65,.85-.05*Math.max(0,p.fc-280)/70);
@@ -18,7 +18,7 @@ function calculate(input){
  for(const k of ['Nu','Rs','muPad'])if(typeof p[k]!=='number'||!Number.isFinite(p[k])||p[k]<0)errors.push(k+' 不得為負值');
  for(const k of ['mainN','hoopN'])if(!Number.isInteger(p[k])||p[k]<(k==='mainN'?2:1)||p[k]>100)errors.push(k+' 必須為有效整數（主筋 2～100、箍筋 1～100）');
  for(const k of ['mainBar','hoopBar'])if(!BARS[p[k]])errors.push('鋼筋號數無效');
- for(const [k,v]of Object.entries({kind:['corbel','bracket'],concrete:['normal','sand','all'],interface:['mono','rough','smooth'],nMode:['direct','pad','tested']}))if(!v.includes(p[k]))errors.push(k+' 選項無效');
+ for(const [k,v]of Object.entries({kind:['corbel','bracket'],concrete:['normal','sand','all'],interface:['mono','rough','smooth'],nMode:['direct','pad','tested'],nCombine:['envelope','sum']}))if(!v.includes(p[k]))errors.push(k+' 選項無效');
  if(p.fc<175||p.fc>700)errors.push('本版材料範圍：f′c＝175～700 kgf/cm²');
  if(p.fy<2800||p.fy>4200)errors.push('本版主筋與箍筋同級，fy＝2800～4200 kgf/cm²（剪力摩擦上限）');
  if(p.htip>p.h)errors.push('本版支承面深度不得小於外端深度');
@@ -31,7 +31,8 @@ function calculate(input){
  if(p.av-p.bl/2<0||p.av+p.bl/2>p.L||p.bb>p.bw)errors.push('承壓面必須完整位於托架頂面');
  if(errors.length)return {valid:false,errors,p};
  const lambda=p.concrete==='normal'?1:p.concrete==='sand'?.85:.75,mu={mono:1.4,rough:1,smooth:.6}[p.interface]*lambda;
- const Vu=p.Vu*1000,Nuc=Math.max(p.Nu*1000,p.nMode==='direct'?0:1.6*(p.nMode==='pad'?.2:Math.min(.2,p.muPad))*p.Rs*1000);
+ const Vu=p.Vu*1000,Npad=p.nMode==='direct'?0:1.6*(p.nMode==='pad'?.2:Math.min(.2,p.muPad))*p.Rs*1000;
+ const Nuc=p.nMode!=='direct'&&p.nCombine==='sum'?p.Nu*1000+Npad:Math.max(p.Nu*1000,Npad);
  const ratio=p.av/d,Mu=Vu*p.av+Nuc*(p.h-d),An=Nuc/(PHI*p.fy),Avf=Vu/(PHI*mu*p.fy),Amin=.04*p.fc/p.fy*p.bw*d;
  const disc=d*d-2*Mu/(PHI*.85*p.fc*p.bw),beta=Math.max(.65,.85-.05*Math.max(0,p.fc-280)/70),aBal=beta*d*.003/(.003+p.fy/ES),AsBal=.85*p.fc*p.bw*aBal/p.fy;
  const Af=disc>=0?2*Mu/(PHI*p.fy*(d+Math.sqrt(disc))):Infinity;
@@ -64,4 +65,5 @@ function calculate(input){
 }
 const api={BARS,DEFAULT,PHI,ES,calculate,flexural};if(typeof module!=='undefined'&&module.exports)module.exports=api;root.CorbelEngine=api;
 })(typeof window!=='undefined'?window:globalThis);
+
 

@@ -24,10 +24,10 @@
 ## 規範來源
 
 - https://www.nlma.gov.tw/ch/legislation/regsearch/6874
-- https://www.nlma.gov.tw/uploads/files/34f8103d5ef2b7f82dde347c52758207.pdf
+- https://www.nlma.gov.tw/uploads/files/011d9249cac7d6c5547786aa348e352a.pdf
 - https://www.nlma.gov.tw/uploads/files/40e4370d2726960efcc41074b2d99f53.pdf
 
-查核日期：2026-10-05。
+查核日期：2026-10-10。
 
 ## 驗證
 
@@ -42,3 +42,17 @@ node -e "require('./engine.js'); const r=require('./verification.js').run(); con
 ## 檔案
 
 `engine.js`純計算；`app.js`輸入、圖示、計算書；`verification.js`獨立基準與回歸；`style.css`桌面、手機與列印介面。單檔離線版由相同程式打包，保持線上／離線公式一致。
+
+
+## v1.2.0 更新
+
+- 27個輸入參數均有可點按定義、範例、單位與來源；操作說明支援搜尋。
+- 未通過項目篩選、手機底部快捷鍵；保留可編輯Word與完整計算軌跡。
+- 支承墊可選完整總拉力與束制估值取大，或同向同時獨立外拉力相加；直接模式輸入完整Nuc。
+- 2分56秒、8章節的實際畫面教學，Microsoft zh-TW-HsiaoChenNeural台灣女性合成旁白，內嵌字幕、時間跳轉、速度控制及文字稿。
+- 單檔HTML下載將影片、海報、字幕、程式全部嵌入，無網路也能計算、播放及匯出Word。
+- 31項內建驗證通過；320、375、390、768、1440像素五種尺寸無整頁橫向溢出。
+
+### 影音來源
+
+影片由HyperFrames HTML＋GSAP製作；畫面取本工具實際截圖；旁白以指定台灣女性合成語音產生。它是操作教學，不代表完整工程審查或合格認證。
