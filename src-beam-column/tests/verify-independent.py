@@ -63,3 +63,4 @@ check('梁RC一般剪力：0.53√fc bd + AvFyh d/s',.53*math.sqrt(280)*50*69/10
 (BASE/'independent.json').write_text(json.dumps([{**{k:v for k,v in t.items() if k!='pass_'},'pass':t['pass_']} for t in tests],ensure_ascii=False,indent=2))
 for t in tests: print(('PASS' if t['pass_'] else 'FAIL'),t['name'],t['actual'])
 if not all(t['pass_'] for t in tests):raise SystemExit(1)
+

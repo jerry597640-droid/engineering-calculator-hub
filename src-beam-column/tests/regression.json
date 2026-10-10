@@ -1,0 +1,164 @@
+[
+  {
+    "name": "柱範例材料、幾何及P–M條件",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "柱大彎矩顯示強度不足",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "純軸壓工況不產生假中性軸",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "零軸力雙向彎矩可平衡",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "強軸單向工況",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "弱軸單向工況",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "軸拉輸入拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "扭矩輸入拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "不對稱主筋輸入拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "空白非數值輸入拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "一階樓層穩定分母失效拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "一階構材Euler分母失效拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "二階模式忽略未採用的一階空白欄位",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "一階模式忽略未採用的二階空白欄位",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "有效一階欄位空白仍拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "Cm小於SRC端彎矩比公式範圍拒絕",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "SRC雙曲率M1/M2=1的Cm=0.2可用",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "海水曝露4cm保護層阻擋合格",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "曝露保護層門檻依RC113勘誤",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "鋼骨比不足阻擋合格",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "柱箍筋間距過大阻擋合格",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "高強度混凝土超出範圍阻擋合格",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "λc>1.5採Euler型分支",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "梁正負對稱容量相等",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "梁RC剪力摩擦控制",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "梁剪力需求分配守恆",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  },
+  {
+    "name": "梁D10主筋阻擋合格",
+    "expected": "符合指定數值／防錯行為",
+    "actual": "通過",
+    "pass": true
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "pass": true,
+  "mode": "file:// + network offline",
+  "checks": [
+    "離線影片metadata",
+    "H2641280×720/AAC",
+    "六章按鈕",
+    "跳轉及實際播放",
+    "內嵌繁中字幕",
+    "390px播放器無溢出"
+  ],
+  "duration": 168.625,
+  "width": 1280,
+  "height": 720,
+  "cues": 28,
+  "src": "file:///workspace/scratch/e265d9f8a907/src-beam-column/media/src-tutorial.mp4"
+}

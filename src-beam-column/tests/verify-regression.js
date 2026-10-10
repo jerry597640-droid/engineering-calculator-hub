@@ -13,6 +13,13 @@ test('不對稱主筋輸入拒絕',()=>{let q=clone(p);q.bars[0].x+=1;assert.thr
 test('空白非數值輸入拒絕',()=>assert.throws(()=>SRCC.calculate({...p,Pu:NaN},false)));
 test('一階樓層穩定分母失效拒絕',()=>assert.throws(()=>SRCC.calculate({...p,order:'first',thetaX:1},false)));
 test('一階構材Euler分母失效拒絕',()=>assert.throws(()=>SRCC.calculate({...p,order:'first',Pu:30000},false)));
+test('二階模式忽略未採用的一階空白欄位',()=>{let r=SRCC.calculate({...p,Cmx:NaN,thetaX:NaN,Mntx:NaN},false);assert(r.valid);assert.equal(r.demand[0].B1,null);assert.equal(r.demand[0].M,60);});
+test('一階模式忽略未採用的二階空白欄位',()=>assert(SRCC.calculate({...p,order:'first',Mx:NaN,My:NaN},false).valid));
+test('有效一階欄位空白仍拒絕',()=>assert.throws(()=>SRCC.calculate({...p,order:'first',Mntx:NaN},false)));
+test('Cm小於SRC端彎矩比公式範圍拒絕',()=>assert.throws(()=>SRCC.calculate({...p,order:'first',Cmx:.1},false)));
+test('SRC雙曲率M1/M2=1的Cm=0.2可用',()=>assert(SRCC.calculate({...p,order:'first',Cmx:.2},false).valid));
+test('海水曝露4cm保護層阻擋合格',()=>assert(!SRCC.calculate({...p,exposure:'corrosive'},false).valid));
+test('曝露保護層門檻依RC113勘誤',()=>{for(const [exposure,cover]of [['indoor',4],['weather',5],['soil',7.5],['corrosive',10]]){let g=SRC.geometry({...p,exposure,cover});assert(g.checks.find(c=>c.name==='箍筋保護層（SRC／RC）').ok);g=SRC.geometry({...p,exposure,cover:cover-.01});assert(!g.checks.find(c=>c.name==='箍筋保護層（SRC／RC）').ok);}});
 test('鋼骨比不足阻擋合格',()=>{let r=SRCC.calculate({...p,bf:10,hs:20,tf:1,tw:.5},false);assert(!r.valid);});
 test('柱箍筋間距過大阻擋合格',()=>assert(!SRCC.calculate({...p,s:30},false).valid));
 test('高強度混凝土超出範圍阻擋合格',()=>assert(!SRCC.calculate({...p,fc:560},false).valid));
@@ -26,3 +33,4 @@ fs.writeFileSync(require('path').join(__dirname,'regression.json'),JSON.stringif
 const examples=[{name:'柱範例',p:SRCC.defaults()},{name:'一階分析',p:{...SRCC.defaults(),order:'first'}},{name:'長柱',p:{...SRCC.defaults(),L:2200}}].map(t=>({...t,r:SRCC.calculate(t.p,false)}));
 fs.writeFileSync(require('path').join(__dirname,'check-cases.json'),JSON.stringify(examples,null,2));
 fs.writeFileSync(require('path').join(__dirname,'beam-result.json'),JSON.stringify(SRC.calculate(SRC.defaults()),null,2));
+
