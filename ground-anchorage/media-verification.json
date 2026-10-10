@@ -1,0 +1,16 @@
+{
+  "durationSeconds": 186.958333,
+  "voice": "zh-TW-HsiaoChenNeural",
+  "chapters": 8,
+  "checks": [
+    "MP4實際播放",
+    "章節跳轉",
+    "播放速度",
+    "切頁暫停",
+    "線上產生含影片單檔",
+    "完全斷網計算",
+    "完全斷網手機播放",
+    "離線Word匯出"
+  ],
+  "pageErrors": []
+}

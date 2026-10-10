@@ -47,8 +47,10 @@ function calculate(p){
  ck('free','自由段與破壞面',p.Lf+1e-9>=requiredLf,'Lf ≥ 最小自由段且 ≥ 破壞面交點距離＋後退長度');
  ck('length','錨碇段最小長度',p.La>=300,'La ≥ 300 cm（02492 §1.5.3）');
  const floor=factors(p.period,'tw');ck('factors','安全係數基準',p.fsSteel>=floor[0]&&p.fsGround>=floor[1]&&p.fsBond>=floor[2],'採用的 FS 不低於 02492 表列參考值');
- if(p.fhwa&&ultimate!==null){ck('lock','FHWA 鎖定荷重上限',lockLoad<=lockLimit+1e-10,'鎖定荷重 ≤ 0.70 × 抗張材極限拉力');ck('test','FHWA 試驗荷重上限',testLoad<=testLimit+1e-10,'試驗荷重 ≤ 0.80 × 抗張材極限拉力');}
+ if(p.fhwa&&ultimate!==null){ck('lock','FHWA 鎖定荷重上限',lockLoad<=lockLimit+1e-10,'鎖定荷重 ≤ 0.70 × 抗張材極限拉力');ck('testMinimum','FHWA 試驗倍率下限',p.testFactor+1e-12>=1.33,'最大試驗荷重 ≥ 1.33 × 設計軸力（FHWA 附錄 E §6.01）');ck('test','FHWA 試驗荷重上限',testLoad<=testLimit+1e-10,'試驗荷重 ≤ 0.80 × 抗張材極限拉力');}
  const warnings=[];
+ if(p.areaMode==='solid')warnings.push('臺北市02492章明列不包括鋼棒；鋼棒模式僅沿用原式與參考係數，須另依契約和適用準則核定，不能宣稱符合該章全部條款。');
+ if(p.fhwa)warnings.push('FHWA為1999年國外補充參考，本工具套用鋼材比例、自由段及試驗倍率項目，不代表完整FHWA設計；L2/5為本工具保守代理，須以實際牆高與破壞面校核。');
  if(p.profile==='legacy')warnings.push('原版係數模式用於追溯；原程式的 σas 名稱混淆容許與極限強度，請依材料文件設定強度性質。');
  if(p.stressBasis==='allowable')warnings.push('使用直接容許應力：不再除以 FSsteel；FHWA 極限強度比例與試驗上限未計算，需另補 fpu 檢核。');
  if(p.La>1000)warnings.push('錨碇段超過原版 10 m 建議值，不能假定承載力持續線性增加，須由現地試驗確認有效長度。');
@@ -58,9 +60,10 @@ function calculate(p){
  if(p.slipMode==='rankine')warnings.push('平面破壞面僅適用均質、水平地表及近似垂直牆的初步幾何；分層土、邊坡及圓弧破壞應輸入外部分析交點。');
  const controlling=['抗張材抗拉','地層／漿體抗拔','漿體／抗張材握裹'][caps.indexOf(axialCapacity)];
  const requiredLaGround=p.La*T/caps[1],requiredLaBond=p.La*T/caps[2];
- const requiredN=Math.ceil(T/(steel/p.number)-1e-12);
+ const requiredNDesign=Math.ceil(T/(steel/p.number)-1e-12);
+ const requiredN=p.fhwa&&ultimate!==null?Math.max(requiredNDesign,Math.ceil(lockLoad/(0.7*ultimate/p.number)-1e-12),Math.ceil(testLoad/(0.8*ultimate/p.number)-1e-12)):requiredNDesign;
  const elongation=T*1000*p.Lf/At/p.E*10;
- const checkValues={steel:`${T} ≤ ${steel}+1e-10 tf`,ground:`${T} ≤ ${caps[1]}+1e-10 tf`,grout:`${T} ≤ ${caps[2]}+1e-10 tf`,inclination:`${p.theta} > 10°`,spacing:`${p.spacing} ≥ ${spacingMin} cm`,free:`${p.Lf}+1e-9 ≥ ${requiredLf} cm`,length:`${p.La} ≥ 300 cm`,factors:`[${p.fsSteel},${p.fsGround},${p.fsBond}] ≥ [${floor}]`,lock:`${lockLoad} ≤ ${lockLimit}+1e-10 tf`,test:`${testLoad} ≤ ${testLimit}+1e-10 tf`};
+ const checkValues={steel:`${T} ≤ ${steel}+1e-10 tf`,ground:`${T} ≤ ${caps[1]}+1e-10 tf`,grout:`${T} ≤ ${caps[2]}+1e-10 tf`,inclination:`${p.theta} > 10°`,spacing:`${p.spacing} ≥ ${spacingMin} cm`,free:`${p.Lf}+1e-9 ≥ ${requiredLf} cm`,length:`${p.La} ≥ 300 cm`,factors:`[${p.fsSteel},${p.fsGround},${p.fsBond}] ≥ [${floor}]`,testMinimum:`${p.testFactor} ≥ 1.33`,lock:`${lockLoad} ≤ ${lockLimit}+1e-10 tf`,test:`${testLoad} ≤ ${testLimit}+1e-10 tf`};
  const trace=[];const step=(title,formula,substitution,result,unit='',condition='',source='原版 AnchorEngine.calculate；均勻界面應力與有效長度假設')=>trace.push({title,formula,substitution,result,unit,condition,source});
  step('角度與荷重單位換算','θrad = θ × π / 180；Ptf = P × k',`${p.theta} × π / 180；cosθ=${c}；sinθ=${s}；${p.load} × ${loadFactor}`,loadTf,'tf',`輸入力方向 ${p.loadMode}；1 tf = 1000 kgf = 9.80665 kN`);
  step('設計軸力',p.loadMode==='horizontal'?'T = Ptf / cosθ':'T = Ptf',p.loadMode==='horizontal'?`${loadTf} / ${c}`:`${loadTf}`,T,'tf');
@@ -86,7 +89,7 @@ function calculate(p){
  step('自由段需求','Lf,req = max(Lf,min, s0+b)',`max(${minLf}, ${slip}+${buffer})`,requiredLf,'cm',`已設Lf=${p.Lf}；原比較容差1e-9 cm`);
  step('中心距下限','a,min = max(4D,150)',`max(4 × ${p.D},150)`,spacingMin,'cm',`已設a=${p.spacing}`);
  step('安全係數來源列','FS參考 = factors(period, tw)',`period=${p.period}；採用=[${p.fsSteel},${p.fsGround},${p.fsBond}]`,floor.join(' / '),'', '檢核以臺北基準列，legacy/custom仍須比對最低值','02492 表列參考：臨時列 [1.6,2,2]；永久列 [2,3,3]；欄依序 抗張材／地層／握裹；原版legacy臨時列[1.6,2.5,2.5]');
- step('所需抗張材支數','Nreq = ceil(T/(Ta/N)-1e-12)',`ceil(${T}/(${steel}/${p.number})-1e-12)`,requiredN,'支','向上取整；扣1e-12防浮點邊界跳號；僅抗拉需求');
+ step('建議抗張材支數',p.fhwa&&ultimate!==null?'Nreq = max(ceil(T/(Ta/N)), ceil(Tlock/(0.70Tu/N)), ceil(Ttest/(0.80Tu/N)))':'Nreq = ceil(T/(Ta/N))',`設計需求 ${requiredNDesign} 支；鎖定荷重 ${lockLoad} tf；最大試驗荷重 ${testLoad} tf`,requiredN,'支','各項向上取整；扣1e-12防浮點邊界跳號；同時考慮已啟用的鋼材設計、鎖定、试驗上限，不取代地層與配置檢核');
  step('地層所需有效長度','La,g = La T / Tag',`${p.La} × ${T} / ${caps[1]}`,requiredLaGround,'cm','同一界面應力，未取整；超長有效性須試驗確認');
  step('握裹所需有效長度','La,b = La T / Tab',`${p.La} × ${T} / ${caps[2]}`,requiredLaBond,'cm','未取整；不取代其他配置檢核');
  step('鎖定荷重','Tlock = klock T',`${p.lockFactor} × ${T}`,lockLoad,'tf',p.fhwa&&ultimate!==null?`上限0.70Tu=${lockLimit} tf`:'未計FHWA比例上限');

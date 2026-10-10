@@ -1,10 +1,10 @@
-# 地錨設計工作台 v1.0
+# 地錨設計工作台 v2.0
 
-單一 HTML、無外部依賴、離線互動計算。開啟 `index.html` 即可使用。
+完整離線套件含 HTML、影片、字幕與計算核心；開啟 `index.html` 即可使用。另提供已嵌入影片的單檔 HTML。
 
 - 網頁：https://jerry597640-droid.github.io/engineering-calculator-hub/ground-anchorage/
 - 入口：https://jerry597640-droid.github.io/engineering-calculator-hub/
-- 查核日期：2026-10-05
+- 查核日期：2026-10-10
 
 ## 功能
 
@@ -17,8 +17,8 @@
 臺灣依據：112年版建築物基礎構造設計規範 §7.3.9(3)、§8.7.3解說(8)引用地錨準則與公路邊坡規範。臺北市工程施工規範02492 §§1.5.3、1.6.1提供最低錨長及安全係數參考（地方施工規範不是全臺統一門檻）。公路邊坡規範111/4/27修订公告所述變動為排水條文。FHWA-IF-99-015為1999技術手冊補充，不能稱為新的臺灣法規。
 
 官方來源：
-- https://www.nlma.gov.tw/ch/legislation/regsearch/962
-- https://www.nlma.gov.tw/filesys/file/EMMA/a1120620.pdf
+- https://www.nlma.gov.tw/ch/legislation/law%26regusw/962
+- https://www.nlma.gov.tw/uploads/files/53651dae74223e6599e20838bb8c4f2a.pdf
 - https://laws.gov.taipei/Law/LawSearch/LawArticleContent/FL103224
 - https://www.motc.gov.tw/ch/app/divpubreg_list/view?id=740&module=divpubreg&serno=405
 - https://highways.dot.gov/sites/fhwa.dot.gov/files/FHWA-IF-99-015.pdf
@@ -31,6 +31,16 @@
 
 ## 驗算
 
-`engine.cjs`是與HTML內嵌同內容的計算核心，`verification.json`記錄21項數值測試及範例輸出。使用獨立Python SI公式核對力與伸長。瀏覽器驗证五種寬度(320/390/768/1024/1440px)、無JS錯誤、斷網計算、JSON匯入匯出、下載離線頁及計算書/PDF。
+`engine.cjs`是與HTML內嵌同內容的計算核心，`verification.json`記錄25項數值測試及範例輸出。使用獨立Python SI公式核對力與伸長。瀏覽器驗证五種寬度(320/390/768/1024/1440px)、無JS錯誤、斷網計算、JSON匯入匯出、下載離線頁及計算書/PDF。
 
-離線版 HTML的「依據與驗算」頁可重跑10項內建算術檢查。
+離線版 HTML的「依據與驗算」頁可重跑12項內建算術檢查。
+
+
+## v2.0（2026-10-10）
+- 操作影片：8章節，台灣華語女性 zh-TW-HsiaoChenNeural，繁體中文字幕、章節跳轉及播放速度。
+- 36項參數字典：定義、資料來源、範例B值、公式及常見填寫錯誤；輸入錯誤可跳至欄位。
+- 可編輯Word匯出及完整代入步驟保留；手機可填案名。
+- FHWA補充：試驗倍率1.33下限，建議鋼腱支數同時考慮設計、鎖定及試驗上限。
+- 規範查核日期2026-10-10。現行《建築物基礎構造設計規範》112年版（113/1/1生效）；臺北市02492表列僅在契約適用範圍內採用，不包括鋼棒。FHWA-IF-99-015是1999國外參考，不宣稱完整FHWA設計。
+- 開啟index.html可離線計算與觀看影片；保留assets資料夾。單檔HTML版本也含完整影片與字幕。
+- 表列通過不代表整體穩定、群錨、錨頭承壓、防蝕、潛變及現地試驗已完成。

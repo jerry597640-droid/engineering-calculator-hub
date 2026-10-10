@@ -1,0 +1,572 @@
+{
+  "count": 25,
+  "passed": 25,
+  "results": [
+    {
+      "label": "原版預設：三項極限能力與水平能力",
+      "status": "PASS"
+    },
+    {
+      "label": "範例 B：鋼絞線真實金屬面積及補充上限",
+      "status": "PASS"
+    },
+    {
+      "label": "獨立 SI 驗算：力、握裹、抗拔及伸長",
+      "status": "PASS"
+    },
+    {
+      "label": "低加壓砂土原式分支",
+      "status": "PASS"
+    },
+    {
+      "label": "低加壓黏土原式分支",
+      "status": "PASS"
+    },
+    {
+      "label": "直接容許應力不二次折減",
+      "status": "PASS"
+    },
+    {
+      "label": "原型實心面積與鋼絞線面積不可混用",
+      "status": "PASS"
+    },
+    {
+      "label": "軸力輸入不再次除 cosθ",
+      "status": "PASS"
+    },
+    {
+      "label": "kgf／tf 換算不改結果",
+      "status": "PASS"
+    },
+    {
+      "label": "kN／tf 換算不改結果",
+      "status": "PASS"
+    },
+    {
+      "label": "自由段幾何正確：交點同時滿足兩條直線",
+      "status": "PASS"
+    },
+    {
+      "label": "自由段不足與等號邊界",
+      "status": "PASS"
+    },
+    {
+      "label": "外部滑動面交點不套平面公式",
+      "status": "PASS"
+    },
+    {
+      "label": "錨碇段 300cm 可等號通過",
+      "status": "PASS"
+    },
+    {
+      "label": "錨碇長度超過10m 不假報全設計已合格",
+      "status": "PASS"
+    },
+    {
+      "label": "錨碇中心距150cm、4D邊界",
+      "status": "PASS"
+    },
+    {
+      "label": "傾角 10° 及高傾角輸入界限",
+      "status": "PASS"
+    },
+    {
+      "label": "最大試驗力超過80%能被獨立判出",
+      "status": "PASS"
+    },
+    {
+      "label": "長久安全係數下限",
+      "status": "PASS"
+    },
+    {
+      "label": "減支數與增荷重應使強度失敗",
+      "status": "PASS"
+    },
+    {
+      "label": "空值、零值、分數支數與不合理深度阻擋",
+      "status": "PASS"
+    },
+    {
+      "label": "FHWA試驗倍率1.33可等號通過、1.329不可",
+      "status": "PASS"
+    },
+    {
+      "label": "試驗1.6T建議支數按80%極限上限向上取整",
+      "status": "PASS"
+    },
+    {
+      "label": "鎖定1.5T建議支數按70%極限上限向上取整",
+      "status": "PASS"
+    },
+    {
+      "label": "鋼棒顯示02492適用範圍限制",
+      "status": "PASS"
+    }
+  ],
+  "exampleB": {
+    "errors": [],
+    "trace": [
+      {
+        "title": "角度與荷重單位換算",
+        "formula": "θrad = θ × π / 180；Ptf = P × k",
+        "substitution": "20 × π / 180；cosθ=0.9396926207859084；sinθ=0.3420201433256687；63.5 × 1",
+        "result": 63.5,
+        "unit": "tf",
+        "condition": "輸入力方向 horizontal；1 tf = 1000 kgf = 9.80665 kN",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "設計軸力",
+        "formula": "T = Ptf / cosθ",
+        "substitution": "63.5 / 0.9396926207859084",
+        "result": 67.57528855222041,
+        "unit": "tf",
+        "condition": "",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "水平分力",
+        "formula": "H = T cosθ",
+        "substitution": "67.57528855222041 × 0.9396926207859084",
+        "result": 63.49999999999999,
+        "unit": "tf",
+        "condition": "",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "垂直分力",
+        "formula": "V = T sinθ",
+        "substitution": "67.57528855222041 × 0.3420201433256687",
+        "result": 23.112109875903847,
+        "unit": "tf",
+        "condition": "",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "單支材料面積",
+        "formula": "A = 材料面積輸入",
+        "substitution": "0.987",
+        "result": 0.987,
+        "unit": "cm²",
+        "condition": "面積模式 strand；鋼絞線不能以外徑實心圓代替證明面積",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "總面積",
+        "formula": "At = A × N",
+        "substitution": "0.987 × 7",
+        "result": 6.909,
+        "unit": "cm²",
+        "condition": "",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "材料極限拉力",
+        "formula": "Tu = At fpu / 1000",
+        "substitution": "6.909 × 19000 / 1000",
+        "result": 131.271,
+        "unit": "tf",
+        "condition": "",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "抗張材原始容許力",
+        "formula": "Tas = Tu / FSs",
+        "substitution": "131.271 / 1.6",
+        "result": 82.04437499999999,
+        "unit": "tf",
+        "condition": "FSs=1.6",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "抗張材容許力採用",
+        "formula": "Ta = min(Tas, 0.60Tu)",
+        "substitution": "min(82.04437499999999, 78.76259999999999)",
+        "result": 78.76259999999999,
+        "unit": "tf",
+        "condition": "採最小值；FHWA補充60%極限拉力限制",
+        "source": "原版公式與勾選 FHWA 補充条件"
+      },
+      {
+        "title": "地層極限抗拔力",
+        "formula": "Tug = π D La τu / 1000",
+        "substitution": "π × 23 × 915 × 5 / 1000",
+        "result": 330.574086973986,
+        "unit": "tf",
+        "condition": "界面極限剪應力由地質／試驗提供",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "地層容許抗拔力",
+        "formula": "Tag = Tug / FSg",
+        "substitution": "330.574086973986 / 2",
+        "result": 165.287043486993,
+        "unit": "tf",
+        "condition": "",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "極限握裹力",
+        "formula": "Tbu = π Dt La N τb / 1000",
+        "substitution": "π × 1.27 × 915 × 7 × 11 / 1000",
+        "result": 281.10295621900946,
+        "unit": "tf",
+        "condition": "",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "容許握裹力",
+        "formula": "Tab = Tbu / FSb",
+        "substitution": "281.10295621900946 / 2",
+        "result": 140.55147810950473,
+        "unit": "tf",
+        "condition": "",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "控制容許軸力",
+        "formula": "Tallow = min(Ta, Tag, Tab)",
+        "substitution": "min(78.76259999999999, 165.287043486993, 140.55147810950473)",
+        "result": 78.76259999999999,
+        "unit": "tf",
+        "condition": "控制：抗張材抗拉；同值時採候選順序首項",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "容許水平力",
+        "formula": "Hallow = Tallow cosθ",
+        "substitution": "78.76259999999999 × 0.9396926207859084",
+        "result": 74.01263401391218,
+        "unit": "tf",
+        "condition": "",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "強度利用率",
+        "formula": "u = T / Tallow",
+        "substitution": "67.57528855222041 / 78.76259999999999",
+        "result": 0.8579616283898757,
+        "unit": "",
+        "condition": "容許值判定各自保留原引擎 1e-10 tf 比較容差",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "破壞面角度",
+        "formula": "β = 45 + φs/2",
+        "substitution": "45 + 30/2",
+        "result": 60,
+        "unit": "°",
+        "condition": "水平地表、均質土、垂直牆初步平面破壞面",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "破壞面交點",
+        "formula": "s0 = (L2-L1)/(sinθ+cosθ tanβ)",
+        "substitution": "(1158-252) / (0.3420201433256687+0.9396926207859084 × tan(60°))",
+        "result": 459.9882551842426,
+        "unit": "cm",
+        "condition": "",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "破壞面後退長度",
+        "formula": "b = max(b輸入, 150, L2/5)",
+        "substitution": "max(150,150,1158/5)",
+        "result": 231.6,
+        "unit": "cm",
+        "condition": "FHWA勾選時保留原引擎修正",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "最小自由段",
+        "formula": "Lf,min = FHWA且非實心 ? 450 : 400",
+        "substitution": "FHWA=true；面積模式=strand",
+        "result": 450,
+        "unit": "cm",
+        "condition": "",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "自由段需求",
+        "formula": "Lf,req = max(Lf,min, s0+b)",
+        "substitution": "max(450, 459.9882551842426+231.6)",
+        "result": 691.5882551842426,
+        "unit": "cm",
+        "condition": "已設Lf=800；原比較容差1e-9 cm",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "中心距下限",
+        "formula": "a,min = max(4D,150)",
+        "substitution": "max(4 × 23,150)",
+        "result": 150,
+        "unit": "cm",
+        "condition": "已設a=200",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "安全係數來源列",
+        "formula": "FS參考 = factors(period, tw)",
+        "substitution": "period=temporary；採用=[1.6,2,2]",
+        "result": "1.6 / 2 / 2",
+        "unit": "",
+        "condition": "檢核以臺北基準列，legacy/custom仍須比對最低值",
+        "source": "02492 表列參考：臨時列 [1.6,2,2]；永久列 [2,3,3]；欄依序 抗張材／地層／握裹；原版legacy臨時列[1.6,2.5,2.5]"
+      },
+      {
+        "title": "建議抗張材支數",
+        "formula": "Nreq = max(ceil(T/(Ta/N)), ceil(Tlock/(0.70Tu/N)), ceil(Ttest/(0.80Tu/N)))",
+        "substitution": "設計需求 7 支；鎖定荷重 67.57528855222041 tf；最大試驗荷重 89.87513377445316 tf",
+        "result": 7,
+        "unit": "支",
+        "condition": "各項向上取整；扣1e-12防浮點邊界跳號；同時考慮已啟用的鋼材設計、鎖定、试驗上限，不取代地層與配置檢核",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "地層所需有效長度",
+        "formula": "La,g = La T / Tag",
+        "substitution": "915 × 67.57528855222041 / 165.287043486993",
+        "result": 374.08491144163634,
+        "unit": "cm",
+        "condition": "同一界面應力，未取整；超長有效性須試驗確認",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "握裹所需有效長度",
+        "formula": "La,b = La T / Tab",
+        "substitution": "915 × 67.57528855222041 / 140.55147810950473",
+        "result": 439.9198774495162,
+        "unit": "cm",
+        "condition": "未取整；不取代其他配置檢核",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "鎖定荷重",
+        "formula": "Tlock = klock T",
+        "substitution": "1 × 67.57528855222041",
+        "result": 67.57528855222041,
+        "unit": "tf",
+        "condition": "上限0.70Tu=91.88969999999999 tf",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "試驗荷重",
+        "formula": "Ttest = ktest T",
+        "substitution": "1.33 × 67.57528855222041",
+        "result": 89.87513377445316,
+        "unit": "tf",
+        "condition": "上限0.80Tu=105.01679999999999 tf",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "自由段彈性伸長",
+        "formula": "Δ = T × 1000 × Lf / At / E × 10",
+        "substitution": "67.57528855222041 × 1000 × 800 / 6.909 / 1950000 × 10",
+        "result": 40.1262053893111,
+        "unit": "mm",
+        "condition": "tf→kgf乘1000；cm→mm乘10；未取整",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "檢核 抗張材抗拉",
+        "formula": "設計軸力 ≤ 抗張材容許軸力",
+        "substitution": "67.57528855222041 ≤ 78.76259999999999+1e-10 tf",
+        "result": "通過",
+        "unit": "",
+        "condition": "全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "檢核 地層／漿體抗拔",
+        "formula": "設計軸力 ≤ 極限抗拔力／FSg",
+        "substitution": "67.57528855222041 ≤ 165.287043486993+1e-10 tf",
+        "result": "通過",
+        "unit": "",
+        "condition": "全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "檢核 漿體／抗張材握裹",
+        "formula": "設計軸力 ≤ 極限握裹力／FSb",
+        "substitution": "67.57528855222041 ≤ 140.55147810950473+1e-10 tf",
+        "result": "通過",
+        "unit": "",
+        "condition": "全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "檢核 地錨傾角",
+        "formula": "θ > 10°；沿用原準則的施工建議",
+        "substitution": "20 > 10°",
+        "result": "通過",
+        "unit": "",
+        "condition": "全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "檢核 錨碇段中心距",
+        "formula": "a ≥ max(4D, 150 cm)；須另查群錨與鑽孔偏差",
+        "substitution": "200 ≥ 150 cm",
+        "result": "通過",
+        "unit": "",
+        "condition": "全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "檢核 自由段與破壞面",
+        "formula": "Lf ≥ 最小自由段且 ≥ 破壞面交點距離＋後退長度",
+        "substitution": "800+1e-9 ≥ 691.5882551842426 cm",
+        "result": "通過",
+        "unit": "",
+        "condition": "全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "檢核 錨碇段最小長度",
+        "formula": "La ≥ 300 cm（02492 §1.5.3）",
+        "substitution": "915 ≥ 300 cm",
+        "result": "通過",
+        "unit": "",
+        "condition": "全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "檢核 安全係數基準",
+        "formula": "採用的 FS 不低於 02492 表列參考值",
+        "substitution": "[1.6,2,2] ≥ [1.6,2,2]",
+        "result": "通過",
+        "unit": "",
+        "condition": "全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "檢核 FHWA 鎖定荷重上限",
+        "formula": "鎖定荷重 ≤ 0.70 × 抗張材極限拉力",
+        "substitution": "67.57528855222041 ≤ 91.88969999999999+1e-10 tf",
+        "result": "通過",
+        "unit": "",
+        "condition": "全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "檢核 FHWA 試驗倍率下限",
+        "formula": "最大試驗荷重 ≥ 1.33 × 設計軸力（FHWA 附錄 E §6.01）",
+        "substitution": "1.33 ≥ 1.33",
+        "result": "通過",
+        "unit": "",
+        "condition": "全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      },
+      {
+        "title": "檢核 FHWA 試驗荷重上限",
+        "formula": "試驗荷重 ≤ 0.80 × 抗張材極限拉力",
+        "substitution": "89.87513377445316 ≤ 105.01679999999999+1e-10 tf",
+        "result": "通過",
+        "unit": "",
+        "condition": "全部表列檢核須通過；不代表整體穩定、群錨、錨頭、防蝕、潛變與現地試驗已完成",
+        "source": "原版 AnchorEngine.calculate；均勻界面應力與有效長度假設"
+      }
+    ],
+    "inputSnapshot": "{\"project\":\"示範地錨 A1\",\"period\":\"temporary\",\"profile\":\"tw\",\"loadMode\":\"horizontal\",\"loadUnit\":\"tf\",\"load\":63.5,\"method\":\"interface\",\"areaMode\":\"strand\",\"diameter\":1.27,\"area\":0.987,\"number\":7,\"stressBasis\":\"ultimate\",\"strength\":19000,\"bond\":11,\"tau\":5,\"nFactor\":40,\"phi\":30,\"alpha\":0.3,\"cu\":10,\"D\":23,\"La\":915,\"Lf\":800,\"L1\":252,\"L2\":1158,\"spacing\":200,\"theta\":20,\"phiSlip\":30,\"slipMode\":\"rankine\",\"slipDistance\":450,\"buffer\":150,\"fsSteel\":1.6,\"fsGround\":2,\"fsBond\":2,\"fhwa\":true,\"lockFactor\":1,\"testFactor\":1.33,\"E\":1950000}",
+    "T": 67.57528855222041,
+    "H": 63.49999999999999,
+    "V": 23.112109875903847,
+    "A": 0.987,
+    "At": 6.909,
+    "ultimate": 131.271,
+    "steel": 78.76259999999999,
+    "ground": 330.574086973986,
+    "grout": 281.10295621900946,
+    "caps": [
+      78.76259999999999,
+      165.287043486993,
+      140.55147810950473
+    ],
+    "axialCapacity": 78.76259999999999,
+    "horizontalCapacity": 74.01263401391218,
+    "beta": 60,
+    "slip": 459.9882551842426,
+    "buffer": 231.6,
+    "minLf": 450,
+    "requiredLf": 691.5882551842426,
+    "checks": [
+      {
+        "key": "steel",
+        "name": "抗張材抗拉",
+        "ok": true,
+        "detail": "設計軸力 ≤ 抗張材容許軸力"
+      },
+      {
+        "key": "ground",
+        "name": "地層／漿體抗拔",
+        "ok": true,
+        "detail": "設計軸力 ≤ 極限抗拔力／FSg"
+      },
+      {
+        "key": "grout",
+        "name": "漿體／抗張材握裹",
+        "ok": true,
+        "detail": "設計軸力 ≤ 極限握裹力／FSb"
+      },
+      {
+        "key": "inclination",
+        "name": "地錨傾角",
+        "ok": true,
+        "detail": "θ > 10°；沿用原準則的施工建議"
+      },
+      {
+        "key": "spacing",
+        "name": "錨碇段中心距",
+        "ok": true,
+        "detail": "a ≥ max(4D, 150 cm)；須另查群錨與鑽孔偏差"
+      },
+      {
+        "key": "free",
+        "name": "自由段與破壞面",
+        "ok": true,
+        "detail": "Lf ≥ 最小自由段且 ≥ 破壞面交點距離＋後退長度"
+      },
+      {
+        "key": "length",
+        "name": "錨碇段最小長度",
+        "ok": true,
+        "detail": "La ≥ 300 cm（02492 §1.5.3）"
+      },
+      {
+        "key": "factors",
+        "name": "安全係數基準",
+        "ok": true,
+        "detail": "採用的 FS 不低於 02492 表列參考值"
+      },
+      {
+        "key": "lock",
+        "name": "FHWA 鎖定荷重上限",
+        "ok": true,
+        "detail": "鎖定荷重 ≤ 0.70 × 抗張材極限拉力"
+      },
+      {
+        "key": "testMinimum",
+        "name": "FHWA 試驗倍率下限",
+        "ok": true,
+        "detail": "最大試驗荷重 ≥ 1.33 × 設計軸力（FHWA 附錄 E §6.01）"
+      },
+      {
+        "key": "test",
+        "name": "FHWA 試驗荷重上限",
+        "ok": true,
+        "detail": "試驗荷重 ≤ 0.80 × 抗張材極限拉力"
+      }
+    ],
+    "warnings": [
+      "FHWA為1999年國外補充參考，本工具套用鋼材比例、自由段及試驗倍率項目，不代表完整FHWA設計；L2/5為本工具保守代理，須以實際牆高與破壞面校核。",
+      "平面破壞面僅適用均質、水平地表及近似垂直牆的初步幾何；分層土、邊坡及圓弧破壞應輸入外部分析交點。"
+    ],
+    "controlling": "抗張材抗拉",
+    "requiredN": 7,
+    "requiredLaGround": 374.08491144163634,
+    "requiredLaBond": 439.9198774495162,
+    "elongation": 40.1262053893111,
+    "utilization": 0.8579616283898757,
+    "pass": true
+  }
+}

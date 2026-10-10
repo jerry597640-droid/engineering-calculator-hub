@@ -1,6 +1,6 @@
 {
-  "count": 21,
-  "passed": 21,
+  "count": 25,
+  "passed": 25,
   "results": [
     {
       "label": "原版預設：三項極限能力與水平能力",
@@ -182,5 +182,12 @@
     "elongation": 40.1262053893111,
     "utilization": 0.8579616283898757,
     "pass": true
-  }
+  },
+  "version": "2.0",
+  "codeCheckDate": "2026-10-10",
+  "newChecks": [
+    "FHWA最低試驗倍率1.33",
+    "建議支數含設計／鎖定／試驗",
+    "鋼棒02492適用範圍"
+  ]
 }
