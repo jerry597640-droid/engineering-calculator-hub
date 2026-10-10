@@ -1,0 +1,293 @@
+{
+  "version": "1.2.0",
+  "checked": "2026-10-10",
+  "checks": [
+    {
+      "name": "version 1.2.0",
+      "passed": true
+    },
+    {
+      "name": "98 catalog rows preserved",
+      "passed": true
+    },
+    {
+      "name": "31 theoretical examples preserved",
+      "passed": true
+    },
+    {
+      "name": "catalog consistency self tests",
+      "passed": true
+    },
+    {
+      "name": "fixed home URL",
+      "passed": true
+    },
+    {
+      "name": "home preserves original tab",
+      "passed": true
+    },
+    {
+      "name": "noopener",
+      "passed": true
+    },
+    {
+      "name": "example resets filters",
+      "passed": true
+    },
+    {
+      "name": "catalog weight 880.8kg",
+      "passed": true
+    },
+    {
+      "name": "display unit keeps weight inputs",
+      "passed": true
+    },
+    {
+      "name": "fractional quantity rejected",
+      "passed": true
+    },
+    {
+      "name": "live H area 45.33",
+      "passed": true
+    },
+    {
+      "name": "300mm converts to 30cm",
+      "passed": true
+    },
+    {
+      "name": "unit conversion preserves geometry",
+      "passed": true
+    },
+    {
+      "name": "H independent area",
+      "passed": true
+    },
+    {
+      "name": "H mass relation",
+      "passed": true
+    },
+    {
+      "name": "I independent area",
+      "passed": true
+    },
+    {
+      "name": "I mass relation",
+      "passed": true
+    },
+    {
+      "name": "U independent area",
+      "passed": true
+    },
+    {
+      "name": "U mass relation",
+      "passed": true
+    },
+    {
+      "name": "L independent area",
+      "passed": true
+    },
+    {
+      "name": "L mass relation",
+      "passed": true
+    },
+    {
+      "name": "C independent area",
+      "passed": true
+    },
+    {
+      "name": "C mass relation",
+      "passed": true
+    },
+    {
+      "name": "RHS independent area",
+      "passed": true
+    },
+    {
+      "name": "RHS mass relation",
+      "passed": true
+    },
+    {
+      "name": "SHS independent area",
+      "passed": true
+    },
+    {
+      "name": "SHS mass relation",
+      "passed": true
+    },
+    {
+      "name": "CHS independent area",
+      "passed": true
+    },
+    {
+      "name": "CHS mass relation",
+      "passed": true
+    },
+    {
+      "name": "T independent area",
+      "passed": true
+    },
+    {
+      "name": "T mass relation",
+      "passed": true
+    },
+    {
+      "name": "H Ix independent formula",
+      "passed": true
+    },
+    {
+      "name": "SHS Ix independent formula",
+      "passed": true
+    },
+    {
+      "name": "invalid SHS rejected",
+      "passed": true
+    },
+    {
+      "name": "excessive flange rejected",
+      "passed": true
+    },
+    {
+      "name": "invalid result cleared",
+      "passed": true
+    },
+    {
+      "name": "empty dimension rejected",
+      "passed": true
+    },
+    {
+      "name": "square H B synchronized",
+      "passed": true
+    },
+    {
+      "name": "saved custom entry",
+      "passed": true
+    },
+    {
+      "name": "custom survives reload",
+      "passed": true
+    },
+    {
+      "name": "restored values recalculated",
+      "passed": true
+    },
+    {
+      "name": "edit updates instead of duplicate",
+      "passed": true
+    },
+    {
+      "name": "backup uses canonical mm",
+      "passed": true
+    },
+    {
+      "name": "invalid import atomic",
+      "passed": true
+    },
+    {
+      "name": "dictionary search",
+      "passed": true
+    },
+    {
+      "name": "28 parameter definitions",
+      "passed": true
+    },
+    {
+      "name": "steel code source",
+      "passed": true
+    },
+    {
+      "name": "cold formed source",
+      "passed": true
+    },
+    {
+      "name": "no page overflow 360",
+      "passed": true
+    },
+    {
+      "name": "home visible after scroll 360",
+      "passed": true
+    },
+    {
+      "name": "home touch target 360",
+      "passed": true
+    },
+    {
+      "name": "no page overflow 390",
+      "passed": true
+    },
+    {
+      "name": "home visible after scroll 390",
+      "passed": true
+    },
+    {
+      "name": "home touch target 390",
+      "passed": true
+    },
+    {
+      "name": "no page overflow 768",
+      "passed": true
+    },
+    {
+      "name": "home visible after scroll 768",
+      "passed": true
+    },
+    {
+      "name": "home touch target 768",
+      "passed": true
+    },
+    {
+      "name": "no page overflow 1440",
+      "passed": true
+    },
+    {
+      "name": "home visible after scroll 1440",
+      "passed": true
+    },
+    {
+      "name": "home touch target 1440",
+      "passed": true
+    },
+    {
+      "name": "no script exceptions",
+      "passed": true
+    },
+    {
+      "name": "MP4 contains audio",
+      "passed": true
+    },
+    {
+      "name": "MP4 contains video",
+      "passed": true
+    },
+    {
+      "name": "embedded video decodes",
+      "passed": true
+    },
+    {
+      "name": "chapter seeking",
+      "passed": true
+    },
+    {
+      "name": "downloaded offline snapshot starts",
+      "passed": true
+    }
+  ],
+  "scope": "Chromium on GitHub Actions. No physical iOS Safari test. Geometry checks are not structural certification.",
+  "media": {
+    "voice": "zh-TW-HsiaoChenNeural",
+    "gender": "Female",
+    "locale": "zh-TW",
+    "duration_seconds": 157.675,
+    "chapters": [
+      0.0,
+      18.536,
+      35.29600000000001,
+      56.328,
+      75.03200000000001,
+      96.88000000000001,
+      117.072,
+      137.096
+    ],
+    "sha256": "d6d70660e150c955f6be735094ce8d87a0f76484df36a94000484608747f8a9b",
+    "type": "Actual Playwright screen recordings with H.264/AAC synthesized narration and burned-in captions"
+  }
+}
