@@ -1,6 +1,6 @@
 {
-  "verified_on": "2026-10-05",
-  "engineering_groups": 20,
+  "verified_on": "2026-10-10",
+  "engineering_groups": 21,
   "test_output": [
     "PASS Uniform pressure: N/A",
     "PASS Full contact: exact biaxial elastic formula",
@@ -22,20 +22,35 @@
     "PASS Input protections: cover, column boundary, paired case types",
     "PASS Partial contact adds size effect, equilibrium intact",
     "PASS Rectangular short-direction distribution 13.3.3.3",
-    "Verified 20 engineering test groups."
+    "PASS At most 40 complete load combinations; excessive case import rejected",
+    "Verified 21 engineering test groups."
   ],
   "offline_external_dependencies": [],
   "embedded_engine_matches_source": true,
   "embedded_ui_matches_source": true,
   "browser_observations": {
-    "desktop": "Published app, source NG, thickness example PASS, invalid input blocked; no console errors",
-    "mobile": "375px content width equals scroll width; stacked form and horizontal navigation observed",
-    "hub": "Tool card and correct destination observed"
+    "desktop": "Published v1.1, six chapters, H.264/AAC readyState4 duration215.066667, chapter5 seek139.65s played; leaving tutorial paused video; dictionary count40/searchqa2matches and qa focus; same-sample PASS shear0.79/punch0.62",
+    "mobile": "Actual standalone app rendered in 390px iframe: stacked toolbar, horizontal navigation, readable summary; screenshot inspected",
+    "download": "Browser download completed; 6MB+ HTML contains current safe example, complete video payload and no external script src",
+    "hub": "Existing isolated-footing destination preserved"
   },
   "verification_limits": [
-    "Local file URL execution could not be tested in the cloud browser. All runtime dependencies are embedded and the core was tested with Node.",
-    "Browser download event was not returned by the cloud browser. The identical standalone HTML is included directly in this release.",
-    "Actual device filesystem opening and hardcopy printing should be confirmed on the target device."
+    "Cloud browser prohibits file:// navigation, so execution under a local-file origin remains untested; standalone payload and downloaded current case were inspected.",
+    "Target-device filesystem opening and hardcopy printing require device confirmation.",
+    "PASS covers implemented checks for entered combinations; edge/corner punching, settlement, liquefaction, anchorage and seismic detailing remain outside scope."
   ],
-  "sha256_html": "201661ac17ddb97ffaeeecb85d417b841a81d1d1c9e24785486ef8eb20ce4364"
+  "sha256_html": "2366bfa3a60702251e519cf5edf47db55ff5049f9afad645c46150bb1231082f",
+  "embedded_extensions": true,
+  "tutorial": {
+    "voice": "zh-TW-HsiaoChenNeural",
+    "chapters": 6,
+    "duration_seconds": 215.066667,
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "size_bytes": 4051331,
+    "resolution": "1280x720",
+    "captions": "word-boundary timestamps",
+    "visual_checks": "6 snapshots and exported MP4 frame inspected",
+    "hyperframes_check": "0 errors, 0 warnings; crossfade overlap and screenshot crops reviewed as intentional"
+  }
 }
