@@ -36,8 +36,9 @@ await page.evaluate(()=>fillModel(example('bench')));await done();assert.equal(a
 await page.locator('#import-file').setInputFiles(path.join(root,'example-project.json'));await page.waitForFunction(()=>result?.model?.name==='10 m åœŸå¡æ•™å­¸ç¯„ä¾‹',{},{timeout:120000});assert.equal(await page.evaluate(()=>result.model.ground[2][1]-result.model.ground[1][1]),10);checks.push('project import auto-runs');
 const downloadEvent=page.waitForEvent('download');await page.locator('#offline-btn').click();const download=await downloadEvent;const single=path.join(output,'standalone.html');await download.saveAs(single);
 await page.goto('file:///'+single.replaceAll('\\','/'));await done();checks.push('downloaded standalone auto-runs with network offline');
-await page.setViewportSize({width:390,height:844});await page.locator('#plot').scrollIntoViewIfNeded();await capture('mobile-complete');
+await page.setViewportSize({width:390,height:844});await page.locator('#plot').scrollIntoViewIfNeeded();await capture('mobile-complete');
 count=await page.evaluate(()=>workerStarts);
 await page.evaluate(()=>{const plot=document.getElementById('plot'),r=plot.getBoundingClientRect();const send=(type,id,x,y)=>plot.dispatchEvent(new PointerEvent(type,{pointerId:id,pointerType:'touch',clientX:r.left+x,clientY:r.top+y,bubbles:true}));plot.setPointerCapture=()=>{};send('pointerdown',1,100,100);send('pointerdown',2,250,100);send('pointermove',2,280,100);send('pointerup',2,280,100);send('pointermove',1,120,120);send('pointerup',1,120,120);});
 assert.equal(await page.evaluate(()=>workerStarts),count);assert(await page.evaluate(()=>view.w<900));await capture('mobile-zoom-pan');checks.push('mobile viewport synthetic two-pointer pinch/pan without recalculation');
-assert.deepEqual(errors,[]);fs.writeFileSync(path.join(output,'results.json'),JSON.stringify…ç$²– xJë¢»®º+²{¥—g(žÊ%zZ rœ’ÈèŠyÚÁ¨­nº0±êÜ–‹q«\…
+assert.deepEqual(errors,[]);fs.writeFileSync(path.join(output,'results.json'),JSON.stringify({checks,pageErrors:errors},null,2));console.log(checks.join('\n'));await browser.close();
+})().catch(e=>{console.error(e);process.exit(1);});
