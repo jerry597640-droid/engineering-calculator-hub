@@ -193,7 +193,7 @@ function resizeSpanDraft(equal=false){
  renderEditor();$('span-count').focus();
 }
 function applyContinuousSpans(){
- const next=B.continuousModel(model,spanDraft.lengths,spanDraft.extend);model=next;spanDraft=null;zoom={scale:1,left:0};resetSpanDraft();dirty();renderEditor();
+ const next=B.continuousModel(model,spanDraft.lengths,spanDraft.extend);model=next;zoom={scale:1,left:0};resetSpanDraft();dirty();renderEditor();
  toast('已套用'+(model.supports.length-1)+'跨連續梁；總長'+nf(model.length)+'m。請按分析與檢核。');
 }
 function presetSupports(name){const L=model.length;if(name==='simple')model.supports=[{x:0,type:'pin',settlement:0},{x:L,type:'roller',settlement:0}];if(name==='left')model.supports=[{x:0,type:'fixed',settlement:0}];if(name==='right')model.supports=[{x:L,type:'fixed',settlement:0}];if(name==='fixed')model.supports=[{x:0,type:'fixed',settlement:0},{x:L,type:'fixed',settlement:0}];if(name==='propped')model.supports=[{x:0,type:'fixed',settlement:0},{x:L,type:'roller',settlement:0}];if(name==='continuous'){if(!spanDraft)resetSpanDraft();resizeSpanDraft();applyContinuousSpans();return;}resetSpanDraft();dirty();renderEditor();}
