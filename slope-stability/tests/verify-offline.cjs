@@ -1,0 +1,20 @@
+const {chromium}=require('playwright'),assert=require('assert'),fs=require('fs'),path=require('path');
+(async()=>{
+const browser=await chromium.launch({channel:'msedge',headless:true}),context=await browser.newContext({offline:true,viewport:{width:1440,height:1000}}),page=await context.newPage();
+const entry=path.resolve(process.argv[2]),output=path.resolve(process.argv[3]);fs.mkdirSync(output,{recursive:true});
+await page.goto('file:///'+entry.replaceAll('\\','/'));
+const done=()=>page.waitForFunction(()=>analysisState==='complete',null,{timeout:120000});await done();
+assert.equal(await page.evaluate(()=>result.results.length),3);
+await page.evaluate(()=>{window.realWorker=Worker;window.Worker=class{constructor(){throw Error('test launch failure');}};runAnalysis();});
+assert.equal(await page.locator('#run-status').getAttribute('data-state'),'error');assert(await page.evaluate(()=>worker===null&&result===null&&!document.getElementById('run-btn').disabled));
+await page.evaluate(()=>{window.Worker=realWorker;runAnalysis();worker.onmessage({data:{ok:false,error:'test calculation failure'}});});
+assert.equal(await page.locator('#run-status').getAttribute('data-state'),'error');
+await page.evaluate(()=>{runAnalysis();worker.onerror({message:'test worker failure'});});assert.equal(await page.locator('#run-status').getAttribute('data-state'),'error');
+await page.locator('#density').fill('30');await page.locator('#run-btn').click();
+assert.equal(await page.locator('#run-status').getAttribute('data-state'),'running');assert(await page.locator('#metrics').innerText().then(t=>t.includes('計算中')));
+await page.evaluate(()=>zoom(.8));await page.locator('#notice').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,'desktop-running.png')});await done();
+await page.locator('#plot').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,'offline-zip-complete.png')});
+const video=path.resolve(path.dirname(entry),'assets/operation-tw-female.mp4');assert(fs.statSync(video).size>1000);
+fs.writeFileSync(path.join(output,'offline-zip-results.json'),JSON.stringify({offlineZip:true,workerLaunchFailureRecovery:true,workerErrorRecovery:true,solverFailureRecovery:true,highDensity:30,uiZoomWhileRunning:true,videoPresent:true,fs:await page.evaluate(()=>result.results.map(r=>r.best.fs))},null,2));
+console.log('Offline ZIP, worker startup/solver/error recovery, full density-30 background completion and UI zoom passed');await browser.close();
+})().catch(e=>{console.error(e);process.exit(1);});

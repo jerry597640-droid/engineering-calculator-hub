@@ -4,7 +4,7 @@ const source=fs.readFileSync(path.join(app,'app.js'),'utf8'),C=require(path.join
 const fields=new Map(),inputs={},plotEvents={};let plotRect={left:0,top:0,width:900,height:500};
 const element=(id,v='')=>({id,value:String(v),checked:false,disabled:false,max:'40',dataset:{},tagName:'INPUT',textContent:'',innerHTML:'',previousElementSibling:{textContent:id},closest:()=>true,setAttribute(k,v){this[k]=v;},setPointerCapture(){},addEventListener(n,fn){plotEvents[n]=fn;},getBoundingClientRect(){return plotRect;}});
 for(const [id,v]of Object.entries({...base,geometryMode:'simple',height:10,ratio:1.5,horizontalLength:15,beta:33.6900675,toeLength:15,crestLength:25,datum:0,project:base.name,units:'kn',targetNormal:1.5,targetRain:1.2,targetSeismic:1.1,strict:0,customSource:'',cx:0,cy:15,radius:16,ground:base.ground.map(p=>p.join(',')).join('\n'),waterLine:base.ground.map(p=>[p[0],p[1]-4].join(',')).join('\n'),rainLine:base.ground.map(p=>p.join(',')).join('\n')}))fields.set(id,element(id,v));
-for(const id of ['height-slider','horizontal-slider','beta-slider','horizontal-range','q-position-note','plot','notice','run-status','slice-inspector','slice-select','slice-prev','slice-next','slice-info','slice-caption','zoom-level','zoom-in','zoom-out','zoom-reset','flip-btn'])fields.set(id,element(id));
+for(const id of ['height-slider','horizontal-slider','beta-slider','horizontal-range','q-position-note','plot','notice','run-status','cancel-btn','slice-inspector','slice-select','slice-prev','slice-next','slice-info','slice-caption','zoom-level','zoom-in','zoom-out','zoom-reset','flip-btn'])fields.set(id,element(id));
 for(const id of ['q-follow','show-details','show-slices']){fields.set(id,element(id));fields.get(id).checked=true;}
 fields.set('show-slice-labels',element('show-slice-labels'));fields.set('show-candidates',element('show-candidates'));fields.set('scenario',element('scenario','normal'));
 fields.set('layers',{tBodies:[{rows:base.layers.map(l=>({querySelectorAll:()=>Object.entries(l).map(([k,v])=>({dataset:{key:k},value:String(v)}))}))}]});
@@ -12,7 +12,8 @@ const context={C,SCENES:{normal:'常時',rain:'暴雨／最高水位',seismic:'�
 vm.createContext(context);
 for(const prefix of ['const val=','const fmt=','const esc='])vm.runInContext(source.split('\n').find(l=>l.startsWith(prefix)),context);
 vm.runInContext(source.slice(source.indexOf('function syncGeometry('),source.indexOf('function fillModel(')),context);
-vm.runInContext(source.split('\n').find(l=>l.startsWith('function markDirty(')),context);
+Object.assign(context,{clearTimeout:()=>{},setTimeout:()=>1,autoTimer:null,analysisRevision:0,AUTO_DELAY:500});
+vm.runInContext(source.slice(source.indexOf('function stopAnalysis('),source.indexOf('const numericalInputs=')),context);
 vm.runInContext(source.split('\n').find(l=>l.startsWith('const numericalInputs=')),context);
 vm.runInContext(source.split('\n').find(l=>l.startsWith("document.addEventListener('input'")),context);
 vm.runInContext(source.slice(source.indexOf('function assessment('),source.indexOf('function renderResults(')),context);
