@@ -1,10 +1,10 @@
-/* Beam Workbench 1.2.1 — linear, prismatic Euler–Bernoulli beam.
+/* Beam Workbench 1.2.2 — linear, prismatic Euler–Bernoulli beam.
    Internal units: kN, m, rad. Input loads: downward force/q positive,
    counterclockwise applied couple positive. Displacement/reaction upward positive.
    Consistent nodal loading + exact equilibrium/integrated displacement recovery. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.BeamCore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const VERSION='1.2.1', G=9.80665, groups=['D','L','X'];
+const VERSION='1.2.2', G=9.80665, groups=['D','L','X'];
 const copy=x=>JSON.parse(JSON.stringify(x));
 const finite=(x,n)=>{if(typeof x!=='number'||!Number.isFinite(x))throw Error(n+'必須為有限數值');return x;};
 function continuousModel(model,lengths,extendFullLengthLoads=true){
