@@ -1,12 +1,24 @@
-/* Beam Workbench 1.0.0 — linear, prismatic Euler–Bernoulli beam.
+/* Beam Workbench 1.1.0 — linear, prismatic Euler–Bernoulli beam.
    Internal units: kN, m, rad. Input loads: downward force/q positive,
    counterclockwise applied couple positive. Displacement/reaction upward positive.
    Consistent nodal loading + exact equilibrium/integrated displacement recovery. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.BeamCore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const VERSION='1.0.0', G=9.80665, groups=['D','L','X'];
+const VERSION='1.1.0', G=9.80665, groups=['D','L','X'];
 const copy=x=>JSON.parse(JSON.stringify(x));
 const finite=(x,n)=>{if(typeof x!=='number'||!Number.isFinite(x))throw Error(n+'必須為有限數值');return x;};
+function continuousModel(model,lengths,extendFullLengthLoads=true){
+ if(!Array.isArray(lengths)||lengths.length<2||lengths.length>11)throw Error('連續梁快速設定須為 2～11 跨（3～12 個支承）');
+ lengths.forEach((L,i)=>{finite(L,'第'+(i+1)+'跨長度');if(L<=0)throw Error('第'+(i+1)+'跨長度須大於零');});
+ const m=copy(model),oldLength=m.length;let x=0;
+ m.supports=[{x:0,type:'pin',settlement:0}];
+ for(const L of lengths){x+=L;m.supports.push({x,type:'roller',settlement:0});}
+ m.length=x;
+ if(extendFullLengthLoads)for(const l of m.loads)if(l.type==='distributed'&&l.a===0&&Math.abs(l.b-oldLength)<=Math.max(1,oldLength)*1e-9)l.b=x;
+ // Validate a copy before applying: never leave a partially changed project.
+ try{validate(m);}catch(e){throw Error('分跨設定未套用：'+e.message+'。原載重位置採絕對座標，請先檢查載重及車位。');}
+ return m;
+}
 function validate(m){
  if(!m||m.schema!=='beam-workbench/1')throw Error('專案格式不支援，請使用本工具匯出的 JSON');
  finite(m.length,'梁長');if(m.length<.1||m.length>1000)throw Error('梁長須介於 0.1～1000 m');
@@ -98,10 +110,11 @@ function example(name='uniform'){const m={schema:'beam-workbench/1',title:'梁�
  if(name==='cantilever'){m.title='懸臂端點集中力範例';m.length=3;m.supports=[{x:0,type:'fixed',settlement:0}];m.loads=[{name:'自由端集中力',type:'point',group:'L',x:3,value:20,enabled:true}];}
  if(name==='fixed'){m.title='兩端固定均布載重範例';m.supports.forEach(s=>s.type='fixed');}
  if(name==='continuous'){m.title='兩跨連續梁範例';m.length=12;m.supports=[{x:0,type:'pin',settlement:0},{x:6,type:'roller',settlement:0},{x:12,type:'roller',settlement:0}];m.loads[0].b=12;}
+ if(['three-span','four-span','unequal-span'].includes(name)){const lengths=name==='three-span'?[6,6,6]:name==='four-span'?[6,6,6,6]:[4,6,5];const c=continuousModel(m,lengths);c.title=name==='three-span'?'三跨連續梁範例':name==='four-span'?'四跨連續梁範例':'不等跨連續梁範例（4＋6＋5m）';return c;}
  if(name==='triangle'){m.title='三角分布載重範例';m.loads[0].q0=0;m.loads[0].q1=12;}
  if(name==='moment'){m.title='跨中集中彎矩範例';m.loads=[{name:'逆時針彎矩',type:'moment',group:'L',x:3,value:20,enabled:true}];}
  if(name==='vehicle'){m.title='車行載重範例（自訂示範車）';m.length=12;m.supports[1].x=12;m.loads=[{name:'永久均布載重',type:'distributed',group:'D',a:0,b:12,q0:2,q1:2,enabled:true}];m.vehicle.enabled=true;m.vehicle.position=4;}
  return m;
 }
-return {VERSION,G,validate,compile,solve,evaluate,summarize,envelope,checks,section,example,loadsFor,roots,spans,stations,scanPositions};
+return {VERSION,G,validate,compile,solve,evaluate,summarize,envelope,checks,section,continuousModel,example,loadsFor,roots,spans,stations,scanPositions};
 });

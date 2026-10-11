@@ -40,6 +40,14 @@ for(const mutate of [m=>m.E=0,m=>m.I=-1,m=>m.supports=[{x:2,type:'roller',settle
 let seed=712345;function random(){seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;}
 const fixtures=[];
 for(let i=0;i<60;i++){const m=B.example();m.title='independent-'+i;m.length=4+random()*14;m.E=30000+random()*200000;m.I=2500+random()*22000;const L=m.length,preset=i%6;const points=preset===0?[0,L]:preset===1?[0]:preset===2?[L]:preset===3?[0,L/2,L]:preset===4?[L*.12,L*.47,L*.83]:[0,L*.33,L*.72,L];m.supports=points.map((x,j)=>({x,type:(preset===1||preset===2||preset===5&&j===0)?'fixed':j===0?'pin':'roller',settlement:(random()-.5)*6}));m.loads=[];for(let j=0;j<5;j++){const type=j%3===0?'point':j%3===1?'moment':'distributed',base={type,group:['D','L','X'][j%3],enabled:true};if(type==='distributed'){const a=random()*L*.7,b=a+(L-a)*(.15+random()*.85);m.loads.push({...base,a,b,q0:(random()-.3)*15,q1:(random()-.3)*20});}else m.loads.push({...base,x:random()*L,value:(random()-.35)*60});}m.combination='custom-service';m.factors={D:1.1,L:1.3,X:-.7};const {s,a}=run(m);const at=[0,L*.071,L*.233,L*.523,L*.817,L,...m.supports.map(s=>s.x)];fixtures.push({model:m,solution:s,at:at.map(x=>B.evaluate(s,x)),summary:{Mplus:a.Mplus,Mminus:a.Mminus,Vabs:a.Vabs,Dabs:a.Dabs}});}
+// Additional multi-span fixtures for the independent global-compatibility solver.
+for(let n=2;n<=11;n++){
+ const lengths=Array.from({length:n},(_,i)=>3.5+(i%4)*.7),m=B.continuousModel(B.example(),lengths),L=m.length;
+ m.title='independent-multi-'+n;m.supports.forEach((s,i)=>s.settlement=(i%3-1)*.8);if(n%2===0)m.supports.at(-1).type='fixed';
+ m.loads.push({name:'mixed point',type:'point',group:'L',enabled:true,x:.37*L,value:27},{name:'mixed moment',type:'moment',group:'X',enabled:true,x:.68*L,value:-14},{name:'partial trapezoid',type:'distributed',group:'L',enabled:true,a:.12*L,b:.87*L,q0:-3,q1:7});
+ m.combination='custom-service';m.factors={D:1.1,L:1.3,X:-.7};const {s,a}=run(m),at=[0,.071*L,.233*L,.523*L,.817*L,L,...m.supports.map(s=>s.x)];
+ fixtures.push({model:m,solution:s,at:at.map(x=>B.evaluate(s,x)),summary:{Mplus:a.Mplus,Mminus:a.Mminus,Vabs:a.Vabs,Dabs:a.Dabs}});
+}
 async function main(){
  const m=B.example('point');m.loads=[];m.vehicle.enabled=true;m.vehicle.axles=[{offset:0,p:20}];m.vehicle.step=.17;m.vehicle.position=1;m.vehicle.impact=.3;m.vehicle.share=.5;
  const env=await B.envelope(B.compile(m));const P=20*1.3*.5;near(env.governing.Mplus.result.value,P*6/4,'moving single axle moment');near(env.governing.Dabs.result.value,P*216/(48*16000)*1000,'moving single axle displacement');assert.ok(env.converged);assertions++;near(env.reactions[0].Rmax,P,'moving support axle');near(env.maxGap<=m.vehicle.step/2+1e-9?0:1,0,'max scan gap');
