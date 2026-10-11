@@ -335,6 +335,15 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
     "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/slope-stability/",
     "code": "SLOPE",
     "favorite": false
+  },
+  {
+    "id": "beam-analysis",
+    "name": "梁受力分析工作台",
+    "category": "構材分析設計",
+    "description": "簡支、懸臂與多跨梁；集中力、分布載重、彎矩及車行包絡，含反力、撓度、容量比對、操作範例與離線版。",
+    "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/beam-analysis/",
+    "code": "BEAM",
+    "favorite": false
   }
 ]
 </script>
@@ -351,10 +360,19 @@ iconPaths['rc-wall']='<rect x="4" y="5" width="24" height="22"/><path d="M9 5v22
 iconPaths['concrete-strength']='<path d="M4 3v25h25M7 24l5-9 7-5 9-3"/><circle cx="19" cy="10" r="2"/>';
 iconPaths['slab-analysis']='<path d="M3 8h26v16H3zM3 16h26M11 8v16M21 8v16M6 28h20"/>';
 iconPaths['steel-sections']='<path d="M4 8h24v5H19v6h9v5H4v-5h9v-6H4z"/><path d="M4 28h24M16 4v3"/>';
+iconPaths['beam-analysis']='<path d="M3 18h26M5 20l-3 6h6zM24 20l-3 6h6zM16 3v11m-4-4 4 4 4-4"/><path d="M6 8h4m12 0h4"/>';
 function toolIcon(id){return '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(iconPaths[id]||iconPaths.custom)+'</svg>'}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function validate(items){if(!Array.isArray(items)||items.length>1000)throw Error('備份必須包含工具清單，最多 1000 項。');const ids=new Set();return items.map((t,i)=>{if(!t||typeof t!=='object')throw Error('工具資料格式錯誤。');for(const [k,max]of [['id',100],['name',80],['category',40],['url',2000]])if(typeof t[k]!=='string'||!t[k].trim()||t[k].length>max)throw Error('第 '+(i+1)+' 項工具的名稱、網址或分類無效。');let u;try{u=new URL(t.url)}catch{throw Error('網址格式錯誤。')}if(!['http:','https:'].includes(u.protocol))throw Error('只接受 http 或 https 網址。');if(ids.has(t.id))throw Error('備份內有重複的工具識別碼。');ids.add(t.id);return{id:t.id,name:t.name.trim(),category:t.category.trim(),url:t.url.trim(),description:typeof t.description==='string'?t.description.slice(0,300):'',code:typeof t.code==='string'?t.code.slice(0,8):'TOOL',favorite:t.favorite===true};});}
 let startupWarning='';try{const v=localStorage.getItem(KEY);if(v!==null)tools=validate(JSON.parse(v).tools)}catch{startupWarning='無法讀取個人清單，先顯示預設工具。請檢查備份或瀏覽器儲存設定。'}
+// beam-analysis migration begin
+{
+ const marker='engineering-calculator-hub.beam-analysis.v1';let apply=true;
+ try{apply=!localStorage.getItem(marker)}catch{}
+ if(apply){const addon=SEED.find(t=>t.id==='beam-analysis');if(addon&&!tools.some(t=>t.id===addon.id||t.url.replace(/\/$/,'')===addon.url.replace(/\/$/,'')))tools.push(structuredClone(addon));try{localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}catch{startupWarning='梁受力分析工具已載入；請匯出清單保存新增項目。';}}
+}
+// beam-analysis migration end
+
 
 
 // Add slab tool once without replacing saved names, favorites or custom links.
@@ -501,3 +519,4 @@ $('theme-save').onclick=()=>{try{const next=validTheme(Object.fromEntries(Object
 applyTheme(themeSaved);
 </script>
 </body></html>
+
