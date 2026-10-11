@@ -1,0 +1,3 @@
+// Tutorial numbers come from the shipped engine; no duplicated solver or handwritten envelopes.
+const B=require('../beam-core.js'),fs=require('node:fs'),path=require('node:path');
+(async()=>{const model=B.example('three-span');model.vehicle.enabled=true;const e=await B.envelope(B.compile(model));const data={model,governing:Object.fromEntries(Object.entries(e.governing).map(([k,g])=>[k,{position:g.position,result:g.result,metric:g.metric}])),rows:e.rows,converged:e.converged,changes:e.changes,count:e.count,coarseCount:e.coarseCount};fs.writeFileSync(path.join(__dirname,'example-data.json'),JSON.stringify(data));console.log(JSON.stringify({version:B.VERSION,count:e.count,converged:e.converged}));})().catch(e=>{console.error(e);process.exit(1)});

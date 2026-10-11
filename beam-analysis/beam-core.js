@@ -4,7 +4,7 @@
    Consistent nodal loading + exact equilibrium/integrated displacement recovery. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.BeamCore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const VERSION='1.1.0', G=9.80665, groups=['D','L','X'];
+const VERSION='1.2.0', G=9.80665, groups=['D','L','X'];
 const copy=x=>JSON.parse(JSON.stringify(x));
 const finite=(x,n)=>{if(typeof x!=='number'||!Number.isFinite(x))throw Error(n+'必須為有限數值');return x;};
 function continuousModel(model,lengths,extendFullLengthLoads=true){
