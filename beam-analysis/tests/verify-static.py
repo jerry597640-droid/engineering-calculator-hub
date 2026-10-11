@@ -1,7 +1,7 @@
 from html.parser import HTMLParser
 from pathlib import Path
 from collections import Counter
-import hashlib,json,re,subprocess
+import base64,hashlib,json,re,subprocess
 root=Path(__file__).resolve().parent.parent
 html=(root/'index.html').read_text(encoding='utf-8')
 class Parser(HTMLParser):
@@ -16,8 +16,16 @@ p=Parser();p.feed(html)
 assert p.viewport
 assert not [k for k,n in Counter(p.ids).items() if n>1]
 assert not p.resources, 'Offline build must contain no resource dependencies'
-assert not re.search(r'<!--(?:CORE|APP|STYLES)-->',html)
-for script in ['app.js','beam-core.js']:subprocess.run(['node','--check',str(root/script)],check=True)
+assert not re.search(r'<!--(?:CORE|PARAMETERS|APP|STYLES|TUTORIAL)-->',html)
+for script in ['app.js','beam-core.js','parameters.js']:subprocess.run(['node','--check',str(root/script)],check=True)
+media=json.loads(re.search(r'<script id="tutorial-media" type="application/json">(.*?)</script>',html,re.S).group(1))
+video=base64.b64decode(media['video'],validate=True)
+assert video[4:8]==b'ftyp' and len(video)==media['bytes']
+assert hashlib.sha256(video).hexdigest()==media['sha256']
+assert media['voice']=='zh-TW-HsiaoChenNeural' and len(media['chapters'])==6
+assert media['captions'].startswith('WEBVTT') and 0<media['duration']<600
+assert media['width']==1280 and media['height']==720 and media['codec']=='H.264/AAC'
+assert all(0<=c['start']<media['duration'] and c['lines'] for c in media['chapters'])
 source=(root/'app.js').read_text()
 declared=set(p.ids)|set(re.findall(r'\bid="([A-Za-z][A-Za-z0-9_-]*)"',source))
 references=set(re.findall(r"\$\('([A-Za-z][A-Za-z0-9_-]*)'\)",source))

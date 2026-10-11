@@ -2,3 +2,10 @@ node_modules/
 tests/fixtures.json
 tests/*validation.json
 __pycache__/
+tutorial-source/video-runtime/
+tutorial-source/speech-*
+tutorial-source/composition/.hyperframes/
+tutorial-source/composition/assets/
+tutorial-source/*.mp4
+tutorial-source/audio-meta.json
+tutorial-source/example-data.json
