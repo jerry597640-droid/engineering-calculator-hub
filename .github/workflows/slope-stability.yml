@@ -31,3 +31,34 @@ jobs:
       - run: python tests/verify.py
       - run: python build.py
       - run: git diff --exit-code -- index.html
+      - run: python tests/verify-release.py
+  browser-offline:
+    needs: regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: slope-stability
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm install --no-save --no-package-lock playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/verify-live.cjs
+      - run: python tests/build-offline.py
+      - run: python tests/verify-release.py --check-archive
+      - run: mkdir -p tests/offline-unpacked && unzip -q slope-offline-v1.1.zip -d tests/offline-unpacked
+      - run: node tests/verify-offline.cjs tests/offline-unpacked/index.html tests/offline-output
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: slope-stability-browser-evidence
+          path: |
+            slope-stability/tests/live-output
+            slope-stability/tests/offline-output
+          if-no-files-found: ignore

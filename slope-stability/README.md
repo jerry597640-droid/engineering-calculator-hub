@@ -1,4 +1,4 @@
-# 邊坡穩定分析工作台 1.1.3
+# 邊坡穩定分析工作台 1.1.4
 
 線上位置：https://jerry597640-droid.github.io/engineering-calculator-hub/slope-stability/
 
@@ -72,3 +72,7 @@ https://www.rocscience.com/help/slide2/verification-theory/verification-manuals
 輸入停止 0.5 秒後自動執行三工況分析，初次開啟、範例及 JSON 匯入亦適用。無效輸入暫停計算並清除舊 FS、臨界面與切片；修正後自動恢復。等待／計算中／無效／停止／失敗／完成均有明確狀態。每次輸入或取消會使舊 Worker 回呼失效，完成後一次更新同次模型的圖形與結果。縮放、平移、切片選取及工況切換不重算。停止按鈕同時取消等待與運算；手動執行或下一次修改恢復分析。
 
 新增測試：node tests/verify-regression.cjs、node tests/verify-live.cjs（需 Playwright 與 Edge）。python tests/build-offline.py 重建完整離線 ZIP，保留既有影片及附件。tests/verify-offline.cjs 接受解壓後 index.html 路徑與證據輸出目錄。
+
+## CI 修正 v1.1.4
+
+修正多行即時計算函式造成控制測試解析失敗，統一核心、介面、專案 JSON、HTML 與離線下載的版本號。GitHub Actions 先執行控制、數值回歸、獨立 Python 驗算及可重現建置，再以 Playwright Chromium 驗證即時計算、過期 Worker 防護、桌機／手機縮放與完整離線 ZIP；所有工作通過後才更新 main。

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "app": "SlopeWorkbench",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "model": {
     "name": "10 m 土坡教學範例",
     "method": "bishop",

@@ -4,7 +4,7 @@ const fs=require('fs'),path=require('path'),assert=require('assert');
 const root=path.resolve(__dirname,'..'),output=process.env.SLOPE_VERIFY_OUTPUT||path.join(root,'tests','live-output');
 fs.mkdirSync(output,{recursive:true});
 (async()=>{
-const browser=await chromium.launch({channel:'msedge',headless:true});
+const browser=await chromium.launch({channel:process.env.SLOPE_BROWSER_CHANNEL||undefined,headless:true});
 const context=await browser.newContext({viewport:{width:1440,height:1000},offline:true,acceptDownloads:true});
 const page=await context.newPage(),errors=[],checks=[];
 page.on('pageerror',e=>errors.push(e.message));

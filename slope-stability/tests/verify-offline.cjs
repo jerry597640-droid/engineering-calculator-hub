@@ -1,6 +1,6 @@
 const {chromium}=require('playwright'),assert=require('assert'),fs=require('fs'),path=require('path');
 (async()=>{
-const browser=await chromium.launch({channel:'msedge',headless:true}),context=await browser.newContext({offline:true,viewport:{width:1440,height:1000}}),page=await context.newPage();
+const browser=await chromium.launch({channel:process.env.SLOPE_BROWSER_CHANNEL||undefined,headless:true}),context=await browser.newContext({offline:true,viewport:{width:1440,height:1000}}),page=await context.newPage();
 const entry=path.resolve(process.argv[2]),output=path.resolve(process.argv[3]);fs.mkdirSync(output,{recursive:true});
 await page.goto('file:///'+entry.replaceAll('\\','/'));
 const done=()=>page.waitForFunction(()=>analysisState==='complete',null,{timeout:120000});await done();
