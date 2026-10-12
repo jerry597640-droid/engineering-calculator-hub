@@ -4,7 +4,7 @@ from zipfile import ZipFile
 import argparse
 
 root = Path(__file__).resolve().parents[1]
-version = "1.1.4"
+version = "1.1.5"
 checks = {
     "README.md": f"工作台 {version}",
     "template.html": f"v{version} / CI VERIFIED",
@@ -18,6 +18,7 @@ for name, marker in checks.items():
 index = (root / "index.html").read_text()
 assert f"v{version} / CI VERIFIED" in index
 assert "@STYLE" not in index and "@ENGINE" not in index and "@APP" not in index
+assert 'id="solve-h-btn"' in index and "SlopeCore.findHorizontal" in index
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--check-archive", action="store_true")

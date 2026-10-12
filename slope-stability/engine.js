@@ -81,9 +81,35 @@ let step=(hi-lo)/N,rstep=(m.arcMax-m.arcMin)/N;
 for(let round=0;round<3&&best;round++){const seed=best.circle;step/=2;rstep/=2;for(const da of [-step,0,step])for(const db of [-step,0,step])for(const dr of [-rstep,0,rstep]){const a=seed.a+da,b=seed.b+db,r=seed.ratio+dr;if(a>=lo&&b<=hi&&b-a>=m.minSpan&&r>=m.arcMin&&r<=m.arcMax)tryOne(circleFromEnds(m,a,b,r));}}
 top.sort((a,b)=>a.fs-b.fs);return {best,count,valid,errors,top:top.slice(0,12)};
 }
+function horizontalModel(m,H){
+if(m.geometry?.mode!=='simple'||m.mode!=='search')throw Error('H 反算僅適用標準坡及「搜尋圓弧」模式');
+if(m.waterMode==='line')throw Error('H 反算暫不支援自訂水位線；請改用乾燥、固定水深或 ru 模式');
+const z=JSON.parse(JSON.stringify(m)),g=m.ground,V=g[2][1]-g[1][1],baseH=g[2][0]-g[1][0],crest=g[3][0]-g[2][0];
+if(!Number.isFinite(H)||H<=0||!Number.isFinite(V)||V<=0||g.length!==4)throw Error('標準坡幾何無效，無法反算 H');
+const dx=H-baseH;z.ground=[[g[0][0],g[0][1]],[g[1][0],g[1][1]],[g[1][0]+H,g[1][1]+V],[g[1][0]+H+crest,g[1][1]+V]];
+z.geometry={...z.geometry,height:V,ratio:H/V};
+if(z.qFollowCrest){z.qa+=dx;z.qb+=dx;}
+return validate(z);
+}
+function horizontalCheck(m,H){
+const z=horizontalModel(m,H),ts=targets(z),strict=z.profile==='foundation-global'||z.profile==='custom'&&z.strict;
+const results=[['normal',ts[0]],['seismic',ts[2]]].map(([scenario,target])=>{const r=search(z,scenario),fs=r.best?.fs??null,pass=Boolean(r.best&&!r.best.negative&&(strict?fs>target:fs>=target));return {...r,scenario,target,strict,pass};});
+return {H,ratio:H/z.geometry.height,beta:Math.atan(z.geometry.height/H)/rad,pass:results.every(r=>r.pass),results,model:z};
+}
+function findHorizontal(m,options={}){
+validate(m);if(m.geometry?.mode!=='simple'||m.mode!=='search')throw Error('H 反算僅適用標準坡及「搜尋圓弧」模式');if(m.waterMode==='line')throw Error('H 反算暫不支援自訂水位線；請改用乾燥、固定水深或 ru 模式');
+const g=m.ground,V=g[2][1]-g[1][1],crest=g[3][0]-g[2][0],loadMin=m.qFollowCrest?0:m.qb-g[1][0]-crest,tolerance=Number(options.tolerance??.1),min=Number(options.min??Math.max(V/Math.tan(80*rad),loadMin)),max=Number(options.max??V/Math.tan(5*rad));
+if(!Number.isFinite(tolerance)||tolerance<=0||tolerance>Math.max(1,V))throw Error('H 反算精度須大於 0，且不得超過坡高或 1 m 的較大值');
+if(!Number.isFinite(min)||!Number.isFinite(max)||min<=0||max<=min)throw Error('H 反算範圍無效');
+const evaluations=[],test=H=>{const z=horizontalCheck(m,H);evaluations.push({H:z.H,ratio:z.ratio,beta:z.beta,pass:z.pass,normalFS:z.results[0].best?.fs??null,seismicFS:z.results[1].best?.fs??null});return z;};
+let lower=test(min);if(lower.pass)return {found:true,tolerance,range:[min,max],iterations:0,evaluations,solution:lower};
+let upper=test(max);if(!upper.pass)return {found:false,tolerance,range:[min,max],iterations:0,evaluations,reason:'在坡角 5° 對應的 H 上限仍未同時達到常時與地震門檻'};
+let iterations=0;while(upper.H-lower.H>tolerance&&iterations<40){const mid=test((lower.H+upper.H)/2);if(mid.pass)upper=mid;else lower=mid;iterations++;}
+return {found:true,tolerance,range:[min,max],iterations,evaluations,solution:upper,lower};
+}
 function run(m){validate(m);const results=[];for(const scenario of ['normal','rain','seismic']){let r;if(m.mode==='manual'){const pairs=intersectionPairs(m,m.circle),items=pairs.map(c=>analyzeCircle(m,c,scenario));const ok=items.filter(z=>!z.error).sort((a,b)=>a.fs-b.fs);r={best:ok[0]||null,count:items.length,valid:ok.length,errors:items.reduce((o,z)=>{if(z.error)o[z.error]=(o[z.error]||0)+1;return o;},{}),top:ok.map(z=>({fs:z.fs,circle:z.circle,negative:z.negative}))};}else r=search(m,scenario);const j=['normal','rain','seismic'].indexOf(scenario);results.push({...r,scenario,target:targets(m)[j],strict:m.profile==='foundation-global'||m.profile==='custom'&&m.strict});}
-return {model:m,results,version:'1.1.4',checked:'2026-10-11'};
+return {model:m,results,version:'1.1.5',checked:'2026-10-12'};
 }
 function benchmarks(){const heights=[.8,2.3,3.3,3.9,4.1,3.6,1.65],angles=[-9,.5,9,18.5,28,39,52],pressures=[7.84,22.54,32.34,38.22,40.18,35.28,16.17];return [0,1].map(wet=>{const ss=heights.map((h,i)=>({i:i+1,b:2.5,l:2.5/Math.cos(angles[i]*rad),alpha:angles[i]*rad,W:50*h,Q:0,yg:0,u:wet?pressures[i]:0,c:20,phi:20}));const z=solve(ss,{cy:0,r:1});return {name:wet?'Rocscience 濕坡七切片':'Rocscience 乾坡七切片',expected:wet?1.555:2.113,actual:z.fs,tolerance:.002,pass:Math.abs(z.fs-(wet?1.555:2.113))<=.002,residual:z.residual,rows:z.rows};});}
-const api={interp,parsePoints,validate,targets,waterY,bottom,circleFromEnds,intersectionPairs,slices,solve,solveOrdinary,analyzeCircle,search,run,benchmarks,gw};root.SlopeCore=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
+const api={interp,parsePoints,validate,targets,waterY,bottom,circleFromEnds,intersectionPairs,slices,solve,solveOrdinary,analyzeCircle,search,horizontalModel,horizontalCheck,findHorizontal,run,benchmarks,gw};root.SlopeCore=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof self!=='undefined'?self:globalThis);

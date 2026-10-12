@@ -19,6 +19,7 @@ para('程式版本 '+(out.version||'1.1.1')+'　計算書產生時間 '+(options
 heading('一 檢核依據與結果');
 para(m.profile==='custom'?'自訂依據 '+m.customSource:m.profile==='foundation-global'?'建築物基礎構造設計規範112年版 第7.4.4節 113年1月1日生效。長期FS>1.5、最高水位FS>1.2、地震FS>1.1。本程式僅套用整體穩定門檻，未建模擋土牆自重、牆體與錨力；完整擋土結構需另行分析。':'水土保持技術規範第73條　114年5月7日修正版本。永久性常時1.5、暴雨1.2、地震1.1；臨時性常時1.2、暴雨1.1、地震1.0。其他類別工程須依案件規範另行設定。');
 table(['工況','計算 FS','要求 FS','判讀','有效／總候選'],out.results.map(r=>[names[r.scenario],n(r.best?.fs,8),(r.strict?'>':'≥')+n(r.target,2),verdict(r),r.valid+'/'+r.count]),[2100,1700,1500,3000,1900]);
+if(out.inverseHorizontal?.found){const z=out.inverseHorizontal,s=z.solution,normal=s.results[0],seismic=s.results[1];para('固定 V 反算最小 H','Heading2');para('搜尋範圍 H='+n(z.range[0])+'～'+n(z.range[1])+' m；收斂精度 '+n(z.tolerance)+' m；共評估 '+z.evaluations.length+' 組 H。通過側 H='+n(s.H,9)+' m；不通過側 H='+(z.lower?n(z.lower.H,9)+' m':'範圍下限已通過')+'。');table(['項目','反算結果','門檻／判讀'],[['坡形','V:H=1:'+n(s.ratio,6)+'；β='+n(s.beta,6)+'°','固定目前 V'],['常時','FS='+n(normal.best?.fs,9),(normal.strict?'>':'≥')+n(normal.target,3)+'；'+(normal.pass?'通過':'不通過')],['地震','FS='+n(seismic.best?.fs,9),(seismic.strict?'>':'≥')+n(seismic.target,3)+'；'+(seismic.pass?'通過':'不通過')]]);para('每組 H 均重新搜尋常時與地震臨界圓弧；負有效法向力不視為通過。此值是目前切片、搜尋密度與容許精度下的數值設計值，正式採用前應提高解析度複核並依施工容許差向上取整。');}
 para('方法 '+(m.method==='bishop'?'Bishop簡化法':'Fellenius普通切片法')+'。僅處理二維土坡、水平土層、圓弧滑動及有效應力。Bishop未滿足完整水平力平衡；地震係數採擬靜態簡化，正式設計需按案件規範以完整平衡及適當破壞機制複核。負有效法向力不截零，須另檢討張裂或接觸。');
 heading('二 輸入資料與資料來源');
 table(['項目','本模型輸入','定義與應採資料來源'],[

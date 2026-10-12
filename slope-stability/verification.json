@@ -1,6 +1,6 @@
 {
-  "version": "1.1.0",
-  "checked": "2026-10-11",
+  "version": "1.1.5",
+  "checked": "2026-10-12",
   "pass": true,
   "checks": [
     {
@@ -95,6 +95,17 @@
       "name": "No intersecting circle produces no result",
       "pass": true,
       "detail": {}
+    },
+    {
+      "name": "Fixed V inverse H brackets normal and seismic compliance",
+      "pass": true,
+      "detail": {
+        "H": 14.951229168865366,
+        "lowerH": 14.511630523472675,
+        "normalFS": 1.5046280139793835,
+        "seismicFS": 1.2407963152560875,
+        "tolerance": 0.5
+      }
     },
     {
       "name": "Rocscience 乾坡七切片",

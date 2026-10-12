@@ -22,7 +22,8 @@ const dry=structuredClone(fixed);dry.waterMode='dry';runs.push(C.run(dry));
 const q=structuredClone(dry);q.q=0;runs.push(C.run(q));
 const invalid=[];for(const update of [a=>a.layers[0].sat=1,a=>a.ground.reverse(),a=>a.q=-1,a=>a.kh=NaN,a=>a.slices=0,a=>{a.profile='custom';a.customSource='';}]){const a=structuredClone(m);update(a);try{C.run(a);invalid.push(false);}catch{invalid.push(true);}}
 const none=structuredClone(fixed);none.circle={cx:200,cy:200,r:1};const nor=C.run(none);
-console.log(JSON.stringify({runs,bench:C.benchmarks(),invalid,none:nor}));
+const inverseModel=structuredClone(m);inverseModel.density=6;inverseModel.slices=20;const inverse=C.findHorizontal(inverseModel,{tolerance:.5});
+console.log(JSON.stringify({runs,bench:C.benchmarks(),invalid,none:nor,inverse}));
 '''
 data=json.loads(subprocess.check_output(['node','-e',script],cwd=ROOT,text=True))
 checks=[]
@@ -64,6 +65,7 @@ check('Zero strength gives FS zero',all(r['best']['fs']==0 for r in data['runs']
 check('Zero seismic coefficients equal normal case',abs(data['runs'][8]['results'][0]['best']['fs']-data['runs'][8]['results'][2]['best']['fs'])<1e-12,{})
 check('Invalid inputs rejected',all(data['invalid']),{'rejected':sum(data['invalid'])})
 check('No intersecting circle produces no result',all(r['best'] is None for r in data['none']['results']),{})
+inv=data['inverse'];check('Fixed V inverse H brackets normal and seismic compliance',inv['found'] and inv['solution']['pass'] and not inv['lower']['pass'] and all(r['pass'] and r['best']['negative']==0 for r in inv['solution']['results']),{'H':inv['solution']['H'],'lowerH':inv['lower']['H'],'normalFS':inv['solution']['results'][0]['best']['fs'],'seismicFS':inv['solution']['results'][1]['best']['fs'],'tolerance':inv['tolerance']})
 for b in data['bench']:check(b['name'],b['pass'],{k:v for k,v in b.items() if k!='rows'})
 check('Current water-soil targets',data['runs'][0]['results'][1]['target']==1.2 and data['runs'][0]['results'][2]['target']==1.1,{})
 # Strength and weights consistency across every selected slice.
@@ -71,7 +73,7 @@ err=max(abs(sum(p['dW'] for p in s['weightParts'])-s['W']) for run in data['runs
 check('Gauss audit entries sum to slice weight',err<1e-10,{'maxDifferenceKN':err})
 foundation=subprocess.check_output(['node','-e',"const C=require('./engine.js'),m=JSON.parse(require('fs').readFileSync('example-project.json')).model;m.profile='foundation-global';console.log(JSON.stringify(C.run(m).results.map(r=>({target:r.target,strict:r.strict}))))"],cwd=ROOT,text=True)
 check('Foundation 112 strict comparison',all(r['strict'] for r in json.loads(foundation)),json.loads(foundation))
-report={'version':'1.1.0','checked':'2026-10-11','pass':all(c['pass'] for c in checks),'checks':checks,'scope':'Tests validate formulas and selected cases; not universal design certification.'}
+report={'version':'1.1.5','checked':'2026-10-12','pass':all(c['pass'] for c in checks),'checks':checks,'scope':'Tests validate formulas and selected cases; not universal design certification.'}
 (ROOT/'verification.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
 (ROOT/'verification-detail.json').write_text(json.dumps(data['runs'][0],ensure_ascii=False))
 print(json.dumps(report,ensure_ascii=False,indent=2))
