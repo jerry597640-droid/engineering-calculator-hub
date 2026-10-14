@@ -13,7 +13,7 @@ const SRC = require('./engine.js');
     assert(Math.abs(f.con.grossQ - f.con.deductions.reduce((s,x)=>s+x.Q,0) - f.con.Q) < 1e-8);
     assert.equal(f.con.deductions.filter(x=>x.kind==='bar'&&x.A>0).length,2);
   }
-  const browser = await chromium.launch({headless:true,executablePath:'/root/.cache/hyperframes/chrome/chrome-headless-shell/linux-152.0.7977.30/chrome-headless-shell-linux64/chrome-headless-shell',args:['--no-sandbox']});
+  const browser = await chromium.launch({headless:true,executablePath:process.env.SRC_TEST_CHROME||undefined,args:['--no-sandbox']});
   const page = await browser.newPage({viewport:{width:1512,height:982}});
   const errors=[]; page.on('pageerror',e=>errors.push(e.message));
   await page.goto('file://'+path.resolve('src-beam/index.html'));

@@ -1,6 +1,6 @@
 const {chromium}=require('playwright');const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');
 (async()=>{
-const browser=await chromium.launch({headless:true,executablePath:'/root/.cache/hyperframes/chrome/chrome-headless-shell/linux-152.0.7977.30/chrome-headless-shell-linux64/chrome-headless-shell',args:['--no-sandbox']});
+const browser=await chromium.launch({headless:true,executablePath:process.env.SRC_TEST_CHROME||undefined,args:['--no-sandbox']});
 const page=await browser.newPage({viewport:{width:1512,height:982}});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('file://'+path.resolve('src-beam/index.html'));
 await page.locator('#fc').locator('..').locator('.param-help').click();assert(await page.locator('#parameter-dialog').isVisible());assert((await page.locator('#parameter-dialog').innerText()).includes('210–420'));await page.locator('#parameter-dialog button').click();
 await page.locator('[data-view="parameters"]').click();assert.equal(await page.locator('.parameter-card').count(),41);await page.locator('#parameter-search').fill('Avf');assert((await page.locator('#parameter-cards').innerText()).includes('摩擦有效面積'));await page.locator('#parameter-search').fill('不存在的字詞');assert((await page.locator('#parameter-cards').innerText()).includes('沒有符合'));

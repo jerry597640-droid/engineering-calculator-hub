@@ -7,7 +7,8 @@ d=(root/'../shared/calculation-docx.js').read_text(encoding='utf8').replace('</s
 a=(root/'report-addon.js').read_text(encoding='utf8')
 s=s.replace('<script id="tutorial-data" type="application/json">[]</script>','<script id="tutorial-data" type="application/json">'+(root/'media/chapters.json').read_text(encoding='utf8')+'</script>')
 u=(root/'ui-enhancements.js').read_text(encoding='utf8')
-x=s.rsplit('</body>',1);s=x[0]+'<script>'+v+'</script><script>'+d+'</script><script>'+a+'</script><script>'+u+'</script></body>'+x[1]
+w=(root/'viewport-addon.js').read_text(encoding='utf8')
+x=s.rsplit('</body>',1);s=x[0]+'<script>'+v+'</script><script>'+d+'</script><script>'+a+'</script><script>'+u+'</script><script>'+w+'</script></body>'+x[1]
 (root/'index.html').write_text(s,encoding='utf8')
 print('built',len(s.encode()))
 

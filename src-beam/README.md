@@ -1,4 +1,4 @@
-# SRC 梁斷面分析設計工作台 v1.2
+# SRC 梁斷面分析設計工作台 v1.2.1
 
 完整 ZIP 解壓後開啟 `src-beam/index.html`，可離線計算與播放影片；請保留旁邊的 `media` 資料夾。單檔 HTML 可離線計算，影片改連線上網址。計算引擎、SVG 斷面、操作說明、資料來源、示範案例及 35 項驗證摘要已內嵌。
 
@@ -45,3 +45,9 @@
 ## 建置相依與教學來源
 
 `build.py` 會讀取父目錄的 `vendor/docx/docx-9.6.1.iife.js`、`shared/calculation-docx.js`、本資料夾的 `media/chapters.json` 與 `ui-enhancements.js`，保留 Word 匯出能力。ZIP 已附這些來源。教學影片可重製來源收錄在 `tutorial-source.zip`；其中包含旁白音訊、同步字詞時間點、實際介面截圖、HyperFrames composition 與檢查結果。影片 1280×720、24fps、H.264/AAC。
+
+## 2026-10-14 輸入與圖形同步檢視
+
+電腦版左側輸入區可獨立捲動，右側斷面圖固定顯示；修改材料、H 鋼或主筋時即時更新。手機輸入模式在上方保留固定斷面預覽，可切換正負彎矩或按「放大」查看完整結果。無效輸入會清空預覽並提示修正。計算引擎、影片與既有報告功能維持同一版本。
+
+`viewport-addon.js` 隨 `build.py` 內嵌至單檔 HTML；`node src-beam/test-viewport.cjs` 驗證捲動與輸入期間圖形可視性。UI 測試預設使用 Playwright 安裝的 Chromium，也可用 `SRC_TEST_CHROME` 指定路徑。
