@@ -43,3 +43,8 @@ aside,nav{min-width:0}
  #drawing-dialog .dialog-head{top:-18px}
 }
 @media print{.preview-enlarge,.preview-state,#drawing-dialog{display:none!important}.diagram-card{position:static!important;box-shadow:none!important}}
+
+@media screen and (min-width:721px) and (max-height:600px){
+ .analysis-layout .diagram-card>.legend,.analysis-layout .diagram-card>.geometry-summary,.analysis-layout .diagram-card>.card-note,.analysis-layout #diagram .diagram-data{display:none}
+ .analysis-layout #diagram .diagram-wide svg{max-height:calc(100dvh - 130px)}
+}

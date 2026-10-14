@@ -33,6 +33,13 @@ function previewStatus(){
  if(drawingDialog.open) $('drawing-dialog-content').innerHTML=$('diagram').innerHTML;
 }
 new MutationObserver(previewStatus).observe($('diagram'),{childList:true});previewStatus();
+
+$('input-form').addEventListener('focusin',()=>{
+ if(!matchMedia('(min-width:721px)').matches)return;
+ const box=drawingCard.getBoundingClientRect();
+ if(box.top>16&&box.bottom>window.innerHeight)window.scrollBy({top:box.top-16,behavior:'instant'});
+});
+
 enlarge.onclick=()=>{$('drawing-dialog-content').innerHTML=$('diagram').innerHTML;drawingDialog.showModal();};
 
 const initial=new URLSearchParams(location.search).get('view');if(['overview','process','manual','verify','tutorial'].includes(initial))view(initial);
