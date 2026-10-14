@@ -4,8 +4,20 @@
   const analysis = document.getElementById('analysis');
   const layout = analysis.querySelector('.layout');
   const source = document.getElementById('drawing');
-  const viewer = analysis.querySelector('.result-grid > .panel');
+  const results = analysis.querySelector('.results');
+  const resultGrid = results.querySelector('.result-grid');
+  const viewer = results.querySelector('.viewer-panel') || resultGrid.querySelector('.panel');
   viewer.classList.add('viewer-panel');
+  resultGrid.before(viewer);
+  const data = document.getElementById('diagram-data');
+  if (!document.getElementById('diagram-info-panel')) {
+    const dataPanel = document.createElement('section');
+    dataPanel.id = 'diagram-info-panel';
+    dataPanel.className = 'panel';
+    dataPanel.innerHTML = '<div class="panel-title"><h2>斷面計算數值</h2><small>對應目前彎矩方向</small></div><div class="panel-body"></div>';
+    dataPanel.querySelector('.panel-body').append(data);
+    resultGrid.insertBefore(dataPanel, resultGrid.lastElementChild);
+  }
   const preview = document.createElement('section');
   preview.id = 'mobile-preview';
   preview.className = 'mobile-preview panel no-print';
@@ -35,18 +47,40 @@
   let pending = false;
   function resizePanes() {
     pending = false;
-    if (analysis.hidden || window.innerWidth <= 820) return;
+    if (analysis.hidden) return;
     const top = Math.max(16, layout.getBoundingClientRect().top);
-    const height = Math.max(280, window.innerHeight - top - 20);
-    document.documentElement.style.setProperty('--src-pane-height', height + 'px');
+    if (window.innerWidth > 820) {
+      const height = Math.max(480, window.innerHeight - top - 20);
+      document.documentElement.style.setProperty('--src-pane-height', height + 'px');
+    } else {
+      const viewHeight = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty('--src-mobile-view-height', viewHeight + 'px');
+      const height = Math.max(110, viewHeight - top - 16);
+      document.documentElement.style.setProperty('--src-mobile-input-height', height + 'px');
+    }
   }
   function scheduleResize() {
     if (!pending) { pending = true; requestAnimationFrame(resizePanes); }
   }
   window.addEventListener('resize', scheduleResize);
   window.addEventListener('scroll', scheduleResize, {passive: true});
+  window.visualViewport?.addEventListener('resize', scheduleResize);
+  layout.querySelector('.inputs').addEventListener('focusin', () => {
+    requestAnimationFrame(() => {
+      if (window.innerWidth > 820) {
+        const rect = layout.getBoundingClientRect();
+        if (rect.top > 24 || rect.top < 0) window.scrollBy(0, rect.top - 16);
+      } else {
+        const rect = preview.getBoundingClientRect();
+        const viewHeight = window.visualViewport?.height || window.innerHeight;
+        if (rect.top < 0 || rect.bottom > viewHeight) analysis.scrollIntoView({block: 'start'});
+      }
+      scheduleResize();
+    });
+  });
   new MutationObserver(scheduleResize).observe(analysis, {attributes: true, attributeFilter: ['hidden']});
   new ResizeObserver(scheduleResize).observe(document.querySelector('.summary'));
+  new ResizeObserver(scheduleResize).observe(preview);
   sync();
   scheduleResize();
 })();
