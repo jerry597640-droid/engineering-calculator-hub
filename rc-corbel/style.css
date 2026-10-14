@@ -48,3 +48,7 @@ aside,nav{min-width:0}
  .analysis-layout .diagram-card>.legend,.analysis-layout .diagram-card>.geometry-summary,.analysis-layout .diagram-card>.card-note,.analysis-layout #diagram .diagram-data{display:none}
  .analysis-layout #diagram .diagram-wide svg{max-height:calc(100dvh - 130px)}
 }
+
+@media screen{.analysis-layout.review-results .diagram-card{position:static;box-shadow:none}.preview-checks{font-size:11px;min-height:36px;padding:5px 10px}}
+@media screen and (max-width:720px){.preview-checks{display:none}}
+@media print{.preview-checks{display:none!important}}

@@ -50,6 +50,10 @@ aside,nav{min-width:0}
  .analysis-layout .diagram-card>.legend,.analysis-layout .diagram-card>.geometry-summary,.analysis-layout .diagram-card>.card-note,.analysis-layout #diagram .diagram-data{display:none}
  .analysis-layout #diagram .diagram-wide svg{max-height:calc(100dvh - 130px)}
 }
+
+@media screen{.analysis-layout.review-results .diagram-card{position:static;box-shadow:none}.preview-checks{font-size:11px;min-height:36px;padding:5px 10px}}
+@media screen and (max-width:720px){.preview-checks{display:none}}
+@media print{.preview-checks{display:none!important}}
 </style></head>
 <body><div class="shell"><aside><a class="brand" href="https://jerry597640-droid.github.io/engineering-calculator-hub/"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M12 5v54h12V43l34-18V16H24V5z" fill="currentColor"/><path d="M18 22h34" stroke="#15283e" stroke-width="3"/></svg><span>工程設計工作台<small>STRUCTURAL WORKBENCH</small></span></a><div class="side-caption">RC 接合部設計</div><nav aria-label="工作台"><button data-view="overview" class="active"><span>▣</span> 分析總覽</button><button data-view="process"><span>∑</span> 詳細計算</button><button data-view="manual"><span>▤</span> 操作說明</button><button data-view="tutorial"><span>▶</span> 操作影片</button><button data-view="verify"><span>✓</span> 驗證與規範</button></nav><a class="back" href="https://jerry597640-droid.github.io/engineering-calculator-hub/">← 回到工程工具</a><div class="side-foot"><b>TW 112 · §16.5</b>含 113 年勘誤查核<br>v1.2.1 ／ 2026.10.14<br><span id="network">可完全離線運作</span></div></aside>
 <main><header><div><span class="eyebrow">CONCRETE CONNECTIONS / 01</span><h1>RC 托架與梁托</h1><p>從支承反力到配筋檢核，每一步都可追溯。</p></div><div class="actions"><button id="load-example">載入範例</button><button id="save-project">儲存案件</button><button id="open-project">開啟案件</button><button id="download-offline" class="primary">下載離線版</button><button id="export-report">匯出計算書</button><input id="file-input" type="file" accept=".json,application/json" hidden></div></header>
@@ -23385,6 +23389,6 @@ fill();update();tests();const initialView=new URLSearchParams(location.search).g
 })();
 
 
-</script><script>CorbelReport.install()</script><script src="enhancements.js?v=1.2.1a"></script></body></html>
+</script><script>CorbelReport.install()</script><script src="enhancements.js?v=1.2.1b"></script></body></html>
 
 
