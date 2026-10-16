@@ -37,8 +37,7 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
 <dialog id="help-dialog" aria-labelledby="help-title"><div class="dialog-header"><h2 id="help-title">操作說明</h2><button data-close="help-dialog" aria-label="關閉">×</button></div><div class="dialog-content help"><p>這裡收納你提供的工程工具，並可持續新增。點選工具圖示或名稱，會在新分頁開啟原網站。</p><h3>日常使用</h3><ol><li>選擇左側分類，或輸入工具名稱與用途搜尋。</li><li>點星號加入常用，從「常用收藏」快速找到工具。</li><li>點「編輯」可修改任何工具名稱、網址、分類與說明。</li><li>點「新增工具」，輸入資料並儲存。分類欄可直接輸入新名稱。</li></ol><h3>調整工具順序</h3><p>圖示與清單模式都可用滑鼠拖曳 ⠿ 把手，放到其他工具前方或後方；插入提示會顯示放置位置。順序會自動儲存在目前瀏覽器，兩種模式共用。搜尋或分類篩選時，只調整畫面中工具的順序。若使用名稱排序或常用優先，拖曳後會切回「自訂順序」。也可聚焦把手，按 Alt＋方向鍵前後移動。</p><h3>調整顏色</h3><p>點上方「外觀設定」，可選預設配色或自訂側欄、頁面背景、卡片背景、主要文字、強調色及圖示色。即時預覽後，點「儲存配色」保留；「取消」會還原。配色存在目前瀏覽器，下載離線入口頁也會帶入當下配色。</p><h3>每個欄位填什麼？</h3><p><strong>工具名稱：</strong>你習慣使用的名稱。<br><strong>工具網址：</strong>從瀏覽器網址列複製的完整網址。<br><strong>分類：</strong>依工作需求分組，可自行建立。<br><strong>用途說明：</strong>工具用途或便於搜尋的關鍵字，可留白。</p><h3>備份與離線使用</h3><p>個人清單存在目前網址的瀏覽器，清除網站資料、換裝置或換瀏覽器不會自動帶入。請使用「清單備份」匯出 JSON，再在另一裝置匯入。匯入採合併：同一識別碼更新，其餘新增。</p><p>「下載離線入口頁」會保留下載當下的工具清單。入口頁可離線瀏覽、編輯；開啟線上計算工具仍需要網路。各工具的離線版須從原工具另行下載。</p><p class="inline-note">分類與名稱只改變收納清單。計算內容、公式與適用範圍以各工具網站為準。</p></div><div class="dialog-actions"><button class="primary" data-close="help-dialog">了解</button></div></dialog>
 <dialog id="backup-dialog" aria-labelledby="backup-title"><div class="dialog-header"><h2 id="backup-title">清單備份與搬移</h2><button data-close="backup-dialog" aria-label="關閉">×</button></div><div class="dialog-content"><p>匯出名稱、網址、分類、說明與收藏設定，保留日後擴充的工具。</p><div class="backup-actions"><button class="primary" id="export-json">匯出 JSON 清單</button><button id="import-json">選擇 JSON 備份</button></div><input id="import-file" type="file" accept=".json,application/json" hidden><p id="import-summary" class="import-summary" aria-live="polite"></p><p class="inline-note">匯入前會先顯示預覽，確認後才合併清單；不會刪除其他工具。</p><button id="confirm-import" class="primary" hidden>確認合併清單</button><p class="error" id="import-error" role="alert"></p></div><div class="dialog-actions"><button data-close="backup-dialog">關閉</button></div></dialog>
 <dialog id="delete-dialog" aria-labelledby="delete-title"><div class="dialog-header"><h2 id="delete-title">移除這項工具？</h2></div><div class="dialog-content"><p>只會移除收納清單中的項目，原計算網站保持可用。</p><p id="delete-name"></p></div><div class="dialog-actions"><button data-close="delete-dialog">取消</button><button class="primary" id="confirm-delete">確認移除</button></div></dialog><div id="toast" class="toast" role="status" hidden></div>
-<script id="seed-data" type="application/json">
-[
+<script id="seed-data" type="application/json">[
   {
     "id": "rebar",
     "name": "鋼筋與鋼線網互換",
@@ -344,9 +343,17 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
     "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/beam-analysis/",
     "code": "BEAM",
     "favorite": false
+  },
+  {
+    "id": "steel-beam-holes",
+    "name": "鋼梁開孔彎矩折減",
+    "category": "構材分析設計",
+    "description": "翼板圓孔強軸截面分析、ASD有效斷面與淨斷面比較、詳細計算、Word、範例與離線版。",
+    "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/steel-beam-holes/",
+    "code": "HOLE",
+    "favorite": false
   }
-]
-</script>
+]</script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id),KEY='engineering-calculator-hub.v1',SEED=JSON.parse($('seed-data').textContent);let tools=structuredClone(SEED),current='all',pendingImport=null,toastTimer;
@@ -389,6 +396,7 @@ try{const marker='engineering-calculator-hub.concrete-anchor.v1';if(!localStorag
 // Add crane reaction calculator once, preserving user names and favorites.
 try{const marker='engineering-calculator-hub.crane-outrigger.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='crane-outrigger');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='吊車支腿工具已載入；請匯出清單保存新增項目。';}
 // Add the newly published tool once without overwriting names, categories or favorites.
+try{const marker='engineering-calculator-hub.steel-beam-holes.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='steel-beam-holes');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url)){tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));}localStorage.setItem(marker,'1');}}catch{}
 try{const migrationKey='engineering-calculator-hub.seed-updates.v1',seen=JSON.parse(localStorage.getItem(migrationKey)||'[]');if(!Array.isArray(seen))throw Error('invalid migration state');if(!seen.includes('retaining-wall')){const addon=SEED.find(t=>t.id==='retaining-wall');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(migrationKey,JSON.stringify([...seen,'retaining-wall']));}}catch{startupWarning='新工具已載入；瀏覽器無法保存更新時，請匯出清單備份。';}
 // Add the newly published tool once without replacing personal changes.
 try { if(!localStorage.getItem('steel-beam-default.v1')) { if(!tools.some(t=>t.id==='steel-beam')) {tools.push(SEED.find(t=>t.id==='steel-beam'));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));} localStorage.setItem('steel-beam-default.v1','1'); } } catch {}
