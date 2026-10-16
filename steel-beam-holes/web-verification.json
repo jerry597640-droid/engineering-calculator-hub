@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-17",
+  "method": "AISC DG2 equations and published examples 1/1A; Bentley authored technical manual cross-check",
+  "sources": [
+    "https://www.aisc.org/aisc/publications/design-guides/design-guide-summary/",
+    "https://studylib.net/doc/28030624/design-guide-2---steel-and-composite-beams-with-web-openings",
+    "https://p.urbanpro.com/tv-prod/documents/null-STAAD%20Tutorial.pdf"
+  ],
+  "model": "Unreinforced isolated opening, noncomposite beam, DG2 ASD bridge or DG2 LRFD",
+  "passed": 18,
+  "tests": [
+    "published W24x55 capacities and six LRFD decisions",
+    "published ASD example 1A decisions",
+    "unit-invariant closed-form shear checked in kip-inch directly",
+    "plastic net moment independently integrated to PNA",
+    "opening eccentricity mirrors capacity",
+    "moment sign changes compression tee gate",
+    "ASD bridge only once",
+    "zero bending allows pure shear capacity",
+    "zero shear reduces to bending ratio",
+    "combined capacity boundary is exact",
+    "longer rectangular hole reduces shear capacity",
+    "circle substitutions 0.9D and 0.45D",
+    "small radius fails geometry, capacity cannot turn overall green",
+    "missing lateral restraint gates pass",
+    "too near support gates pass",
+    "stocky web shear upper bound enforced",
+    "nonstocky web upper bound enforced",
+    "invalid and flange-intersecting inputs stop calculation"
+  ],
+  "source_comparison": [
+    {
+      "name": "Mm（kip·in）",
+      "reference": 4184,
+      "calculated": 4184.099999712671,
+      "error_percent": 0.0023900504940499445,
+      "tolerance_percent": 0.01
+    },
+    {
+      "name": "Vm（kip）",
+      "reference": 60.31,
+      "calculated": 60.553802143303805,
+      "error_percent": 0.404248289344733,
+      "tolerance_percent": 0.5
+    },
+    {
+      "name": "φMm（kip·in，LRFD）",
+      "reference": 3766,
+      "calculated": 3765.6899997414043,
+      "error_percent": -0.00823155227285266,
+      "tolerance_percent": 0.02
+    },
+    {
+      "name": "φVm（kip，LRFD）",
+      "reference": 54.28,
+      "calculated": 54.49842192897343,
+      "error_percent": 0.40239854269239483,
+      "tolerance_percent": 0.5
+    }
+  ],
+  "case_points": [
+    {
+      "x": 3,
+      "M": 1192,
+      "V": 30.1,
+      "R": 0.6,
+      "pass": true,
+      "calculated_R": 0.5849954615479619
+    },
+    {
+      "x": 6,
+      "M": 2169,
+      "V": 24.1,
+      "R": 0.65,
+      "pass": true,
+      "calculated_R": 0.6523150802055306
+    },
+    {
+      "x": 9,
+      "M": 2928,
+      "V": 18.1,
+      "R": 0.8,
+      "pass": true,
+      "calculated_R": 0.7972417263313937
+    },
+    {
+      "x": 12,
+      "M": 3470,
+      "V": 12,
+      "R": 0.93,
+      "pass": true,
+      "calculated_R": 0.9256497915205822
+    },
+    {
+      "x": 15,
+      "M": 3795,
+      "V": 6,
+      "R": 1.01,
+      "pass": false,
+      "calculated_R": 1.0082212159189756
+    },
+    {
+      "x": 18,
+      "M": 3903,
+      "V": 0,
+      "R": 1.04,
+      "pass": false,
+      "calculated_R": 1.0364634370508525
+    }
+  ]
+}

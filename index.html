@@ -346,9 +346,9 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
   },
   {
     "id": "steel-beam-holes",
-    "name": "鋼梁開孔彎矩折減",
+    "name": "鋼梁開孔彎矩與剪力",
     "category": "構材分析設計",
-    "description": "翼板圓孔強軸截面分析、ASD有效斷面與淨斷面比較、詳細計算、Word、範例與離線版。",
+    "description": "翼板孔彎矩折減、腹板矩形／圓孔 DG2 彎剪檢核、圖形釘選、公開案例比對、Word與離線版。",
     "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/steel-beam-holes/",
     "code": "HOLE",
     "favorite": false
@@ -397,6 +397,7 @@ try{const marker='engineering-calculator-hub.concrete-anchor.v1';if(!localStorag
 try{const marker='engineering-calculator-hub.crane-outrigger.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='crane-outrigger');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1');}}catch{startupWarning='吊車支腿工具已載入；請匯出清單保存新增項目。';}
 // Add the newly published tool once without overwriting names, categories or favorites.
 try{const marker='engineering-calculator-hub.steel-beam-holes.v1';if(!localStorage.getItem(marker)){const addon=SEED.find(t=>t.id==='steel-beam-holes');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url)){tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));}localStorage.setItem(marker,'1');}}catch{}
+try{const k='engineering-calculator-hub.steel-beam-holes.v11';if(!localStorage.getItem(k)){const item=tools.find(t=>t.id==='steel-beam-holes'),seed=SEED.find(t=>t.id==='steel-beam-holes');if(item&&seed){if(item.name==='鋼梁開孔彎矩折減')item.name=seed.name;item.description=seed.description;localStorage.setItem(KEY,JSON.stringify({version:1,tools}));}localStorage.setItem(k,'1');}}catch{}
 try{const migrationKey='engineering-calculator-hub.seed-updates.v1',seen=JSON.parse(localStorage.getItem(migrationKey)||'[]');if(!Array.isArray(seen))throw Error('invalid migration state');if(!seen.includes('retaining-wall')){const addon=SEED.find(t=>t.id==='retaining-wall');if(addon&&!tools.some(t=>t.id===addon.id||t.url===addon.url))tools.push(structuredClone(addon));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(migrationKey,JSON.stringify([...seen,'retaining-wall']));}}catch{startupWarning='新工具已載入；瀏覽器無法保存更新時，請匯出清單備份。';}
 // Add the newly published tool once without replacing personal changes.
 try { if(!localStorage.getItem('steel-beam-default.v1')) { if(!tools.some(t=>t.id==='steel-beam')) {tools.push(SEED.find(t=>t.id==='steel-beam'));localStorage.setItem(KEY,JSON.stringify({version:1,tools}));} localStorage.setItem('steel-beam-default.v1','1'); } } catch {}
