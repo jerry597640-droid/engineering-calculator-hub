@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-17",
+  "passed": 15,
+  "method": "TW ASD 4.1/4.2 rules + independently integrated 200000 depth strips; not a published flange-hole case",
+  "sources": [
+    "https://www.nlma.gov.tw/uploads/files/e7c2c9d73eefc69beecde12336374b9b.pdf",
+    "https://www.nlma.gov.tw/uploads/files/91bbcbd01a38582e6c5b1f00dd367683.pdf"
+  ],
+  "tests": [
+    "four positions mask inactive flange counts",
+    "mapping never changes saved raw field values",
+    "上翼板 independently integrated net section",
+    "下翼板 independently integrated net section",
+    "上下翼板 independently integrated net section",
+    "top and bottom mirror without changing conservative moment reference",
+    "equal holes on both flanges retain central centroid",
+    "both flanges reduce capacity more than one flange",
+    "moment sign changes compression flange without moving the holes",
+    "zero holes remains a supported baseline",
+    "unknown position is rejected",
+    "combined flange/web net section independently integrated",
+    "combined reflected openings mirror net section",
+    "combined web opening cannot increase section modulus reference",
+    "combined holes touching a flange are rejected"
+  ],
+  "inputs": {
+    "H": 50,
+    "B": 20,
+    "tw": 1,
+    "tf": 1.6,
+    "Fy": 325,
+    "d": 18,
+    "nt": 2,
+    "nb": 2,
+    "Lb": 100,
+    "M": 20,
+    "Fb": 0,
+    "add": 1.5
+  },
+  "examples": [
+    {
+      "position": "top",
+      "name": "上翼板",
+      "nt": 2,
+      "nb": 0,
+      "area": 104.56,
+      "centroid": 23.555776587605205,
+      "I": 42162.73524427443,
+      "St": 1594.402474474336,
+      "Sb": 1789.9106441033239,
+      "retention": 86.58351340202907,
+      "Mnet": 34.87422624186089,
+      "max_integration_error_I": 6.59820216242224e-7
+    },
+    {
+      "position": "bottom",
+      "name": "下翼板",
+      "nt": 0,
+      "nb": 2,
+      "area": 104.56,
+      "centroid": 26.4442234123948,
+      "I": 42162.73524427443,
+      "St": 1789.910644103324,
+      "Sb": 1594.4024744743358,
+      "retention": 86.58351340202906,
+      "Mnet": 34.87422624186088,
+      "max_integration_error_I": 5.806505214422941e-7
+    },
+    {
+      "position": "both",
+      "name": "上下翼板",
+      "nt": 2,
+      "nb": 2,
+      "area": 98.32000000000001,
+      "centroid": 25.000000000000004,
+      "I": 38725.09973333334,
+      "St": 1549.003989333334,
+      "Sb": 1549.0039893333335,
+      "retention": 84.11816327270633,
+      "Mnet": 33.8812291365553,
+      "max_integration_error_I": 5.311594577506185e-7
+    }
+  ],
+  "combinedInputs": {
+    "ho": 20,
+    "e": 2
+  },
+  "combinedExamples": [
+    {
+      "flangePosition": "top",
+      "area": 84.56,
+      "centroid": 22.741154210028384,
+      "I": 41202.70025001577,
+      "Mnet": 33.06167382632602,
+      "retention": 82.08342341368217
+    },
+    {
+      "flangePosition": "bottom",
+      "area": 84.56,
+      "centroid": 26.3127719962157,
+      "I": 41488.42967291076,
+      "Mnet": 34.487921046973504,
+      "retention": 85.62441940559637
+    },
+    {
+      "flangePosition": "both",
+      "area": 78.32000000000002,
+      "centroid": 24.489274770173644,
+      "I": 37958.00405747362,
+      "Mnet": 32.54521790858767,
+      "retention": 80.80119947085012
+    }
+  ]
+}

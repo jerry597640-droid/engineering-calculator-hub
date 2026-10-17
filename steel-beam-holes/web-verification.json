@@ -10,7 +10,7 @@
   "passed": 18,
   "tests": [
     "published W24x55 capacities and six LRFD decisions",
-    "published ASD example 1A decisions",
+    "published ASD example 1A six decisions",
     "unit-invariant closed-form shear checked in kip-inch directly",
     "plastic net moment independently integrated to PNA",
     "opening eccentricity mirrors capacity",
@@ -106,6 +106,56 @@
       "R": 1.04,
       "pass": false,
       "calculated_R": 1.0364634370508525
+    }
+  ],
+  "asd_case_points": [
+    {
+      "x": 3,
+      "M": 1418,
+      "V": 35.8,
+      "R": 0.63,
+      "pass": true,
+      "calculated_R": 0.626216866332435
+    },
+    {
+      "x": 6,
+      "M": 2581,
+      "V": 28.7,
+      "R": 0.7,
+      "pass": true,
+      "calculated_R": 0.6987684214600198
+    },
+    {
+      "x": 9,
+      "M": 3484,
+      "V": 22.4,
+      "R": 0.86,
+      "pass": true,
+      "calculated_R": 0.8563334254302363
+    },
+    {
+      "x": 12,
+      "M": 4129,
+      "V": 14.4,
+      "R": 1,
+      "pass": true,
+      "calculated_R": 0.9914129548570072
+    },
+    {
+      "x": 15,
+      "M": 4516,
+      "V": 7.1,
+      "R": 1.08,
+      "pass": false,
+      "calculated_R": 1.0797851497879072
+    },
+    {
+      "x": 18,
+      "M": 4645,
+      "V": 0,
+      "R": 1.11,
+      "pass": false,
+      "calculated_R": 1.1101551110917474
     }
   ]
 }

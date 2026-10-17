@@ -1,0 +1,29 @@
+{
+  "version": "1.3",
+  "date": "2026-10-17",
+  "duration_seconds": 124,
+  "chapters": 8,
+  "caption_cues": 24,
+  "narration": false,
+  "format": {
+    "codec_name": "h264",
+    "width": 1280,
+    "height": 720,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "24/1",
+    "nb_frames": "2976"
+  },
+  "bytes": 5450608,
+  "sha256": "b75ca8b7e4cd3fe7862bdc23414ab716448f74c38cf6b6850bf0c835c9e25f5d",
+  "fast_start": true,
+  "hyperframes_check": {
+    "runtime": true,
+    "layout": true,
+    "contrast_checked": 101,
+    "contrast_passed": 101,
+    "reviewed_lint_warnings": "8 intentional nested_structure_needs_subcomposition warnings for monolithic scene authoring"
+  },
+  "visual_review": "8 chapter hero frames plus revised single-flange frames and encoded combined frame reviewed",
+  "scope": "Captioned animated teaching demo, with combined flange/web joint strength explicitly pending.",
+  "full_video_decode_passed": true
+}
