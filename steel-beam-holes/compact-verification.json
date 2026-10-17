@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-17",
+  "passed": 12,
+  "source": "TW ASD 4.5, Table 4.5-1 and 7.2.1",
+  "source_url": "https://www.nlma.gov.tw/uploads/files/e7c2c9d73eefc69beecde12336374b9b.pdf",
+  "tests": [
+    "official table limits, independently calculated decimal reference",
+    "flange alone controls",
+    "web alone controls",
+    "both elements can exceed limits",
+    "equality is included for both compact limits",
+    "flange boundary uses full precision",
+    "web boundary uses full precision",
+    "uniform dimension scaling preserves classification",
+    "high-strength material restriction is separate from compact geometry",
+    "long unbraced length does not change compactness",
+    "moment sign and hole count do not relabel the gross section",
+    "blank, nonpositive and impossible geometry are rejected"
+  ],
+  "example": {
+    "fy": 3.3140776921782664,
+    "b": 10,
+    "h": 46.8,
+    "flange": 6.25,
+    "web": 46.8,
+    "flangeLimit": 9.338294771036585,
+    "webLimit": 93.38294771036585,
+    "flangeRatio": 0.669287075771568,
+    "webRatio": 0.50116216233775,
+    "flangePass": true,
+    "webPass": true,
+    "compact": true,
+    "materialPass": true,
+    "lc": 219.72458284791966
+  }
+}
