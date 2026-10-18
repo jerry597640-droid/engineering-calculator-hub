@@ -1,0 +1,42 @@
+name: Aluminum formwork verification
+on:
+  push:
+    paths:
+      - 'aluminum-formwork/**'
+      - 'index.html'
+      - '.github/workflows/aluminum-formwork.yml'
+  pull_request:
+    paths:
+      - 'aluminum-formwork/**'
+      - 'index.html'
+      - '.github/workflows/aluminum-formwork.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: aluminum-formwork
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python build.py
+      - run: git diff --exit-code -- index.html
+      - run: node tests/verify.cjs
+      - run: node tests/verify-models.cjs
+      - run: npm install --no-save --no-package-lock jsdom@26.1.0
+      - run: node tests/verify-ui.cjs
+      - run: node tests/verify-hub.cjs ../index.html
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aluminum-formwork-verification
+          path: aluminum-formwork/tests/*validation.json
+          if-no-files-found: ignore

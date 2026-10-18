@@ -1,6 +1,6 @@
 {
-  "version": "1.0.0",
-  "count": 21,
+  "version": "1.1.0",
+  "count": 26,
   "results": [
     {
       "name": "完整HTML離線啟動與有效檢核結果",
@@ -64,6 +64,26 @@
     },
     {
       "name": "離線版沒有外部腳本、樣式、字型依賴",
+      "status": "passed"
+    },
+    {
+      "name": "柱牆梁板詳解包含四章及控制算例",
+      "status": "passed"
+    },
+    {
+      "name": "不等跨與固定端輸入可操作並更新反力",
+      "status": "passed"
+    },
+    {
+      "name": "實心矩形自算會顯示實際I及撓度NG",
+      "status": "passed"
+    },
+    {
+      "name": "指定集中力欄位、反力連動與獨立龍骨開關",
+      "status": "passed"
+    },
+    {
+      "name": "柱牆梁板詳解DOCX可匯出",
       "status": "passed"
     },
     {

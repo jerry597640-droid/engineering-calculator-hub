@@ -11,7 +11,7 @@ test('任意位置集中力：反力及M=Pab/L',()=>{const {L,E,I}=base,P=6300,a
 for(const spans of [1,2,3])test('均布加集中力守恆 '+spans+'跨',()=>{const b=A.beam({...base,spans,points:[{x:123,P:1200},{x:base.L*spans-193,P:3700}]});near(b.equilibrium,0,1e-7);near(b.momentResidual,0,1e-6);});
 test('彎矩與撓度線性疊加、零載重',()=>{const a=A.beam(base),b=A.beam({...base,q:base.q*2}),z=A.beam({...base,q:0});near(b.Mmax,a.Mmax*2);near(b.deflection,a.deflection*2);near(z.Mmax,0);near(z.deflection,0);});
 test('梁剛度只改變撓度、不改變靜定內力',()=>{const a=A.beam(base),b=A.beam({...base,I:base.I*4});near(a.Mmax,b.Mmax);near(a.deflection/4,b.deflection);});
-test('ACI低速牆公式：原始SI值',()=>{let s=A.preset('wall'),p=A.pressure(s);near(p.p,7.2+785*1.5/(21+17.8));assert.equal(p.kind,'b');near(p.p/A.KF,3828.824128966558);});
+test('ACI低速牆公式：原始SI值',()=>{let s={...A.preset('wall'),loadMode:'aci'},p=A.pressure(s);near(p.p,7.2+785*1.5/(21+17.8));assert.equal(p.kind,'b');near(p.p/A.KF,3828.824128966558);});
 test('ACI高牆／中速公式',()=>{let p=A.pressure({...A.defaults,height:5,rate:1.5});near(p.raw,7.2+(1156+244*1.5)/38.8);assert.equal(p.kind,'c');});
 test('ACI速率2.1m/h邊界採c式',()=>assert.equal(A.pressure({...A.defaults,rate:2.1}).kind,'c'));
 test('ACI牆速率超過4.5m/h採全液壓',()=>{const p=A.pressure({...A.defaults,rate:4.501});near(p.p,p.hydro);assert.equal(p.kind,'hydro');});
@@ -28,10 +28,10 @@ test('密度Cw輕／常重／重質邊界',()=>{for(const [rho,w]of [[1000,.8],[
 test('Cc六種摻料與緩凝條件',()=>{for(const [chemistry,retarder,c]of [['plain',false,1],['plain',true,1.2],['blend',false,1.2],['blend',true,1.4],['high',false,1.4],['high',true,1.5]])near(A.pressure({...A.defaults,chemistry,retarder}).Cc,c);});
 test('梁側0.7m液壓=1610kgf/m²',()=>near(A.pressure(A.preset('beamSide')).p/A.KF,1610));
 test('原書樓板參數自重加30%衝擊=493kgf/m²',()=>{let v=A.verticalLoad({...A.preset('slab'),loadRule:'reference'});near(v.q/A.KF,493);});
-test('樓板設計模式另加250kgf施工活載=743',()=>near(A.verticalLoad(A.preset('slab')).q/A.KF,743));
+test('樓板設計模式另加250kgf施工活載=743',()=>near(A.verticalLoad({...A.preset('slab'),loadRule:'aci'}).q/A.KF,743));
 test('ACI活載下限2.4kPa，總載重下限4.8kPa',()=>{let v=A.verticalLoad({...A.defaults,depth:1,impact:0,live:0,formWeight:0});near(v.live,2.4);near(v.q,4.8);});
 test('動力車活載3.6kPa、總載重6.0kPa',()=>{let v=A.verticalLoad({...A.defaults,depth:1,impact:0,live:0,formWeight:0,motorCart:true});near(v.live,3.6);near(v.q,6);});
-test('拉片與銷釘從同一側壓力連動',()=>{const r=A.calculate(A.preset('wall'));near(r.tie.demand,r.p*.5*.4);near(r.pin.N,r.p*.25*.4);near(r.tie.demand/A.KF,765.7648257933116);});
+test('拉片與銷釘從同一側壓力連動',()=>{const r=A.calculate(A.preset('wall'));near(r.tie.demand,r.p*.5*.4);near(r.pin.N,r.p*.25*.4);near(r.tie.demand/A.KF,765);});
 test('拉結最弱配件控制',()=>{const r=A.calculate({...A.defaults,tieConnection:100});near(r.tie.capacity/A.KF,100);assert.equal(r.checks.find(c=>c.id==='tie').pass,false);});
 test('銷釘孔壁弱點控制，不能只看鋼材',()=>{const r=A.calculate({...A.defaults,pinBearing:5});near(r.pin.capacity/A.KF,5);assert.equal(r.checks.find(c=>c.id==='pin').pass,false);});
 test('面板條帶力學：寬度1000mm與I/S/Av相同',()=>{const r=A.calculate(A.defaults),m=r.members[0];near(m.I,1000*4**3/12);near(m.S,1000*4**2/6);near(m.Av,1000*4/1.5);near(m.q,r.p);});
