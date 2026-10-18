@@ -1,0 +1,91 @@
+{
+  "version": "1.0.0",
+  "count": 21,
+  "results": [
+    {
+      "name": "完整HTML離線啟動與有效檢核結果",
+      "status": "passed"
+    },
+    {
+      "name": "每個輸入參數都有定義、單位與來源",
+      "status": "passed"
+    },
+    {
+      "name": "手機五種構件切換不留舊結果",
+      "status": "passed"
+    },
+    {
+      "name": "修改密度與SCC立即更新側壓力與圖",
+      "status": "passed"
+    },
+    {
+      "name": "空白數值隱藏舊結果並顯示錯誤",
+      "status": "passed"
+    },
+    {
+      "name": "輸入分類可切換且條件欄位符合構件",
+      "status": "passed"
+    },
+    {
+      "name": "所有範例可載入且顯示重算結果",
+      "status": "passed"
+    },
+    {
+      "name": "釘選可關閉再開啟；放大值更新",
+      "status": "passed"
+    },
+    {
+      "name": "構件卡顯示對應集中力、反力與彎矩圖",
+      "status": "passed"
+    },
+    {
+      "name": "只看未通過篩選與完整計算頁",
+      "status": "passed"
+    },
+    {
+      "name": "參數ⓘ連到對應定義及資料來源",
+      "status": "passed"
+    },
+    {
+      "name": "規範與原書差異頁可閱讀",
+      "status": "passed"
+    },
+    {
+      "name": "手機工作區按鈕切換輸入／結果／圖形／說明",
+      "status": "passed"
+    },
+    {
+      "name": "輸入文字安全轉義",
+      "status": "passed"
+    },
+    {
+      "name": "每次有效修改保留JSON狀態",
+      "status": "passed"
+    },
+    {
+      "name": "離線版沒有外部腳本、樣式、字型依賴",
+      "status": "passed"
+    },
+    {
+      "name": "Word匯出為ZIP容器DOCX",
+      "status": "passed"
+    },
+    {
+      "name": "下載離線版包含目前參數且重新開啟可運算",
+      "status": "passed"
+    },
+    {
+      "name": "Excel CSV含數值檢核與完整輸入",
+      "status": "passed"
+    },
+    {
+      "name": "列印計算書含配置圖及完整計算",
+      "status": "passed"
+    },
+    {
+      "name": "沒有執行期JavaScript例外",
+      "status": "passed"
+    }
+  ],
+  "verificationLimit": "DOM and user events verified in jsdom; no actual browser geometry or mobile screenshot because managed preview could not start."
+}

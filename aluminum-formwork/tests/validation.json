@@ -1,0 +1,252 @@
+{
+  "version": "1.0.0",
+  "checkedAt": "2026-10-18T12:16:43.969Z",
+  "count": 61,
+  "results": [
+    {
+      "name": "單跨簡支均布：M、V、跨中撓度與反力閉式解",
+      "status": "passed"
+    },
+    {
+      "name": "二等跨：負彎矩及3/8、5/4、3/8反力",
+      "status": "passed"
+    },
+    {
+      "name": "三等跨：支點負彎矩及0.4、1.1、1.1、0.4反力",
+      "status": "passed"
+    },
+    {
+      "name": "中央集中力：M=PL/4、δ=PL³/48EI",
+      "status": "passed"
+    },
+    {
+      "name": "任意位置集中力：反力及M=Pab/L",
+      "status": "passed"
+    },
+    {
+      "name": "均布加集中力守恆 1跨",
+      "status": "passed"
+    },
+    {
+      "name": "均布加集中力守恆 2跨",
+      "status": "passed"
+    },
+    {
+      "name": "均布加集中力守恆 3跨",
+      "status": "passed"
+    },
+    {
+      "name": "彎矩與撓度線性疊加、零載重",
+      "status": "passed"
+    },
+    {
+      "name": "梁剛度只改變撓度、不改變靜定內力",
+      "status": "passed"
+    },
+    {
+      "name": "ACI低速牆公式：原始SI值",
+      "status": "passed"
+    },
+    {
+      "name": "ACI高牆／中速公式",
+      "status": "passed"
+    },
+    {
+      "name": "ACI速率2.1m/h邊界採c式",
+      "status": "passed"
+    },
+    {
+      "name": "ACI牆速率超過4.5m/h採全液壓",
+      "status": "passed"
+    },
+    {
+      "name": "ACI柱任何速率依b式，受液壓上限控制",
+      "status": "passed"
+    },
+    {
+      "name": "ACI柱任一平面尺寸>2m改按牆條件",
+      "status": "passed"
+    },
+    {
+      "name": "低溫慢澆置最小壓力30Cw",
+      "status": "passed"
+    },
+    {
+      "name": "矮模板低於30kPa採液壓上限",
+      "status": "passed"
+    },
+    {
+      "name": "scc自動採液壓",
+      "status": "passed"
+    },
+    {
+      "name": "externalVibration自動採液壓",
+      "status": "passed"
+    },
+    {
+      "name": "unknownMix自動採液壓",
+      "status": "passed"
+    },
+    {
+      "name": "坍度175邊界與超限",
+      "status": "passed"
+    },
+    {
+      "name": "內振深度1.2m邊界與超限",
+      "status": "passed"
+    },
+    {
+      "name": "底部泵送至少1.25液壓，優先於指定值",
+      "status": "passed"
+    },
+    {
+      "name": "指定壓力圖峰值與計算值一致",
+      "status": "passed"
+    },
+    {
+      "name": "密度Cw輕／常重／重質邊界",
+      "status": "passed"
+    },
+    {
+      "name": "Cc六種摻料與緩凝條件",
+      "status": "passed"
+    },
+    {
+      "name": "梁側0.7m液壓=1610kgf/m²",
+      "status": "passed"
+    },
+    {
+      "name": "原書樓板參數自重加30%衝擊=493kgf/m²",
+      "status": "passed"
+    },
+    {
+      "name": "樓板設計模式另加250kgf施工活載=743",
+      "status": "passed"
+    },
+    {
+      "name": "ACI活載下限2.4kPa，總載重下限4.8kPa",
+      "status": "passed"
+    },
+    {
+      "name": "動力車活載3.6kPa、總載重6.0kPa",
+      "status": "passed"
+    },
+    {
+      "name": "拉片與銷釘從同一側壓力連動",
+      "status": "passed"
+    },
+    {
+      "name": "拉結最弱配件控制",
+      "status": "passed"
+    },
+    {
+      "name": "銷釘孔壁弱點控制，不能只看鋼材",
+      "status": "passed"
+    },
+    {
+      "name": "面板條帶力學：寬度1000mm與I/S/Av相同",
+      "status": "passed"
+    },
+    {
+      "name": "集中傳力總荷重等於壓力乘分攤面積",
+      "status": "passed"
+    },
+    {
+      "name": "面板與肋條容許應力獨立",
+      "status": "passed"
+    },
+    {
+      "name": "絕對撓度與L/n取小值",
+      "status": "passed"
+    },
+    {
+      "name": "鋼管截面閉式計算",
+      "status": "passed"
+    },
+    {
+      "name": "鋼管310cm舊ASD彈性挫屈閉式",
+      "status": "passed"
+    },
+    {
+      "name": "短柱轉非彈性式",
+      "status": "passed"
+    },
+    {
+      "name": "支柱加長必降低容許力；330cm長細比NG",
+      "status": "passed"
+    },
+    {
+      "name": "原廠與底座能力必取最小",
+      "status": "passed"
+    },
+    {
+      "name": "二跨反力放大傳至支柱",
+      "status": "passed"
+    },
+    {
+      "name": "梁底雙排需求減半，且未偷加樓板面積",
+      "status": "passed"
+    },
+    {
+      "name": "斜撐平衡H=Ncosθ、V=Nsinθ",
+      "status": "passed"
+    },
+    {
+      "name": "未核定材料不能顯示整體pass",
+      "status": "passed"
+    },
+    {
+      "name": "拒絕無效輸入 panelThickness",
+      "status": "passed"
+    },
+    {
+      "name": "拒絕無效輸入 propT",
+      "status": "passed"
+    },
+    {
+      "name": "拒絕無效輸入 temperature",
+      "status": "passed"
+    },
+    {
+      "name": "拒絕無效輸入 panelSpans",
+      "status": "passed"
+    },
+    {
+      "name": "拒絕無效輸入 pumpFactor",
+      "status": "passed"
+    },
+    {
+      "name": "拒絕無效輸入 distribution",
+      "status": "passed"
+    },
+    {
+      "name": "拒絕無效輸入 mode",
+      "status": "passed"
+    },
+    {
+      "name": "拒絕無效輸入 propRows",
+      "status": "passed"
+    },
+    {
+      "name": "拒絕無效輸入 ribI",
+      "status": "passed"
+    },
+    {
+      "name": "拒絕無效輸入 ribE",
+      "status": "passed"
+    },
+    {
+      "name": "拒絕無效輸入 crossPitch",
+      "status": "passed"
+    },
+    {
+      "name": "所有七組範例計算可重現、無非有限結果",
+      "status": "passed"
+    },
+    {
+      "name": "零載重梁與錯誤支承不造成靜默NaN",
+      "status": "passed"
+    }
+  ],
+  "method": "Independent closed-form beam/statics, ACI official equations, reference algebra, capacity and invalid-input invariants"
+}
