@@ -1,6 +1,6 @@
 {
   "version": "1.1.0",
-  "count": 26,
+  "count": 27,
   "results": [
     {
       "name": "完整HTML離線啟動與有效檢核結果",
@@ -32,6 +32,10 @@
     },
     {
       "name": "釘選可關閉再開啟；放大值更新",
+      "status": "passed"
+    },
+    {
+      "name": "釘選工具列可直接切換構件圖",
       "status": "passed"
     },
     {
