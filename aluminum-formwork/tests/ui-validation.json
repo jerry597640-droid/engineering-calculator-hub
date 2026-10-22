@@ -1,6 +1,6 @@
 {
   "version": "1.1.0",
-  "count": 27,
+  "count": 32,
   "results": [
     {
       "name": "完整HTML離線啟動與有效檢核結果",
@@ -8,6 +8,26 @@
     },
     {
       "name": "每個輸入參數都有定義、單位與來源",
+      "status": "passed"
+    },
+    {
+      "name": "壓力與彈性模數欄位以重力單位顯示",
+      "status": "passed"
+    },
+    {
+      "name": "舊版儲存資料維持物理值且換算輸入顯示",
+      "status": "passed"
+    },
+    {
+      "name": "kgf輸入正確連動側壓拉力風力與彈性模數",
+      "status": "passed"
+    },
+    {
+      "name": "kgf基準壓力輸入正確縮放集中力",
+      "status": "passed"
+    },
+    {
+      "name": "五類計算過程說明及圖形皆無壓力SI單位",
       "status": "passed"
     },
     {
