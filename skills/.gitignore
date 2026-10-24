@@ -1,0 +1,12 @@
+# Private source documents and review work stay outside tracked source files.
+/.private/
+/.venv/
+__pycache__/
+*.py[cod]
+*.private.*
+policy.draft.json
+policy.reviewed*.json
+manifest*.json
+previews/
+*.traineddata
+.DS_Store
