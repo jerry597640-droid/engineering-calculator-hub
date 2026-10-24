@@ -1,0 +1,46 @@
+{
+  "skill": "engineering-document-redactor",
+  "core_version": "0.1.0",
+  "date_utc": "2026-10-24",
+  "core_reference_commit": "c0773c127e157c3ac66e8eeb53b5010b380c06f5",
+  "deployment_entry": ".agents/skills/engineering-document-redactor/SKILL.md",
+  "canonical_skill": "skills/engineering-document-redactor",
+  "validation_method": "Static metadata and path checks plus a fresh-context agent following an inert entry/skills fixture at the same directory depth and running doctor read-only.",
+  "checks": {
+    "skill_metadata_valid": true,
+    "three_parent_repository_root_resolution_valid": true,
+    "canonical_workflow_and_cli_found": true,
+    "fresh_context_workflow_loaded": true,
+    "doctor_executed_successfully": true,
+    "core_source_files_sha256_matched": 12,
+    "core_code_changed": false,
+    "real_documents_processed_in_this_entry_test": false
+  },
+  "doctor_environment": {
+    "status": "READY",
+    "status_scope": "Required Python modules only; this is not complete OCR or delivery readiness.",
+    "python": "3.12.14",
+    "modules": {
+      "fitz": true,
+      "PIL": true,
+      "lxml": true
+    },
+    "tesseract_available": true,
+    "ocr_languages": ["eng", "osd"],
+    "traditional_chinese_ocr_ready": false,
+    "network_required_for_processing": false
+  },
+  "acceptance_scope": {
+    "codex_runtime_available_in_test_environment": false,
+    "actual_codex_auto_discovery_tested": false,
+    "user_machine_installation_or_menu_tested": false,
+    "protected_global_skill_directories_modified": false
+  },
+  "remaining_user_environment_checks": [
+    "Open the latest repository version in Codex and confirm the project skill is listed or explicitly loaded.",
+    "Run doctor using the Python environment that will process the documents.",
+    "For Traditional Chinese scans, confirm both chi_tra and eng OCR language data are available.",
+    "Perform a non-sensitive document trial and review the rendered output before using real engineering documents."
+  ],
+  "official_discovery_reference": "https://learn.chatgpt.com/docs/build-skills"
+}

@@ -4,7 +4,11 @@
 
 針對工程文件的名稱、聯絡資訊、Logo、印章與簽名進行去識別化，保留未選取的尺寸、公式、單位與工程圖。支援 DOCX、PDF、PNG、JPEG，採「建立候選 → 覆核 → 實際移除 → 檢查輸出」流程。
 
-完整技能在 [`engineering-document-redactor/`](engineering-document-redactor/)，入口為 [`SKILL.md`](engineering-document-redactor/SKILL.md)。本資料夾保存可執行的 Python 程式與 Skill 定義；在 ChatGPT／Codex 中註冊 Skill 是另一個安裝步驟。
+完整技能在 [`engineering-document-redactor/`](engineering-document-redactor/)，工作流程為 [`SKILL.md`](engineering-document-redactor/SKILL.md)。專案另提供 [Codex 辨識入口](../.agents/skills/engineering-document-redactor/SKILL.md)，供 Codex 在開啟本儲存庫時載入完整技能。
+
+## 在 Codex 開始使用
+
+開啟最新 `main` 的工程工具專案後，輸入 `$engineering-document-redactor`。首次使用先檢查 Python 與 OCR 環境；專案辨識、跨專案個人安裝與可直接貼上的提示詞，見 [Codex 設定說明](CODEX_SETUP.md)。
 
 ## 功能與使用界線
 
@@ -110,7 +114,9 @@ PDF 與圖片須逐頁檢視輸出；Word 須用可用的 DOCX renderer 檢查�
 - 已進行 Word／PDF 渲染視覺檢查；未使用 Microsoft Word 進行互動編輯測試。
 - 12 個核心來源檔與快照中的 SHA-256 一致。
 
-快照中的安裝與同步欄位記錄提交前的原開發環境狀態；目前 GitHub 來源版本以本分支為準。GitHub 來源提交不會自動完成 Skills 註冊。
+快照中的安裝與同步欄位記錄提交前的原開發環境狀態；目前 GitHub 來源版本以本分支為準。GitHub 來源提交不會自動完成個人 Skills 安裝；專案入口仍須在使用者的 Codex 環境確認載入。
+
+新增入口的路徑、完整技能載入與環境檢查結果，見 [專案入口驗證紀錄](validation/codex-project-entry.json)。該次檢查未變更 12 個核心檔案，也未在使用者電腦上執行 Codex。
 
 ## 來源與進一步說明
 
@@ -120,3 +126,4 @@ PDF 與圖片須逐頁檢視輸出；Word 須用可用的 DOCX renderer 檢查�
 - [來源、依賴與限制](engineering-document-redactor/references/sources-and-limits.md)
 
 工作流程參考 [legal-redactor](https://github.com/qwertyzhu/legal-redactor)，繁中方向參考 [pii-guard](https://github.com/danyuchn/pii-guard)。本版本的工程規則、介面與後端為另行實作，未複製這兩個專案的程式碼。第三方套件授權依各上游實際版本為準。
+

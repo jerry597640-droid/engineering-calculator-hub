@@ -1,0 +1,4 @@
+interface:
+  display_name: "工程文件遮蔽"
+  short_description: "遮蔽工程 Word 與 PDF 的名稱、個資與 Logo，並檢查殘留內容"
+  default_prompt: "請使用 $engineering-document-redactor 處理這份工程文件，列出名稱與圖片候選，依指定範圍遮蔽並檢查輸出。"
