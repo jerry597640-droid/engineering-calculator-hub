@@ -1,0 +1,181 @@
+{
+  "skill": "engineering-document-redactor",
+  "version": "0.1.0",
+  "date_utc": "2026-10-24",
+  "local_git_commit": "e87ec7c5f89044e2279e8eb9c1d1764b73bf54e0",
+  "skill_installation_status": "BLOCKED_BY_AUTOMATIC_APPROVAL_REVIEW",
+  "remote_skill_sync_completed": false,
+  "unit_tests": {
+    "passed": 37,
+    "failed": 0,
+    "detection": 14,
+    "docx_backend": 9,
+    "pdf_image_backend": 14
+  },
+  "ui_script_behavior_tests": {
+    "passed": 15,
+    "failed": 0,
+    "method": "Actual generated JavaScript with Node vm and mocked DOM/canvas/download APIs",
+    "real_browser_visual_or_CSP_test_completed": false
+  },
+  "cli_integration": {
+    "initial_passed": 20,
+    "initial_total": 21,
+    "initial_failure": "Mixed PDF could report absent without OCR coverage",
+    "fixed_targeted_tests_passed": 6,
+    "fixed_targeted_tests_total": 6,
+    "targeted_cases_include_three_retests": true,
+    "postfix_cases": [
+      {
+        "name": "mixed_pdf_without_ocr_inconclusive",
+        "passed": true,
+        "exit_code": 1,
+        "report": {
+          "status": "INCONCLUSIVE",
+          "output_sha256": "c62f46444279afa51be89cf27c7415d962bf15b171c8b7db93d47a5425510175",
+          "residual_term_indices": [],
+          "text_targets_checked": 1,
+          "text_blocks_checked": 1,
+          "ocr_used": false,
+          "coverage_warnings": [
+            "PDF_VISUAL_CONTENT_REQUIRES_OCR"
+          ],
+          "known_terms_absent_in_checked_text": true,
+          "scope": "Text/OCR check of known terms only. This does not prove all identifiers or logos were detected; inspect the rendered output."
+        }
+      },
+      {
+        "name": "mixed_pdf_with_ocr_finds_residual",
+        "passed": true,
+        "exit_code": 1,
+        "report": {
+          "status": "FAIL",
+          "output_sha256": "c62f46444279afa51be89cf27c7415d962bf15b171c8b7db93d47a5425510175",
+          "residual_term_indices": [
+            0
+          ],
+          "text_targets_checked": 1,
+          "text_blocks_checked": 2,
+          "ocr_used": true,
+          "coverage_warnings": [],
+          "known_terms_absent_in_checked_text": false,
+          "scope": "Text/OCR check of known terms only. This does not prove all identifiers or logos were detected; inspect the rendered output."
+        }
+      },
+      {
+        "name": "raster_pdf_without_ocr_inconclusive",
+        "passed": true,
+        "exit_code": 1,
+        "report": {
+          "status": "INCONCLUSIVE",
+          "output_sha256": "94717321bfad8655db52fced48c1e5583bb7e282bc7f62c7a199957b0de89261",
+          "residual_term_indices": [],
+          "text_targets_checked": 1,
+          "text_blocks_checked": 1,
+          "ocr_used": false,
+          "coverage_warnings": [
+            "PDF_VISUAL_CONTENT_REQUIRES_OCR",
+            "PDF_PAGE_WITHOUT_SELECTABLE_TEXT"
+          ],
+          "known_terms_absent_in_checked_text": true,
+          "scope": "Text/OCR check of known terms only. This does not prove all identifiers or logos were detected; inspect the rendered output."
+        }
+      },
+      {
+        "name": "zero_text_targets_inconclusive",
+        "passed": true,
+        "exit_code": 1,
+        "report": {
+          "status": "INCONCLUSIVE",
+          "output_sha256": "f94052f231e9769fee1053b6ce8a9f6b80c91d17152bad2155e2431b208b0bef",
+          "residual_term_indices": [],
+          "text_targets_checked": 0,
+          "text_blocks_checked": 1,
+          "ocr_used": false,
+          "coverage_warnings": [
+            "NO_TEXT_TARGETS_SELECTED"
+          ],
+          "known_terms_absent_in_checked_text": null,
+          "scope": "Text/OCR check of known terms only. This does not prove all identifiers or logos were detected; inspect the rendered output."
+        }
+      },
+      {
+        "name": "docx_with_media_without_ocr_inconclusive",
+        "passed": true,
+        "exit_code": 1,
+        "report": {
+          "status": "INCONCLUSIVE",
+          "output_sha256": "373256b8d21b471e8c8d79907bb190b80c94715ae39c5e6270e4f9c056dad3b5",
+          "residual_term_indices": [],
+          "text_targets_checked": 1,
+          "text_blocks_checked": 29,
+          "ocr_used": false,
+          "coverage_warnings": [
+            "DOCX_EMBEDDED_IMAGE_TEXT_NOT_CHECKED"
+          ],
+          "known_terms_absent_in_checked_text": true,
+          "scope": "Text/OCR check of known terms only. This does not prove all identifiers or logos were detected; inspect the rendered output."
+        }
+      },
+      {
+        "name": "docx_unsupported_ocr_rejected",
+        "passed": true,
+        "exit_code": 2,
+        "report": {
+          "status": "ERROR",
+          "code": "DOCX_OCR_UNSUPPORTED",
+          "message": "DOCX embedded-image OCR is not implemented. Review each embedded image, or explicitly convert a copy to PDF for OCR."
+        }
+      }
+    ]
+  },
+  "fixed_version_word_run": {
+    "source_unchanged": true,
+    "skill_files_unchanged": true,
+    "package_parts_identical_to_independently_audited_and_visually_reviewed_output": true,
+    "apply_counts": {
+      "text_replacements": 9,
+      "media_modified": 1,
+      "media_reencoded": 2,
+      "parts_removed": 7,
+      "external_links_removed": 1
+    },
+    "known_terms_absent_in_checked_text": true,
+    "independent_verify_status": "INCONCLUSIVE",
+    "reason": "DOCX embedded image text is covered by explicit visual review, not standalone text verification."
+  },
+  "visual_and_content_checks": {
+    "docx_chinese_page_render_reviewed": true,
+    "pdf_redacted_page_render_reviewed": true,
+    "word_native_editable_text_present": true,
+    "word_interactive_edit_in_microsoft_word_tested": false,
+    "engineering_numeric_text_retained": true,
+    "engineering_diagram_pixels_identical": true,
+    "shared_logo_pixels_replaced": true,
+    "known_names_absent_from_checked_docx_package_parts": true
+  },
+  "limitations": [
+    "Candidate detection is rule based and can miss names and aliases.",
+    "Logo and DOCX image text require explicit visual review and selected regions.",
+    "OCR may misread characters; exact matching can miss a differently recognized string.",
+    "PDF defaults to raster reconstruction without selectable text or interactive forms.",
+    "Word layout needs rendering review for each real document.",
+    "No universal anonymization or compliance certification is claimed.",
+    "OCR language data and Python dependencies must be installed separately.",
+    "Skill registration and remote git synchronization are blocked; source code is a completed development deliverable, not an installed skill."
+  ],
+  "source_files_sha256": {
+    "SKILL.md": "24381efda3c62a57df6c0cb6c1f2cacb23bef906b073963d8fb8f55ef2d6fc51",
+    "agents/openai.yaml": "8fa9e7200f10eee4a444eaa3f64339475512e65107d01a9c7f3abae64a224ed7",
+    "assets/terms.example.json": "5738e6544aef89910b33cb99cb3eefc0998f3de781e6ec11c80963169ccea992",
+    "references/commands.md": "9872f5adddff905e412a4021ea2a6297349b8261e5547c5c7d16d68cb6b6e005",
+    "references/policy.md": "36ed82183242ae5916a184b2acccea49da4c455a5354ac6ec0c7281bf79c2cfb",
+    "references/sources-and-limits.md": "7e43dba1e73daa79ff42902f84bcbcfc892d9082185f251f417400fb9ccc17bc",
+    "scripts/detect_entities.py": "6bb4cac7a56b8dc1d8f396adde5f05743ea6b526f1e2763e0ea3598bd852ffe1",
+    "scripts/docx_backend.py": "2b03061b2fc4da392b51aa31b246696d59b652ec27241272a4cffec946b7c5a8",
+    "scripts/pdf_backend.py": "5931bfa844f458bbd9f95599c2fd48de404e07b8268625a04bfd3f94221ab1c7",
+    "scripts/redact_engineering.py": "e0b121e8d5d12d559b0d8d656fd91e7133ea8320dd1fe5cbb9c204f9ca379b25",
+    "scripts/requirements.txt": "595fb38ca923fb830c7a5ed6f75e00b033177e1fc0c8eddefb200ebb00f06a03",
+    "scripts/review_ui.py": "2151f9bfbc67b53097ae1aa3841da2fb9209ec0b61a2ab88062d6ee8cf517547"
+  }
+}

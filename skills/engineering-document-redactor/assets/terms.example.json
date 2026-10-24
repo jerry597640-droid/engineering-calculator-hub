@@ -1,0 +1,8 @@
+{
+  "terms": [
+    {"text": "青禾示範大樓新建工程", "replacement": "[工程名稱]", "category": "PROJECT"},
+    {"text": "範例營造股份有限公司", "replacement": "[營造公司]", "category": "ORG"},
+    {"text": "EXAMPLE CONSTRUCTION CO., LTD.", "replacement": "[公司英文名稱]", "category": "ORG"},
+    {"text": "陳範例", "replacement": "[人名]", "category": "PERSON"}
+  ]
+}
