@@ -1,0 +1,392 @@
+{
+  "engine": "PyniteFEA",
+  "version": "3.2.0",
+  "source": "https://github.com/JWock82/Pynite",
+  "license": "MIT",
+  "engine_sha256": "7359150e518ec3cd377b0555f1031d611b09bc5c7695723e07203418092e49c4",
+  "scope": "Linear Euler-Bernoulli beams only; not pressure, material allowable stress, buckling, connections or code certification.",
+  "relative_tolerance": 1e-06,
+  "count": 38,
+  "results": [
+    {
+      "name": "wall/panel",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 0.0,
+        "moment": 1.4368263266275565e-15,
+        "deflection": 4.3913063918705965e-15
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "wall/rib",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.997957257135314e-16,
+        "moment": 9.501476602157463e-16,
+        "deflection": 8.62697976884461e-15
+      },
+      "sample_count": 150
+    },
+    {
+      "name": "wall/cross",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 2.73692774950043e-16,
+        "moment": 2.0485303501547585e-15,
+        "deflection": 2.388561682318027e-15
+      },
+      "sample_count": 100
+    },
+    {
+      "name": "wall/waler",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 0.0,
+        "moment": 1.4445590646763157e-15,
+        "deflection": 3.586269145394822e-15
+      },
+      "sample_count": 50
+    },
+    {
+      "name": "column/panel",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 0.0,
+        "moment": 1.4368263266275565e-15,
+        "deflection": 4.3913063918705965e-15
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "column/rib",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.997957257135314e-16,
+        "moment": 9.501476602157463e-16,
+        "deflection": 8.62697976884461e-15
+      },
+      "sample_count": 150
+    },
+    {
+      "name": "column/cross",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 2.73692774950043e-16,
+        "moment": 2.0485303501547585e-15,
+        "deflection": 2.388561682318027e-15
+      },
+      "sample_count": 100
+    },
+    {
+      "name": "column/waler",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 2.215449280285925e-15,
+        "moment": 6.492625820888151e-15,
+        "deflection": 5.471378163347998e-15
+      },
+      "sample_count": 125
+    },
+    {
+      "name": "smallBeam/panel",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.7493332069854016e-16,
+        "moment": 4.898132979559124e-16,
+        "deflection": 3.543209620630154e-15
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "smallBeam/rib",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 7.605796552110442e-17,
+        "moment": 6.221541579626342e-16,
+        "deflection": 1.1949551471871296e-14
+      },
+      "sample_count": 50
+    },
+    {
+      "name": "smallBeam/cross",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 7.605796552110442e-16,
+        "moment": 4.938256312094894e-16,
+        "deflection": 1.1216217995733479e-15
+      },
+      "sample_count": 75
+    },
+    {
+      "name": "largeBeam/panel",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 0.0,
+        "moment": 6.782321811530315e-16,
+        "deflection": 2.1199601284182903e-15
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "largeBeam/rib",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 0.0,
+        "moment": 1.3497419181496486e-15,
+        "deflection": 5.456007798268477e-15
+      },
+      "sample_count": 75
+    },
+    {
+      "name": "largeBeam/cross",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.1243584912385868e-15,
+        "moment": 1.0519470664584027e-15,
+        "deflection": 1.3815066946051245e-15
+      },
+      "sample_count": 100
+    },
+    {
+      "name": "beamSide/panel",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 2.400172083373139e-16,
+        "moment": 9.600688333492554e-16,
+        "deflection": 9.722919319219889e-15
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "beamSide/rib",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.0435530797274516e-16,
+        "moment": 5.342991768204553e-16,
+        "deflection": 5.651922431871958e-15
+      },
+      "sample_count": 50
+    },
+    {
+      "name": "beamSide/cross",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 2.0871061594549033e-16,
+        "moment": 5.081649779542373e-16,
+        "deflection": 8.394113682408332e-16
+      },
+      "sample_count": 75
+    },
+    {
+      "name": "beamSide/waler",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.7455796969986465e-16,
+        "moment": 7.447806707194225e-16,
+        "deflection": 1.9737247425821086e-15
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "largeBeamSide/panel",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.866800509290219e-16,
+        "moment": 7.965015506304934e-16,
+        "deflection": 1.327806082917394e-14
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "largeBeamSide/rib",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.405700178112168e-16,
+        "moment": 1.5190622212746719e-15,
+        "deflection": 1.2600008549265734e-14
+      },
+      "sample_count": 75
+    },
+    {
+      "name": "largeBeamSide/cross",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.3479316776418051e-15,
+        "moment": 1.6142356418949088e-15,
+        "deflection": 3.397359063502876e-15
+      },
+      "sample_count": 100
+    },
+    {
+      "name": "largeBeamSide/waler",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 4.582146704621446e-16,
+        "moment": 1.2796686069633709e-15,
+        "deflection": 2.06355104832717e-15
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "largeBeamSide55/panel",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.866800509290219e-16,
+        "moment": 7.965015506304934e-16,
+        "deflection": 1.327806082917394e-14
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "largeBeamSide55/rib",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.405700178112168e-16,
+        "moment": 1.5190622212746719e-15,
+        "deflection": 1.2600008549265734e-14
+      },
+      "sample_count": 75
+    },
+    {
+      "name": "largeBeamSide55/cross",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.3479316776418051e-15,
+        "moment": 1.6142356418949088e-15,
+        "deflection": 3.397359063502876e-15
+      },
+      "sample_count": 100
+    },
+    {
+      "name": "largeBeamSide55/waler",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 0.0,
+        "moment": 1.0082237509408379e-15,
+        "deflection": 3.073680932123687e-15
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "slab/panel",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 2.351487051256036e-16,
+        "moment": 6.019806851215452e-16,
+        "deflection": 4.605484350881565e-16
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "slab/waler",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.9595725427133632e-16,
+        "moment": 9.196927133801385e-16,
+        "deflection": 9.251242999070224e-16
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "slab20/panel",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.7862605797676825e-16,
+        "moment": 9.145654168410535e-16,
+        "deflection": 1.399385999990516e-15
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "slab20/waler",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 2.9771009662794705e-16,
+        "moment": 1.524275694735089e-15,
+        "deflection": 2.795037784510378e-15
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "hydro/panel",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.7569887146260882e-16,
+        "moment": 1.1244727773606966e-15,
+        "deflection": 1.514284731327116e-14
+      },
+      "sample_count": 25
+    },
+    {
+      "name": "hydro/rib",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 9.772617018596644e-17,
+        "moment": 8.748162600451884e-16,
+        "deflection": 5.6262911535943106e-15
+      },
+      "sample_count": 150
+    },
+    {
+      "name": "hydro/cross",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 2.409686388147112e-15,
+        "moment": 1.7635174318723552e-15,
+        "deflection": 3.558060015903583e-15
+      },
+      "sample_count": 100
+    },
+    {
+      "name": "hydro/waler",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 0.0,
+        "moment": 6.182555779524992e-16,
+        "deflection": 2.768273312809013e-15
+      },
+      "sample_count": 50
+    },
+    {
+      "name": "unequal/simple",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 8.494112563860725e-17,
+        "moment": 5.5125912360260545e-16,
+        "deflection": 3.114984362135047e-15
+      },
+      "sample_count": 75
+    },
+    {
+      "name": "unequal/fixed",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.9924662938416718e-16,
+        "moment": 8.953007295054407e-16,
+        "deflection": 8.648168874360329e-15
+      },
+      "sample_count": 75
+    },
+    {
+      "name": "unequal/fixed-left",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 2.033150800233541e-16,
+        "moment": 8.851953925143453e-16,
+        "deflection": 8.463669805426583e-15
+      },
+      "sample_count": 75
+    },
+    {
+      "name": "unequal/fixed-right",
+      "status": "passed",
+      "max_normalized_error": {
+        "reaction": 1.6702354445225108e-16,
+        "moment": 7.555663125145252e-16,
+        "deflection": 3.1471109947990505e-15
+      },
+      "sample_count": 75
+    }
+  ]
+}
