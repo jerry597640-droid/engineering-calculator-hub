@@ -1,6 +1,6 @@
 {
   "version": "1.1.0",
-  "count": 32,
+  "count": 33,
   "results": [
     {
       "name": "完整HTML離線啟動與有效檢核結果",
@@ -72,6 +72,10 @@
     },
     {
       "name": "規範與原書差異頁可閱讀",
+      "status": "passed"
+    },
+    {
+      "name": "規範頁內建獨立驗算快照並區分即時結果",
       "status": "passed"
     },
     {

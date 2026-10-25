@@ -24,6 +24,7 @@ test('構件卡顯示對應集中力、反力與彎矩圖',()=>{click('[data-mem
 test('只看未通過篩選與完整計算頁',()=>{click('#onlyFail');assert.equal(d.querySelectorAll('[data-check]').length,app.getResult().failures.length);click('#onlyFail');click('#viewTabs [data-view="report"]');assert.equal(d.querySelector('#reportView').hidden,false);assert.ok(d.querySelector('#reportView').textContent.includes('力平衡殘差'));assert.ok(d.querySelector('#reportView').textContent.includes('有效斷面'));});
 test('參數ⓘ連到對應定義及資料來源',()=>{click('[data-info="ribI"]');assert.equal(d.querySelector('#manualView').hidden,false);assert.ok(d.querySelector('#paramTable').textContent.includes('慣性矩'));});
 test('規範與原書差異頁可閱讀',()=>{click('#viewTabs [data-view="reference"]');assert.ok(d.querySelector('#referenceView').textContent.includes('Aluminum Design Manual 2020'));assert.ok(d.querySelector('#referenceView').textContent.includes('493'));});
+test('規範頁內建獨立驗算快照並區分即時結果',()=>{click('#viewTabs [data-view="reference"]');const box=d.querySelector('#externalVerification');assert.ok(box);for(const t of ['38 組模型','3.2.0','並非目前輸入','側壓','離線'])assert.ok(box.textContent.includes(t),t);assert.equal(box.querySelectorAll('tbody tr').length,3);assert.ok(box.querySelector('a[href*="aluminum-formwork-external.yml"]'));});
 test('手機工作區按鈕切換輸入／結果／圖形／說明',()=>{for(const target of ['result','diagram','help','input']){click('[data-mobile="'+target+'"]');assert.equal(d.body.dataset.mobile,target);}});
 test('輸入文字安全轉義',()=>{change('project','<img src=x onerror="alert(1)">');assert.equal(d.querySelectorAll('#summary img').length,0);assert.ok(d.querySelector('#summary').textContent.includes('<img'));change('project','鋁模板驗算');});
 test('每次有效修改保留JSON狀態',()=>{const saved=JSON.parse(w.localStorage.getItem('aluminum-formwork.v1'));assert.equal(saved.project,'鋁模板驗算');});
@@ -40,3 +41,4 @@ click('[data-action="print"]');test('列印計算書含配置圖及完整計算'
 test('沒有執行期JavaScript例外',()=>assert.deepEqual(errors,[]));
 const report={version:w.AlForm.VERSION,count,results:records,verificationLimit:'DOM and user events verified in jsdom; no actual browser geometry or mobile screenshot because managed preview could not start.'};fs.writeFileSync(path.join(__dirname,'ui-validation.json'),JSON.stringify(report,null,2));console.log(`${count} DOM and user-event checks passed; ${app.fields.length} documented fields.`);dom.window.close();
 })().catch(e=>{console.error(e);dom.window.close();process.exit(1);});
+
