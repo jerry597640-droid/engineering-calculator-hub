@@ -3,7 +3,7 @@
   "version": "3.2.0",
   "source": "https://github.com/JWock82/Pynite",
   "license": "MIT",
-  "engine_sha256": "7359150e518ec3cd377b0555f1031d611b09bc5c7695723e07203418092e49c4",
+  "engine_sha256": "fdbbf52d1e5a34250340897bad68cba6ee7fe56b303a7d4fc17dab5183a30350",
   "scope": "Linear Euler-Bernoulli beams only; not pressure, material allowable stress, buckling, connections or code certification.",
   "relative_tolerance": 1e-06,
   "count": 38,
