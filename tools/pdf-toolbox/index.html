@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a42">
+  <meta name="description" content="依容量或頁數分割 PDF、多檔排序合併、依指定容量縮小。文件在瀏覽器本機處理，支援離線單檔版。">
+  <title>PDF 工具箱｜分割・合併・壓縮</title>
+  <link rel="stylesheet" href="./app.css">
+  <script defer src="./vendor/pdf-lib.min.js"></script>
+  <script defer src="./vendor/jszip.min.js"></script>
+  <script defer src="./pdf-engine.js"></script>
+  <script defer src="./pdf-compress.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#top" aria-label="PDF 工具箱首頁">
+        <span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><rect x="8" y="5" width="24" height="30" rx="5" stroke="currentColor" stroke-width="2.3"/><path d="M14 14h12M14 20h12M14 26h8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+        <span><strong>PDF 工具箱</strong><small>DOCUMENT WORKSPACE</small></span>
+      </a>
+
+      <div class="nav-label">文件處理</div>
+      <nav class="side-nav" aria-label="主要工具">
+        <button type="button" class="side-nav-item active" data-mode="split" aria-current="page"><span class="nav-icon" aria-hidden="true">✂</span>容量分割<span class="nav-number">01</span></button>
+        <button type="button" class="side-nav-item" data-mode="merge"><span class="nav-icon" aria-hidden="true">▤</span>檔案合併<span class="nav-number">02</span></button>
+        <button type="button" class="side-nav-item" data-mode="compress"><span class="nav-icon" aria-hidden="true">⇲</span>檔案縮小<span class="nav-number">03</span></button>
+      </nav>
+
+      <div class="side-bottom">
+        <div class="privacy-panel"><span class="privacy-dot"></span><strong>資料只在您的裝置處理</strong><p>PDF 不會上傳至任何伺服器。關閉頁面後不會保留您的文件。</p></div>
+        <a class="offline-link" id="offline-link" href="./offline.html" download="PDF工具箱_離線版.html"><span aria-hidden="true">↓</span> 下載離線單檔版</a>
+        <div class="side-foot">PDF WORKSPACE · v1.1</div>
+      </div>
+    </aside>
+
+    <div class="page-container" id="top">
+      <header class="topbar"><div class="breadcrumb"><a href="https://jerry597640-droid.github.io/engineering-calculator-hub/">← 工程工具入口</a> / <strong id="breadcrumb-current">容量分割</strong></div><div class="secure-badge"><span class="secure-circle">✓</span> 瀏覽器本機處理</div></header>
+      <main class="main-content">
+        <section class="hero">
+          <div class="hero-text"><div class="eyebrow"><span class="eyebrow-rule"></span> PDF DOCUMENT UTILITIES</div><h1 id="hero-title">大型 PDF，<span>剛剛好地分割。</span></h1><p id="hero-description">可按檔案容量或頁數分割完整頁面，讓工程圖說、施工計畫與計算書更容易傳送、歸檔。</p><div class="hero-traits"><span><i>✓</i> 完整保留頁面</span><span><i>✓</i> 實際檔案大小驗證</span><span><i>✓</i> 無需註冊</span></div></div>
+          <div class="hero-art" aria-hidden="true"><div class="paper paper-back"><span></span><span></span><span></span></div><div class="paper paper-front"><b>PDF</b><span></span><span></span><span></span><em>2.5 MB</em></div><div class="art-spark spark-one">+</div><div class="art-spark spark-two">✦</div></div>
+        </section>
+
+        <div class="mode-toggle" role="tablist" aria-label="選擇 PDF 工具"><button type="button" class="mode-tab selected" role="tab" id="tab-split" aria-selected="true" aria-controls="split-view" data-mode="split"><span class="tab-glyph" aria-hidden="true">✂</span><span><strong>PDF 分割</strong><small>依容量 MB 或每份頁數</small></span></button><button type="button" class="mode-tab" role="tab" id="tab-merge" aria-selected="false" aria-controls="merge-view" data-mode="merge"><span class="tab-glyph" aria-hidden="true">▤</span><span><strong>合併 PDF</strong><small>排序後合成一個 PDF 檔案</small></span></button><button type="button" class="mode-tab" role="tab" id="tab-compress" aria-selected="false" aria-controls="compress-view" data-mode="compress"><span class="tab-glyph" aria-hidden="true">⇲</span><span><strong>縮小 PDF</strong><small>依指定檔案容量限制處理</small></span></button></div>
+
+        <section id="split-view" class="tool-view" role="tabpanel" aria-labelledby="tab-split">
+          <div class="content-grid">
+            <div class="stack">
+              <article class="panel" id="split-upload"><div class="section-heading"><span class="step">01</span><div><h2>匯入 PDF 文件</h2><p>選擇一份需要依容量分割的 PDF</p></div></div>
+                <div class="dropzone" id="split-dropzone" role="button" tabindex="0" aria-label="選擇 PDF 檔案，或將 PDF 拖曳到此處"><div class="upload-illustration"><svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="15" y="9" width="34" height="46" rx="5" stroke="currentColor" stroke-width="2"/><path d="M23 36h18M23 43h13" stroke="currentColor" stroke-linecap="round" stroke-width="2"/><path d="M32 29V15m0 0-6 6m6-6 6 6" stroke="#1b9aa0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"/></svg></div><strong>拖曳 PDF 至此，或點擊選取檔案</strong><p>支援 .pdf 格式 · 文件僅在您的瀏覽器內處理</p><span class="outline-button">選擇 PDF</span></div>
+                <input id="split-file-input" type="file" accept=".pdf,application/pdf" hidden>
+                <div class="chosen-file" id="split-chosen" hidden><div class="file-icon">PDF</div><div class="file-details"><strong id="split-name"></strong><span id="split-info"></span></div><button type="button" class="icon-button" id="split-remove" title="移除檔案" aria-label="移除檔案">×</button></div>
+              </article>
+              <article class="panel"><div class="section-heading"><span class="step">02</span><div><h2>選擇分割規則</h2><p>可依檔案容量上限，或固定的頁數進行分割</p></div></div>
+                <div class="rule-toggle" role="radiogroup" aria-label="分割方式"><label class="rule-choice active"><input type="radio" name="split-rule" value="size" checked><span class="rule-symbol">◴</span><span><strong>依容量</strong><small>設定 MB 上限</small></span></label><label class="rule-choice"><input type="radio" name="split-rule" value="pages"><span class="rule-symbol">▤</span><span><strong>依頁數</strong><small>設定每份頁數</small></span></label></div>
+                <div id="split-size-options"><label class="field-label" for="split-max-mb">每份 PDF 最大檔案大小</label><div class="size-entry"><input id="split-max-mb" type="number" min="0.1" max="2048" step="0.1" value="5" inputmode="decimal" aria-describedby="mb-hint"><span>MB</span></div><div class="presets" aria-label="常用容量"><button type="button" data-size="1">1 MB</button><button type="button" data-size="3">3 MB</button><button type="button" data-size="5" class="active">5 MB</button><button type="button" data-size="10">10 MB</button><button type="button" data-size="20">20 MB</button></div><p class="field-hint" id="mb-hint">1 MB = 1,000,000 bytes。以實際產生的 PDF 容量確認分割結果。</p></div>
+                <div id="split-page-options" hidden><label class="field-label" for="split-max-pages">每份 PDF 的頁數</label><div class="size-entry"><input id="split-max-pages" type="number" min="1" max="100000" step="1" value="10" inputmode="numeric"><span>頁 / 份</span></div><div class="presets" aria-label="常用頁數"><button type="button" data-pages="5">5 頁</button><button type="button" data-pages="10" class="active">10 頁</button><button type="button" data-pages="20">20 頁</button><button type="button" data-pages="50">50 頁</button><button type="button" data-pages="100">100 頁</button></div><p class="field-hint">按原始順序分割，每份至多指定頁數，最後一份可能較少；此模式不限制 MB。</p></div>
+                <button type="button" id="split-start" class="primary-button" disabled><span class="button-icon">✂</span> 開始分割 PDF <span class="button-arrow">→</span></button>
+                <button type="button" id="split-cancel" class="cancel-button" hidden>取消分割</button>
+              </article>
+            </div>
+            <aside class="stack sidebar-panels"><article class="panel preview-panel"><div class="small-heading"><span class="pulse"></span> 分割摘要</div><div class="metric"><span>來源文件</span><strong id="split-metric-file">尚未選取</strong></div><div class="metric"><span>原始頁數</span><strong id="split-metric-pages">—</strong></div><div class="metric"><span>來源容量</span><strong id="split-metric-size">—</strong></div><div class="metric"><span id="split-limit-label">容量上限</span><strong id="split-metric-limit">5.00 MB</strong></div><div class="thin-line"></div><div class="note-highlight"><span class="note-icon">ⓘ</span><p id="split-rule-explanation">PDF 會以<strong>完整頁面</strong>分割，無法把單一頁面切成兩份。若某一頁本身超出上限，將獨立輸出並標示提醒。</p></div></article>
+              <article class="help-card"><div class="help-icon">✧</div><strong>適合這些工作情境</strong><p>工程圖說送審、Email 附件容量限制、計算書分冊、報告文件歸檔。</p></article></aside>
+          </div>
+          <div class="status-panel" id="split-status" hidden><div class="status-header"><strong id="split-status-title">正在準備…</strong><span id="split-percent">0%</span></div><div class="progress-track"><div class="progress-fill" id="split-progress"></div></div><p id="split-status-detail" aria-live="polite">正在讀取 PDF…</p></div>
+          <div class="results" id="split-results" hidden><div class="results-head"><div><span class="results-kicker">PROCESS COMPLETE</span><h2>分割完成 <span class="done-check">✓</span></h2><p id="split-result-caption"></p></div><button type="button" class="secondary-button" id="split-download-zip">↓ 下載全部 ZIP</button></div><div class="result-stats"><div><span>輸出檔案</span><strong id="result-count"></strong></div><div><span>總頁數</span><strong id="result-pages"></strong></div><div><span>最大單檔</span><strong id="result-max-size"></strong></div></div><div class="result-list" id="split-result-list"></div></div>
+        </section>
+
+        <section id="merge-view" class="tool-view" role="tabpanel" aria-labelledby="tab-merge" hidden>
+          <div class="content-grid">
+            <div class="stack"><article class="panel"><div class="section-heading"><span class="step">01</span><div><h2>加入要合併的 PDF</h2><p>可一次選取多份，也可以分批新增</p></div></div><div class="dropzone" id="merge-dropzone" role="button" tabindex="0" aria-label="選擇多個 PDF 檔案，或拖曳到此處"><div class="upload-illustration"><svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="20" y="7" width="31" height="42" rx="4" stroke="currentColor" stroke-width="2"/><rect x="12" y="16" width="31" height="42" rx="4" fill="#F9FFFF" stroke="currentColor" stroke-width="2"/><path d="M19 38h17M19 45h11" stroke="currentColor" stroke-linecap="round" stroke-width="2"/><path d="M27.5 33V21m0 0-5 5m5-5 5 5" stroke="#1b9aa0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><strong>拖曳多份 PDF，或點擊加入文件</strong><p>合併順序可以在下方調整</p><span class="outline-button">新增 PDF</span></div><input id="merge-file-input" type="file" multiple accept=".pdf,application/pdf" hidden>
+                <div class="merge-queue-wrap" id="merge-queue-wrap" hidden><div class="queue-head"><strong>合併順序 <span id="merge-queue-count"></span></strong><button type="button" class="text-button" id="merge-clear">清空清單</button></div><ol class="merge-queue" id="merge-queue"></ol><p class="queue-tip">請用 ↑ ↓ 調整順序；合併後的頁面將依照此清單排列。</p></div>
+              </article><article class="panel"><div class="section-heading"><span class="step">02</span><div><h2>設定輸出檔名</h2><p>產生一份整合後的 PDF 文件</p></div></div><label class="field-label" for="merge-output-name">合併後的 PDF 檔案名稱</label><div class="name-entry"><input id="merge-output-name" type="text" value="合併文件" maxlength="100" placeholder="例如：工程圖說_全冊"><span>.pdf</span></div><button type="button" id="merge-start" class="primary-button" disabled><span class="button-icon">▤</span> 開始合併 PDF <span class="button-arrow">→</span></button><p class="field-hint">依排序合併完整頁面，並保留原始比例與方向。</p></article></div>
+            <aside class="stack sidebar-panels"><article class="panel preview-panel"><div class="small-heading"><span class="pulse"></span> 合併摘要</div><div class="metric"><span>已加入文件</span><strong id="merge-metric-count">0 份</strong></div><div class="metric"><span>預計總頁數</span><strong id="merge-metric-pages">0 頁</strong></div><div class="metric"><span>來源總容量</span><strong id="merge-metric-size">0 MB</strong></div><div class="thin-line"></div><div class="note-highlight"><span class="note-icon">ⓘ</span><p>合併功能將文件依清單順序接在一起，<strong>不以壓縮容量為目的</strong>。若合併後太大，可接著使用容量分割功能。</p></div></article><article class="help-card"><div class="help-icon">▤</div><strong>建議合併順序</strong><p>封面 → 目錄 → 主文 → 附圖 → 附件；圖說資料也可以按圖號順序整併。</p></article></aside>
+          </div>
+          <div class="status-panel" id="merge-status" hidden><div class="status-header"><strong id="merge-status-title">正在合併 PDF…</strong><span id="merge-percent">0%</span></div><div class="progress-track"><div class="progress-fill" id="merge-progress"></div></div><p id="merge-status-detail" aria-live="polite">準備中…</p></div>
+          <div class="results" id="merge-results" hidden><div class="results-head"><div><span class="results-kicker">MERGE COMPLETE</span><h2>合併完成 <span class="done-check">✓</span></h2><p id="merge-result-caption"></p></div><button type="button" id="merge-download" class="secondary-button">↓ 下載合併 PDF</button></div><div class="merge-result-actions"><div class="merged-file-pill"><span class="file-icon">PDF</span><div><strong id="merge-result-name"></strong><small id="merge-result-info"></small></div></div><button type="button" class="ghost-action" id="merge-to-split">接著依容量分割 →</button></div></div>
+        </section>
+
+        <section id="compress-view" class="tool-view" role="tabpanel" aria-labelledby="tab-compress" hidden>
+          <div class="content-grid">
+            <div class="stack">
+              <article class="panel"><div class="section-heading"><span class="step">01</span><div><h2>匯入要縮小的 PDF</h2><p>設定檔案限制，依實際輸出容量檢查結果</p></div></div>
+                <div class="dropzone" id="compress-dropzone" role="button" tabindex="0" aria-label="選擇要壓縮的 PDF"><div class="upload-illustration" aria-hidden="true">⇲</div><strong>拖曳 PDF 至此，或點擊選取檔案</strong><p>原始文件不會被覆寫；壓縮結果另行下載</p><span class="outline-button">選擇 PDF</span></div>
+                <input id="compress-file-input" type="file" accept=".pdf,application/pdf" hidden>
+                <div class="chosen-file" id="compress-chosen" hidden><div class="file-icon">PDF</div><div class="file-details"><strong id="compress-name"></strong><span id="compress-info"></span></div><button type="button" id="compress-remove" class="icon-button" aria-label="移除壓縮來源">×</button></div>
+              </article>
+              <article class="panel"><div class="section-heading"><span class="step">02</span><div><h2>設定目標容量</h2><p>先嘗試保留文字與向量，必要時才影像化</p></div></div>
+                <label class="field-label" for="compress-max-mb">輸出 PDF 的容量上限</label><div class="size-entry"><input id="compress-max-mb" type="number" min="0.01" max="2048" step="0.01" value="5" inputmode="decimal" aria-describedby="compress-size-hint"><span>MB</span></div><p class="field-hint" id="compress-size-hint">1 MB = 1,000,000 bytes。目標不是保證值；每次輸出都會核對實際 bytes 與頁數。</p>
+                <label class="raster-consent"><input id="compress-allow-raster" type="checkbox"><span><strong>同意將每頁轉成影像，以進一步縮小</strong><small>未勾選時，只重新封裝，不降低圖面解析度。影像化後無法選取或搜尋原文字，向量線條會變成像素；互動表單、連結及文件附件不保留，註解僅保留可渲染的外觀。</small></span></label>
+                <div id="compress-raster-options" hidden><label class="field-label" for="compress-min-dpi">最低影像解析度</label><select id="compress-min-dpi"><option value="150">150 dpi｜較清晰，容量較大</option><option value="96">96 dpi｜一般螢幕閱讀</option><option value="72" selected>72 dpi｜優先縮小，細字需檢查</option><option value="48">48 dpi｜強力縮小，可能明顯模糊</option></select><p class="field-hint">從 150 dpi 開始調整 JPEG 品質與解析度，達到限制即停止。工程圖細字、尺寸線請下載後放大核對。</p></div>
+                <div class="compression-notice">重新封裝或影像化會使原數位簽章失效。請保留原始檔案；已符合容量限制時會直接提供原檔。</div>
+                <button type="button" id="compress-start" class="primary-button" disabled><span class="button-icon">⇲</span> 開始縮小 PDF <span class="button-arrow">→</span></button><button type="button" id="compress-cancel" class="cancel-button" hidden>取消壓縮</button>
+              </article>
+            </div>
+            <aside class="stack sidebar-panels"><article class="panel preview-panel"><div class="small-heading"><span class="pulse"></span> 壓縮摘要</div><div class="metric"><span>來源文件</span><strong id="compress-metric-file">尚未選取</strong></div><div class="metric"><span>原始頁數</span><strong id="compress-metric-pages">—</strong></div><div class="metric"><span>來源容量</span><strong id="compress-metric-size">—</strong></div><div class="metric"><span>容量上限</span><strong id="compress-metric-limit">5.00 MB</strong></div><div class="thin-line"></div><div class="note-highlight"><span class="note-icon">ⓘ</span><p>已壓縮的文件可能幾乎無法再縮小；限制過低時會清楚標示<strong>未達上限</strong>。可調高上限、同意影像化，或使用分割功能。</p></div></article><article class="help-card"><div class="help-icon">⇲</div><strong>掃描文件通常較有縮小空間</strong><p>以影像為主的計畫書可嘗試影像化壓縮。精細圖說建議先保留文字與向量，再檢查輸出的閱讀品質。</p></article></aside>
+          </div>
+          <div class="status-panel" id="compress-status" hidden><div class="status-header"><strong>正在處理 PDF…</strong><span id="compress-percent">0%</span></div><div class="progress-track"><div class="progress-fill" id="compress-progress"></div></div><p id="compress-status-detail" aria-live="polite"></p></div>
+          <div class="results" id="compress-results" hidden><div class="results-head"><div><span class="results-kicker">PDF SIZE CHECK</span><h2 id="compress-result-title">容量核對完成</h2><p id="compress-result-caption" aria-live="polite"></p></div><button type="button" id="compress-download" class="secondary-button">↓ 下載結果 PDF</button></div><div class="result-stats"><div><span>輸出容量</span><strong id="compress-result-size"></strong></div><div><span>縮小比例</span><strong id="compress-result-saving"></strong></div><div><span>完整頁數</span><strong id="compress-result-pages"></strong></div></div><p id="compress-result-method" class="compression-method"></p></div>
+        </section>
+
+        <div id="app-alert" class="app-alert" role="alert" hidden><span id="app-alert-icon">!</span><p id="app-alert-text"></p><button type="button" id="app-alert-close" aria-label="關閉訊息">×</button></div>
+        <footer class="site-footer"><span>PDF 工具箱 · 為大型工程文件而設計</span><span>本機處理 · 無檔案上傳 · <a href="./offline.html" download="PDF工具箱_離線版.html">下載離線單檔版 ↓</a></span></footer>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
