@@ -404,11 +404,68 @@
     $('split-upload').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
+  const validDpi = value => Number.isInteger(value) && value >= 24 && value <= 600;
+  const validQuality = value => Number.isInteger(value) && value >= 10 && value <= 100;
+  function compressionInput() {
+    return {
+      mb: Number($('compress-max-mb').value),
+      allowRaster: $('compress-allow-raster').checked,
+      resolutionMode: $('compress-resolution-mode').value,
+      targetDpi: Number($('compress-target-dpi').value),
+      minDpi: Number($('compress-min-dpi').value),
+      jpegQuality: Number($('compress-jpeg-quality').value),
+    };
+  }
+  function compressionSettingError(value) {
+    if (!Number.isFinite(value.mb) || value.mb < 0.01 || value.mb > 2048) return '容量上限請輸入 0.01–2,048 MB。';
+    if (!value.allowRaster) return '';
+    if (!['auto', 'fixed'].includes(value.resolutionMode)) return '請選擇自動調整或固定解析度。';
+    if (!validDpi(value.targetDpi)) return '影像解析度請輸入 24–600 之間的整數，可每次微調 1 dpi。';
+    if (value.resolutionMode === 'auto' && (!validDpi(value.minDpi) || value.minDpi > value.targetDpi)) return '最低解析度請輸入 24 dpi 以上的整數，且不得高於起始解析度。';
+    if (!validQuality(value.jpegQuality)) return 'JPEG 品質請輸入 10–100 之間的整數，可每次微調 1%。';
+    return '';
+  }
   function compressSettings() {
-    const mb = Number($('compress-max-mb').value);
-    const minDpi = Number($('compress-min-dpi').value);
-    if (!Number.isFinite(mb) || mb < 0.01 || mb > 2048 || ![48, 72, 96, 150].includes(minDpi)) return null;
-    return { limit: Math.round(mb * 1_000_000), mb, minDpi, allowRaster: $('compress-allow-raster').checked };
+    const value = compressionInput();
+    if (compressionSettingError(value)) return null;
+    // Disabled image settings must not block the preserve-text path.
+    if (!value.allowRaster) Object.assign(value, { resolutionMode: 'auto', targetDpi: 150, minDpi: 72, jpegQuality: 82 });
+    return { ...value, limit: Math.round(value.mb * 1_000_000) };
+  }
+  function updateResolutionControls(busy) {
+    const value = compressionInput(), fixed = value.resolutionMode === 'fixed';
+    $('compress-raster-options').disabled = busy || !value.allowRaster;
+    $('compress-auto-options').hidden = fixed;
+    $('compress-min-dpi').disabled = fixed || busy || !value.allowRaster;
+    $('compress-min-dpi').max = validDpi(value.targetDpi) ? String(value.targetDpi) : '600';
+    $('compress-dpi-label').textContent = fixed ? '影像化時固定解析度' : '起始影像解析度';
+    $('compress-quality-label').textContent = fixed ? '影像化時固定 JPEG 品質' : '起始 JPEG 品質';
+    $('compress-quality-value').textContent = validQuality(value.jpegQuality) ? `${value.jpegQuality}%` : '待設定';
+    if (validQuality(value.jpegQuality)) $('compress-quality-slider').value = String(value.jpegQuality);
+    const presets = [...$('compress-dpi-preset').options].map(option => option.value);
+    $('compress-dpi-preset').value = presets.includes(String(value.targetDpi)) ? String(value.targetDpi) : 'custom';
+    if (validDpi(value.targetDpi)) $('compress-dpi-slider').value = String(value.targetDpi);
+    $('compress-dpi-level').textContent = !validDpi(value.targetDpi) ? '待設定' : value.targetDpi >= 300 ? '高解析度' : value.targetDpi >= 180 ? '較清晰' : value.targetDpi >= 100 ? '均衡閱讀' : value.targetDpi >= 72 ? '小容量' : '粗略預覽';
+    $('compress-resolution-hint').textContent = fixed
+      ? '需要影像化時，使用指定的 dpi 與 JPEG 品質，不自動降低。若容量仍超標會明確提示；原檔或重新封裝已達標時，則直接保留原有文字與向量。'
+      : '自動模式從指定 dpi 與 JPEG 品質開始，逐步降低以符合容量；解析度不低於您設定的最低值。結果會列出實際使用的 dpi 與品質。';
+    $('compress-resolution-intro').textContent = value.allowRaster
+      ? '影像化設定已啟用。僅在原檔與重新封裝均無法達到容量限制時套用。'
+      : '勾選上方「同意將每頁轉成影像」後啟用。僅在原檔與重新封裝均無法達到容量限制時套用。';
+    const preview = $('compress-resolution-preview');
+    preview.textContent = validDpi(value.targetDpi)
+      ? `A4 頁面估算：${fmtNumber(Math.ceil(210 / 25.4 * value.targetDpi))} × ${fmtNumber(Math.ceil(297 / 25.4 * value.targetDpi))} 像素。實際輸出依各頁原始尺寸與方向決定。`
+      : '輸入有效 dpi 後，這裡會顯示 A4 頁面的像素估算。';
+    const error = compressionSettingError(value);
+    $('compress-settings-error').textContent = error;
+    $('compress-settings-error').hidden = !error;
+    for (const [id, valid] of [
+      ['compress-target-dpi', validDpi(value.targetDpi)],
+      ['compress-min-dpi', fixed || validDpi(value.minDpi) && value.minDpi <= value.targetDpi],
+      ['compress-jpeg-quality', validQuality(value.jpegQuality)],
+    ]) $(id).setAttribute('aria-invalid', String(value.allowRaster && !valid));
+    $('compress-metric-resolution').textContent = !value.allowRaster ? '保留文字與向量' : error ? '請檢查設定' : fixed ? `固定 ${value.targetDpi} dpi` : `${value.targetDpi} → ${value.minDpi} dpi`;
+    $('compress-metric-quality').textContent = !value.allowRaster ? '不套用' : !validQuality(value.jpegQuality) ? '請檢查設定' : fixed ? `固定 ${value.jpegQuality}%` : `從 ${value.jpegQuality}% 自動調整`;
   }
   function clearCompressResults() {
     revokeResult(state.compress.result); state.compress.result = null;
@@ -421,7 +478,8 @@
     $('compress-metric-size').textContent = s.source ? fmtMB(s.source.bytes.length) : '—';
     $('compress-metric-limit').textContent = settings ? fmtMB(settings.limit) : '設定無效';
     $('compress-start').disabled = busy || !s.source || !settings || !window.PDFCompressor;
-    for (const id of ['compress-max-mb', 'compress-min-dpi', 'compress-allow-raster', 'compress-remove', 'compress-file-input']) $(id).disabled = busy;
+    for (const id of ['compress-max-mb', 'compress-allow-raster', 'compress-remove', 'compress-file-input']) $(id).disabled = busy;
+    updateResolutionControls(busy);
     $('compress-dropzone').setAttribute('aria-disabled', String(busy));
   }
   function setCompressStatus(percent, detail) {
@@ -454,10 +512,27 @@
     if (state.compress.working || state.compress.loading) return;
     state.compress.source = null; clearCompressResults(); $('compress-chosen').hidden = true; updateCompressSummary();
   });
-  for (const id of ['compress-max-mb', 'compress-min-dpi', 'compress-allow-raster']) {
-    $(id).addEventListener(id === 'compress-max-mb' ? 'input' : 'change', () => {
-      clearCompressResults(); $('compress-raster-options').hidden = !$('compress-allow-raster').checked; updateCompressSummary();
-    });
+  function compressionSettingsChanged(id) {
+    if (state.compress.working || state.compress.loading) return;
+    const target = Number($('compress-target-dpi').value);
+    if (['compress-target-dpi', 'compress-dpi-preset', 'compress-dpi-slider', 'compress-resolution-mode'].includes(id)
+      && validDpi(target) && Number($('compress-min-dpi').value) > target) $('compress-min-dpi').value = String(target);
+    clearCompressResults(); updateCompressSummary();
+  }
+  for (const id of ['compress-max-mb', 'compress-min-dpi', 'compress-target-dpi', 'compress-jpeg-quality']) {
+    $(id).addEventListener('input', () => compressionSettingsChanged(id));
+  }
+  for (const id of ['compress-allow-raster', 'compress-resolution-mode']) {
+    $(id).addEventListener('change', () => compressionSettingsChanged(id));
+  }
+  $('compress-dpi-preset').addEventListener('change', () => {
+    const value = $('compress-dpi-preset').value;
+    if (value === 'custom') { $('compress-target-dpi').focus(); $('compress-target-dpi').select(); return; }
+    $('compress-target-dpi').value = value;
+    compressionSettingsChanged('compress-dpi-preset');
+  });
+  for (const [slider, input] of [['compress-dpi-slider', 'compress-target-dpi'], ['compress-quality-slider', 'compress-jpeg-quality']]) {
+    $(slider).addEventListener('input', () => { $(input).value = $(slider).value; compressionSettingsChanged(slider); });
   }
   $('compress-start').addEventListener('click', async () => {
     const s = state.compress, settings = compressSettings();
@@ -468,6 +543,7 @@
     try {
       const result = await window.PDFCompressor.compressToSize(s.source, settings.limit, {
         allowRaster: settings.allowRaster, minDpi: settings.minDpi,
+        resolutionMode: settings.resolutionMode, targetDpi: settings.targetDpi, jpegQuality: settings.jpegQuality,
         checkCancelled() { if (s.cancelled) throw new Error('__CANCELLED__'); },
         yieldControl: nextTick, onProgress({ percent, detail }) { setCompressStatus(percent, detail); },
       });
@@ -476,11 +552,11 @@
       s.result = { ...result, ...addDownloadData(result.bytes, filename) };
       $('compress-result-title').textContent = result.metTarget ? '符合容量限制 ✓' : '尚未達到容量限制';
       $('compress-result-title').classList.toggle('unmet', !result.metTarget);
-      $('compress-result-caption').textContent = `目標 ≤ ${fmtNumber(settings.limit)} bytes（${settings.mb} MB）；輸出 ${fmtNumber(result.bytes.length)} bytes。${result.metTarget ? '已確認符合設定上限。' : '目前可取得的最小結果仍超過上限，可調高限制或改用分割。'}`;
+      $('compress-result-caption').textContent = `目標 ≤ ${fmtNumber(settings.limit)} bytes（${settings.mb} MB）；輸出 ${fmtNumber(result.bytes.length)} bytes。${result.metTarget ? '已確認符合設定上限。' : settings.allowRaster && settings.resolutionMode === 'fixed' ? '維持指定的解析度與畫質後仍未達標；可自行降低設定、改用自動模式、調高容量上限或分割。' : '目前設定下仍超過上限，可調整影像設定、調高限制或改用分割。'}`;
       $('compress-result-size').textContent = fmtMB(result.bytes.length);
       $('compress-result-saving').textContent = `${Math.max(0, (1 - result.bytes.length / s.source.bytes.length) * 100).toFixed(1)}%`;
       $('compress-result-pages').textContent = `${result.pages} 頁`;
-      const method = result.method === 'original' ? '提供原始檔案（未變更內容）。' : result.method === 'rewrite' ? '已保留文字與向量，重新封裝 PDF；未降低圖面解析度。' : `已影像化：${result.dpi} dpi、JPEG 品質 ${Math.round(result.quality * 100)}%。原文字無法選取／搜尋；下載後請核對細字、尺寸線與註解外觀。`;
+      const method = result.method === 'original' ? '提供原始檔案（未變更內容，未套用影像解析度設定）。' : result.method === 'rewrite' ? '已保留文字與向量，重新封裝 PDF；未套用影像解析度設定。' : `已影像化（${settings.resolutionMode === 'fixed' ? '固定模式' : '自動模式'}）：實際 ${result.dpi} dpi、JPEG 品質 ${Math.round(result.quality * 100)}%。原文字無法選取／搜尋；下載後請核對細字、尺寸線與註解外觀。`;
       $('compress-result-method').textContent = method + (result.method === 'original' && !result.metTarget && !settings.allowRaster ? ' 若要進一步縮小，可勾選同意影像化後再試。' : '');
       $('compress-results').hidden = false;
       $('compress-results').scrollIntoView({ behavior: 'smooth', block: 'start' });

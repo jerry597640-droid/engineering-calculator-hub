@@ -6,12 +6,12 @@
   <meta name="theme-color" content="#102a42">
   <meta name="description" content="依容量或頁數分割 PDF、多檔排序合併、依指定容量縮小。文件在瀏覽器本機處理，支援離線單檔版。">
   <title>PDF 工具箱｜分割・合併・壓縮</title>
-  <link rel="stylesheet" href="./app.css">
+  <link rel="stylesheet" href="./app.css?v=1.2.0">
   <script defer src="./vendor/pdf-lib.min.js"></script>
   <script defer src="./vendor/jszip.min.js"></script>
   <script defer src="./pdf-engine.js"></script>
-  <script defer src="./pdf-compress.js"></script>
-  <script defer src="./app.js"></script>
+  <script defer src="./pdf-compress.js?v=1.2.0"></script>
+  <script defer src="./app.js?v=1.2.0"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -31,7 +31,7 @@
       <div class="side-bottom">
         <div class="privacy-panel"><span class="privacy-dot"></span><strong>資料只在您的裝置處理</strong><p>PDF 不會上傳至任何伺服器。關閉頁面後不會保留您的文件。</p></div>
         <a class="offline-link" id="offline-link" href="./offline.html" download="PDF工具箱_離線版.html"><span aria-hidden="true">↓</span> 下載離線單檔版</a>
-        <div class="side-foot">PDF WORKSPACE · v1.1</div>
+        <div class="side-foot">PDF WORKSPACE · v1.2.0</div>
       </div>
     </aside>
 
@@ -90,12 +90,46 @@
               <article class="panel"><div class="section-heading"><span class="step">02</span><div><h2>設定目標容量</h2><p>先嘗試保留文字與向量，必要時才影像化</p></div></div>
                 <label class="field-label" for="compress-max-mb">輸出 PDF 的容量上限</label><div class="size-entry"><input id="compress-max-mb" type="number" min="0.01" max="2048" step="0.01" value="5" inputmode="decimal" aria-describedby="compress-size-hint"><span>MB</span></div><p class="field-hint" id="compress-size-hint">1 MB = 1,000,000 bytes。目標不是保證值；每次輸出都會核對實際 bytes 與頁數。</p>
                 <label class="raster-consent"><input id="compress-allow-raster" type="checkbox"><span><strong>同意將每頁轉成影像，以進一步縮小</strong><small>未勾選時，只重新封裝，不降低圖面解析度。影像化後無法選取或搜尋原文字，向量線條會變成像素；互動表單、連結及文件附件不保留，註解僅保留可渲染的外觀。</small></span></label>
-                <div id="compress-raster-options" hidden><label class="field-label" for="compress-min-dpi">最低影像解析度</label><select id="compress-min-dpi"><option value="150">150 dpi｜較清晰，容量較大</option><option value="96">96 dpi｜一般螢幕閱讀</option><option value="72" selected>72 dpi｜優先縮小，細字需檢查</option><option value="48">48 dpi｜強力縮小，可能明顯模糊</option></select><p class="field-hint">從 150 dpi 開始調整 JPEG 品質與解析度，達到限制即停止。工程圖細字、尺寸線請下載後放大核對。</p></div>
+                <fieldset id="compress-raster-options" class="resolution-panel" disabled>
+                  <legend>影像解析度與畫質 <span>精細調整</span></legend>
+                  <p class="field-hint" id="compress-resolution-intro">勾選上方「同意將每頁轉成影像」後啟用。僅在原檔與重新封裝均無法達到容量限制時套用。</p>
+                  <label class="field-label" for="compress-resolution-mode">解析度處理方式</label>
+                  <select id="compress-resolution-mode" aria-describedby="compress-resolution-hint"><option value="auto">依容量自動調整｜設定起始值與最低值</option><option value="fixed">固定解析度與畫質｜維持我指定的設定</option></select>
+                  <div class="resolution-heading"><label class="field-label" for="compress-dpi-preset" id="compress-dpi-label">起始影像解析度</label><span class="resolution-badge" id="compress-dpi-level">均衡</span></div>
+                  <div class="resolution-inputs">
+                    <select id="compress-dpi-preset" aria-labelledby="compress-dpi-label">
+                      <optgroup label="高解析度｜細字與圖說">
+                        <option value="600">600 dpi｜超高解析度</option><option value="450">450 dpi｜高精細</option><option value="400">400 dpi｜高精細</option><option value="350">350 dpi｜精細</option><option value="300">300 dpi｜高畫質</option><option value="240">240 dpi｜細字閱讀</option><option value="200">200 dpi｜較清晰</option><option value="180">180 dpi｜較清晰</option>
+                      </optgroup>
+                      <optgroup label="中解析度｜閱讀與容量兼顧">
+                        <option value="150" selected>150 dpi｜均衡</option><option value="120">120 dpi｜一般閱讀</option><option value="100">100 dpi｜螢幕閱讀</option><option value="96">96 dpi｜螢幕閱讀</option><option value="90">90 dpi｜較小容量</option>
+                      </optgroup>
+                      <optgroup label="低解析度｜預覽與小容量">
+                        <option value="75">75 dpi｜小容量</option><option value="72">72 dpi｜小容量</option><option value="60">60 dpi｜低解析度</option><option value="50">50 dpi｜低解析度</option><option value="48">48 dpi｜強力縮小</option><option value="36">36 dpi｜粗略預覽</option><option value="24">24 dpi｜極低，僅供預覽</option>
+                      </optgroup>
+                      <option value="custom">自訂 dpi（24–600）</option>
+                    </select>
+                    <div class="resolution-number"><input id="compress-target-dpi" type="number" min="24" max="600" step="1" value="150" inputmode="numeric" aria-label="自訂影像解析度 dpi" aria-describedby="compress-dpi-hint compress-settings-error"><span>dpi</span></div>
+                  </div>
+                  <input id="compress-dpi-slider" class="resolution-slider" type="range" min="24" max="600" step="1" value="150" aria-label="影像解析度滑桿 dpi">
+                  <div class="range-labels"><span>24 dpi · 較小容量</span><span>600 dpi · 較清晰</span></div>
+                  <p class="field-hint" id="compress-dpi-hint">可選 20 組常用值，或以 1 dpi 為單位微調。提高 dpi 不會恢復原圖已失去的細節。</p>
+                  <div class="resolution-auto" id="compress-auto-options">
+                    <label class="field-label" for="compress-min-dpi">自動調整時，最低保留解析度</label>
+                    <div class="resolution-number"><input id="compress-min-dpi" type="number" min="24" max="150" step="1" value="72" inputmode="numeric" aria-describedby="compress-resolution-hint compress-settings-error"><span>dpi</span></div>
+                  </div>
+                  <div class="resolution-heading"><label class="field-label" for="compress-jpeg-quality" id="compress-quality-label">起始 JPEG 品質</label><span class="resolution-badge" id="compress-quality-value">82%</span></div>
+                  <div class="quality-inputs"><input id="compress-quality-slider" class="resolution-slider" type="range" min="10" max="100" step="1" value="82" aria-label="JPEG 品質滑桿百分比"><div class="resolution-number"><input id="compress-jpeg-quality" type="number" min="10" max="100" step="1" value="82" inputmode="numeric" aria-describedby="compress-resolution-hint compress-settings-error"><span>%</span></div></div>
+                  <p class="field-hint" id="compress-resolution-hint">自動模式從指定 dpi 與 JPEG 品質開始，逐步降低以符合容量；解析度不低於您設定的最低值。結果會列出實際使用的 dpi 與品質。</p>
+                  <div class="resolution-preview" id="compress-resolution-preview" aria-live="polite"></div>
+                  <p class="field-hint resolution-canvas-note">大幅圖面搭配高 dpi 會需要更多記憶體；超出瀏覽器可處理範圍時會提示調整。工程圖細字與尺寸線請下載後放大核對。</p>
+                </fieldset>
+                <p id="compress-settings-error" class="settings-error" role="status" hidden></p>
                 <div class="compression-notice">重新封裝或影像化會使原數位簽章失效。請保留原始檔案；已符合容量限制時會直接提供原檔。</div>
                 <button type="button" id="compress-start" class="primary-button" disabled><span class="button-icon">⇲</span> 開始縮小 PDF <span class="button-arrow">→</span></button><button type="button" id="compress-cancel" class="cancel-button" hidden>取消壓縮</button>
               </article>
             </div>
-            <aside class="stack sidebar-panels"><article class="panel preview-panel"><div class="small-heading"><span class="pulse"></span> 壓縮摘要</div><div class="metric"><span>來源文件</span><strong id="compress-metric-file">尚未選取</strong></div><div class="metric"><span>原始頁數</span><strong id="compress-metric-pages">—</strong></div><div class="metric"><span>來源容量</span><strong id="compress-metric-size">—</strong></div><div class="metric"><span>容量上限</span><strong id="compress-metric-limit">5.00 MB</strong></div><div class="thin-line"></div><div class="note-highlight"><span class="note-icon">ⓘ</span><p>已壓縮的文件可能幾乎無法再縮小；限制過低時會清楚標示<strong>未達上限</strong>。可調高上限、同意影像化，或使用分割功能。</p></div></article><article class="help-card"><div class="help-icon">⇲</div><strong>掃描文件通常較有縮小空間</strong><p>以影像為主的計畫書可嘗試影像化壓縮。精細圖說建議先保留文字與向量，再檢查輸出的閱讀品質。</p></article></aside>
+            <aside class="stack sidebar-panels"><article class="panel preview-panel"><div class="small-heading"><span class="pulse"></span> 壓縮摘要</div><div class="metric"><span>來源文件</span><strong id="compress-metric-file">尚未選取</strong></div><div class="metric"><span>原始頁數</span><strong id="compress-metric-pages">—</strong></div><div class="metric"><span>來源容量</span><strong id="compress-metric-size">—</strong></div><div class="metric"><span>容量上限</span><strong id="compress-metric-limit">5.00 MB</strong></div><div class="metric resolution-metric"><span>影像處理</span><strong id="compress-metric-resolution">保留文字與向量</strong></div><div class="metric resolution-metric"><span>JPEG 品質</span><strong id="compress-metric-quality">不套用</strong></div><div class="thin-line"></div><div class="note-highlight"><span class="note-icon">ⓘ</span><p>已壓縮的文件可能幾乎無法再縮小；限制過低時會清楚標示<strong>未達上限</strong>。可調高上限、調整影像設定，或使用分割功能。</p></div></article><article class="help-card"><div class="help-icon">⇲</div><strong>圖說與報告，可選不同精細度</strong><p>細字圖說可從 300 dpi 試起；一般閱讀可從 150 dpi 試起，預覽則可選 72 dpi。這些是起始建議，仍應依原檔與輸出品質調整。</p></article></aside>
           </div>
           <div class="status-panel" id="compress-status" hidden><div class="status-header"><strong>正在處理 PDF…</strong><span id="compress-percent">0%</span></div><div class="progress-track"><div class="progress-fill" id="compress-progress"></div></div><p id="compress-status-detail" aria-live="polite"></p></div>
           <div class="results" id="compress-results" hidden><div class="results-head"><div><span class="results-kicker">PDF SIZE CHECK</span><h2 id="compress-result-title">容量核對完成</h2><p id="compress-result-caption" aria-live="polite"></p></div><button type="button" id="compress-download" class="secondary-button">↓ 下載結果 PDF</button></div><div class="result-stats"><div><span>輸出容量</span><strong id="compress-result-size"></strong></div><div><span>縮小比例</span><strong id="compress-result-saving"></strong></div><div><span>完整頁數</span><strong id="compress-result-pages"></strong></div></div><p id="compress-result-method" class="compression-method"></p></div>

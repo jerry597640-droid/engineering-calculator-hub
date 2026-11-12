@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '..');
 let page = await readFile(resolve(root, 'index.html'), 'utf8');
 const css = await readFile(resolve(root, 'app.css'), 'utf8');
-page = page.replace('<link rel="stylesheet" href="./app.css">', () => `<style>\n${css}\n</style>`);
+page = page.replace(/<link rel="stylesheet" href="\.\/app\.css(?:\?[^"<>]*)?">/, () => `<style>\n${css}\n</style>`);
 const resources = JSON.parse(await readFile(resolve(root, 'vendor/pdfjs-data.json'), 'utf8'));
 resources.main = (await readFile(resolve(root, 'vendor/pdfjs.min.mjs'))).toString('base64');
 resources.worker = (await readFile(resolve(root, 'vendor/pdfjs.worker.min.mjs'))).toString('base64');
@@ -12,7 +12,8 @@ page = page.replace('</head>', () => `<script type="application/json" id="pdfjs-
 const scripts = [];
 for (const name of ['vendor/pdf-lib.min.js', 'vendor/jszip.min.js', 'pdf-engine.js', 'pdf-compress.js', 'app.js']) {
   const source = await readFile(resolve(root, name), 'utf8');
-  page = page.replace(`<script defer src="./${name}"></script>`, '');
+  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  page = page.replace(new RegExp(`<script defer src="\\./${escapedName}(?:\\?[^"<>]*)?"></script>`), '');
   scripts.push(`<script>\n${source.replace(/<\/script/gi, '<\\/script')}\n</script>`);
 }
 for (const [id, file] of [
