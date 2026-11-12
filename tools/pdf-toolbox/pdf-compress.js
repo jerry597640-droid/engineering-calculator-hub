@@ -2,6 +2,14 @@
 (function (root) {
   'use strict';
   const PDFDocument = root.PDFLib.PDFDocument;
+  const MAX_DPI = 1200;
+  // Render a high-resolution page in bounded canvases, not one enormous bitmap.
+  // A4 at 1200 dpi is about 139 million pixels; A3 is about 278 million.
+  const TILE_EDGE = 2048;
+  const MAX_PAGE_PIXELS = 300_000_000;
+  const MAX_DOCUMENT_PIXELS = 1_000_000_000;
+  const MAX_PAGE_EDGE = 65536;
+  const MAX_ENCODED_BYTES = 128 * 1024 * 1024;
   const scriptBase = typeof document !== 'undefined'
     ? new URL('./', document.currentScript?.src || document.baseURI).href : '';
   let rendererPromise;
@@ -86,8 +94,8 @@
     const startDpi = Number(targetDpi);
     const floorDpi = resolutionMode === 'fixed' ? startDpi : Number(minDpi);
     const qualityPercent = Number(jpegQuality);
-    if (!Number.isInteger(startDpi) || startDpi < 24 || startDpi > 600) throw new Error('影像解析度必須為 24 至 600 dpi 的整數。');
-    if (!Number.isInteger(floorDpi) || floorDpi < 24 || floorDpi > 600) throw new Error('最低影像解析度必須為 24 至 600 dpi 的整數。');
+    if (!Number.isInteger(startDpi) || startDpi < 24 || startDpi > MAX_DPI) throw new Error('影像解析度必須為 24 至 1200 dpi 的整數。');
+    if (!Number.isInteger(floorDpi) || floorDpi < 24 || floorDpi > MAX_DPI) throw new Error('最低影像解析度必須為 24 至 1200 dpi 的整數。');
     if (floorDpi > startDpi) throw new Error('自動調整的最低解析度不可高於起始解析度。');
     if (!Number.isInteger(qualityPercent) || qualityPercent < 10 || qualityPercent > 100) throw new Error('JPEG 品質必須為 10 至 100% 的整數。');
     if (!source?.bytes?.length || !source.doc || source.pages < 1) throw new Error('請先匯入有效的 PDF。');
@@ -129,52 +137,98 @@
         dimensions.push([viewport.width, viewport.height]);
         page.cleanup();
       }
-      const fitsCanvas = dpi => dimensions.every(([w, h]) => {
-        const width = Math.ceil(w * dpi / 72 - 1e-7), height = Math.ceil(h * dpi / 72 - 1e-7);
-        return width * height <= 24_000_000 && width <= 16384 && height <= 16384;
-      });
+      const fitsResources = dpi => {
+        let totalPixels = 0;
+        return dimensions.every(([w, h]) => {
+          const width = Math.ceil(w * dpi / 72 - 1e-7), height = Math.ceil(h * dpi / 72 - 1e-7);
+          const pixels = width * height;
+          totalPixels += pixels;
+          return Number.isSafeInteger(pixels) && width > 0 && height > 0
+            && width <= MAX_PAGE_EDGE && height <= MAX_PAGE_EDGE
+            && pixels <= MAX_PAGE_PIXELS && totalPixels <= MAX_DOCUMENT_PIXELS;
+        });
+      };
       const plan = rasterPlan(resolutionMode, startDpi, floorDpi, qualityPercent)
-        .filter(([dpi]) => fitsCanvas(dpi));
+        .filter(([dpi]) => fitsResources(dpi));
       if (!plan.length) {
-        if (resolutionMode === 'fixed') throw new Error(`所選 ${startDpi} dpi 超過瀏覽器可處理的畫布範圍。固定模式不會自動降低解析度；請選擇較低的 dpi，或改用自動調整。`);
-        throw new Error(`圖面在設定的最低 ${floorDpi} dpi 仍超過瀏覽器畫布範圍。請選擇較低的最低解析度或改用桌面 PDF 工具。`);
+        const limits = '單頁上限 3 億像素、任一邊 65,536 像素，整份文件單次上限 10 億像素';
+        if (resolutionMode === 'fixed') throw new Error(`所選 ${startDpi} dpi 超過處理範圍（${limits}）。固定模式不會自動降低解析度；請選擇較低的 dpi、分割文件，或改用自動調整。`);
+        throw new Error(`文件在設定的最低 ${floorDpi} dpi 仍超過處理範圍（${limits}）。請降低最低解析度、分割文件，或改用桌面 PDF 工具。`);
       }
       for (let pass = 0; pass < plan.length; pass++) {
         const [dpi, quality] = plan[pass];
         checkCancelled();
         const output = await PDFDocument.create();
-        output.setProducer('PDF 工具箱 v1.2.0（影像化壓縮）');
-        for (let n = 1; n <= pdf.numPages; n++) {
-          checkCancelled();
-          onProgress({ percent: 10 + 82 * (pass + (n - 1) / pdf.numPages) / plan.length,
-            detail: `第 ${pass + 1}/${plan.length} 次嘗試：${dpi} dpi，JPEG ${Math.round(quality * 100)}%；處理第 ${n}/${pdf.numPages} 頁` });
-          await yieldControl();
-          const page = await pdf.getPage(n);
-          const physical = page.getViewport({ scale: 1 });
-          const viewport = page.getViewport({ scale: dpi / 72 });
-          // PDF.js can return 900.0000000000001 for an exact 900 px extent.
-          const width = Math.ceil(viewport.width - 1e-7), height = Math.ceil(viewport.height - 1e-7);
-          if (width * height > 24_000_000 || width > 16384 || height > 16384) {
-            throw new Error(`第 ${n} 頁在 ${dpi} dpi 超過瀏覽器可處理的畫布範圍。請先將大型圖說分冊或改用桌面 PDF 工具。`);
-          }
-          const canvas = createCanvas(width, height);
-          try {
-            const context = canvas.getContext('2d');
-            if (!context) throw new Error('瀏覽器無法建立頁面畫布。');
-            await page.render({ canvasContext: context, viewport,
-              background: 'rgb(255,255,255)', annotationMode: loaded.renderer.AnnotationMode?.ENABLE ?? 1 }).promise;
+        output.setProducer('PDF 工具箱 v1.3.0（影像化壓縮）');
+        let encodedBytes = 0;
+        try {
+          for (let n = 1; n <= pdf.numPages; n++) {
             checkCancelled();
-            const jpeg = await jpegBytes(canvas, quality);
-            const image = await output.embedJpg(jpeg);
-            const destination = output.addPage([physical.width, physical.height]);
-            destination.drawImage(image, { x: 0, y: 0, width: physical.width, height: physical.height });
-          } finally { canvas.width = 0; canvas.height = 0; page.cleanup(); }
+            const page = await pdf.getPage(n);
+            try {
+              const physical = page.getViewport({ scale: 1 });
+              const viewport = page.getViewport({ scale: dpi / 72 });
+              // PDF.js can return 900.0000000000001 for an exact 900 px extent.
+              const width = Math.ceil(viewport.width - 1e-7), height = Math.ceil(viewport.height - 1e-7);
+              const columns = Math.ceil(width / TILE_EDGE), rows = Math.ceil(height / TILE_EDGE);
+              const tileCount = columns * rows, pointsPerPixel = 72 / dpi;
+              const destination = output.addPage([physical.width, physical.height]);
+              for (let row = 0; row < rows; row++) for (let column = 0; column < columns; column++) {
+                checkCancelled();
+                const tileIndex = row * columns + column;
+                onProgress({ percent: 10 + 82 * (pass + (n - 1 + tileIndex / tileCount) / pdf.numPages) / plan.length,
+                  detail: `第 ${pass + 1}/${plan.length} 次嘗試：${dpi} dpi，JPEG ${Math.round(quality * 100)}%；處理第 ${n}/${pdf.numPages} 頁，第 ${tileIndex + 1}/${tileCount} 圖塊` });
+                await yieldControl();
+                checkCancelled();
+                const x = column * TILE_EDGE, y = row * TILE_EDGE;
+                const tileWidth = Math.min(TILE_EDGE, width - x), tileHeight = Math.min(TILE_EDGE, height - y);
+                const canvas = createCanvas(tileWidth, tileHeight);
+                try {
+                  const context = canvas.getContext('2d');
+                  if (!context) throw new Error('瀏覽器無法建立頁面畫布。');
+                  // PDF.js applies this translation before its crop/rotation-aware
+                  // viewport transform. All tiles share one continuous pixel grid.
+                  await page.render({ canvasContext: context, viewport,
+                    transform: [1, 0, 0, 1, -x, -y],
+                    background: 'rgb(255,255,255)', annotationMode: loaded.renderer.AnnotationMode?.ENABLE ?? 1 }).promise;
+                  checkCancelled();
+                  const jpeg = await jpegBytes(canvas, quality);
+                  checkCancelled();
+                  encodedBytes += jpeg.length;
+                  if (encodedBytes > MAX_ENCODED_BYTES) {
+                    const error = new Error('本次壓縮的影像暫存超過 128 MiB。請降低 dpi 或 JPEG 品質，或先分割文件再處理；未變更原始檔案。');
+                    error.code = 'PDF_RASTER_BYTE_LIMIT';
+                    throw error;
+                  }
+                  const image = await output.embedJpg(jpeg);
+                  // Use exact 72/dpi dimensions rather than stretching rounded
+                  // pixel counts. The last partial pixel is clipped by the page.
+                  destination.drawImage(image, {
+                    x: x * pointsPerPixel,
+                    y: physical.height - (y + tileHeight) * pointsPerPixel,
+                    width: tileWidth * pointsPerPixel,
+                    height: tileHeight * pointsPerPixel,
+                  });
+                } finally { canvas.width = 1; canvas.height = 1; }
+              }
+            } finally { page.cleanup(); }
+          }
+          checkCancelled();
+          const bytes = await output.save({ useObjectStreams: true, objectsPerTick: 60 });
+          checkCancelled();
+          attempts++;
+          if (bytes.length < best.bytes.length) best = { bytes, pages: source.pages, method: 'raster', dpi, quality };
+          if (best.bytes.length <= byteLimit) break;
+        } catch (error) {
+          // A smaller automatic candidate may still fit the memory budget.
+          // Fixed mode never substitutes another DPI or quality.
+          if (error?.code === 'PDF_RASTER_BYTE_LIMIT' && resolutionMode === 'auto' && pass + 1 < plan.length) {
+            onProgress({ percent: 10 + 82 * (pass + 1) / plan.length,
+              detail: `${dpi} dpi、JPEG ${Math.round(quality * 100)}% 的影像暫存較大，繼續嘗試下一組允許設定…` });
+            continue;
+          }
+          throw error;
         }
-        checkCancelled();
-        const bytes = await output.save({ useObjectStreams: true, objectsPerTick: 60 });
-        attempts++;
-        if (bytes.length < best.bytes.length) best = { bytes, pages: source.pages, method: 'raster', dpi, quality };
-        if (best.bytes.length <= byteLimit) break;
       }
     } finally { await task.destroy(); }
     onProgress({ percent: 97, detail: '驗證實際檔案大小與完整頁數…' });

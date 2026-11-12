@@ -60,13 +60,15 @@ async function resolveRun(result) {
 (async () => {
   try {
     $('tab-compress').click();
-    const expectedPresets = [600, 450, 400, 350, 300, 240, 200, 180, 150, 120, 100, 96, 90, 75, 72, 60, 50, 48, 36, 24];
-    check('20 explicit DPI presets plus a custom option', () => {
+    const expectedPresets = [1200, 1000, 900, 800, 720, 600, 450, 400, 350, 300, 240, 200, 180, 150, 120, 100, 96, 90, 75, 72, 60, 50, 48, 36, 24];
+    check('25 explicit DPI presets plus a custom option up to 1200 DPI', () => {
       const options = Array.from($('compress-dpi-preset').options, option => option.value);
       assert.deepEqual(options.filter(value => value !== 'custom').map(Number), expectedPresets);
       assert.equal(options.filter(value => value === 'custom').length, 1);
       assert.equal($('compress-target-dpi').step, '1');
       assert.equal($('compress-dpi-slider').step, '1');
+      assert.equal($('compress-target-dpi').max, '1200');
+      assert.equal($('compress-dpi-slider').max, '1200');
     });
     check('Consent gates image controls', () => {
       assert.equal($('compress-allow-raster').checked, false);
@@ -87,6 +89,30 @@ async function resolveRun(result) {
     check('Opting in enables detailed controls', () => {
       assert.equal($('compress-raster-options').disabled, false);
       assert.equal($('compress-target-dpi').matches(':disabled'), false);
+      assert.equal($('compress-start').disabled, false);
+    });
+
+    for (const value of ['', '3', '35', '350']) {
+      set('compress-target-dpi', value);
+      assert.equal($('compress-min-dpi').value, '72', 'Partial numeric edits must not lower the chosen minimum DPI');
+    }
+    event('compress-target-dpi', 'change');
+    check('Typing 350 one digit at a time preserves the 72 DPI floor', () => {
+      assert.equal($('compress-min-dpi').value, '72');
+      assert.equal($('compress-min-dpi').max, '350');
+      assert.equal($('compress-metric-resolution').textContent, '350 → 72 dpi');
+      assert.equal($('compress-start').disabled, false);
+    });
+    set('compress-target-dpi', 1200);
+    event('compress-target-dpi', 'change');
+    set('compress-min-dpi', 720);
+    for (const value of ['', '1', '10', '100', '1000']) {
+      set('compress-target-dpi', value);
+      assert.equal($('compress-min-dpi').value, '720', 'High-DPI edits must preserve the chosen floor');
+    }
+    event('compress-target-dpi', 'change');
+    check('Typing 1000 preserves a chosen 720 DPI floor', () => {
+      assert.equal($('compress-metric-resolution').textContent, '1000 → 720 dpi');
       assert.equal($('compress-start').disabled, false);
     });
 
@@ -127,6 +153,11 @@ async function resolveRun(result) {
     });
     set('compress-min-dpi', 180);
     set('compress-target-dpi', 120);
+    check('Unfinished lower DPI input preserves the floor and blocks processing', () => {
+      assert.equal($('compress-min-dpi').value, '180');
+      assert.equal($('compress-start').disabled, true);
+    });
+    event('compress-target-dpi', 'change');
     check('Lowering start DPI adjusts existing floor to the new maximum', () => {
       assert.equal($('compress-min-dpi').value, '120');
       assert.equal($('compress-min-dpi').max, '120');
@@ -141,7 +172,7 @@ async function resolveRun(result) {
       assert.match($('compress-dpi-label').textContent, /固定解析度/);
     });
     set('compress-target-dpi', 241);
-    for (const value of [-1, 23, 24.5, 601, '']) {
+    for (const value of [-1, 23, 24.5, 1201, '']) {
       set('compress-target-dpi', value);
       check(`Invalid target DPI ${JSON.stringify(value)} is rejected`, () => {
         assert.equal($('compress-start').disabled, true);
@@ -195,6 +226,24 @@ async function resolveRun(result) {
       assert.match($('compress-result-method').textContent, /固定模式.*實際 241 dpi、JPEG 品質 67%/);
     });
 
+    set('compress-dpi-preset', 1200, 'change');
+    $('compress-start').click();
+    check('Fixed 1200 DPI reaches the engine without being capped at 600', () => {
+      assert.equal(calls.at(-1).opts.targetDpi, 1200);
+      assert.equal(calls.at(-1).opts.resolutionMode, 'fixed');
+    });
+    await resolveRun({ bytes: new w.Uint8Array(1000), pages: 2, method: 'raster', dpi: 1200, quality: 0.67, metTarget: true, attempts: 1 });
+    check('Completed high-DPI result displays its actual 1200 DPI', () => {
+      assert.match($('compress-result-method').textContent, /固定模式.*實際 1200 dpi/);
+    });
+    $('compress-start').click();
+    await resolveRun({ bytes: new w.Uint8Array(2000), pages: 2, method: 'original', dpi: null, quality: null, metTarget: false, attempts: 2 });
+    check('Keeping a smaller original never claims the specified high DPI was applied', () => {
+      assert.match($('compress-result-caption').textContent, /指定影像設定未能產生更小的檔案/);
+      assert.doesNotMatch($('compress-result-caption').textContent, /維持指定的解析度/);
+      assert.match($('compress-result-method').textContent, /未套用影像解析度設定/);
+    });
+
     set('compress-resolution-mode', 'auto', 'change');
     set('compress-min-dpi', 99);
     set('compress-target-dpi', 300);
@@ -214,7 +263,7 @@ async function resolveRun(result) {
     await resolveRun({ bytes: new w.Uint8Array(1000), pages: 2, method: 'raster', dpi: 99, quality: 0.4, metTarget: true, attempts: 5 });
     check('Auto result distinguishes actual DPI from selected start', () => assert.match($('compress-result-method').textContent, /自動模式.*實際 99 dpi、JPEG 品質 40%/));
 
-    set('compress-target-dpi', 601);
+    set('compress-target-dpi', 1201);
     set('compress-jpeg-quality', 9);
     $('compress-allow-raster').click();
     check('Turning consent off makes invalid image fields irrelevant', () => {

@@ -46,7 +46,7 @@
 .resolution-preview{font-size:11px;line-height:1.9;padding:12px;background:#eef5f8;border-radius:7px;color:#4f7183;margin-top:14px}.resolution-canvas-note{margin-bottom:0}
 .settings-error{font-size:12px;line-height:1.8;padding:11px 13px;color:#a1472f;background:#fff3ec;border:1px solid #f1d4c4;border-radius:7px}
 .resolution-metric strong{white-space:normal;overflow:visible;line-height:1.7}
-@media(max-width:650px){.resolution-panel{padding:15px 12px}.resolution-inputs{grid-template-columns:minmax(0,1fr) 92px}.resolution-auto{padding:10px;grid-template-columns:minmax(0,1fr) 84px}.resolution-panel select{font-size:11px}.quality-inputs{grid-template-columns:minmax(0,1fr) 84px}.resolution-heading{margin-top:18px}.range-labels{font-size:9px}}
+@media(max-width:650px){.resolution-panel{padding:15px 12px}.resolution-inputs{grid-template-columns:minmax(0,1fr) 110px}.resolution-auto{padding:10px;grid-template-columns:minmax(0,1fr) 110px}.resolution-panel select{font-size:11px}.quality-inputs{grid-template-columns:minmax(0,1fr) 84px}.resolution-heading{margin-top:18px}.range-labels{font-size:9px}}
 @media(max-width:360px){.resolution-inputs{grid-template-columns:minmax(0,1fr)}.resolution-inputs .resolution-number{max-width:140px}}
 
 </style>
@@ -75,7 +75,7 @@
       <div class="side-bottom">
         <div class="privacy-panel"><span class="privacy-dot"></span><strong>資料只在您的裝置處理</strong><p>PDF 不會上傳至任何伺服器。關閉頁面後不會保留您的文件。</p></div>
         <a class="offline-link" id="offline-link" href="#top"><span aria-hidden="true">↓</span> 目前已是離線單檔版</a>
-        <div class="side-foot">PDF WORKSPACE · v1.2.0</div>
+        <div class="side-foot">PDF WORKSPACE · v1.3.0</div>
       </div>
     </aside>
 
@@ -141,7 +141,10 @@
                   <select id="compress-resolution-mode" aria-describedby="compress-resolution-hint"><option value="auto">依容量自動調整｜設定起始值與最低值</option><option value="fixed">固定解析度與畫質｜維持我指定的設定</option></select>
                   <div class="resolution-heading"><label class="field-label" for="compress-dpi-preset" id="compress-dpi-label">起始影像解析度</label><span class="resolution-badge" id="compress-dpi-level">均衡</span></div>
                   <div class="resolution-inputs">
-                    <select id="compress-dpi-preset" aria-labelledby="compress-dpi-label">
+                    <select id="compress-dpi-preset" aria-labelledby="compress-dpi-label" aria-describedby="compress-dpi-hint compress-high-dpi-hint">
+                      <optgroup label="超高解析度｜600 dpi 以上">
+                        <option value="1200">1200 dpi｜最高精細度</option><option value="1000">1000 dpi｜超高精細</option><option value="900">900 dpi｜超高精細</option><option value="800">800 dpi｜超高精細</option><option value="720">720 dpi｜超高解析度</option>
+                      </optgroup>
                       <optgroup label="高解析度｜細字與圖說">
                         <option value="600">600 dpi｜超高解析度</option><option value="450">450 dpi｜高精細</option><option value="400">400 dpi｜高精細</option><option value="350">350 dpi｜精細</option><option value="300">300 dpi｜高畫質</option><option value="240">240 dpi｜細字閱讀</option><option value="200">200 dpi｜較清晰</option><option value="180">180 dpi｜較清晰</option>
                       </optgroup>
@@ -151,13 +154,13 @@
                       <optgroup label="低解析度｜預覽與小容量">
                         <option value="75">75 dpi｜小容量</option><option value="72">72 dpi｜小容量</option><option value="60">60 dpi｜低解析度</option><option value="50">50 dpi｜低解析度</option><option value="48">48 dpi｜強力縮小</option><option value="36">36 dpi｜粗略預覽</option><option value="24">24 dpi｜極低，僅供預覽</option>
                       </optgroup>
-                      <option value="custom">自訂 dpi（24–600）</option>
+                      <option value="custom">自訂 dpi（24–1200）</option>
                     </select>
-                    <div class="resolution-number"><input id="compress-target-dpi" type="number" min="24" max="600" step="1" value="150" inputmode="numeric" aria-label="自訂影像解析度 dpi" aria-describedby="compress-dpi-hint compress-settings-error"><span>dpi</span></div>
+                    <div class="resolution-number"><input id="compress-target-dpi" type="number" min="24" max="1200" step="1" value="150" inputmode="numeric" aria-label="自訂影像解析度 dpi" aria-describedby="compress-dpi-hint compress-high-dpi-hint compress-settings-error"><span>dpi</span></div>
                   </div>
-                  <input id="compress-dpi-slider" class="resolution-slider" type="range" min="24" max="600" step="1" value="150" aria-label="影像解析度滑桿 dpi">
-                  <div class="range-labels"><span>24 dpi · 較小容量</span><span>600 dpi · 較清晰</span></div>
-                  <p class="field-hint" id="compress-dpi-hint">可選 20 組常用值，或以 1 dpi 為單位微調。提高 dpi 不會恢復原圖已失去的細節。</p>
+                  <input id="compress-dpi-slider" class="resolution-slider" type="range" min="24" max="1200" step="1" value="150" aria-label="影像解析度滑桿 dpi" aria-describedby="compress-high-dpi-hint">
+                  <div class="range-labels"><span>24 dpi · 較小容量</span><span>1200 dpi · 較清晰</span></div>
+                  <p class="field-hint" id="compress-dpi-hint">可選 25 組常用值，或在 24–1200 dpi 間以 1 dpi 為單位微調。提高 dpi 不會恢復原圖已失去的細節。</p>
                   <div class="resolution-auto" id="compress-auto-options">
                     <label class="field-label" for="compress-min-dpi">自動調整時，最低保留解析度</label>
                     <div class="resolution-number"><input id="compress-min-dpi" type="number" min="24" max="150" step="1" value="72" inputmode="numeric" aria-describedby="compress-resolution-hint compress-settings-error"><span>dpi</span></div>
@@ -166,7 +169,7 @@
                   <div class="quality-inputs"><input id="compress-quality-slider" class="resolution-slider" type="range" min="10" max="100" step="1" value="82" aria-label="JPEG 品質滑桿百分比"><div class="resolution-number"><input id="compress-jpeg-quality" type="number" min="10" max="100" step="1" value="82" inputmode="numeric" aria-describedby="compress-resolution-hint compress-settings-error"><span>%</span></div></div>
                   <p class="field-hint" id="compress-resolution-hint">自動模式從指定 dpi 與 JPEG 品質開始，逐步降低以符合容量；解析度不低於您設定的最低值。結果會列出實際使用的 dpi 與品質。</p>
                   <div class="resolution-preview" id="compress-resolution-preview" aria-live="polite"></div>
-                  <p class="field-hint resolution-canvas-note">大幅圖面搭配高 dpi 會需要更多記憶體；超出瀏覽器可處理範圍時會提示調整。工程圖細字與尺寸線請下載後放大核對。</p>
+                  <p class="field-hint resolution-canvas-note" id="compress-high-dpi-hint">720–1200 dpi 需要較長處理時間及更多記憶體，檔案也可能更大。大幅圖面超出可處理範圍時會提示調整；固定模式不會擅自降低 dpi。工程圖細字與尺寸線請下載後放大核對。</p>
                 </fieldset>
                 <p id="compress-settings-error" class="settings-error" role="status" hidden></p>
                 <div class="compression-notice">重新封裝或影像化會使原數位簽章失效。請保留原始檔案；已符合容量限制時會直接提供原檔。</div>
@@ -1670,6 +1673,14 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 (function (root) {
   'use strict';
   const PDFDocument = root.PDFLib.PDFDocument;
+  const MAX_DPI = 1200;
+  // Render a high-resolution page in bounded canvases, not one enormous bitmap.
+  // A4 at 1200 dpi is about 139 million pixels; A3 is about 278 million.
+  const TILE_EDGE = 2048;
+  const MAX_PAGE_PIXELS = 300_000_000;
+  const MAX_DOCUMENT_PIXELS = 1_000_000_000;
+  const MAX_PAGE_EDGE = 65536;
+  const MAX_ENCODED_BYTES = 128 * 1024 * 1024;
   const scriptBase = typeof document !== 'undefined'
     ? new URL('./', document.currentScript?.src || document.baseURI).href : '';
   let rendererPromise;
@@ -1754,8 +1765,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     const startDpi = Number(targetDpi);
     const floorDpi = resolutionMode === 'fixed' ? startDpi : Number(minDpi);
     const qualityPercent = Number(jpegQuality);
-    if (!Number.isInteger(startDpi) || startDpi < 24 || startDpi > 600) throw new Error('影像解析度必須為 24 至 600 dpi 的整數。');
-    if (!Number.isInteger(floorDpi) || floorDpi < 24 || floorDpi > 600) throw new Error('最低影像解析度必須為 24 至 600 dpi 的整數。');
+    if (!Number.isInteger(startDpi) || startDpi < 24 || startDpi > MAX_DPI) throw new Error('影像解析度必須為 24 至 1200 dpi 的整數。');
+    if (!Number.isInteger(floorDpi) || floorDpi < 24 || floorDpi > MAX_DPI) throw new Error('最低影像解析度必須為 24 至 1200 dpi 的整數。');
     if (floorDpi > startDpi) throw new Error('自動調整的最低解析度不可高於起始解析度。');
     if (!Number.isInteger(qualityPercent) || qualityPercent < 10 || qualityPercent > 100) throw new Error('JPEG 品質必須為 10 至 100% 的整數。');
     if (!source?.bytes?.length || !source.doc || source.pages < 1) throw new Error('請先匯入有效的 PDF。');
@@ -1797,52 +1808,98 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         dimensions.push([viewport.width, viewport.height]);
         page.cleanup();
       }
-      const fitsCanvas = dpi => dimensions.every(([w, h]) => {
-        const width = Math.ceil(w * dpi / 72 - 1e-7), height = Math.ceil(h * dpi / 72 - 1e-7);
-        return width * height <= 24_000_000 && width <= 16384 && height <= 16384;
-      });
+      const fitsResources = dpi => {
+        let totalPixels = 0;
+        return dimensions.every(([w, h]) => {
+          const width = Math.ceil(w * dpi / 72 - 1e-7), height = Math.ceil(h * dpi / 72 - 1e-7);
+          const pixels = width * height;
+          totalPixels += pixels;
+          return Number.isSafeInteger(pixels) && width > 0 && height > 0
+            && width <= MAX_PAGE_EDGE && height <= MAX_PAGE_EDGE
+            && pixels <= MAX_PAGE_PIXELS && totalPixels <= MAX_DOCUMENT_PIXELS;
+        });
+      };
       const plan = rasterPlan(resolutionMode, startDpi, floorDpi, qualityPercent)
-        .filter(([dpi]) => fitsCanvas(dpi));
+        .filter(([dpi]) => fitsResources(dpi));
       if (!plan.length) {
-        if (resolutionMode === 'fixed') throw new Error(`所選 ${startDpi} dpi 超過瀏覽器可處理的畫布範圍。固定模式不會自動降低解析度；請選擇較低的 dpi，或改用自動調整。`);
-        throw new Error(`圖面在設定的最低 ${floorDpi} dpi 仍超過瀏覽器畫布範圍。請選擇較低的最低解析度或改用桌面 PDF 工具。`);
+        const limits = '單頁上限 3 億像素、任一邊 65,536 像素，整份文件單次上限 10 億像素';
+        if (resolutionMode === 'fixed') throw new Error(`所選 ${startDpi} dpi 超過處理範圍（${limits}）。固定模式不會自動降低解析度；請選擇較低的 dpi、分割文件，或改用自動調整。`);
+        throw new Error(`文件在設定的最低 ${floorDpi} dpi 仍超過處理範圍（${limits}）。請降低最低解析度、分割文件，或改用桌面 PDF 工具。`);
       }
       for (let pass = 0; pass < plan.length; pass++) {
         const [dpi, quality] = plan[pass];
         checkCancelled();
         const output = await PDFDocument.create();
-        output.setProducer('PDF 工具箱 v1.2.0（影像化壓縮）');
-        for (let n = 1; n <= pdf.numPages; n++) {
-          checkCancelled();
-          onProgress({ percent: 10 + 82 * (pass + (n - 1) / pdf.numPages) / plan.length,
-            detail: `第 ${pass + 1}/${plan.length} 次嘗試：${dpi} dpi，JPEG ${Math.round(quality * 100)}%；處理第 ${n}/${pdf.numPages} 頁` });
-          await yieldControl();
-          const page = await pdf.getPage(n);
-          const physical = page.getViewport({ scale: 1 });
-          const viewport = page.getViewport({ scale: dpi / 72 });
-          // PDF.js can return 900.0000000000001 for an exact 900 px extent.
-          const width = Math.ceil(viewport.width - 1e-7), height = Math.ceil(viewport.height - 1e-7);
-          if (width * height > 24_000_000 || width > 16384 || height > 16384) {
-            throw new Error(`第 ${n} 頁在 ${dpi} dpi 超過瀏覽器可處理的畫布範圍。請先將大型圖說分冊或改用桌面 PDF 工具。`);
-          }
-          const canvas = createCanvas(width, height);
-          try {
-            const context = canvas.getContext('2d');
-            if (!context) throw new Error('瀏覽器無法建立頁面畫布。');
-            await page.render({ canvasContext: context, viewport,
-              background: 'rgb(255,255,255)', annotationMode: loaded.renderer.AnnotationMode?.ENABLE ?? 1 }).promise;
+        output.setProducer('PDF 工具箱 v1.3.0（影像化壓縮）');
+        let encodedBytes = 0;
+        try {
+          for (let n = 1; n <= pdf.numPages; n++) {
             checkCancelled();
-            const jpeg = await jpegBytes(canvas, quality);
-            const image = await output.embedJpg(jpeg);
-            const destination = output.addPage([physical.width, physical.height]);
-            destination.drawImage(image, { x: 0, y: 0, width: physical.width, height: physical.height });
-          } finally { canvas.width = 0; canvas.height = 0; page.cleanup(); }
+            const page = await pdf.getPage(n);
+            try {
+              const physical = page.getViewport({ scale: 1 });
+              const viewport = page.getViewport({ scale: dpi / 72 });
+              // PDF.js can return 900.0000000000001 for an exact 900 px extent.
+              const width = Math.ceil(viewport.width - 1e-7), height = Math.ceil(viewport.height - 1e-7);
+              const columns = Math.ceil(width / TILE_EDGE), rows = Math.ceil(height / TILE_EDGE);
+              const tileCount = columns * rows, pointsPerPixel = 72 / dpi;
+              const destination = output.addPage([physical.width, physical.height]);
+              for (let row = 0; row < rows; row++) for (let column = 0; column < columns; column++) {
+                checkCancelled();
+                const tileIndex = row * columns + column;
+                onProgress({ percent: 10 + 82 * (pass + (n - 1 + tileIndex / tileCount) / pdf.numPages) / plan.length,
+                  detail: `第 ${pass + 1}/${plan.length} 次嘗試：${dpi} dpi，JPEG ${Math.round(quality * 100)}%；處理第 ${n}/${pdf.numPages} 頁，第 ${tileIndex + 1}/${tileCount} 圖塊` });
+                await yieldControl();
+                checkCancelled();
+                const x = column * TILE_EDGE, y = row * TILE_EDGE;
+                const tileWidth = Math.min(TILE_EDGE, width - x), tileHeight = Math.min(TILE_EDGE, height - y);
+                const canvas = createCanvas(tileWidth, tileHeight);
+                try {
+                  const context = canvas.getContext('2d');
+                  if (!context) throw new Error('瀏覽器無法建立頁面畫布。');
+                  // PDF.js applies this translation before its crop/rotation-aware
+                  // viewport transform. All tiles share one continuous pixel grid.
+                  await page.render({ canvasContext: context, viewport,
+                    transform: [1, 0, 0, 1, -x, -y],
+                    background: 'rgb(255,255,255)', annotationMode: loaded.renderer.AnnotationMode?.ENABLE ?? 1 }).promise;
+                  checkCancelled();
+                  const jpeg = await jpegBytes(canvas, quality);
+                  checkCancelled();
+                  encodedBytes += jpeg.length;
+                  if (encodedBytes > MAX_ENCODED_BYTES) {
+                    const error = new Error('本次壓縮的影像暫存超過 128 MiB。請降低 dpi 或 JPEG 品質，或先分割文件再處理；未變更原始檔案。');
+                    error.code = 'PDF_RASTER_BYTE_LIMIT';
+                    throw error;
+                  }
+                  const image = await output.embedJpg(jpeg);
+                  // Use exact 72/dpi dimensions rather than stretching rounded
+                  // pixel counts. The last partial pixel is clipped by the page.
+                  destination.drawImage(image, {
+                    x: x * pointsPerPixel,
+                    y: physical.height - (y + tileHeight) * pointsPerPixel,
+                    width: tileWidth * pointsPerPixel,
+                    height: tileHeight * pointsPerPixel,
+                  });
+                } finally { canvas.width = 1; canvas.height = 1; }
+              }
+            } finally { page.cleanup(); }
+          }
+          checkCancelled();
+          const bytes = await output.save({ useObjectStreams: true, objectsPerTick: 60 });
+          checkCancelled();
+          attempts++;
+          if (bytes.length < best.bytes.length) best = { bytes, pages: source.pages, method: 'raster', dpi, quality };
+          if (best.bytes.length <= byteLimit) break;
+        } catch (error) {
+          // A smaller automatic candidate may still fit the memory budget.
+          // Fixed mode never substitutes another DPI or quality.
+          if (error?.code === 'PDF_RASTER_BYTE_LIMIT' && resolutionMode === 'auto' && pass + 1 < plan.length) {
+            onProgress({ percent: 10 + 82 * (pass + 1) / plan.length,
+              detail: `${dpi} dpi、JPEG ${Math.round(quality * 100)}% 的影像暫存較大，繼續嘗試下一組允許設定…` });
+            continue;
+          }
+          throw error;
         }
-        checkCancelled();
-        const bytes = await output.save({ useObjectStreams: true, objectsPerTick: 60 });
-        attempts++;
-        if (bytes.length < best.bytes.length) best = { bytes, pages: source.pages, method: 'raster', dpi, quality };
-        if (best.bytes.length <= byteLimit) break;
       }
     } finally { await task.destroy(); }
     onProgress({ percent: 97, detail: '驗證實際檔案大小與完整頁數…' });
@@ -2259,7 +2316,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     $('split-upload').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  const validDpi = value => Number.isInteger(value) && value >= 24 && value <= 600;
+  const validDpi = value => Number.isInteger(value) && value >= 24 && value <= 1200;
   const validQuality = value => Number.isInteger(value) && value >= 10 && value <= 100;
   function compressionInput() {
     return {
@@ -2275,7 +2332,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     if (!Number.isFinite(value.mb) || value.mb < 0.01 || value.mb > 2048) return '容量上限請輸入 0.01–2,048 MB。';
     if (!value.allowRaster) return '';
     if (!['auto', 'fixed'].includes(value.resolutionMode)) return '請選擇自動調整或固定解析度。';
-    if (!validDpi(value.targetDpi)) return '影像解析度請輸入 24–600 之間的整數，可每次微調 1 dpi。';
+    if (!validDpi(value.targetDpi)) return '影像解析度請輸入 24–1200 之間的整數，可每次微調 1 dpi。';
     if (value.resolutionMode === 'auto' && (!validDpi(value.minDpi) || value.minDpi > value.targetDpi)) return '最低解析度請輸入 24 dpi 以上的整數，且不得高於起始解析度。';
     if (!validQuality(value.jpegQuality)) return 'JPEG 品質請輸入 10–100 之間的整數，可每次微調 1%。';
     return '';
@@ -2292,7 +2349,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     $('compress-raster-options').disabled = busy || !value.allowRaster;
     $('compress-auto-options').hidden = fixed;
     $('compress-min-dpi').disabled = fixed || busy || !value.allowRaster;
-    $('compress-min-dpi').max = validDpi(value.targetDpi) ? String(value.targetDpi) : '600';
+    $('compress-min-dpi').max = validDpi(value.targetDpi) ? String(value.targetDpi) : '1200';
     $('compress-dpi-label').textContent = fixed ? '影像化時固定解析度' : '起始影像解析度';
     $('compress-quality-label').textContent = fixed ? '影像化時固定 JPEG 品質' : '起始 JPEG 品質';
     $('compress-quality-value').textContent = validQuality(value.jpegQuality) ? `${value.jpegQuality}%` : '待設定';
@@ -2300,7 +2357,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     const presets = [...$('compress-dpi-preset').options].map(option => option.value);
     $('compress-dpi-preset').value = presets.includes(String(value.targetDpi)) ? String(value.targetDpi) : 'custom';
     if (validDpi(value.targetDpi)) $('compress-dpi-slider').value = String(value.targetDpi);
-    $('compress-dpi-level').textContent = !validDpi(value.targetDpi) ? '待設定' : value.targetDpi >= 300 ? '高解析度' : value.targetDpi >= 180 ? '較清晰' : value.targetDpi >= 100 ? '均衡閱讀' : value.targetDpi >= 72 ? '小容量' : '粗略預覽';
+    $('compress-dpi-level').textContent = !validDpi(value.targetDpi) ? '待設定' : value.targetDpi > 600 ? '超高解析度' : value.targetDpi >= 300 ? '高解析度' : value.targetDpi >= 180 ? '較清晰' : value.targetDpi >= 100 ? '均衡閱讀' : value.targetDpi >= 72 ? '小容量' : '粗略預覽';
     $('compress-resolution-hint').textContent = fixed
       ? '需要影像化時，使用指定的 dpi 與 JPEG 品質，不自動降低。若容量仍超標會明確提示；原檔或重新封裝已達標時，則直接保留原有文字與向量。'
       : '自動模式從指定 dpi 與 JPEG 品質開始，逐步降低以符合容量；解析度不低於您設定的最低值。結果會列出實際使用的 dpi 與品質。';
@@ -2367,16 +2424,19 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     if (state.compress.working || state.compress.loading) return;
     state.compress.source = null; clearCompressResults(); $('compress-chosen').hidden = true; updateCompressSummary();
   });
-  function compressionSettingsChanged(id) {
+  function compressionSettingsChanged(id, committed = true) {
     if (state.compress.working || state.compress.loading) return;
     const target = Number($('compress-target-dpi').value);
     if (['compress-target-dpi', 'compress-dpi-preset', 'compress-dpi-slider', 'compress-resolution-mode'].includes(id)
+      && (id !== 'compress-target-dpi' || committed)
       && validDpi(target) && Number($('compress-min-dpi').value) > target) $('compress-min-dpi').value = String(target);
     clearCompressResults(); updateCompressSummary();
   }
   for (const id of ['compress-max-mb', 'compress-min-dpi', 'compress-target-dpi', 'compress-jpeg-quality']) {
-    $(id).addEventListener('input', () => compressionSettingsChanged(id));
+    $(id).addEventListener('input', () => compressionSettingsChanged(id, false));
   }
+  // Keep a user's minimum while typing partial numbers such as 1 → 10 → 100 → 1000.
+  $('compress-target-dpi').addEventListener('change', () => compressionSettingsChanged('compress-target-dpi'));
   for (const id of ['compress-allow-raster', 'compress-resolution-mode']) {
     $(id).addEventListener('change', () => compressionSettingsChanged(id));
   }
@@ -2407,7 +2467,12 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       s.result = { ...result, ...addDownloadData(result.bytes, filename) };
       $('compress-result-title').textContent = result.metTarget ? '符合容量限制 ✓' : '尚未達到容量限制';
       $('compress-result-title').classList.toggle('unmet', !result.metTarget);
-      $('compress-result-caption').textContent = `目標 ≤ ${fmtNumber(settings.limit)} bytes（${settings.mb} MB）；輸出 ${fmtNumber(result.bytes.length)} bytes。${result.metTarget ? '已確認符合設定上限。' : settings.allowRaster && settings.resolutionMode === 'fixed' ? '維持指定的解析度與畫質後仍未達標；可自行降低設定、改用自動模式、調高容量上限或分割。' : '目前設定下仍超過上限，可調整影像設定、調高限制或改用分割。'}`;
+      const unmetMessage = settings.allowRaster && settings.resolutionMode === 'fixed'
+        ? result.method === 'raster'
+          ? '維持指定的解析度與畫質後仍未達標；可自行降低設定、改用自動模式、調高容量上限或分割。'
+          : '指定影像設定未能產生更小的檔案，已保留較小的版本；仍超過容量限制，可降低設定、改用自動模式或分割。'
+        : '目前設定下仍超過上限，可調整影像設定、調高限制或改用分割。';
+      $('compress-result-caption').textContent = `目標 ≤ ${fmtNumber(settings.limit)} bytes（${settings.mb} MB）；輸出 ${fmtNumber(result.bytes.length)} bytes。${result.metTarget ? '已確認符合設定上限。' : unmetMessage}`;
       $('compress-result-size').textContent = fmtMB(result.bytes.length);
       $('compress-result-saving').textContent = `${Math.max(0, (1 - result.bytes.length / s.source.bytes.length) * 100).toFixed(1)}%`;
       $('compress-result-pages').textContent = `${result.pages} 頁`;

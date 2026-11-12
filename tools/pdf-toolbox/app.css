@@ -37,5 +37,5 @@
 .resolution-preview{font-size:11px;line-height:1.9;padding:12px;background:#eef5f8;border-radius:7px;color:#4f7183;margin-top:14px}.resolution-canvas-note{margin-bottom:0}
 .settings-error{font-size:12px;line-height:1.8;padding:11px 13px;color:#a1472f;background:#fff3ec;border:1px solid #f1d4c4;border-radius:7px}
 .resolution-metric strong{white-space:normal;overflow:visible;line-height:1.7}
-@media(max-width:650px){.resolution-panel{padding:15px 12px}.resolution-inputs{grid-template-columns:minmax(0,1fr) 92px}.resolution-auto{padding:10px;grid-template-columns:minmax(0,1fr) 84px}.resolution-panel select{font-size:11px}.quality-inputs{grid-template-columns:minmax(0,1fr) 84px}.resolution-heading{margin-top:18px}.range-labels{font-size:9px}}
+@media(max-width:650px){.resolution-panel{padding:15px 12px}.resolution-inputs{grid-template-columns:minmax(0,1fr) 110px}.resolution-auto{padding:10px;grid-template-columns:minmax(0,1fr) 110px}.resolution-panel select{font-size:11px}.quality-inputs{grid-template-columns:minmax(0,1fr) 84px}.resolution-heading{margin-top:18px}.range-labels{font-size:9px}}
 @media(max-width:360px){.resolution-inputs{grid-template-columns:minmax(0,1fr)}.resolution-inputs .resolution-number{max-width:140px}}

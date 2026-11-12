@@ -6,12 +6,12 @@
   <meta name="theme-color" content="#102a42">
   <meta name="description" content="依容量或頁數分割 PDF、多檔排序合併、依指定容量縮小。文件在瀏覽器本機處理，支援離線單檔版。">
   <title>PDF 工具箱｜分割・合併・壓縮</title>
-  <link rel="stylesheet" href="./app.css?v=1.2.0">
+  <link rel="stylesheet" href="./app.css?v=1.3.0">
   <script defer src="./vendor/pdf-lib.min.js"></script>
   <script defer src="./vendor/jszip.min.js"></script>
   <script defer src="./pdf-engine.js"></script>
-  <script defer src="./pdf-compress.js?v=1.2.0"></script>
-  <script defer src="./app.js?v=1.2.0"></script>
+  <script defer src="./pdf-compress.js?v=1.3.0"></script>
+  <script defer src="./app.js?v=1.3.0"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -31,7 +31,7 @@
       <div class="side-bottom">
         <div class="privacy-panel"><span class="privacy-dot"></span><strong>資料只在您的裝置處理</strong><p>PDF 不會上傳至任何伺服器。關閉頁面後不會保留您的文件。</p></div>
         <a class="offline-link" id="offline-link" href="./offline.html" download="PDF工具箱_離線版.html"><span aria-hidden="true">↓</span> 下載離線單檔版</a>
-        <div class="side-foot">PDF WORKSPACE · v1.2.0</div>
+        <div class="side-foot">PDF WORKSPACE · v1.3.0</div>
       </div>
     </aside>
 
@@ -97,7 +97,10 @@
                   <select id="compress-resolution-mode" aria-describedby="compress-resolution-hint"><option value="auto">依容量自動調整｜設定起始值與最低值</option><option value="fixed">固定解析度與畫質｜維持我指定的設定</option></select>
                   <div class="resolution-heading"><label class="field-label" for="compress-dpi-preset" id="compress-dpi-label">起始影像解析度</label><span class="resolution-badge" id="compress-dpi-level">均衡</span></div>
                   <div class="resolution-inputs">
-                    <select id="compress-dpi-preset" aria-labelledby="compress-dpi-label">
+                    <select id="compress-dpi-preset" aria-labelledby="compress-dpi-label" aria-describedby="compress-dpi-hint compress-high-dpi-hint">
+                      <optgroup label="超高解析度｜600 dpi 以上">
+                        <option value="1200">1200 dpi｜最高精細度</option><option value="1000">1000 dpi｜超高精細</option><option value="900">900 dpi｜超高精細</option><option value="800">800 dpi｜超高精細</option><option value="720">720 dpi｜超高解析度</option>
+                      </optgroup>
                       <optgroup label="高解析度｜細字與圖說">
                         <option value="600">600 dpi｜超高解析度</option><option value="450">450 dpi｜高精細</option><option value="400">400 dpi｜高精細</option><option value="350">350 dpi｜精細</option><option value="300">300 dpi｜高畫質</option><option value="240">240 dpi｜細字閱讀</option><option value="200">200 dpi｜較清晰</option><option value="180">180 dpi｜較清晰</option>
                       </optgroup>
@@ -107,13 +110,13 @@
                       <optgroup label="低解析度｜預覽與小容量">
                         <option value="75">75 dpi｜小容量</option><option value="72">72 dpi｜小容量</option><option value="60">60 dpi｜低解析度</option><option value="50">50 dpi｜低解析度</option><option value="48">48 dpi｜強力縮小</option><option value="36">36 dpi｜粗略預覽</option><option value="24">24 dpi｜極低，僅供預覽</option>
                       </optgroup>
-                      <option value="custom">自訂 dpi（24–600）</option>
+                      <option value="custom">自訂 dpi（24–1200）</option>
                     </select>
-                    <div class="resolution-number"><input id="compress-target-dpi" type="number" min="24" max="600" step="1" value="150" inputmode="numeric" aria-label="自訂影像解析度 dpi" aria-describedby="compress-dpi-hint compress-settings-error"><span>dpi</span></div>
+                    <div class="resolution-number"><input id="compress-target-dpi" type="number" min="24" max="1200" step="1" value="150" inputmode="numeric" aria-label="自訂影像解析度 dpi" aria-describedby="compress-dpi-hint compress-high-dpi-hint compress-settings-error"><span>dpi</span></div>
                   </div>
-                  <input id="compress-dpi-slider" class="resolution-slider" type="range" min="24" max="600" step="1" value="150" aria-label="影像解析度滑桿 dpi">
-                  <div class="range-labels"><span>24 dpi · 較小容量</span><span>600 dpi · 較清晰</span></div>
-                  <p class="field-hint" id="compress-dpi-hint">可選 20 組常用值，或以 1 dpi 為單位微調。提高 dpi 不會恢復原圖已失去的細節。</p>
+                  <input id="compress-dpi-slider" class="resolution-slider" type="range" min="24" max="1200" step="1" value="150" aria-label="影像解析度滑桿 dpi" aria-describedby="compress-high-dpi-hint">
+                  <div class="range-labels"><span>24 dpi · 較小容量</span><span>1200 dpi · 較清晰</span></div>
+                  <p class="field-hint" id="compress-dpi-hint">可選 25 組常用值，或在 24–1200 dpi 間以 1 dpi 為單位微調。提高 dpi 不會恢復原圖已失去的細節。</p>
                   <div class="resolution-auto" id="compress-auto-options">
                     <label class="field-label" for="compress-min-dpi">自動調整時，最低保留解析度</label>
                     <div class="resolution-number"><input id="compress-min-dpi" type="number" min="24" max="150" step="1" value="72" inputmode="numeric" aria-describedby="compress-resolution-hint compress-settings-error"><span>dpi</span></div>
@@ -122,7 +125,7 @@
                   <div class="quality-inputs"><input id="compress-quality-slider" class="resolution-slider" type="range" min="10" max="100" step="1" value="82" aria-label="JPEG 品質滑桿百分比"><div class="resolution-number"><input id="compress-jpeg-quality" type="number" min="10" max="100" step="1" value="82" inputmode="numeric" aria-describedby="compress-resolution-hint compress-settings-error"><span>%</span></div></div>
                   <p class="field-hint" id="compress-resolution-hint">自動模式從指定 dpi 與 JPEG 品質開始，逐步降低以符合容量；解析度不低於您設定的最低值。結果會列出實際使用的 dpi 與品質。</p>
                   <div class="resolution-preview" id="compress-resolution-preview" aria-live="polite"></div>
-                  <p class="field-hint resolution-canvas-note">大幅圖面搭配高 dpi 會需要更多記憶體；超出瀏覽器可處理範圍時會提示調整。工程圖細字與尺寸線請下載後放大核對。</p>
+                  <p class="field-hint resolution-canvas-note" id="compress-high-dpi-hint">720–1200 dpi 需要較長處理時間及更多記憶體，檔案也可能更大。大幅圖面超出可處理範圍時會提示調整；固定模式不會擅自降低 dpi。工程圖細字與尺寸線請下載後放大核對。</p>
                 </fieldset>
                 <p id="compress-settings-error" class="settings-error" role="status" hidden></p>
                 <div class="compression-notice">重新封裝或影像化會使原數位簽章失效。請保留原始檔案；已符合容量限制時會直接提供原檔。</div>

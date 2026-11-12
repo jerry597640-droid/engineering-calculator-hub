@@ -404,7 +404,7 @@
     $('split-upload').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  const validDpi = value => Number.isInteger(value) && value >= 24 && value <= 600;
+  const validDpi = value => Number.isInteger(value) && value >= 24 && value <= 1200;
   const validQuality = value => Number.isInteger(value) && value >= 10 && value <= 100;
   function compressionInput() {
     return {
@@ -420,7 +420,7 @@
     if (!Number.isFinite(value.mb) || value.mb < 0.01 || value.mb > 2048) return '容量上限請輸入 0.01–2,048 MB。';
     if (!value.allowRaster) return '';
     if (!['auto', 'fixed'].includes(value.resolutionMode)) return '請選擇自動調整或固定解析度。';
-    if (!validDpi(value.targetDpi)) return '影像解析度請輸入 24–600 之間的整數，可每次微調 1 dpi。';
+    if (!validDpi(value.targetDpi)) return '影像解析度請輸入 24–1200 之間的整數，可每次微調 1 dpi。';
     if (value.resolutionMode === 'auto' && (!validDpi(value.minDpi) || value.minDpi > value.targetDpi)) return '最低解析度請輸入 24 dpi 以上的整數，且不得高於起始解析度。';
     if (!validQuality(value.jpegQuality)) return 'JPEG 品質請輸入 10–100 之間的整數，可每次微調 1%。';
     return '';
@@ -437,7 +437,7 @@
     $('compress-raster-options').disabled = busy || !value.allowRaster;
     $('compress-auto-options').hidden = fixed;
     $('compress-min-dpi').disabled = fixed || busy || !value.allowRaster;
-    $('compress-min-dpi').max = validDpi(value.targetDpi) ? String(value.targetDpi) : '600';
+    $('compress-min-dpi').max = validDpi(value.targetDpi) ? String(value.targetDpi) : '1200';
     $('compress-dpi-label').textContent = fixed ? '影像化時固定解析度' : '起始影像解析度';
     $('compress-quality-label').textContent = fixed ? '影像化時固定 JPEG 品質' : '起始 JPEG 品質';
     $('compress-quality-value').textContent = validQuality(value.jpegQuality) ? `${value.jpegQuality}%` : '待設定';
@@ -445,7 +445,7 @@
     const presets = [...$('compress-dpi-preset').options].map(option => option.value);
     $('compress-dpi-preset').value = presets.includes(String(value.targetDpi)) ? String(value.targetDpi) : 'custom';
     if (validDpi(value.targetDpi)) $('compress-dpi-slider').value = String(value.targetDpi);
-    $('compress-dpi-level').textContent = !validDpi(value.targetDpi) ? '待設定' : value.targetDpi >= 300 ? '高解析度' : value.targetDpi >= 180 ? '較清晰' : value.targetDpi >= 100 ? '均衡閱讀' : value.targetDpi >= 72 ? '小容量' : '粗略預覽';
+    $('compress-dpi-level').textContent = !validDpi(value.targetDpi) ? '待設定' : value.targetDpi > 600 ? '超高解析度' : value.targetDpi >= 300 ? '高解析度' : value.targetDpi >= 180 ? '較清晰' : value.targetDpi >= 100 ? '均衡閱讀' : value.targetDpi >= 72 ? '小容量' : '粗略預覽';
     $('compress-resolution-hint').textContent = fixed
       ? '需要影像化時，使用指定的 dpi 與 JPEG 品質，不自動降低。若容量仍超標會明確提示；原檔或重新封裝已達標時，則直接保留原有文字與向量。'
       : '自動模式從指定 dpi 與 JPEG 品質開始，逐步降低以符合容量；解析度不低於您設定的最低值。結果會列出實際使用的 dpi 與品質。';
@@ -512,16 +512,19 @@
     if (state.compress.working || state.compress.loading) return;
     state.compress.source = null; clearCompressResults(); $('compress-chosen').hidden = true; updateCompressSummary();
   });
-  function compressionSettingsChanged(id) {
+  function compressionSettingsChanged(id, committed = true) {
     if (state.compress.working || state.compress.loading) return;
     const target = Number($('compress-target-dpi').value);
     if (['compress-target-dpi', 'compress-dpi-preset', 'compress-dpi-slider', 'compress-resolution-mode'].includes(id)
+      && (id !== 'compress-target-dpi' || committed)
       && validDpi(target) && Number($('compress-min-dpi').value) > target) $('compress-min-dpi').value = String(target);
     clearCompressResults(); updateCompressSummary();
   }
   for (const id of ['compress-max-mb', 'compress-min-dpi', 'compress-target-dpi', 'compress-jpeg-quality']) {
-    $(id).addEventListener('input', () => compressionSettingsChanged(id));
+    $(id).addEventListener('input', () => compressionSettingsChanged(id, false));
   }
+  // Keep a user's minimum while typing partial numbers such as 1 → 10 → 100 → 1000.
+  $('compress-target-dpi').addEventListener('change', () => compressionSettingsChanged('compress-target-dpi'));
   for (const id of ['compress-allow-raster', 'compress-resolution-mode']) {
     $(id).addEventListener('change', () => compressionSettingsChanged(id));
   }
@@ -552,7 +555,12 @@
       s.result = { ...result, ...addDownloadData(result.bytes, filename) };
       $('compress-result-title').textContent = result.metTarget ? '符合容量限制 ✓' : '尚未達到容量限制';
       $('compress-result-title').classList.toggle('unmet', !result.metTarget);
-      $('compress-result-caption').textContent = `目標 ≤ ${fmtNumber(settings.limit)} bytes（${settings.mb} MB）；輸出 ${fmtNumber(result.bytes.length)} bytes。${result.metTarget ? '已確認符合設定上限。' : settings.allowRaster && settings.resolutionMode === 'fixed' ? '維持指定的解析度與畫質後仍未達標；可自行降低設定、改用自動模式、調高容量上限或分割。' : '目前設定下仍超過上限，可調整影像設定、調高限制或改用分割。'}`;
+      const unmetMessage = settings.allowRaster && settings.resolutionMode === 'fixed'
+        ? result.method === 'raster'
+          ? '維持指定的解析度與畫質後仍未達標；可自行降低設定、改用自動模式、調高容量上限或分割。'
+          : '指定影像設定未能產生更小的檔案，已保留較小的版本；仍超過容量限制，可降低設定、改用自動模式或分割。'
+        : '目前設定下仍超過上限，可調整影像設定、調高限制或改用分割。';
+      $('compress-result-caption').textContent = `目標 ≤ ${fmtNumber(settings.limit)} bytes（${settings.mb} MB）；輸出 ${fmtNumber(result.bytes.length)} bytes。${result.metTarget ? '已確認符合設定上限。' : unmetMessage}`;
       $('compress-result-size').textContent = fmtMB(result.bytes.length);
       $('compress-result-saving').textContent = `${Math.max(0, (1 - result.bytes.length / s.source.bytes.length) * 100).toFixed(1)}%`;
       $('compress-result-pages').textContent = `${result.pages} 頁`;
