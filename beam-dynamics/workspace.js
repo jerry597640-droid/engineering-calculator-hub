@@ -99,6 +99,7 @@ function installQuickTools() {
     ['reactions','支承反力','M3 6h18M6 20V9m-3 3 3-3 3 3m9 8V9m-3 3 3-3 3 3','result'],
     ['unitsBtn','單位設定','M3 17 17 3l4 4L7 21zM7 13l2 2m2-6 2 2m2-6 2 2','action'],
     ['runBtn','計算分析','M7 4v16l12-8z','action'],
+    ['reportBtn','計算報告','M5 3h10l4 4v14H5zM14 3v5h5M8 12h8m-8 4h6','action'],
     ['saveBtn','儲存模型','M4 3h13l3 3v15H4zm3 0v7h9V3M8 20v-7h8v7','action']
   ];
   const storeKey = 'beamlab-quick-tools-v1';
