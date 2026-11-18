@@ -1,7 +1,18 @@
-import {build,statics,moving,dynamic,total,vehicleLength,validate} from './solver.js';
+import {installLayoutEditor} from './span-layout.js';
+import {build,statics,moving,dynamic,maxSpans,total,vehicleLength,validate as validateBeam} from './solver.js?v=1.4';
 import {unitSystem, resultDimensions, displayNumber} from './units.js';
-import {installWorkspace, arrangePins, selectView} from './workspace.js?v=1.3';
+import {installWorkspace, arrangePins, selectView} from './workspace.js?v=1.4';
+import {installMaterialEditor,renderMaterialPickers,reconcileManualSpanEdit,assertSpanMaterial} from './material-editor.js?v=1.4';
+import {installSectionEditor,renderSectionPickers,reconcileManualSectionEdit,assertSpanSection} from './section-editor.js?v=1.4';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)],fmt=(x,n=2)=>Math.abs(x)<1e-7?(0).toFixed(n):Number(x).toFixed(n),clone=x=>JSON.parse(JSON.stringify(x));
+function validate(input) {
+ validateBeam(input);
+ for(const s of input.spans){
+   if(s.A!=null&&!(Number.isFinite(s.A)&&s.A>0))throw Error('斷面積必須為正數。');
+   assertSpanMaterial(s);
+   assertSpanSection(s);
+ }
+}
 const span=(L=10)=>({L,E:200,I:.0008,mass:800});
 const base={spans:[span(10),span(10)],supports:['pin','roller','roller'],loads:[{type:'line',a:0,b:20,w1:10,w2:10},{type:'point',x:5,p:50}],axles:[{p:60,offset:0},{p:120,offset:4},{p:120,offset:5.4}],mode:'static',mesh:12,selfWeight:false,direction:1,factor:1,speed:60,step:.2,dt:.01,damping:2,tail:1};
 let c=clone(base),model=null,analysis=null,current=null,frameIndex=0,playing=false,raf=0,dirty=false,busy=false,tab='geometry',preset='continuous';
@@ -51,10 +62,10 @@ function editors(){
  for(let key of ['direction','factor','speed','step','damping','dt','tail','mesh'])$('#'+key).value=key==='step'?entryValue(c.step,'m'):c[key];$('#selfWeight').checked=c.selfWeight;
  $$('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===c.mode));$$('[data-preset]').forEach(b=>b.classList.toggle('selected',b.dataset.preset===preset));
  let hv=$('#historyType').value;$('#historyType').innerHTML='<option value="M">彎矩 M</option><option value="V">剪力 V</option><option value="D">撓度 δ</option>'+c.supports.map((s,i)=>s==='free'?'':`<option value="R:${i}">${String.fromCharCode(65+i)} 支承反力</option>`).join('');if([...$('#historyType').options].some(o=>o.value===hv))$('#historyType').value=hv;
- $('#modelBadge').textContent=c.spans.length+' 跨梁';$('#addSpan').disabled=c.spans.length>=6;$('#addAxle').disabled=c.axles.length>=12;unitLabels();
+ $('#modelBadge').textContent=c.spans.length===1?'單跨梁':c.spans.length+' 跨連續梁';$('#layoutBadge').textContent=c.spans.length+' 跨';$('#addSpan').disabled=c.spans.length>=maxSpans;$('#addAxle').disabled=c.axles.length>=12;unitLabels();renderMaterialPickers();renderSectionPickers();
 }
 function persist(){try{localStorage.setItem('beamlab-model-v1',JSON.stringify(c));$('#saveStatus').textContent='設定已保存在此瀏覽器';}catch{$('#saveStatus').textContent='無法自動儲存，請匯出模型';}}
-function stale(){stop();dirty=true;document.body.classList.add('stale');$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#printBtn').disabled=true;notice('設定已變更，請按「計算分析」更新結果。');persist();try{drawBeam();}catch{}}
+function stale(){stop();dirty=true;document.body.classList.add('stale');$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;notice('設定已變更，請按「計算分析」更新結果。');persist();try{drawBeam();}catch{}}
 function notice(s,error=false){$('#notice').hidden=!s;$('#notice').textContent=s;$('#notice').classList.toggle('error',error);$('#settingsStatus').textContent=s;$('#settingsStatus').hidden=!s;$('#settingsStatus').classList.toggle('error',error);}
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),2400);}
 function svgText(x,y,text,color='#6b7e83',anchor='middle',size=12){return `<text x="${x}" y="${y}" fill="${color}" text-anchor="${anchor}" style="font-size:${size}px">${text}</text>`;}
@@ -93,12 +104,12 @@ function renderResults(){if(!analysis)return;refreshStepInfo();current=analysis.
  $('#analysisInfo').textContent=`${model.els.length} 個梁元素 · 第一頻率 ${fmt(model.omega/(2*Math.PI),3)} Hz · 求解器平衡殘差（基準單位） ${current.residual.toExponential(1)} kN／kN·m`;
  updateQuery();}
 function history(){if(!analysis||c.mode==='static')return;let type=$('#historyType').value,isReaction=type.startsWith('R:'),x=readPosition('#probeX');$('#probeX').disabled=isReaction;if(!isReaction&&(!Number.isFinite(x)||x<0||x>model.L)){$('#historyText').textContent='查詢位置超出梁長';return;}let key=isReaction?'R':type,ri=Number(type.split(':')[1]),unit=key==='M'?'kN·m':key==='D'?'mm':'kN',data=analysis.frames.map(f=>({x:f.t,[key]:isReaction?f.result.reactions[ri].R:f.result.at(x)[key]}));chart('historyChart',data,key,key==='V'?'#4a75ba':'#087a70',null,{time:true,end:analysis.frames.at(-1).t});$('#historyText').textContent=`${isReaction?String.fromCharCode(65+ri)+' 支承':('x = '+quantity(x,'m'))} · ${$('#historyType').selectedOptions[0].text}（${labelOf(unit)}），橫軸時間（s）。完整歷時可匯出 CSV。`;}
-async function run(goToResults=false){if(busy)return;stop();busy=true;$('#reportBtn').disabled=true;$('#runBtn').disabled=true;$('#commandRun').disabled=true;$('#runBtn').textContent='計算中…';$('.sidebar').classList.add('busy');$$('[data-mode]').forEach(b=>b.disabled=true);$('#importBtn').disabled=true;
+async function run(goToResults=false){if(busy)return;stop();busy=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#runBtn').disabled=true;$('#commandRun').disabled=true;$('#runBtn').textContent='計算中…';$('.sidebar').classList.add('busy');$$('[data-mode]').forEach(b=>b.disabled=true);$('#importBtn').disabled=true;
  try{validate(c);model=build(clone(c));let progress=p=>{$('#runBtn').textContent=`計算中 ${Math.round(p*100)}%`;};if(c.mode==='static'){analysis={frames:[{t:0,front:0,result:statics(model)}]};}else analysis=await(c.mode==='moving'?moving(model,progress):dynamic(model,progress));
- frameIndex=c.mode==='static'?0:Math.round((analysis.frames.length-1)*.4);current=analysis.frames[frameIndex].result;dirty=false;document.body.classList.remove('stale');$('#csvBtn').disabled=false;$('#reportBtn').disabled=false;$('#printBtn').disabled=false;$('#playback').hidden=c.mode==='static';$('#historyPanel').hidden=c.mode==='static';$('#frameRange').max=analysis.frames.length-1;refreshStepInfo();
+ frameIndex=c.mode==='static'?0:Math.round((analysis.frames.length-1)*.4);current=analysis.frames[frameIndex].result;dirty=false;document.body.classList.remove('stale');$('#csvBtn').disabled=false;$('#reportBtn').disabled=false;$('#exchangeBtn').disabled=false;$('#printBtn').disabled=false;$('#playback').hidden=c.mode==='static';$('#historyPanel').hidden=c.mode==='static';$('#frameRange').max=analysis.frames.length-1;refreshStepInfo();
 
  notice(c.mode==='dynamic'?'動力模式：考慮梁的質量與阻尼；車輛採移動力模型，未含車橋耦合。':c.mode==='moving'?'移動包絡採逐位置靜力計算，不含振動慣性效應。':'');persist();arrangePins();if(goToResults===true)selectView('results',true);renderResults();history();
- }catch(e){dirty=true;document.body.classList.add('stale');notice(e.message,true);$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#printBtn').disabled=true;}finally{busy=false;$('#runBtn').disabled=false;$('#commandRun').disabled=false;$('#runBtn').textContent='計算分析';$('.sidebar').classList.remove('busy');$$('[data-mode]').forEach(b=>b.disabled=false);$('#importBtn').disabled=false;}}
+ }catch(e){dirty=true;document.body.classList.add('stale');notice(e.message,true);$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;}finally{busy=false;$('#runBtn').disabled=false;$('#commandRun').disabled=false;$('#runBtn').textContent='計算分析';$('.sidebar').classList.remove('busy');$$('[data-mode]').forEach(b=>b.disabled=false);$('#importBtn').disabled=false;}}
 function stop(){playing=false;cancelAnimationFrame(raf);$('#playBtn').textContent='播放';}
 function play(){if(!analysis||dirty)return;if(playing){stop();return;}playing=true;$('#playBtn').textContent='暫停';let last=0;function tick(t){if(!playing)return;if(t-last>70){last=t;frameIndex=(frameIndex+Math.max(1,Math.floor(analysis.frames.length/180)))%analysis.frames.length;renderResults();}raf=requestAnimationFrame(tick);}raf=requestAnimationFrame(tick);}
 function download(name,type,data){let a=document.createElement('a'),url=URL.createObjectURL(new Blob([data],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);}
@@ -136,18 +147,29 @@ function csv() {
   toast('分析結果 CSV 已匯出');
 }
 function usePreset(name){preset=name;c={...clone(base),displayUnits:units.prefs};if(name==='simple'){c.spans=[span(10)];c.supports=['pin','roller'];c.loads=[{type:'line',a:0,b:10,w1:10,w2:10}];}if(name==='cantilever'){c.spans=[span(5)];c.supports=['fixed','free'];c.loads=[{type:'point',x:5,p:50}];}editors();stale();run();}
-$('.sidebar').addEventListener('change',e=>{let el=e.target;if(el.dataset.kind){c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=units.base(el.dataset.dimension,el.valueAsNumber);if(el.value==='')c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=NaN;if(el.dataset.key==='L')editors();}else if(el.dataset.support!=null)c.supports[Number(el.dataset.support)]=el.value;else if(el.id==='selfWeight')c.selfWeight=el.checked;else if(el.id in c)c[el.id]=el.type==='checkbox'?el.checked:el.id==='step'?units.base('m',el.valueAsNumber):Number(el.value);else return;preset='';$$('[data-preset]').forEach(b=>b.classList.remove('selected'));stale();});
-$('.sidebar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tab){tab=b.dataset.tab;$$('.config-panel').forEach(p=>p.hidden=p.id!==tab);$$('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));}if(b.dataset.preset)usePreset(b.dataset.preset);if(b.dataset.addload){if(c.loads.length>=50)return toast('最多 50 筆靜態載重');let type=b.dataset.addload;c.loads.push(type==='line'?{type,a:0,b:total(c),w1:10,w2:10}:{type,x:total(c)/2,p:type==='point'?50:20});editors();stale();}if(b.dataset.delete){let i=Number(b.dataset.index);if(b.dataset.delete==='span'){c.spans.splice(i,1);c.supports.splice(i+1,1);}if(b.dataset.delete==='load')c.loads.splice(i,1);if(b.dataset.delete==='axle')c.axles.splice(i,1);editors();stale();}});
-$('#addSpan').onclick=()=>{if(c.spans.length<6){c.spans.push(span(10));c.supports.push('roller');editors();stale();}};$('#addAxle').onclick=()=>{if(c.axles.length<12){c.axles.push({p:120,offset:vehicleLength(c)+1.4});editors();stale();}};
+$('.sidebar').addEventListener('change',e=>{let el=e.target;if(el.dataset.kind){c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=units.base(el.dataset.dimension,el.valueAsNumber);if(el.value==='')c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=NaN;if(el.dataset.kind==='spans'){const s=c.spans[Number(el.dataset.index)];reconcileManualSectionEdit(s,el.dataset.key);reconcileManualSpanEdit(s,el.dataset.key);if(el.dataset.key==='L'||el.dataset.key==='I')editors();else {renderMaterialPickers();renderSectionPickers();}}}else if(el.dataset.support!=null)c.supports[Number(el.dataset.support)]=el.value;else if(el.id==='selfWeight')c.selfWeight=el.checked;else if(el.id in c)c[el.id]=el.type==='checkbox'?el.checked:el.id==='step'?units.base('m',el.valueAsNumber):Number(el.value);else return;preset='';$$('[data-preset]').forEach(b=>b.classList.remove('selected'));stale();});
+$('.sidebar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tab){tab=b.dataset.tab;$$('.config-panel').forEach(p=>p.hidden=p.id!==tab);$$('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));}if(b.dataset.preset)usePreset(b.dataset.preset);if(b.dataset.addload){if(c.loads.length>=50)return toast('最多 50 筆靜態載重');let type=b.dataset.addload;c.loads.push(type==='line'?{type,a:0,b:total(c),w1:10,w2:10}:{type,x:total(c)/2,p:type==='point'?50:20});editors();stale();}if(b.dataset.delete){let i=Number(b.dataset.index);if(b.dataset.delete==='span'){c.spans.splice(i,1);c.supports.splice(i===0?1:i,1);}if(b.dataset.delete==='load')c.loads.splice(i,1);if(b.dataset.delete==='axle')c.axles.splice(i,1);editors();stale();}});
+$('#addSpan').onclick=()=>{if(c.spans.length<maxSpans){c.spans.push(structuredClone(c.spans.at(-1)));c.supports.splice(-1,0,'roller');preset='';editors();stale();}};$('#addAxle').onclick=()=>{if(c.axles.length<12){c.axles.push({p:120,offset:vehicleLength(c)+1.4});editors();stale();}};
 $$('[data-mode]').forEach(b=>b.onclick=()=>{c.mode=b.dataset.mode;editors();stale();run();});$('#runBtn').onclick=()=>run(true);$('#playBtn').onclick=play;$('#frameRange').oninput=e=>{stop();frameIndex=Number(e.target.value);renderResults();};$('#showEnvelope').onchange=renderResults;$('#queryX').oninput=updateQuery;$('#probeX').onchange=history;$('#historyType').onchange=history;$('#csvBtn').onclick=csv;$('#printBtn').onclick=()=>{stop();window.print();};$('#saveBtn').onclick=()=>{try{validate(c);download('BeamLab_model.json','application/json',JSON.stringify(c,null,2));toast('模型 JSON 已匯出');}catch(e){notice(e.message,true);}};$('#importBtn').onclick=()=>$('#fileInput').click();$('#fileInput').onchange=async e=>{try{let f=e.target.files[0];if(!f)return;if(f.size>1000000)throw Error('模型檔案過大');let obj=JSON.parse(await f.text());validate(obj);c=obj;preset='';dirty=true;updateUnits(obj.displayUnits || units.prefs);stale();await run();toast('模型已匯入');}catch(err){notice('匯入失敗：'+err.message,true);}e.target.value='';};$('#methodBtn').onclick=()=>$('#methodDialog').showModal();$('#closeMethod').onclick=()=>$('#methodDialog').close();$('#methodDialog').onclick=e=>{if(e.target===$('#methodDialog'))$('#methodDialog').close();};
+$('#exchangeBtn').onclick=async()=>{
+  if(!model||!analysis||busy||dirty)return;
+  stop();
+  try{
+    const {openExchange}=await import('./exchange-ui.js?v=1.4');
+    if(!busy&&!dirty)openExchange(model,analysis,frameIndex,units);
+  }catch(err){notice('無法開啟匯出視窗：'+err.message,true);}
+};
 $('#reportBtn').onclick=async()=>{
   if(!model||!analysis||busy||dirty)return;
   stop();
   try {
-    const {openCalculationReport}=await import('./report-ui.js?v=1.3');
+    const {openCalculationReport}=await import('./report-ui.js?v=1.4');
     if(model&&analysis&&!busy&&!dirty)openCalculationReport(model,analysis,frameIndex,readPosition('#queryX'),units);
   } catch(err) {notice('無法開啟計算報告：'+err.message,true);}
 };
+installLayoutEditor({getConfig:()=>c,getUnits:()=>units,validate,onApply:next=>{c=next;preset='';editors();stale();run(true);}});
+installMaterialEditor({getConfig:()=>c,getUnits:()=>units,onChange:()=>{preset='';editors();stale();}});
+installSectionEditor({getConfig:()=>c,getUnits:()=>units,onChange:()=>{preset='';editors();stale();}});
 installWorkspace(() => {drawBeam();if (analysis && !dirty && !busy) {renderResults();history();}});
 $('#unitDialog').querySelectorAll('[data-pref]').forEach(el => el.onchange = () => updateUnits({...units.prefs,[el.dataset.pref]:el.value}));
 $('#unitsBtn').onclick=()=>$('#unitDialog').showModal();

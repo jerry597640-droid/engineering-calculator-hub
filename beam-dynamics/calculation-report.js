@@ -1,3 +1,4 @@
+import {evaluateSection} from './section-geometry.js';
 import {traceBlocks} from './report-trace.js';
 import {unitSystem} from './units.js';
 
@@ -24,6 +25,29 @@ function inputs(m, units, q) {
     table(['節點','位置 ('+u('m')+')','支承','垂直位移','轉角'],c.supports.map((s,i)=>[supportId(i),q(m.ss[i],'m'),supports[s],s==='free'?'自由':'約束',s==='fixed'?'約束':'自由'])),
     p('每跨基本細分 '+c.mesh+' 個元素，並在靜載集中點及分布載重起訖處設置節點。實際共有 '+m.xs.length+' 個節點、'+m.els.length+' 個元素和 '+m.free.length+' 個未約束自由度。內支承維持梁的轉角連續。')
   ];
+  if(c.spans.some(s=>s.section)) {
+    const l=units.show('m',1),length=u('m');
+    rows.push(h2('各跨斷面與彎曲軸'),table(['跨','斷面','面積 ('+length+'²)','Iₕ ('+length+'⁴)','Iᵥ ('+length+'⁴)','採用軸'],c.spans.map((s,i)=>{
+      if(!s.section)return [String(i+1),'直接輸入 I',s.A?fmt(s.A*l*l):'—','—','—','指定 I'];
+      const v=evaluateSection(s.section);
+      return [String(i+1),s.section.name,fmt(v.A*l*l),fmt(v.Ih*l**4),fmt(v.Iv*l**4),s.section.axis==='v'?'形心垂直軸':'形心水平軸'];
+    }),[.65,2.3,1.5,1.5,1.5,1.3]));
+    for(const [i,s] of c.spans.entries())if(s.section){
+      const sec=s.section, dims=Object.entries(sec.dims||{}).map(([key,val])=>key+' = '+fmt(val*l)+' '+length).join('，');
+      rows.push(p('第 '+(i+1)+' 跨 '+sec.name+'。'+(dims?dims+'。':'')+(evaluateSection(sec).source==='table'?'斷面性質採型錄值。':sec.type==='general'?'面積及慣性矩採使用者輸入值。':'以輸入尺寸計算斷面性質，忽略圓角。')));
+    }
+  }
+  if(c.spans.some(s=>s.material)){
+    const lscale=units.show('m',1);
+    rows.push(h2('各跨梁材質'),table(['跨','材質或等級','E ('+u('GPa')+')','密度 (kg/m³)','面積 ('+u('m')+'²)'],c.spans.map((s,i)=>[String(i+1),s.material?.name||'手動剛度',q(s.E,'GPa'),s.material?fmt(s.material.density):'—',s.A?fmt(s.A*lscale*lscale)+(s.areaEstimated?'（推定）':''):'—'])));
+    const seen=new Set();
+    for(const s of c.spans){
+      if(!s.material)continue;
+      const mat=s.material;
+      const note=[mat.name,mat.standard,mat.notes,mat.densityAssumed?'密度採參考值，工程採用時請依材料批次核對。':''].filter(Boolean).join('。');
+      if(!seen.has(note)){seen.add(note);rows.push(p(note));}
+    }
+  }
   const loads = c.loads.map((l,i) => {
     const n=String(i+1);
     if(l.type==='line')return [n,'線性分布',q(l.a,'m')+' 至 '+q(l.b,'m'),q(l.w1,'kN/m')+' 至 '+q(l.w2,'kN/m')+' '+u('kN/m')];

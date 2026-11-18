@@ -1,3 +1,4 @@
+import {sectionOutline,evaluateSection} from './section-geometry.js';
 // The print drawings have a fixed physical layout independent of the on-screen panes.
 const width = 960;
 const ink = '#213840';
@@ -197,8 +198,30 @@ function responseDrawing(series, bounds, config) {
   return canvas;
 }
 
+async function sectionDrawing(span,index,units) {
+  const outline=sectionOutline(span.section);
+  if(!outline)return null;
+  const section=span.section,properties=evaluateSection(section);
+  const {canvas,ctx}=graphic(215);
+  const W=outline.width,H=outline.height,k=Math.min(230/W,155/H),cx=200-W*k/2,baseline=182;
+  ctx.save();ctx.translate(cx,baseline);ctx.scale(k,-k);
+  ctx.fillStyle='#cae1de';ctx.strokeStyle=green;ctx.lineWidth=2/k;
+  const path=new Path2D(outline.path);ctx.fill(path,'evenodd');ctx.stroke(path);ctx.restore();
+  const y=baseline-k*properties.cz,x=cx+k*properties.cy,axisV=section.axis==='v';
+  line(ctx,[[cx-18,y],[cx+W*k+18,y]],axisV?grid:orange,2,[7,4]);
+  line(ctx,[[x,baseline+8],[x,baseline-H*k-8]],axisV?orange:grid,2,[7,4]);
+  label(ctx,section.name,410,52,'left',21);
+  label(ctx,axisV?'採用垂直形心軸 Iᵥ':'採用水平形心軸 Iₕ',410,94,'left',19,orange);
+  label(ctx,'I = '+num(units.show('m⁴',span.I))+' '+units.label('m⁴'),410,131);
+  label(ctx,'A = '+num(properties.A*units.show('m',1)**2)+' '+units.label('m')+'²',410,163);
+  return figure(canvas,'第 '+(index+1)+' 跨斷面','依公稱尺寸繪製，橘色虛線為分析採用的彎曲軸。');
+}
+
 export async function reportFigures(model, analysis, index, units, x) {
   const frame=analysis.frames[index], blocks=[await modelDrawing(model,frame,units)];
+  for(const [i,span] of model.c.spans.entries())if(span.section){
+    const drawing=await sectionDrawing(span,i,units);if(drawing)blocks.push(drawing);
+  }
   const specs=[
     ['M','彎矩','kN·m',green,'正彎矩向下繪製，代表下緣受拉。'],
     ['V','剪力','kN','#28558a','正剪力向上繪製。集中力及支承位置可能有剪力跳躍。'],

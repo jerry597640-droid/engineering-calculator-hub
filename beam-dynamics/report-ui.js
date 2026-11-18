@@ -1,6 +1,6 @@
-import {reportBlocks} from './calculation-report.js';
+import {reportBlocks} from './calculation-report.js?v=1.4';
 import {wordReport} from './word-report.js';
-import {reportFigures} from './report-plots.js';
+import {reportFigures} from './report-plots.js?v=1.4';
 
 const el = (tag,text) => { const node=document.createElement(tag); if(text!=null)node.textContent=text;return node; };
 const get = id => document.getElementById(id);

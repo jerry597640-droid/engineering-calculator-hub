@@ -11,10 +11,11 @@ export function shape(s,L){let r=s/L;return [1-3*r*r+2*r*r*r,L*(r-2*r*r+r*r*r),3
 function deriv(s,L){let r=s/L;return [(-6*r+6*r*r)/L,1-4*r+3*r*r,(6*r-6*r*r)/L,-2*r+3*r*r];}
 const gx=[-Math.sqrt(3/5),0,Math.sqrt(3/5)],gw=[5/9,8/9,5/9];
 function quad(a,b,f){if(b<=a)return 0;let h=(b-a)/2,c=(a+b)/2;return h*gx.reduce((s,x,i)=>s+gw[i]*f(c+h*x),0);}
+export const maxSpans=12;
 export const total=c=>c.spans.reduce((s,x)=>s+x.L,0);
 export const vehicleLength=c=>c.axles.reduce((s,a)=>Math.max(s,a.offset),0);
 export function validate(c){
- if(!c||!Array.isArray(c.spans)||c.spans.length<1||c.spans.length>6)throw Error('請設定 1–6 跨梁。');
+ if(!c||!Array.isArray(c.spans)||c.spans.length<1||c.spans.length>maxSpans)throw Error('請設定 1–'+maxSpans+' 跨梁。');
  const num=v=>typeof v==='number'&&Number.isFinite(v);
  for(const s of c.spans)if(![s.L,s.E,s.I,s.mass].every(num)||s.L<0.1||s.L>200||s.E<=0||s.I<=0||s.mass<=0)throw Error('跨長須為 0.1–200 m；E、I、單位長度質量須大於 0。');
  if(!Array.isArray(c.supports)||c.supports.length!==c.spans.length+1||c.supports.some(s=>!['pin','roller','fixed','free'].includes(s)))throw Error('支承資料不完整。');
