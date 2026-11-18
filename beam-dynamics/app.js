@@ -1,7 +1,8 @@
+import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.6.0';
 import {installSectionCursor} from './section-cursor.js';
 import {installDiagramEditor} from './diagram-editor.js';
 import {installLayoutEditor} from './span-layout.js';
-import {build,statics,moving,dynamic,maxSpans,total,vehicleLength,validate as validateBeam} from './solver.js?v=1.4.1';
+import {build,statics,moving,dynamic,axleLoads,maxSpans,total,vehicleLength,validate as validateBeam} from './solver.js?v=1.6.0';
 import {unitSystem, resultDimensions, displayNumber} from './units.js';
 import {installWorkspace, arrangePins, selectView} from './workspace.js?v=1.4';
 import {openMaterial,installMaterialEditor,renderMaterialPickers,reconcileManualSpanEdit,assertSpanMaterial} from './material-editor.js?v=1.4.1';
@@ -19,6 +20,7 @@ const span=(L=10)=>({L,E:200,I:.0008,mass:800});
 const base={spans:[span(10),span(10)],supports:['pin','roller','roller'],loads:[{type:'line',a:0,b:20,w1:10,w2:10},{type:'point',x:5,p:50}],axles:[{p:60,offset:0},{p:120,offset:4},{p:120,offset:5.4}],mode:'static',mesh:12,selfWeight:false,direction:1,factor:1,speed:60,step:.2,dt:.01,damping:2,tail:1};
 let c=clone(base),model=null,analysis=null,current=null,frameIndex=0,playing=false,raf=0,dirty=false,busy=false,tab='geometry',preset='continuous';
 try{let v=JSON.parse(localStorage.getItem('beamlab-model-v1'));if(v){validate(v,{allowMechanism:true});c=v;preset='';}}catch{}
+let generation=0, autoTimer=0, autoPending=false, travel=null, movingSweep=null;
 let units = unitSystem(c.displayUnits);
 const labelOf = unit => units.label(unit);
 const numberOf = (value, unit, digits = 2) => displayNumber(units.show(unit, value), digits);
@@ -64,10 +66,10 @@ function editors(){
  for(let key of ['direction','factor','speed','step','damping','dt','tail','mesh'])$('#'+key).value=key==='step'?entryValue(c.step,'m'):c[key];$('#selfWeight').checked=c.selfWeight;
  $$('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===c.mode));$$('[data-preset]').forEach(b=>b.classList.toggle('selected',b.dataset.preset===preset));
  let hv=$('#historyType').value;$('#historyType').innerHTML='<option value="M">彎矩 M</option><option value="V">剪力 V</option><option value="D">撓度 δ</option>'+c.supports.map((s,i)=>s==='free'?'':`<option value="R:${i}">${String.fromCharCode(65+i)} 支承反力</option>`).join('');if([...$('#historyType').options].some(o=>o.value===hv))$('#historyType').value=hv;
- $('#modelBadge').textContent=c.spans.length===1?'單跨梁':c.spans.length+' 跨連續梁';$('#layoutBadge').textContent=c.spans.length+' 跨';$('#addSpan').disabled=c.spans.length>=maxSpans;$('#addAxle').disabled=c.axles.length>=12;unitLabels();renderMaterialPickers();renderSectionPickers();
+ $('#modelBadge').textContent=c.spans.length===1?'單跨梁':c.spans.length+' 跨連續梁';$('#layoutBadge').textContent=c.spans.length+' 跨';$('#addSpan').disabled=c.spans.length>=maxSpans;$('#addAxle').disabled=c.axles.length>=12;unitLabels();renderMaterialPickers();renderSectionPickers();liveLoads.refresh();
 }
 function persist(){try{localStorage.setItem('beamlab-model-v1',JSON.stringify(c));$('#saveStatus').textContent='設定已保存在此瀏覽器';}catch{$('#saveStatus').textContent='無法自動儲存，請匯出模型';}}
-function stale(){stop();dirty=true;sectionCursor.clear();document.body.classList.add('stale');$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;notice('設定已變更，請按「計算分析」更新結果。');persist();try{drawBeam();}catch{}}
+function stale(){generation++;clearTimeout(autoTimer);autoPending=false;stop();dirty=true;sectionCursor.clear();document.body.classList.add('stale');$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;notice('設定已變更，請按「計算分析」更新結果。');persist();try{drawBeam();}catch{}}
 function notice(s,error=false){$('#notice').hidden=!s;$('#notice').textContent=s;$('#notice').classList.toggle('error',error);$('#settingsStatus').textContent=s;$('#settingsStatus').hidden=!s;$('#settingsStatus').classList.toggle('error',error);}
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),2400);}
 function svgText(x,y,text,color='#6b7e83',anchor='middle',size=12){return `<text x="${x}" y="${y}" fill="${color}" text-anchor="${anchor}" style="font-size:${size}px">${text}</text>`;}
@@ -100,7 +102,26 @@ function drawBeam(){let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(
    if(i<c.spans.length)x+=c.spans[i].L;
  });
  out+='<g pointer-events="none">';
- let pointLoads=c.loads.filter(l=>l.type!=='line');if(!dirty&&current&&c.mode!=='static')pointLoads.push(...current.load.loads.filter(l=>l.vehicle));pointLoads.forEach((l,i)=>{let xx=X(l.x),col=l.vehicle?'#d88a3b':'#087a70';if(l.type==='moment'){out+=`<path d="M${xx+13},${y-17}a18 18 0 1 0 -25 -10" fill="none" stroke="${col}" stroke-width="2" marker-end="url(#arrow)"/>`+svgText(xx,y-45,quantity(l.p,'kN·m',1),col);}else{let top=l.vehicle?38:24;out+=`<path d="M${xx},${l.p<0?y-3:top}V${l.p<0?top:y-3}" stroke="${col}" stroke-width="2" marker-end="url(#arrow)"/>`+svgText(xx,top-9,quantity(l.p,'kN',1),col);if(l.vehicle)out+=`<circle cx="${xx}" cy="${y-9}" r="5" fill="#fff5e8" stroke="${col}" stroke-width="2"/>`;}});
+ let pointLoads=c.loads.filter(l=>l.type!=='line');if(c.mode!=='static'){
+   const wheels=axleLoads({c,L},vehicleTravel());
+   if(wheels.length>1){
+     const xs=wheels.map(w=>X(w.x));
+     out+=`<path d="M${Math.min(...xs)},${y-11}H${Math.max(...xs)}" stroke="#d88a3b" stroke-width="3" opacity=".8"/>`;
+   }
+   const active=Number($('#liveChoice').value.replace('axles:',''));
+   pointLoads.push(...wheels.sort((a,b)=>Number(b.axleIndex===active)-Number(a.axleIndex===active)));
+ }
+ const labelBoxes=[];
+ function loadLabel(x,preferredY,text,color){
+   const width=Math.min(W-8,Math.max(30,text.length*7.5)),cx=Math.max(width/2+3,Math.min(W-width/2-3,x));
+   for(const yLabel of [preferredY,preferredY-15,preferredY+15,preferredY-30,preferredY+30]){
+     if(yLabel<12||yLabel>y-19)continue;
+     if(labelBoxes.some(b=>Math.abs(b.cx-cx)<(b.width+width)/2+3&&Math.abs(b.y-yLabel)<14))continue;
+     labelBoxes.push({cx,y:yLabel,width});return svgText(cx,yLabel,text,color);
+   }
+   return '';
+ }
+ pointLoads.forEach((l,i)=>{let xx=X(l.x),selected=l.vehicle&&$('#liveChoice').value==='axles:'+l.axleIndex,col=l.vehicle?(selected?'#a7500f':'#d88a3b'):'#087a70';if(l.type==='moment'){out+=`<path d="M${xx+(l.p<0?-13:13)},${y-17}a18 18 0 1 ${l.p<0?1:0} ${l.p<0?25:-25} -10" fill="none" stroke="${col}" stroke-width="2" marker-end="url(#arrow)"/>`+loadLabel(xx,y-45,quantity(l.p,'kN·m',1),col);}else{let top=y-3-(l.p===0?0:28+70*Math.abs(l.p)/(Math.abs(l.p)+35));out+=`<path d="M${xx},${l.p<0?y-3:top}V${l.p<0?top:y-3}" stroke="${col}" stroke-width="2" marker-end="url(#arrow)"/>`+loadLabel(xx,top-9,quantity(l.p,'kN',1),col);if(l.vehicle)out+=`<circle data-axle="${l.axleIndex}" aria-label="第 ${l.axleIndex+1} 軸，x = ${quantity(l.x,'m',3)}，軸重 ${quantity(l.p,'kN',2)}" cx="${xx}" cy="${y-9}" r="${selected?6:4.5}" fill="${selected?'#ffe3bb':'#fff5e8'}" stroke="${col}" stroke-width="2"/>`;}});
  const target=document.activeElement?.closest('#beamWrap [role="button"]')?.dataset;
  out+='</g></svg>';$('#beamWrap').innerHTML=out;
  if(target){const key=target.node===undefined?'span':'node';$('#beamWrap [data-'+key+'="'+target[key]+'"]')?.focus({preventScroll:true});}
@@ -116,12 +137,52 @@ function chart(id,pts,key,color,env=null,opts={}){let W=Math.max(300,Math.min(10
  let peak=pts.reduce((a,p)=>Math.abs(p[key])>Math.abs(a[key])?p:a,pts[0]);lines+=`<circle cx="${X(peak.x)}" cy="${Y(peak[key])}" r="3" fill="${color}"/>`+svgText(Math.max(l+30,Math.min(W-r-30,X(peak.x))),Math.max(14,Math.min(H-bottom-5,Y(peak[key])+(peak[key]*(up?1:-1)>0?16:-10))),numberOf(peak[key],resultDimensions[key]),color);
  $('#'+id).innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" ${opts.time?'':`data-plot-left="${l}" data-plot-right="${W-r}" data-plot-zero="${base}" data-plot-scale="${(up?1:-1)*((H-top-bottom)/2-7)/mx}"`} role="img" aria-label="${key} ${opts.time?'歷時':'分布'}圖"><title>${key}，${opts.time?'時間 s':'座標 '+labelOf('m')}</title>${lines}</svg>`;
 }
+function vehicleTravel(){
+ const length=total(c),end=length+vehicleLength(c)+(c.mode==='dynamic'?c.speed/3.6*c.tail:0);
+ return Math.min(end,Math.max(0,travel??(length+vehicleLength(c))*.4));
+}
+function seekVehicle(x){
+ stop();travel=c.direction===1?x:total(c)-x;
+ if(analysis&&!busy&&!dirty&&c.mode!=='static'){
+   selectTravelFrame(travel);renderResults();
+ }else drawBeam();
+}
+function selectTravelFrame(distance){
+ if(c.mode==='moving'&&movingSweep){
+   const station=movingAtDistance(movingSweep,model,distance,statics);
+   analysis=station.analysis;frameIndex=station.index;
+ }else frameIndex=closestFrame(analysis.frames,distance);
+ $('#frameRange').max=analysis.frames.length-1;
+}
+function scheduleLiveAnalysis(){
+ clearTimeout(autoTimer);autoPending=true;
+ autoTimer=setTimeout(()=>{if(!busy&&autoPending)run();},c.mode==='static'?75:230);
+}
+function editLiveLoad(kind,index,key,value){
+ const row=c[kind]?.[index],L=total(c);
+ if(!row)return '找不到選取的載重。';
+ if(['a','b','x'].includes(key)&&(value<0||value>L))return '位置必須在梁長範圍內。';
+ if((key==='a'&&value>=row.b)||(key==='b'&&value<=row.a))return '分布載重的終點必須大於起點。';
+ if(kind==='axles'&&(key==='p'?value<=0:value<0))return '軸重須大於零，軸距須大於或等於零。';
+ if(key==='offset'&&value!==0&&!c.axles.some((a,i)=>i!==index&&a.offset===0))return '至少一軸的距前軸距離須為 0。';
+ if(row[key]===value)return '';
+ row[key]=value;preset='';$$('[data-preset]').forEach(b=>b.classList.remove('selected'));
+ const side=$('.sidebar input[data-kind="'+kind+'"][data-index="'+index+'"][data-key="'+key+'"]');
+ if(side&&side!==document.activeElement)side.value=entryValue(value,side.dataset.dimension);
+ stale();notice('梁圖已更新，正在更新分析結果。');scheduleLiveAnalysis();
+ return '';
+}
+const liveLoads=installLiveLoads({
+ config:()=>c,units:()=>units,length:()=>total(c),
+ onSelect:()=>{drawBeam();if(!dirty&&!busy)sectionCursor.refresh();},front:()=>c.direction===1?vehicleTravel():total(c)-vehicleTravel(),seek:seekVehicle,edit:editLiveLoad,
+ enableVehicle:selection=>{c.mode='moving';travel=null;editors();liveLoads.selectVehicle(selection);stale();run();}
+});
 function refreshStepInfo() {
   if (!analysis || c.mode==='static') return;
   const detail = c.mode === 'dynamic' ? `時間步長 ${fmt(analysis.dt,5)} s` : `移動步長 ≤ ${quantity(analysis.step,'m',3)}`;
   $('#stepInfo').textContent = `${detail} · ${analysis.frames.length} ${c.mode === 'dynamic' ? '時刻' : '位置'}`;
 }
-function renderResults(){if(!analysis)return;refreshStepInfo();current=analysis.frames[frameIndex].result;let env=c.mode!=='static'&&$('#showEnvelope').checked?analysis.envelope:null;
+function renderResults(){if(!analysis)return;refreshStepInfo();current=analysis.frames[frameIndex].result;if(c.mode!=='static')travel=analysis.frames[frameIndex].front;liveLoads.sync(document.activeElement);let env=c.mode!=='static'&&$('#showEnvelope').checked?analysis.envelope:null;
  drawBeam();chart('momentChart',current.points,'M','#087a70',env?.rows);chart('shearChart',current.points,'V','#4a75ba',env?.rows);chart('deflectionChart',current.points,'D','#9b75ae',env?.rows);
  let pts=env?env.rows.flatMap(p=>[{x:p.x,M:p.Mmin,V:p.Vmin,D:p.Dmin},{x:p.x,M:p.Mmax,V:p.Vmax,D:p.Dmax}]):current.points;
  let maxM=pts.reduce((a,p)=>p.M>a.M?p:a,pts[0]),minM=pts.reduce((a,p)=>p.M<a.M?p:a,pts[0]),maxV=pts.reduce((a,p)=>Math.abs(p.V)>Math.abs(a.V)?p:a,pts[0]),maxD=pts.reduce((a,p)=>Math.abs(p.D)>Math.abs(a.D)?p:a,pts[0]);
@@ -132,13 +193,14 @@ function renderResults(){if(!analysis)return;refreshStepInfo();current=analysis.
  $('#analysisInfo').textContent=`${model.els.length} 個梁元素 · 第一頻率 ${fmt(model.omega/(2*Math.PI),3)} Hz · 求解器平衡殘差（基準單位） ${current.residual.toExponential(1)} kN／kN·m`;
  sectionCursor.refresh();}
 function history(){if(!analysis||c.mode==='static')return;let type=$('#historyType').value,isReaction=type.startsWith('R:'),x=readPosition('#probeX');$('#probeX').disabled=isReaction;if(!isReaction&&(!Number.isFinite(x)||x<0||x>model.L)){$('#historyText').textContent='查詢位置超出梁長';return;}let key=isReaction?'R':type,ri=Number(type.split(':')[1]),unit=key==='M'?'kN·m':key==='D'?'mm':'kN',data=analysis.frames.map(f=>({x:f.t,[key]:isReaction?f.result.reactions[ri].R:f.result.at(x)[key]}));chart('historyChart',data,key,key==='V'?'#4a75ba':'#087a70',null,{time:true,end:analysis.frames.at(-1).t});$('#historyText').textContent=`${isReaction?String.fromCharCode(65+ri)+' 支承':('x = '+quantity(x,'m'))} · ${$('#historyType').selectedOptions[0].text}（${labelOf(unit)}），橫軸時間（s）。完整歷時可匯出 CSV。`;}
-async function run(goToResults=false){if(busy)return;stop();sectionCursor.clear();busy=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#runBtn').disabled=true;$('#commandRun').disabled=true;$('#runBtn').textContent='計算中…';$('.sidebar').classList.add('busy');$$('[data-mode]').forEach(b=>b.disabled=true);$('#importBtn').disabled=true;
- try{validate(c);model=build(clone(c));let progress=p=>{$('#runBtn').textContent=`計算中 ${Math.round(p*100)}%`;};if(c.mode==='static'){analysis={frames:[{t:0,front:0,result:statics(model)}]};}else analysis=await(c.mode==='moving'?moving(model,progress):dynamic(model,progress));
+async function run(goToResults=false){if(busy)return;clearTimeout(autoTimer);autoPending=false;const started=generation;stop();sectionCursor.clear();busy=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#runBtn').disabled=true;$('#commandRun').disabled=true;$('#runBtn').textContent='計算中…';$('.sidebar').classList.add('busy');$$('[data-mode]').forEach(b=>b.disabled=true);$('#importBtn').disabled=true;
+ try{validate(c);const nextModel=build(clone(c));let nextAnalysis;let progress=p=>{if(started!==generation)throw Error('superseded');$('#runBtn').textContent=`計算中 ${Math.round(p*100)}%`;};if(c.mode==='static'){nextAnalysis={frames:[{t:0,front:0,result:statics(nextModel)}]};}else nextAnalysis=await(c.mode==='moving'?moving(nextModel,progress):dynamic(nextModel,progress));
+ if(started!==generation)return;model=nextModel;analysis=nextAnalysis;
  if(!(readPosition('#queryX')>=0&&readPosition('#queryX')<=model.L))$('#queryX').value=entryValue(model.L/2,'m');
- frameIndex=c.mode==='static'?0:Math.round((analysis.frames.length-1)*.4);current=analysis.frames[frameIndex].result;dirty=false;document.body.classList.remove('stale','analysis-invalid');$('#csvBtn').disabled=false;$('#reportBtn').disabled=false;$('#exchangeBtn').disabled=false;$('#printBtn').disabled=false;$('#playback').hidden=c.mode==='static';$('#historyPanel').hidden=c.mode==='static';$('#frameRange').max=analysis.frames.length-1;refreshStepInfo();
+ movingSweep=c.mode==='moving'?analysis:null;frameIndex=0;if(c.mode!=='static')selectTravelFrame(vehicleTravel());current=analysis.frames[frameIndex].result;dirty=false;document.body.classList.remove('stale','analysis-invalid');$('#csvBtn').disabled=false;$('#reportBtn').disabled=false;$('#exchangeBtn').disabled=false;$('#printBtn').disabled=false;$('#playback').hidden=c.mode==='static';$('#historyPanel').hidden=c.mode==='static';$('#frameRange').max=analysis.frames.length-1;refreshStepInfo();
 
  notice(c.mode==='dynamic'?'動力模式：考慮梁的質量與阻尼；車輛採移動力模型，未含車橋耦合。':c.mode==='moving'?'移動包絡採逐位置靜力計算，不含振動慣性效應。':'');persist();arrangePins();if(goToResults===true)selectView('results',true);renderResults();history();
- }catch(e){dirty=true;document.body.classList.add('stale','analysis-invalid');notice(e.message,true);$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;}finally{busy=false;$('#runBtn').disabled=false;$('#commandRun').disabled=false;$('#runBtn').textContent='計算分析';$('.sidebar').classList.remove('busy');$$('[data-mode]').forEach(b=>b.disabled=false);$('#importBtn').disabled=false;}}
+ }catch(e){if(started!==generation)return;dirty=true;document.body.classList.add('stale','analysis-invalid');notice(e.message,true);$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;}finally{busy=false;$('#runBtn').disabled=false;$('#commandRun').disabled=false;$('#runBtn').textContent='計算分析';$('.sidebar').classList.remove('busy');$$('[data-mode]').forEach(b=>b.disabled=false);$('#importBtn').disabled=false;if(autoPending)scheduleLiveAnalysis();}}
 function stop(){playing=false;cancelAnimationFrame(raf);$('#playBtn').textContent='播放';}
 function play(){if(!analysis||dirty)return;if(playing){stop();return;}playing=true;$('#playBtn').textContent='暫停';let last=0;function tick(t){if(!playing)return;if(t-last>70){last=t;frameIndex=(frameIndex+Math.max(1,Math.floor(analysis.frames.length/180)))%analysis.frames.length;renderResults();}raf=requestAnimationFrame(tick);}raf=requestAnimationFrame(tick);}
 function download(name,type,data){let a=document.createElement('a'),url=URL.createObjectURL(new Blob([data],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);}
@@ -175,11 +237,20 @@ function csv() {
   download('BeamLab_results.csv','text/csv;charset=utf-8','\ufeff'+rows.map(row=>row.join(',')).join('\n'));
   toast('分析結果 CSV 已匯出');
 }
-function usePreset(name){preset=name;c={...clone(base),displayUnits:units.prefs};if(name==='simple'){c.spans=[span(10)];c.supports=['pin','roller'];c.loads=[{type:'line',a:0,b:10,w1:10,w2:10}];}if(name==='cantilever'){c.spans=[span(5)];c.supports=['fixed','free'];c.loads=[{type:'point',x:5,p:50}];}editors();stale();run();}
-$('.sidebar').addEventListener('change',e=>{let el=e.target;if(el.dataset.kind){c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=units.base(el.dataset.dimension,el.valueAsNumber);if(el.value==='')c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=NaN;if(el.dataset.kind==='spans'){const s=c.spans[Number(el.dataset.index)];reconcileManualSectionEdit(s,el.dataset.key);reconcileManualSpanEdit(s,el.dataset.key);if(el.dataset.key==='L'||el.dataset.key==='I')editors();else {renderMaterialPickers();renderSectionPickers();}}}else if(el.dataset.support!=null){changeSupport(Number(el.dataset.support),el.value,'sidebar');return;}else if(el.id==='selfWeight')c.selfWeight=el.checked;else if(el.id in c)c[el.id]=el.type==='checkbox'?el.checked:el.id==='step'?units.base('m',el.valueAsNumber):Number(el.value);else return;preset='';$$('[data-preset]').forEach(b=>b.classList.remove('selected'));stale();});
+function usePreset(name){travel=null;preset=name;c={...clone(base),displayUnits:units.prefs};if(name==='simple'){c.spans=[span(10)];c.supports=['pin','roller'];c.loads=[{type:'line',a:0,b:10,w1:10,w2:10}];}if(name==='cantilever'){c.spans=[span(5)];c.supports=['fixed','free'];c.loads=[{type:'point',x:5,p:50}];}editors();stale();run();}
+const isLoadField=el=>['loads','axles'].includes(el.dataset.kind);
+$('.sidebar').addEventListener('input',e=>{if(isLoadField(e.target))liveLoads.sidebarInput(e.target);});
+$('.sidebar').addEventListener('focusout',e=>{
+ const el=e.target;
+ if(isLoadField(el)&&el.validity.customError){
+   el.value=entryValue(c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key],el.dataset.dimension);
+   el.setCustomValidity('');el.removeAttribute('aria-invalid');
+ }
+});
+$('.sidebar').addEventListener('change',e=>{let el=e.target;if(isLoadField(el)){liveLoads.sidebarInput(el);return;}if(el.dataset.kind){c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=units.base(el.dataset.dimension,el.valueAsNumber);if(el.value==='')c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=NaN;if(el.dataset.kind==='spans'){const s=c.spans[Number(el.dataset.index)];reconcileManualSectionEdit(s,el.dataset.key);reconcileManualSpanEdit(s,el.dataset.key);if(el.dataset.key==='L'||el.dataset.key==='I')editors();else {renderMaterialPickers();renderSectionPickers();}}}else if(el.dataset.support!=null){changeSupport(Number(el.dataset.support),el.value,'sidebar');return;}else if(el.id==='selfWeight')c.selfWeight=el.checked;else if(el.id in c)c[el.id]=el.type==='checkbox'?el.checked:el.id==='step'?units.base('m',el.valueAsNumber):Number(el.value);else return;preset='';$$('[data-preset]').forEach(b=>b.classList.remove('selected'));stale();});
 $('.sidebar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tab){tab=b.dataset.tab;$$('.config-panel').forEach(p=>p.hidden=p.id!==tab);$$('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));}if(b.dataset.preset)usePreset(b.dataset.preset);if(b.dataset.addload){if(c.loads.length>=50)return toast('最多 50 筆靜態載重');let type=b.dataset.addload;c.loads.push(type==='line'?{type,a:0,b:total(c),w1:10,w2:10}:{type,x:total(c)/2,p:type==='point'?50:20});editors();stale();}if(b.dataset.delete){let i=Number(b.dataset.index);if(b.dataset.delete==='span'){c.spans.splice(i,1);c.supports.splice(i===0?1:i,1);}if(b.dataset.delete==='load')c.loads.splice(i,1);if(b.dataset.delete==='axle')c.axles.splice(i,1);editors();stale();}});
 $('#addSpan').onclick=()=>{if(c.spans.length<maxSpans){c.spans.push(structuredClone(c.spans.at(-1)));c.supports.splice(-1,0,'roller');preset='';editors();stale();}};$('#addAxle').onclick=()=>{if(c.axles.length<12){c.axles.push({p:120,offset:vehicleLength(c)+1.4});editors();stale();}};
-$$('[data-mode]').forEach(b=>b.onclick=()=>{c.mode=b.dataset.mode;editors();stale();run();});$('#runBtn').onclick=()=>run(true);$('#playBtn').onclick=play;$('#frameRange').oninput=e=>{stop();frameIndex=Number(e.target.value);renderResults();};$('#showEnvelope').onchange=renderResults;$('#probeX').onchange=history;$('#historyType').onchange=history;$('#csvBtn').onclick=csv;$('#printBtn').onclick=()=>{stop();window.print();};$('#saveBtn').onclick=()=>{try{validate(c);download('BeamLab_model.json','application/json',JSON.stringify(c,null,2));toast('模型 JSON 已匯出');}catch(e){notice(e.message,true);}};$('#importBtn').onclick=()=>$('#fileInput').click();$('#fileInput').onchange=async e=>{try{let f=e.target.files[0];if(!f)return;if(f.size>1000000)throw Error('模型檔案過大');let obj=JSON.parse(await f.text());validate(obj);c=obj;preset='';dirty=true;updateUnits(obj.displayUnits || units.prefs);stale();await run();toast('模型已匯入');}catch(err){notice('匯入失敗：'+err.message,true);}e.target.value='';};$('#methodBtn').onclick=()=>$('#methodDialog').showModal();$('#closeMethod').onclick=()=>$('#methodDialog').close();$('#methodDialog').onclick=e=>{if(e.target===$('#methodDialog'))$('#methodDialog').close();};
+$$('[data-mode]').forEach(b=>b.onclick=()=>{travel=null;c.mode=b.dataset.mode;editors();stale();run();});$('#runBtn').onclick=()=>run(true);$('#playBtn').onclick=play;$('#frameRange').oninput=e=>{if(dirty||busy)return;stop();frameIndex=Number(e.target.value);renderResults();};$('#showEnvelope').onchange=()=>{if(!dirty&&!busy)renderResults();};$('#probeX').onchange=history;$('#historyType').onchange=history;$('#csvBtn').onclick=csv;$('#printBtn').onclick=()=>{stop();window.print();};$('#saveBtn').onclick=()=>{try{validate(c);download('BeamLab_model.json','application/json',JSON.stringify(c,null,2));toast('模型 JSON 已匯出');}catch(e){notice(e.message,true);}};$('#importBtn').onclick=()=>$('#fileInput').click();$('#fileInput').onchange=async e=>{try{let f=e.target.files[0];if(!f)return;if(f.size>1000000)throw Error('模型檔案過大');let obj=JSON.parse(await f.text());validate(obj);travel=null;c=obj;preset='';dirty=true;updateUnits(obj.displayUnits || units.prefs);stale();await run();toast('模型已匯入');}catch(err){notice('匯入失敗：'+err.message,true);}e.target.value='';};$('#methodBtn').onclick=()=>$('#methodDialog').showModal();$('#closeMethod').onclick=()=>$('#methodDialog').close();$('#methodDialog').onclick=e=>{if(e.target===$('#methodDialog'))$('#methodDialog').close();};
 $('#exchangeBtn').onclick=async()=>{
   if(!model||!analysis||busy||dirty)return;
   stop();

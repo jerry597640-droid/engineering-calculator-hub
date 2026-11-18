@@ -41,7 +41,7 @@ export function build(c){validate(c);let xs=[0],ss=[0],pos=0;
  const expand=x=>{let u=zero(n);free.forEach((j,i)=>u[j]=x[i]);return u;};
  return {c,xs,ss,els,n,K,M,k,m,free,factor,omega,expand,constrained,L:pos};
 }
-export function axleLoads(model,front){if(front==null)return [];let {c,L}=model;return c.axles.map(a=>({type:'point',x:c.direction===1?front-a.offset:L-front+a.offset,p:a.p*c.factor,vehicle:true})).filter(a=>a.x>=-1e-8&&a.x<=L+1e-8).map(a=>({...a,x:Math.max(0,Math.min(L,a.x))}));}
+export function axleLoads(model,front){if(front==null)return [];let {c,L}=model;return c.axles.map((a,axleIndex)=>({type:'point',axleIndex,x:c.direction===1?front-a.offset:L-front+a.offset,p:a.p*c.factor,vehicle:true})).filter(a=>a.x>=-1e-8&&a.x<=L+1e-8).map(a=>({...a,x:Math.max(0,Math.min(L,a.x))}));}
 export function loading(model,front=null){let loads=[...model.c.loads,...axleLoads(model,front)];if(model.c.selfWeight)model.els.forEach(e=>loads.push({type:'line',a:e.a,b:e.b,w1:e.mu*9.80665,w2:e.mu*9.80665}));
  let F=zero(model.n),efs=model.els.map(()=>zero(4)),elLoads=model.els.map(()=>[]);
  for(const l of loads){if(l.type==='line'){model.els.forEach((e,i)=>{let a=Math.max(e.a,l.a),b=Math.min(e.b,l.b);if(b<=a)return;elLoads[i].push(l);for(let j=0;j<4;j++)efs[i][j]+=quad(a,b,x=>-intensity(l,x)*shape(x-e.a,e.h)[j]);});}else{let i=model.els.findIndex(e=>l.x>=e.a-1e-8&&l.x<=e.b+1e-8);if(i<0)continue;let e=model.els[i],s=Math.max(0,Math.min(e.h,l.x-e.a)),N=l.type==='moment'?deriv(s,e.h):shape(s,e.h);elLoads[i].push(l);for(let j=0;j<4;j++)efs[i][j]+=N[j]*l.p*(l.type==='moment'?1:-1);}}

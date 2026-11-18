@@ -66,6 +66,10 @@
 - [TU Delft 梁動力元素](https://teachbooks.tudelft.nl/computational-modelling/dynamics/Exercises/str_elem_dyn_workshops/Workshop_FEM_dyn_beam.html)：剛度與一致質量矩陣理論。
 - [OpenSees Newmark 文件](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/integrator/Newmark.html)：平均加速度積分方法。
 
+## 梁圖即時載重
+
+可在模型視窗下方調整集中力、集中彎矩、分布載重與車軸。從靜力模式選車軸時會切換到移動分析。拖動前軸位置會同步更新各軸座標及受力圖。逐位置靜力模式在輸入位置求解，並加入該位置檢核包絡；動力歷時模式依最近的積分時刻顯示。更改軸重與軸距會自動重算。
+
 ## 介面樣式
 
 修改 style.css、material-editor.css 或 section-editor.css 後，執行 `node sync-styles.mjs` 將樣式嵌入首頁。可用 `node sync-styles.mjs --check` 驗證。
