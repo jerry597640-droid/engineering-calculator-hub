@@ -156,7 +156,7 @@ function plotAndSummarize(){
     ids('sectionDrawing').replaceChildren();ids('sectionApply').disabled=true;status.textContent=e.message;
   }
 }
-function openSection(i){
+export function openSection(i){
   index=i;const span=context.getConfig().spans[i];if(!span)return;
   draft=span.section?copy(span.section):fromSpan(span);
   ids('sectionTitle').textContent='第 '+(i+1)+' 跨梁斷面';

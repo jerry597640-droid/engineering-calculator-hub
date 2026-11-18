@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {build,statics,maxSpans} from './solver.js';
+import {build,statics,maxSpans,validate} from './solver.js';
 import {changeLayout} from './span-layout.js';
 import {evaluateSection} from './section-geometry.js';
 import {sectionCatalog} from './section-catalog.js';
@@ -40,4 +40,8 @@ for(const n of [1,2,3,6,maxSpans]){
  const m=build(changeLayout(model,Array(n).fill(6)));near(statics(m).reactions.reduce((a,s)=>a+s.R,0),n*60);
 }
 assert.throws(()=>changeLayout(model,Array(maxSpans+1).fill(10)));
+const unsupported={...model,supports:['free','roller']};
+assert.doesNotThrow(()=>validate(unsupported,{allowMechanism:true}));
+assert.throws(()=>build(unsupported),/機構/);
+assert.throws(()=>validate({...unsupported,supports:['unknown','roller']},{allowMechanism:true}),/支承資料/);
 console.log('Passed span layouts, load positions, end restraints, strong/weak axes, exchange and 12-span equilibrium.');

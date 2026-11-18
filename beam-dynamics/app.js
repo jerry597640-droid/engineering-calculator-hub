@@ -1,12 +1,13 @@
+import {installDiagramEditor} from './diagram-editor.js';
 import {installLayoutEditor} from './span-layout.js';
-import {build,statics,moving,dynamic,maxSpans,total,vehicleLength,validate as validateBeam} from './solver.js?v=1.4';
+import {build,statics,moving,dynamic,maxSpans,total,vehicleLength,validate as validateBeam} from './solver.js?v=1.4.1';
 import {unitSystem, resultDimensions, displayNumber} from './units.js';
 import {installWorkspace, arrangePins, selectView} from './workspace.js?v=1.4';
-import {installMaterialEditor,renderMaterialPickers,reconcileManualSpanEdit,assertSpanMaterial} from './material-editor.js?v=1.4';
-import {installSectionEditor,renderSectionPickers,reconcileManualSectionEdit,assertSpanSection} from './section-editor.js?v=1.4';
+import {openMaterial,installMaterialEditor,renderMaterialPickers,reconcileManualSpanEdit,assertSpanMaterial} from './material-editor.js?v=1.4.1';
+import {openSection,installSectionEditor,renderSectionPickers,reconcileManualSectionEdit,assertSpanSection} from './section-editor.js?v=1.4.1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)],fmt=(x,n=2)=>Math.abs(x)<1e-7?(0).toFixed(n):Number(x).toFixed(n),clone=x=>JSON.parse(JSON.stringify(x));
-function validate(input) {
- validateBeam(input);
+function validate(input,options) {
+ validateBeam(input,options);
  for(const s of input.spans){
    if(s.A!=null&&!(Number.isFinite(s.A)&&s.A>0))throw Error('斷面積必須為正數。');
    assertSpanMaterial(s);
@@ -16,7 +17,7 @@ function validate(input) {
 const span=(L=10)=>({L,E:200,I:.0008,mass:800});
 const base={spans:[span(10),span(10)],supports:['pin','roller','roller'],loads:[{type:'line',a:0,b:20,w1:10,w2:10},{type:'point',x:5,p:50}],axles:[{p:60,offset:0},{p:120,offset:4},{p:120,offset:5.4}],mode:'static',mesh:12,selfWeight:false,direction:1,factor:1,speed:60,step:.2,dt:.01,damping:2,tail:1};
 let c=clone(base),model=null,analysis=null,current=null,frameIndex=0,playing=false,raf=0,dirty=false,busy=false,tab='geometry',preset='continuous';
-try{let v=JSON.parse(localStorage.getItem('beamlab-model-v1'));if(v){validate(v);c=v;preset='';}}catch{}
+try{let v=JSON.parse(localStorage.getItem('beamlab-model-v1'));if(v){validate(v,{allowMechanism:true});c=v;preset='';}}catch{}
 let units = unitSystem(c.displayUnits);
 const labelOf = unit => units.label(unit);
 const numberOf = (value, unit, digits = 2) => displayNumber(units.show(unit, value), digits);
@@ -70,12 +71,39 @@ function notice(s,error=false){$('#notice').hidden=!s;$('#notice').textContent=s
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),2400);}
 function svgText(x,y,text,color='#6b7e83',anchor='middle',size=12){return `<text x="${x}" y="${y}" fill="${color}" text-anchor="${anchor}" style="font-size:${size}px">${text}</text>`;}
 function drawBeam(){let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(1000,Math.floor($('#beamWrap').clientWidth || 700)-12)),H=230,pad=W<540?35:65,scale=(W-2*pad)/L,X=x=>pad+x*scale,y=125;
- let out=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="梁模型、支承與載重"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5L5 0" stroke="#819b9f" stroke-width="1"/></pattern></defs>`;
+ let out=`<svg viewBox="0 0 ${W} ${H}" role="group" aria-label="梁模型、支承與載重"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5L5 0" stroke="#819b9f" stroke-width="1"/></pattern></defs>`;
  let lines=c.loads.filter(l=>l.type==='line');lines.forEach((l,i)=>{let mx=Math.max(Math.abs(l.w1),Math.abs(l.w2),1),yy=y-20-i*15,a=X(l.a),b=X(l.b);out+=`<path d="M${a},${yy-30*l.w1/mx}L${b},${yy-30*l.w2/mx}" fill="none" stroke="#087a70" stroke-width="1.5"/>`;for(let j=0;j<=12;j++){let t=j/12,x=a+(b-a)*t,w=l.w1+(l.w2-l.w1)*t;out+=`<path d="M${x},${yy-30*w/mx}L${x},${yy}" stroke="#087a70" stroke-width="1.3" marker-end="url(#arrow)"/>`;}out+=svgText((a+b)/2,yy-38,`${numberOf(l.w1,'kN/m')}${l.w1!==l.w2?' → '+numberOf(l.w2,'kN/m'):''} ${labelOf('kN/m')}`,'#087a70');});
  out+=`<rect x="${pad}" y="${y}" width="${W-pad*2}" height="8" rx="2" fill="#27434c"/>`;
- let x=0;c.supports.forEach((s,i)=>{let xx=X(x);if(s==='fixed'){let left=i===c.supports.length-1;out+=`<rect x="${xx-(left?0:13)}" y="${y-21}" width="13" height="59" fill="url(#hatch)"/><path d="M${xx},${y-21}v59" stroke="#27434c" stroke-width="2"/>`;}else if(s!=='free'){out+=`<path d="M${xx},${y+8}l-11 17h22z" fill="#edf4f3" stroke="#527c7a" stroke-width="1.5"/>`;if(s==='roller')out+=`<circle cx="${xx-6}" cy="${y+29}" r="3" fill="white" stroke="#527c7a"/><circle cx="${xx+6}" cy="${y+29}" r="3" fill="white" stroke="#527c7a"/>`;out+=`<path d="M${xx-17},${y+35}h34" stroke="#78918f"/>`;}out+=svgText(xx,y+55,String.fromCharCode(65+i),'#244b50');if(i<c.spans.length){let nx=x+c.spans[i].L;out+=`<path d="M${xx},205H${X(nx)}M${xx},200v10M${X(nx)},200v10" stroke="#a8babc"/>`+svgText((xx+X(nx))/2,201,quantity(c.spans[i].L,'m',1));x=nx;}});
+ let x=0;
+ c.spans.forEach((member,i)=>{
+   const a=X(x);x+=member.L;const b=X(x),letter=String.fromCharCode(65+i,66+i);
+   out+=`<g class="beam-span" role="button" tabindex="0" data-span="${i}" aria-haspopup="dialog" aria-label="編輯第 ${i+1} 跨 ${letter} 梁斷面與材質"><title>第 ${i+1} 跨 ${letter} · 變更斷面或材質</title><rect class="span-hit" x="${a}" y="${y-16}" width="${b-a}" height="115"/><rect class="span-rail" x="${a}" y="${y}" width="${b-a}" height="8" rx="2"/><path d="M${a},205H${b}M${a},200v10M${b},200v10" stroke="#a8babc"/>`+svgText((a+b)/2,201,quantity(member.L,'m',1))+'</g>';
+ });
+ x=0;
+ c.supports.forEach((s,i)=>{
+   const xx=X(x),letter=String.fromCharCode(65+i);
+   const left=i?Math.min(30,c.spans[i-1].L*scale/2):30;
+   const right=i<c.spans.length?Math.min(30,c.spans[i].L*scale/2):30;
+   out+=`<g class="beam-support" role="button" tabindex="0" data-node="${i}" aria-haspopup="dialog" aria-label="變更 ${letter} 點支承（${supportNames[s]}）"><title>${letter} 點 · ${supportNames[s]}，點選變更</title><rect class="support-hit" x="${xx-left}" y="${y-21}" width="${left+right}" height="85" rx="6"/><g class="support-mark">`;
+   if(s==='fixed'){
+     const end=i===c.supports.length-1;
+     out+=`<rect x="${xx-(end?0:13)}" y="${y-21}" width="13" height="59" fill="url(#hatch)"/><path d="M${xx},${y-21}v59" stroke="#27434c" stroke-width="2"/>`;
+   }else if(s==='free'){
+     out+=`<circle cx="${xx}" cy="${y+4}" r="4" fill="white" stroke="#527c7a" stroke-width="2"/>`;
+   }else{
+     out+=`<path d="M${xx},${y+8}l-11 17h22z" fill="#edf4f3" stroke="#527c7a" stroke-width="1.5"/>`;
+     if(s==='roller')out+=`<circle cx="${xx-6}" cy="${y+29}" r="3" fill="white" stroke="#527c7a"/><circle cx="${xx+6}" cy="${y+29}" r="3" fill="white" stroke="#527c7a"/>`;
+     out+=`<path d="M${xx-17},${y+35}h34" stroke="#78918f"/>`;
+   }
+   out+=svgText(xx,y+55,letter,'#244b50')+'</g></g>';
+   if(i<c.spans.length)x+=c.spans[i].L;
+ });
+ out+='<g pointer-events="none">';
  let pointLoads=c.loads.filter(l=>l.type!=='line');if(!dirty&&current&&c.mode!=='static')pointLoads.push(...current.load.loads.filter(l=>l.vehicle));pointLoads.forEach((l,i)=>{let xx=X(l.x),col=l.vehicle?'#d88a3b':'#087a70';if(l.type==='moment'){out+=`<path d="M${xx+13},${y-17}a18 18 0 1 0 -25 -10" fill="none" stroke="${col}" stroke-width="2" marker-end="url(#arrow)"/>`+svgText(xx,y-45,quantity(l.p,'kN·m',1),col);}else{let top=l.vehicle?38:24;out+=`<path d="M${xx},${l.p<0?y-3:top}V${l.p<0?top:y-3}" stroke="${col}" stroke-width="2" marker-end="url(#arrow)"/>`+svgText(xx,top-9,quantity(l.p,'kN',1),col);if(l.vehicle)out+=`<circle cx="${xx}" cy="${y-9}" r="5" fill="#fff5e8" stroke="${col}" stroke-width="2"/>`;}});
- out+='</svg>';$('#beamWrap').innerHTML=out;$('#modelInfo').textContent=`${c.spans.length} 跨 · 全長 ${quantity(L,'m')} · ${c.loads.length} 筆靜載${c.selfWeight?' ＋ 自重':''}`;
+ const target=document.activeElement?.closest('#beamWrap [role="button"]')?.dataset;
+ out+='</g></svg>';$('#beamWrap').innerHTML=out;
+ if(target){const key=target.node===undefined?'span':'node';$('#beamWrap [data-'+key+'="'+target[key]+'"]')?.focus({preventScroll:true});}
+$('#modelInfo').textContent=`${c.spans.length} 跨 · 全長 ${quantity(L,'m')} · ${c.loads.length} 筆靜載${c.selfWeight?' ＋ 自重':''}`;
 }
 function chart(id,pts,key,color,env=null,opts={}){let W=Math.max(300,Math.min(1000,Math.floor($('#'+id).clientWidth || 700)-12)),H=190,l=W<540?65:77,r=15,top=20,bottom=30,end=opts.end??model.L;let values=pts.map(p=>p[key]);if(env)values.push(...env.map(p=>p[key+'max']),...env.map(p=>p[key+'min']));let mx=Math.max(...values.map(Math.abs),.01),up=key==='M'&&!opts.time;let X=x=>l+(W-l-r)*x/end,Y=v=>top+(H-top-bottom)/2+(up?1:-1)*v/mx*((H-top-bottom)/2-7),base=Y(0);let lines='';
  for(let v of [-mx,0,mx])lines+=`<path d="M${l},${Y(v)}H${W-r}" stroke="${v===0?'#b8c8ca':'#e8eeee'}" ${v===0?'':'stroke-dasharray="3 5"'}/>`+svgText(l-9,Y(v)+4,numberOf(v,resultDimensions[key],Math.abs(units.show(resultDimensions[key],v))>100?0:2),'#819194','end',11);
@@ -106,10 +134,10 @@ function renderResults(){if(!analysis)return;refreshStepInfo();current=analysis.
 function history(){if(!analysis||c.mode==='static')return;let type=$('#historyType').value,isReaction=type.startsWith('R:'),x=readPosition('#probeX');$('#probeX').disabled=isReaction;if(!isReaction&&(!Number.isFinite(x)||x<0||x>model.L)){$('#historyText').textContent='查詢位置超出梁長';return;}let key=isReaction?'R':type,ri=Number(type.split(':')[1]),unit=key==='M'?'kN·m':key==='D'?'mm':'kN',data=analysis.frames.map(f=>({x:f.t,[key]:isReaction?f.result.reactions[ri].R:f.result.at(x)[key]}));chart('historyChart',data,key,key==='V'?'#4a75ba':'#087a70',null,{time:true,end:analysis.frames.at(-1).t});$('#historyText').textContent=`${isReaction?String.fromCharCode(65+ri)+' 支承':('x = '+quantity(x,'m'))} · ${$('#historyType').selectedOptions[0].text}（${labelOf(unit)}），橫軸時間（s）。完整歷時可匯出 CSV。`;}
 async function run(goToResults=false){if(busy)return;stop();busy=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#runBtn').disabled=true;$('#commandRun').disabled=true;$('#runBtn').textContent='計算中…';$('.sidebar').classList.add('busy');$$('[data-mode]').forEach(b=>b.disabled=true);$('#importBtn').disabled=true;
  try{validate(c);model=build(clone(c));let progress=p=>{$('#runBtn').textContent=`計算中 ${Math.round(p*100)}%`;};if(c.mode==='static'){analysis={frames:[{t:0,front:0,result:statics(model)}]};}else analysis=await(c.mode==='moving'?moving(model,progress):dynamic(model,progress));
- frameIndex=c.mode==='static'?0:Math.round((analysis.frames.length-1)*.4);current=analysis.frames[frameIndex].result;dirty=false;document.body.classList.remove('stale');$('#csvBtn').disabled=false;$('#reportBtn').disabled=false;$('#exchangeBtn').disabled=false;$('#printBtn').disabled=false;$('#playback').hidden=c.mode==='static';$('#historyPanel').hidden=c.mode==='static';$('#frameRange').max=analysis.frames.length-1;refreshStepInfo();
+ frameIndex=c.mode==='static'?0:Math.round((analysis.frames.length-1)*.4);current=analysis.frames[frameIndex].result;dirty=false;document.body.classList.remove('stale','analysis-invalid');$('#csvBtn').disabled=false;$('#reportBtn').disabled=false;$('#exchangeBtn').disabled=false;$('#printBtn').disabled=false;$('#playback').hidden=c.mode==='static';$('#historyPanel').hidden=c.mode==='static';$('#frameRange').max=analysis.frames.length-1;refreshStepInfo();
 
  notice(c.mode==='dynamic'?'動力模式：考慮梁的質量與阻尼；車輛採移動力模型，未含車橋耦合。':c.mode==='moving'?'移動包絡採逐位置靜力計算，不含振動慣性效應。':'');persist();arrangePins();if(goToResults===true)selectView('results',true);renderResults();history();
- }catch(e){dirty=true;document.body.classList.add('stale');notice(e.message,true);$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;}finally{busy=false;$('#runBtn').disabled=false;$('#commandRun').disabled=false;$('#runBtn').textContent='計算分析';$('.sidebar').classList.remove('busy');$$('[data-mode]').forEach(b=>b.disabled=false);$('#importBtn').disabled=false;}}
+ }catch(e){dirty=true;document.body.classList.add('stale','analysis-invalid');notice(e.message,true);$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;}finally{busy=false;$('#runBtn').disabled=false;$('#commandRun').disabled=false;$('#runBtn').textContent='計算分析';$('.sidebar').classList.remove('busy');$$('[data-mode]').forEach(b=>b.disabled=false);$('#importBtn').disabled=false;}}
 function stop(){playing=false;cancelAnimationFrame(raf);$('#playBtn').textContent='播放';}
 function play(){if(!analysis||dirty)return;if(playing){stop();return;}playing=true;$('#playBtn').textContent='暫停';let last=0;function tick(t){if(!playing)return;if(t-last>70){last=t;frameIndex=(frameIndex+Math.max(1,Math.floor(analysis.frames.length/180)))%analysis.frames.length;renderResults();}raf=requestAnimationFrame(tick);}raf=requestAnimationFrame(tick);}
 function download(name,type,data){let a=document.createElement('a'),url=URL.createObjectURL(new Blob([data],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);}
@@ -147,7 +175,7 @@ function csv() {
   toast('分析結果 CSV 已匯出');
 }
 function usePreset(name){preset=name;c={...clone(base),displayUnits:units.prefs};if(name==='simple'){c.spans=[span(10)];c.supports=['pin','roller'];c.loads=[{type:'line',a:0,b:10,w1:10,w2:10}];}if(name==='cantilever'){c.spans=[span(5)];c.supports=['fixed','free'];c.loads=[{type:'point',x:5,p:50}];}editors();stale();run();}
-$('.sidebar').addEventListener('change',e=>{let el=e.target;if(el.dataset.kind){c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=units.base(el.dataset.dimension,el.valueAsNumber);if(el.value==='')c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=NaN;if(el.dataset.kind==='spans'){const s=c.spans[Number(el.dataset.index)];reconcileManualSectionEdit(s,el.dataset.key);reconcileManualSpanEdit(s,el.dataset.key);if(el.dataset.key==='L'||el.dataset.key==='I')editors();else {renderMaterialPickers();renderSectionPickers();}}}else if(el.dataset.support!=null)c.supports[Number(el.dataset.support)]=el.value;else if(el.id==='selfWeight')c.selfWeight=el.checked;else if(el.id in c)c[el.id]=el.type==='checkbox'?el.checked:el.id==='step'?units.base('m',el.valueAsNumber):Number(el.value);else return;preset='';$$('[data-preset]').forEach(b=>b.classList.remove('selected'));stale();});
+$('.sidebar').addEventListener('change',e=>{let el=e.target;if(el.dataset.kind){c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=units.base(el.dataset.dimension,el.valueAsNumber);if(el.value==='')c[el.dataset.kind][Number(el.dataset.index)][el.dataset.key]=NaN;if(el.dataset.kind==='spans'){const s=c.spans[Number(el.dataset.index)];reconcileManualSectionEdit(s,el.dataset.key);reconcileManualSpanEdit(s,el.dataset.key);if(el.dataset.key==='L'||el.dataset.key==='I')editors();else {renderMaterialPickers();renderSectionPickers();}}}else if(el.dataset.support!=null){changeSupport(Number(el.dataset.support),el.value,'sidebar');return;}else if(el.id==='selfWeight')c.selfWeight=el.checked;else if(el.id in c)c[el.id]=el.type==='checkbox'?el.checked:el.id==='step'?units.base('m',el.valueAsNumber):Number(el.value);else return;preset='';$$('[data-preset]').forEach(b=>b.classList.remove('selected'));stale();});
 $('.sidebar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tab){tab=b.dataset.tab;$$('.config-panel').forEach(p=>p.hidden=p.id!==tab);$$('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));}if(b.dataset.preset)usePreset(b.dataset.preset);if(b.dataset.addload){if(c.loads.length>=50)return toast('最多 50 筆靜態載重');let type=b.dataset.addload;c.loads.push(type==='line'?{type,a:0,b:total(c),w1:10,w2:10}:{type,x:total(c)/2,p:type==='point'?50:20});editors();stale();}if(b.dataset.delete){let i=Number(b.dataset.index);if(b.dataset.delete==='span'){c.spans.splice(i,1);c.supports.splice(i===0?1:i,1);}if(b.dataset.delete==='load')c.loads.splice(i,1);if(b.dataset.delete==='axle')c.axles.splice(i,1);editors();stale();}});
 $('#addSpan').onclick=()=>{if(c.spans.length<maxSpans){c.spans.push(structuredClone(c.spans.at(-1)));c.supports.splice(-1,0,'roller');preset='';editors();stale();}};$('#addAxle').onclick=()=>{if(c.axles.length<12){c.axles.push({p:120,offset:vehicleLength(c)+1.4});editors();stale();}};
 $$('[data-mode]').forEach(b=>b.onclick=()=>{c.mode=b.dataset.mode;editors();stale();run();});$('#runBtn').onclick=()=>run(true);$('#playBtn').onclick=play;$('#frameRange').oninput=e=>{stop();frameIndex=Number(e.target.value);renderResults();};$('#showEnvelope').onchange=renderResults;$('#queryX').oninput=updateQuery;$('#probeX').onchange=history;$('#historyType').onchange=history;$('#csvBtn').onclick=csv;$('#printBtn').onclick=()=>{stop();window.print();};$('#saveBtn').onclick=()=>{try{validate(c);download('BeamLab_model.json','application/json',JSON.stringify(c,null,2));toast('模型 JSON 已匯出');}catch(e){notice(e.message,true);}};$('#importBtn').onclick=()=>$('#fileInput').click();$('#fileInput').onchange=async e=>{try{let f=e.target.files[0];if(!f)return;if(f.size>1000000)throw Error('模型檔案過大');let obj=JSON.parse(await f.text());validate(obj);c=obj;preset='';dirty=true;updateUnits(obj.displayUnits || units.prefs);stale();await run();toast('模型已匯入');}catch(err){notice('匯入失敗：'+err.message,true);}e.target.value='';};$('#methodBtn').onclick=()=>$('#methodDialog').showModal();$('#closeMethod').onclick=()=>$('#methodDialog').close();$('#methodDialog').onclick=e=>{if(e.target===$('#methodDialog'))$('#methodDialog').close();};
@@ -167,9 +195,24 @@ $('#reportBtn').onclick=async()=>{
     if(model&&analysis&&!busy&&!dirty)openCalculationReport(model,analysis,frameIndex,readPosition('#queryX'),units);
   } catch(err) {notice('無法開啟計算報告：'+err.message,true);}
 };
+function changeSupport(i,type,origin){
+ if(busy||!Object.hasOwn(supportNames,type)||!Number.isInteger(i)||i<0||i>=c.supports.length||c.supports[i]===type)return;
+ c.supports[i]=type;preset='';editors();stale();
+ const selector=origin==='diagram'?'#beamWrap [data-node="'+i+'"]':'#supportList [data-support="'+i+'"]';
+ $(selector)?.focus({preventScroll:true});run();
+}
+const diagramEditor=installDiagramEditor({
+ getConfig:()=>c,quantity,property:(v,u)=>Number(units.show(u,v).toPrecision(7))+' '+labelOf(u),supportNames,openMaterial,openSection,stop,
+ ready:()=>{if(busy)toast('分析進行中，完成後即可編輯圖面');return !busy;},
+ changeSupport:(i,type)=>changeSupport(i,type,'diagram')
+});
+function memberChanged(){
+ preset='';editors();stale();
+ if(diagramEditor.editingSpan())run();
+}
 installLayoutEditor({getConfig:()=>c,getUnits:()=>units,validate,onApply:next=>{c=next;preset='';editors();stale();run(true);}});
-installMaterialEditor({getConfig:()=>c,getUnits:()=>units,onChange:()=>{preset='';editors();stale();}});
-installSectionEditor({getConfig:()=>c,getUnits:()=>units,onChange:()=>{preset='';editors();stale();}});
+installMaterialEditor({getConfig:()=>c,getUnits:()=>units,onChange:memberChanged});
+installSectionEditor({getConfig:()=>c,getUnits:()=>units,onChange:memberChanged});
 installWorkspace(() => {drawBeam();if (analysis && !dirty && !busy) {renderResults();history();}});
 $('#unitDialog').querySelectorAll('[data-pref]').forEach(el => el.onchange = () => updateUnits({...units.prefs,[el.dataset.pref]:el.value}));
 $('#unitsBtn').onclick=()=>$('#unitDialog').showModal();

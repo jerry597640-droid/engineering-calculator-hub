@@ -163,7 +163,7 @@ function refreshResult(){
   const u=context.getUnits(),area=Number(get('beamMaterialArea').value)/areaScale(),rho=Number(get('beamMaterialDensity').value),mass=area*rho;
   get('beamMaterialMass').textContent=positive(mass)?'單位長度質量 ρA = '+rounded(u.show('kg/m',mass))+' '+u.label('kg/m'):'請輸入正的密度與斷面積。';
 }
-function showEditor(i){
+export function openMaterial(i){
   const s=context.getConfig().spans[i];if(!s)return;
   activeIndex=i;const u=context.getUnits();
   baseArea=positive(s.A)?s.A:(positive(s.I)?Math.sqrt(12*s.I):NaN);
@@ -230,7 +230,7 @@ export function renderMaterialPickers(){
     const span=context.getConfig().spans[i];if(!span)return;
     let btn=box.querySelector('.beam-material-picker');
     if(!btn){
-      btn=document.createElement('button');btn.type='button';btn.className='beam-material-picker';btn.setAttribute('aria-haspopup','dialog');btn.onclick=()=>showEditor(i);
+      btn=document.createElement('button');btn.type='button';btn.className='beam-material-picker';btn.setAttribute('aria-haspopup','dialog');btn.onclick=()=>openMaterial(i);
       box.querySelector('.boxhead').after(btn);
     }
     btn.textContent=span.material?'梁材質　'+span.material.name:'選擇梁材質';

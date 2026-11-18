@@ -14,12 +14,12 @@ function quad(a,b,f){if(b<=a)return 0;let h=(b-a)/2,c=(a+b)/2;return h*gx.reduce
 export const maxSpans=12;
 export const total=c=>c.spans.reduce((s,x)=>s+x.L,0);
 export const vehicleLength=c=>c.axles.reduce((s,a)=>Math.max(s,a.offset),0);
-export function validate(c){
+export function validate(c,{allowMechanism=false}={}){
  if(!c||!Array.isArray(c.spans)||c.spans.length<1||c.spans.length>maxSpans)throw Error('請設定 1–'+maxSpans+' 跨梁。');
  const num=v=>typeof v==='number'&&Number.isFinite(v);
  for(const s of c.spans)if(![s.L,s.E,s.I,s.mass].every(num)||s.L<0.1||s.L>200||s.E<=0||s.I<=0||s.mass<=0)throw Error('跨長須為 0.1–200 m；E、I、單位長度質量須大於 0。');
  if(!Array.isArray(c.supports)||c.supports.length!==c.spans.length+1||c.supports.some(s=>!['pin','roller','fixed','free'].includes(s)))throw Error('支承資料不完整。');
- if(!c.supports.includes('fixed')&&c.supports.filter(s=>s!=='free').length<2)throw Error('此模型形成機構：至少需要兩個垂直支承，或一個固定端。');
+ if(!allowMechanism&&!c.supports.includes('fixed')&&c.supports.filter(s=>s!=='free').length<2)throw Error('此模型形成機構：至少需要兩個垂直支承，或一個固定端。');
  let L=total(c);if(!Array.isArray(c.loads)||c.loads.length>50)throw Error('載重筆數須不超過 50 筆。');
  for(const l of c.loads){if(!['point','moment','line'].includes(l.type))throw Error('不支援的載重類型。');if(l.type==='line'){if(![l.a,l.b,l.w1,l.w2].every(num)||l.a<0||l.b>L+1e-8||l.b<=l.a)throw Error('分布載重需滿足 0 ≤ 起點 < 終點 ≤ 梁長。');}else if(![l.x,l.p].every(num)||l.x<0||l.x>L)throw Error('集中載重的位置必須在梁上，數值須為有限數。');}
  if(!Array.isArray(c.axles)||c.axles.length<1||c.axles.length>12||c.axles.some(a=>![a.p,a.offset].every(num)||a.p<=0||a.offset<0)||Math.min(...c.axles.map(a=>a.offset))!==0)throw Error('車輛須有 1–12 軸；軸重 > 0、距前軸距離 ≥ 0，至少一軸位於 0。');
