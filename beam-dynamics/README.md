@@ -66,6 +66,10 @@
 - [TU Delft 梁動力元素](https://teachbooks.tudelft.nl/computational-modelling/dynamics/Exercises/str_elem_dyn_workshops/Workshop_FEM_dyn_beam.html)：剛度與一致質量矩陣理論。
 - [OpenSees Newmark 文件](https://opensees.github.io/OpenSeesDocumentation/user/manual/analysis/integrator/Newmark.html)：平均加速度積分方法。
 
+## 介面樣式
+
+修改 style.css、material-editor.css 或 section-editor.css 後，執行 `node sync-styles.mjs` 將樣式嵌入首頁。可用 `node sync-styles.mjs --check` 驗證。
+
 ## 驗證
 `node unit-tests.mjs` 驗證單位換算；`node tests.mjs` 驗證求解器。50 項數值檢查含：簡支集中力／均布載重、集中力剪力跳躍、懸臂反力矩與撓度、固定兩端、兩跨均布、三角載重、局部分布＋集中矩、自重、不同跨 EI 的互等定理、機構與無效載重拒絕、移動單軸包絡、第一頻率、動力自由度與整體力平衡、網格／時間加密、獨立 60 模態移動力解析解。
 

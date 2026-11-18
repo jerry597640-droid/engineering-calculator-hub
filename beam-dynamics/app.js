@@ -72,20 +72,20 @@ function notice(s,error=false){$('#notice').hidden=!s;$('#notice').textContent=s
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),2400);}
 function svgText(x,y,text,color='#6b7e83',anchor='middle',size=12){return `<text x="${x}" y="${y}" fill="${color}" text-anchor="${anchor}" style="font-size:${size}px">${text}</text>`;}
 function drawBeam(){let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(1000,Math.floor($('#beamWrap').clientWidth || 700)-12)),H=230,pad=W<540?35:65,scale=(W-2*pad)/L,X=x=>pad+x*scale,y=125;
- let out=`<svg viewBox="0 0 ${W} ${H}" data-plot-left="${pad}" data-plot-right="${W-pad}" role="group" aria-label="梁模型、支承與載重"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5L5 0" stroke="#819b9f" stroke-width="1"/></pattern></defs>`;
+ let out=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" data-plot-left="${pad}" data-plot-right="${W-pad}" role="group" aria-label="梁模型、支承與載重"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5L5 0" stroke="#819b9f" stroke-width="1"/></pattern></defs>`;
  let lines=c.loads.filter(l=>l.type==='line');lines.forEach((l,i)=>{let mx=Math.max(Math.abs(l.w1),Math.abs(l.w2),1),yy=y-20-i*15,a=X(l.a),b=X(l.b);out+=`<path d="M${a},${yy-30*l.w1/mx}L${b},${yy-30*l.w2/mx}" fill="none" stroke="#087a70" stroke-width="1.5"/>`;for(let j=0;j<=12;j++){let t=j/12,x=a+(b-a)*t,w=l.w1+(l.w2-l.w1)*t;out+=`<path d="M${x},${yy-30*w/mx}L${x},${yy}" stroke="#087a70" stroke-width="1.3" marker-end="url(#arrow)"/>`;}out+=svgText((a+b)/2,yy-38,`${numberOf(l.w1,'kN/m')}${l.w1!==l.w2?' → '+numberOf(l.w2,'kN/m'):''} ${labelOf('kN/m')}`,'#087a70');});
  out+=`<rect x="${pad}" y="${y}" width="${W-pad*2}" height="8" rx="2" fill="#27434c"/>`;
  let x=0;
  c.spans.forEach((member,i)=>{
    const a=X(x);x+=member.L;const b=X(x),letter=String.fromCharCode(65+i,66+i);
-   out+=`<g class="beam-span" role="button" tabindex="0" data-span="${i}" aria-haspopup="dialog" aria-label="編輯第 ${i+1} 跨 ${letter} 梁斷面與材質"><title>第 ${i+1} 跨 ${letter} · 變更斷面或材質</title><rect class="span-hit" x="${a}" y="${y-16}" width="${b-a}" height="115"/><rect class="span-rail" x="${a}" y="${y}" width="${b-a}" height="8" rx="2"/><path d="M${a},205H${b}M${a},200v10M${b},200v10" stroke="#a8babc"/>`+svgText((a+b)/2,201,quantity(member.L,'m',1))+'</g>';
+   out+=`<g class="beam-span" role="button" tabindex="0" data-span="${i}" aria-haspopup="dialog" aria-label="編輯第 ${i+1} 跨 ${letter} 梁斷面與材質"><title>第 ${i+1} 跨 ${letter} · 變更斷面或材質</title><rect class="span-hit" fill="transparent" stroke="none" pointer-events="all" x="${a}" y="${y-16}" width="${b-a}" height="115"/><rect class="span-rail" fill="transparent" stroke="none" pointer-events="none" x="${a}" y="${y}" width="${b-a}" height="8" rx="2"/><path d="M${a},205H${b}M${a},200v10M${b},200v10" stroke="#a8babc"/>`+svgText((a+b)/2,201,quantity(member.L,'m',1))+'</g>';
  });
  x=0;
  c.supports.forEach((s,i)=>{
    const xx=X(x),letter=String.fromCharCode(65+i);
    const left=i?Math.min(30,c.spans[i-1].L*scale/2):30;
    const right=i<c.spans.length?Math.min(30,c.spans[i].L*scale/2):30;
-   out+=`<g class="beam-support" role="button" tabindex="0" data-node="${i}" aria-haspopup="dialog" aria-label="變更 ${letter} 點支承（${supportNames[s]}）"><title>${letter} 點 · ${supportNames[s]}，點選變更</title><rect class="support-hit" x="${xx-left}" y="${y-21}" width="${left+right}" height="85" rx="6"/><g class="support-mark">`;
+   out+=`<g class="beam-support" role="button" tabindex="0" data-node="${i}" aria-haspopup="dialog" aria-label="變更 ${letter} 點支承（${supportNames[s]}）"><title>${letter} 點 · ${supportNames[s]}，點選變更</title><rect class="support-hit" fill="transparent" stroke="none" pointer-events="all" x="${xx-left}" y="${y-21}" width="${left+right}" height="85" rx="6"/><g class="support-mark">`;
    if(s==='fixed'){
      const end=i===c.supports.length-1;
      out+=`<rect x="${xx-(end?0:13)}" y="${y-21}" width="13" height="59" fill="url(#hatch)"/><path d="M${xx},${y-21}v59" stroke="#27434c" stroke-width="2"/>`;
@@ -114,7 +114,7 @@ function chart(id,pts,key,color,env=null,opts={}){let W=Math.max(300,Math.min(10
  let ds=path(pts.map(p=>({x:p.x,val:p[key]})));lines+=`<path d="M${X(pts[0].x)},${base} ${ds.replace(/^M/,'L')} L${X(pts.at(-1).x)},${base}Z" fill="${color}" opacity=".12"/><path d="${ds}" stroke="${color}" stroke-width="2.2" fill="none" stroke-linejoin="round"/>`;
  if(!opts.time)model.ss.forEach(x=>{lines+=`<path d="M${X(x)},${top}V${H-bottom}" stroke="#b3c7c8" stroke-dasharray="2 5" opacity=".55"/>`;});
  let peak=pts.reduce((a,p)=>Math.abs(p[key])>Math.abs(a[key])?p:a,pts[0]);lines+=`<circle cx="${X(peak.x)}" cy="${Y(peak[key])}" r="3" fill="${color}"/>`+svgText(Math.max(l+30,Math.min(W-r-30,X(peak.x))),Math.max(14,Math.min(H-bottom-5,Y(peak[key])+(peak[key]*(up?1:-1)>0?16:-10))),numberOf(peak[key],resultDimensions[key]),color);
- $('#'+id).innerHTML=`<svg viewBox="0 0 ${W} ${H}" ${opts.time?'':`data-plot-left="${l}" data-plot-right="${W-r}" data-plot-zero="${base}" data-plot-scale="${(up?1:-1)*((H-top-bottom)/2-7)/mx}"`} role="img" aria-label="${key} ${opts.time?'歷時':'分布'}圖"><title>${key}，${opts.time?'時間 s':'座標 '+labelOf('m')}</title>${lines}</svg>`;
+ $('#'+id).innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" ${opts.time?'':`data-plot-left="${l}" data-plot-right="${W-r}" data-plot-zero="${base}" data-plot-scale="${(up?1:-1)*((H-top-bottom)/2-7)/mx}"`} role="img" aria-label="${key} ${opts.time?'歷時':'分布'}圖"><title>${key}，${opts.time?'時間 s':'座標 '+labelOf('m')}</title>${lines}</svg>`;
 }
 function refreshStepInfo() {
   if (!analysis || c.mode==='static') return;
