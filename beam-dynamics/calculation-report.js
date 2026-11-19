@@ -1,3 +1,4 @@
+import {vehicleDescription} from './vehicle-models.js?v=1.10.0';
 import {steelReportBlocks} from './steel-design.js?v=1.9.0';
 import {peakSummary,peakLocation,components} from './extrema.js';
 import {evaluateSection} from './section-geometry.js';
@@ -60,7 +61,7 @@ function inputs(m, units, q) {
   else rows.push(p('未輸入常駐集中力、線載重或集中彎矩。'));
   rows.push(p(c.selfWeight?'自重已計入。取 g = 9.80665 m/s²，各跨自重線載重如下。':'本模型未勾選自重，線質量僅供質量矩陣使用。'));
   if(c.selfWeight)rows.push(table(['跨','自重 ('+u('kN/m')+')'],c.spans.map((s,i)=>[String(i+1),q(s.mass*9.80665/1000,'kN/m')])));
-  if(hasVehicle(m)) rows.push(h2('移動車輛'),p('行進方向'+(c.direction===1?'由左至右':'由右至左')+'，車速 '+fmt(c.speed)+' km/h。軸距由最前軸沿車長向後量取，軸重為分配至本梁的整軸荷重。'),
+  if(hasVehicle(m)) rows.push(h2('移動車輛'),p('車型：'+vehicleDescription(c)+'。預設軸列為示範數據，實際分析採下表輸入值；未含支腿作業反力。'),p('行進方向'+(c.direction===1?'由左至右':'由右至左')+'，車速 '+fmt(c.speed)+' km/h。軸距由最前軸沿車長向後量取，軸重為分配至本梁的整軸荷重。'),
     table(['軸','距前軸 ('+u('m')+')','輸入軸重 ('+u('kN')+')','倍率','作用軸重 ('+u('kN')+')'],c.axles.map((a,i)=>[String(i+1),q(a.offset,'m'),q(a.p,'kN'),fmt(c.factor),q(a.p*c.factor,'kN')])));
   return rows;
 }
@@ -213,4 +214,5 @@ export function reportBlocks(model,analysis,frameIndex,x,units,options={}) {
     {type:'page'},h1('章節目錄'),...blocks.filter(b=>b.type==='h1').map(b=>p(b.text)),{type:'page'}];
   return [...cover,...blocks];
 }
+
 

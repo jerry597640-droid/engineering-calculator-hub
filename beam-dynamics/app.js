@@ -1,8 +1,9 @@
+import {applyVehicleModel,renderVehiclePicker,vehicleLane} from './vehicle-models.js?v=1.10.0';
 import {installSteelDesign,currentSteelDesign} from './steel-design-ui.js?v=1.9.0';
 import {vehicleLabelLayout,vehicleChartOverlay} from './chart-vehicle.js';
 import {peakSummary,peakLocation,components} from './extrema.js';
 import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.7.1';
-import {installSectionCursor} from './section-cursor.js?v=1.9.0';
+import {installSectionCursor} from './section-cursor.js?v=1.10.0';
 import {installDiagramEditor} from './diagram-editor.js';
 import {installLayoutEditor} from './span-layout.js';
 import {build,statics,moving,dynamic,axleLoads,maxSpans,total,vehicleLength,validate as validateBeam} from './solver.js?v=1.9.0';
@@ -62,6 +63,7 @@ function unitLabels() {
 }
 const supportNames={pin:'鉸支承',roller:'滾動支承',fixed:'固定端',free:'自由／無支承'};
 function editors(){
+ renderVehiclePicker(c,quantity);
  $('#spanList').innerHTML=c.spans.map((s,i)=>`<div class="spanbox"><div class="boxhead"><span><span class="index">${String(i+1).padStart(2,'0')}</span> 第 ${i+1} 跨</span>${c.spans.length>1?`<button class="iconbtn" data-delete="span" data-index="${i}" aria-label="刪除第 ${i+1} 跨">×</button>`:''}</div><div class="field-grid">${field('跨長',s.L,'spans',i,'L','m')}${field('彈性模數 E',s.E,'spans',i,'E','GPa')}${field('慣性矩 I',s.I,'spans',i,'I','m⁴')}${field('單位長度質量',s.mass,'spans',i,'mass','kg/m')}</div></div>`).join('');
  let x=0;$('#supportList').innerHTML=c.supports.map((s,i)=>{if(i)x+=c.spans[i-1].L;return `<div class="supportrow"><b>${String.fromCharCode(65+i)}</b><select data-support="${i}" aria-label="${String.fromCharCode(65+i)} 支承">${Object.entries(supportNames).map(([k,v])=>`<option value="${k}" ${s===k?'selected':''}>${v}</option>`).join('')}</select><small>${quantity(x,'m')}</small></div>`;}).join('');
  $('#loadList').innerHTML=c.loads.length?c.loads.map((l,i)=>`<div class="loadbox"><div class="boxhead"><span>${l.type==='point'?'集中力 P':l.type==='moment'?'集中彎矩 M':'線性分布載重 w'}</span><button class="iconbtn" data-delete="load" data-index="${i}" aria-label="刪除第 ${i+1} 筆載重">×</button></div><div class="field-grid">${l.type==='line'?field('起點',l.a,'loads',i,'a','m')+field('終點',l.b,'loads',i,'b','m')+field('起點強度',l.w1,'loads',i,'w1','kN/m')+field('終點強度',l.w2,'loads',i,'w2','kN/m'):field('位置 x',l.x,'loads',i,'x','m')+field('大小',l.p,'loads',i,'p',l.type==='point'?'kN':'kN·m')}</div>${l.type==='line'?'<p class="hint">等值為均布；一端設 0 為三角形。</p>':''}</div>`).join(''):'<p class="hint">尚無靜態載重，可用下方按鈕新增。</p>';
@@ -83,8 +85,10 @@ function loadGroup(key, name){
 function loadHit(path,width=20){
  return `<path class="load-hit" d="${path}" fill="none" stroke="transparent" stroke-width="${width}" vector-effect="non-scaling-stroke" pointer-events="stroke"/>`;
 }
-function drawBeam(){let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(1000,Math.floor($('#beamWrap').clientWidth || 700)-12)),H=230,pad=W<540?35:65,scale=(W-2*pad)/L,X=x=>pad+x*scale,y=125;
- let out=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" data-plot-left="${pad}" data-plot-right="${W-pad}" role="group" aria-label="梁模型、支承與載重"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5L5 0" stroke="#819b9f" stroke-width="1"/></pattern></defs>`;
+function drawBeam(){renderVehiclePicker(c,quantity);let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(1000,Math.floor($('#beamWrap').clientWidth || 700)-12)),H=c.mode==='static'?230:350,pad=W<540?35:65,scale=(W-2*pad)/L,X=x=>pad+x*scale,y=125;
+ let out=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" data-beam-offset="${c.mode==='static'?0:120}" data-plot-left="${pad}" data-plot-right="${W-pad}" role="group" aria-label="梁模型、支承與載重"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5L5 0" stroke="#819b9f" stroke-width="1"/></pattern></defs>`;
+ if(c.mode!=='static')out+=vehicleLane(c,{front:vehicleTravel(),length:L,left:pad,right:W-pad,width:W});
+ out+=`<g transform="translate(0,${c.mode==='static'?0:120})">`;
  out+=`<rect x="${pad}" y="${y}" width="${W-pad*2}" height="8" rx="2" fill="#27434c"/>`;
  let x=0;
  c.spans.forEach((member,i)=>{
@@ -176,7 +180,7 @@ function drawBeam(){let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(
    out+=`<g class="load-caption${active?' is-editing':''}" data-load-key="${key}" aria-hidden="true"><rect x="${cx-width/2-2}" y="${baseline-11}" width="${width+4}" height="15" rx="2" fill="transparent" pointer-events="all"/><use href="#${id}" pointer-events="none"/></g>`;
  }
  const target=document.activeElement?.closest('#beamWrap [role="button"]')?.dataset;
- out+='</svg>';$('#beamWrap').innerHTML=out;
+ out+='</g></svg>';$('#beamWrap').innerHTML=out;
  if(target){
    const key=target.loadKey!==undefined?'loadKey':target.node!==undefined?'node':'span';
    const attr=key==='loadKey'?'load-key':key;
@@ -363,7 +367,7 @@ $('#reportBtn').onclick=async()=>{
   if(!model||!analysis||busy||dirty)return;
   stop();
   try {
-    const {openCalculationReport}=await import('./report-ui.js?v=1.9.0');
+    const {openCalculationReport}=await import('./report-ui.js?v=1.10.0');
     if(model&&analysis&&!busy&&!dirty)openCalculationReport(model,analysis,frameIndex,readPosition('#queryX'),units,currentSteelDesign());
   } catch(err) {notice('無法開啟計算報告：'+err.message,true);}
 };
@@ -402,6 +406,10 @@ document.addEventListener('keydown', event => {
     run(true);
   }
 });
+$('#vehicleType').addEventListener('change',event=>{
+ event.stopPropagation();stop();c=applyVehicleModel(c,event.target.value);travel=null;if(c.mode==='static'&&event.target.value!=='custom')c.mode='moving';editors();stale();run();
+});
 installSteelDesign({getConfig:()=>c,getUnits:()=>units,persist,stop});
 editors();drawBeam();run();
+
 

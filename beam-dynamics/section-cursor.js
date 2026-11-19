@@ -59,7 +59,7 @@ export function installSectionCursor({getState,quantity,numberOf,labelOf,readX,w
       }
       svg.append(cursor);
     }
-    cursor.removeAttribute('display');cursor.setAttribute('transform','translate('+pixel+' 0)');
+    cursor.removeAttribute('display');cursor.setAttribute('transform','translate('+pixel+' '+(key?0:Number(svg.dataset.beamOffset||0))+')');
     if(key){
       const values=[faces.left,faces.right],dots=cursor.querySelectorAll('circle');
       values.forEach((face,i)=>{
@@ -179,4 +179,5 @@ export function installSectionCursor({getState,quantity,numberOf,labelOf,readX,w
   query.addEventListener('input',()=>{stop();refresh();});
   return {refresh,clear};
 }
+
 

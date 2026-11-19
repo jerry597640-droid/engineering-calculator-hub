@@ -1,5 +1,5 @@
 import {peakSummary,components} from './extrema.js';
-import {reportBlocks} from './calculation-report.js?v=1.9.0';
+import {reportBlocks} from './calculation-report.js?v=1.10.0';
 import {wordReport} from './word-report.js?v=1.9.0';
 import {reportFigures} from './report-plots.js?v=1.9.0';
 
@@ -109,4 +109,5 @@ export function openCalculationReport(model,analysis,frameIndex,queryX,units,des
   get('reportBuild').disabled=false;get('wordExport').disabled=false;
   invalidate();dialog.showModal();
 }
+
 
