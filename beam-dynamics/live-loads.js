@@ -28,13 +28,59 @@ export function installLiveLoads({config,units,length,front,seek,edit,enableVehi
   panel.before(home);
   let previousMode,signature='',anchor=null;
   const loadTarget='[data-load-key]';
+  const handle=dialog.querySelector('.load-dialog-head');
+  let manualPosition=null,drag=null;
   function positionDialog(){
-    if(!dialog.open||!anchor||matchMedia('(max-width:600px)').matches)return;
-    const margin=10,w=dialog.offsetWidth,h=dialog.offsetHeight;
-    const x=anchor.x+w+2*margin<=innerWidth?anchor.x+margin:anchor.x-w-margin;
-    dialog.style.left=Math.max(margin,Math.min(innerWidth-w-margin,x))+'px';
-    dialog.style.top=Math.max(margin,Math.min(innerHeight-h-margin,anchor.y-h/3))+'px';
+    if(!dialog.open||!anchor)return;
+    dialog.toggleAttribute('data-moved',!!manualPosition);
+    if(!manualPosition&&matchMedia('(max-width:600px)').matches){
+      dialog.style.removeProperty('left');dialog.style.removeProperty('top');
+      return;
+    }
+    const viewport=window.visualViewport;
+    const left=viewport?.offsetLeft??0,top=viewport?.offsetTop??0;
+    const width=viewport?.width??document.documentElement.clientWidth,height=viewport?.height??innerHeight;
+    const w=dialog.offsetWidth,h=dialog.offsetHeight;
+    const insetX=Math.max(0,Math.min(10,(width-w)/2)),insetY=Math.max(0,Math.min(10,(height-h)/2));
+    const x=manualPosition?.x??(anchor.x+w+20<=left+width?anchor.x+10:anchor.x-w-10);
+    const y=manualPosition?.y??(anchor.y-h/3);
+    dialog.style.left=Math.max(left+insetX,Math.min(left+width-w-insetX,x))+'px';
+    dialog.style.top=Math.max(top+insetY,Math.min(top+height-h-insetY,y))+'px';
   }
+  function endDrag(){
+    if(!drag)return;
+    const id=drag.id;
+    drag=null;handle.classList.remove('dragging');
+    if(handle.hasPointerCapture(id))handle.releasePointerCapture(id);
+  }
+  handle.addEventListener('pointerdown',e=>{
+    if(drag||!e.isPrimary||e.button!==0||e.target.closest('button'))return;
+    const r=dialog.getBoundingClientRect();
+    drag={id:e.pointerId,dx:e.clientX-r.left,dy:e.clientY-r.top};
+    handle.setPointerCapture(e.pointerId);handle.classList.add('dragging');
+    e.preventDefault();
+  });
+  handle.addEventListener('pointermove',e=>{
+    if(drag?.id!==e.pointerId)return;
+    manualPosition={x:e.clientX-drag.dx,y:e.clientY-drag.dy};
+    positionDialog();
+  });
+  for(const eventName of ['pointerup','pointercancel','lostpointercapture']){
+    handle.addEventListener(eventName,e=>{if(drag?.id===e.pointerId)endDrag();});
+  }
+  handle.addEventListener('keydown',e=>{
+    if(e.target!==handle)return;
+    const directions={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+    if(e.key==='Home')manualPosition=null;
+    else if(directions[e.key]){
+      const [dx,dy]=directions[e.key],r=dialog.getBoundingClientRect(),step=e.shiftKey?40:10;
+      manualPosition={x:r.left+dx*step,y:r.top+dy*step};
+    }else return;
+    e.preventDefault();positionDialog();
+  });
+  new ResizeObserver(positionDialog).observe(dialog);
+  window.visualViewport?.addEventListener('resize',positionDialog);
+  window.visualViewport?.addEventListener('scroll',positionDialog);
   function title(){
     const {kind,index,item}=selection();
     if(!item)return;
@@ -66,7 +112,7 @@ export function installLiveLoads({config,units,length,front,seek,edit,enableVehi
     if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)dialog.close();
   });
   dialog.addEventListener('close',()=>{
-    home.after(panel);anchor=null;
+    endDrag();home.after(panel);anchor=null;
     onSelect();
     const target=beam.querySelector('[data-load-key="'+choice.value+'"]')||choice;
     target.focus({preventScroll:true});

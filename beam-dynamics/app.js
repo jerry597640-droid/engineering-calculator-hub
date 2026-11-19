@@ -1,4 +1,4 @@
-import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.7.0';
+import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.7.1';
 import {installSectionCursor} from './section-cursor.js';
 import {installDiagramEditor} from './diagram-editor.js';
 import {installLayoutEditor} from './span-layout.js';
