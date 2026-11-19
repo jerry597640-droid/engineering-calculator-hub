@@ -1,4 +1,4 @@
-import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.6.0';
+import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.7.0';
 import {installSectionCursor} from './section-cursor.js';
 import {installDiagramEditor} from './diagram-editor.js';
 import {installLayoutEditor} from './span-layout.js';
@@ -73,9 +73,15 @@ function stale(){generation++;clearTimeout(autoTimer);autoPending=false;stop();d
 function notice(s,error=false){$('#notice').hidden=!s;$('#notice').textContent=s;$('#notice').classList.toggle('error',error);$('#settingsStatus').textContent=s;$('#settingsStatus').hidden=!s;$('#settingsStatus').classList.toggle('error',error);}
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),2400);}
 function svgText(x,y,text,color='#6b7e83',anchor='middle',size=12){return `<text x="${x}" y="${y}" fill="${color}" text-anchor="${anchor}" style="font-size:${size}px">${text}</text>`;}
+function loadGroup(key, name){
+ const editing=$('#loadDialog').open && $('#liveChoice').value===key;
+ return `<g class="beam-load${editing?' is-editing':''}" data-load-key="${key}" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="loadDialog" aria-label="調整${name}"><title>調整${name}</title>`;
+}
+function loadHit(path,width=20){
+ return `<path class="load-hit" d="${path}" fill="none" stroke="transparent" stroke-width="${width}" vector-effect="non-scaling-stroke" pointer-events="stroke"/>`;
+}
 function drawBeam(){let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(1000,Math.floor($('#beamWrap').clientWidth || 700)-12)),H=230,pad=W<540?35:65,scale=(W-2*pad)/L,X=x=>pad+x*scale,y=125;
  let out=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" data-plot-left="${pad}" data-plot-right="${W-pad}" role="group" aria-label="梁模型、支承與載重"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5L5 0" stroke="#819b9f" stroke-width="1"/></pattern></defs>`;
- let lines=c.loads.filter(l=>l.type==='line');lines.forEach((l,i)=>{let mx=Math.max(Math.abs(l.w1),Math.abs(l.w2),1),yy=y-20-i*15,a=X(l.a),b=X(l.b);out+=`<path d="M${a},${yy-30*l.w1/mx}L${b},${yy-30*l.w2/mx}" fill="none" stroke="#087a70" stroke-width="1.5"/>`;for(let j=0;j<=12;j++){let t=j/12,x=a+(b-a)*t,w=l.w1+(l.w2-l.w1)*t;out+=`<path d="M${x},${yy-30*w/mx}L${x},${yy}" stroke="#087a70" stroke-width="1.3" marker-end="url(#arrow)"/>`;}out+=svgText((a+b)/2,yy-38,`${numberOf(l.w1,'kN/m')}${l.w1!==l.w2?' → '+numberOf(l.w2,'kN/m'):''} ${labelOf('kN/m')}`,'#087a70');});
  out+=`<rect x="${pad}" y="${y}" width="${W-pad*2}" height="8" rx="2" fill="#27434c"/>`;
  let x=0;
  c.spans.forEach((member,i)=>{
@@ -101,30 +107,78 @@ function drawBeam(){let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(
    out+=svgText(xx,y+55,letter,'#244b50')+'</g></g>';
    if(i<c.spans.length)x+=c.spans[i].L;
  });
- out+='<g pointer-events="none">';
- let pointLoads=c.loads.filter(l=>l.type!=='line');if(c.mode!=='static'){
-   const wheels=axleLoads({c,L},vehicleTravel());
-   if(wheels.length>1){
-     const xs=wheels.map(w=>X(w.x));
-     out+=`<path d="M${Math.min(...xs)},${y-11}H${Math.max(...xs)}" stroke="#d88a3b" stroke-width="3" opacity=".8"/>`;
-   }
-   const active=Number($('#liveChoice').value.replace('axles:',''));
-   pointLoads.push(...wheels.sort((a,b)=>Number(b.axleIndex===active)-Number(a.axleIndex===active)));
- }
- const labelBoxes=[];
- function loadLabel(x,preferredY,text,color){
-   const width=Math.min(W-8,Math.max(30,text.length*7.5)),cx=Math.max(width/2+3,Math.min(W-width/2-3,x));
-   for(const yLabel of [preferredY,preferredY-15,preferredY+15,preferredY-30,preferredY+30]){
-     if(yLabel<12||yLabel>y-19)continue;
-     if(labelBoxes.some(b=>Math.abs(b.cx-cx)<(b.width+width)/2+3&&Math.abs(b.y-yLabel)<14))continue;
-     labelBoxes.push({cx,y:yLabel,width});return svgText(cx,yLabel,text,color);
+ const captions=[];
+ function loadLabel(key,x,preferredY,text,color){
+   const width=Math.min(W-8,Math.max(24,text.length*7.5)),cx=Math.max(width/2+3,Math.min(W-width/2-3,x));
+   for(const yLabel of [preferredY,preferredY-16,preferredY+16,preferredY-32,preferredY+32]){
+     if(yLabel<12||yLabel>y-13)continue;
+     if(captions.some(b=>Math.abs(b.cx-cx)<(b.width+width)/2+4&&Math.abs(b.y-yLabel)<16))continue;
+     const id='beam-label-'+captions.length;
+     captions.push({key,cx,y:yLabel,width,id});
+     // The separate painted caption layer keeps its text above crossing arrows.
+     return '<g opacity="0" pointer-events="none">'+svgText(cx,yLabel,text,color).replace('<text ','<text id="'+id+'" ')+'</g>';
    }
    return '';
  }
- pointLoads.forEach((l,i)=>{let xx=X(l.x),selected=l.vehicle&&$('#liveChoice').value==='axles:'+l.axleIndex,col=l.vehicle?(selected?'#a7500f':'#d88a3b'):'#087a70';if(l.type==='moment'){out+=`<path d="M${xx+(l.p<0?-13:13)},${y-17}a18 18 0 1 ${l.p<0?1:0} ${l.p<0?25:-25} -10" fill="none" stroke="${col}" stroke-width="2" marker-end="url(#arrow)"/>`+loadLabel(xx,y-45,quantity(l.p,'kN·m',1),col);}else{let top=y-3-(l.p===0?0:28+70*Math.abs(l.p)/(Math.abs(l.p)+35));out+=`<path d="M${xx},${l.p<0?y-3:top}V${l.p<0?top:y-3}" stroke="${col}" stroke-width="2" marker-end="url(#arrow)"/>`+loadLabel(xx,top-9,quantity(l.p,'kN',1),col);if(l.vehicle)out+=`<circle data-axle="${l.axleIndex}" aria-label="第 ${l.axleIndex+1} 軸，x = ${quantity(l.x,'m',3)}，軸重 ${quantity(l.p,'kN',2)}" cx="${xx}" cy="${y-9}" r="${selected?6:4.5}" fill="${selected?'#ffe3bb':'#fff5e8'}" stroke="${col}" stroke-width="2"/>`;}});
+ let row=0;
+ const pointLoads=[];
+ for(const [index,load] of c.loads.entries()){
+   if(load.type!=='line'){pointLoads.push({load,key:'loads:'+index,name:'第 '+(index+1)+' 筆'+(load.type==='moment'?'集中彎矩':'集中力')});continue;}
+   const {a,b,w1,w2}=load;
+   const mx=Math.max(Math.abs(w1),Math.abs(w2),1);
+   const bottom=y-20-Math.min(row++,4)*10,baseY=bottom-30*Math.max(0,-w1,-w2)/mx;
+   const xa=X(a),xb=X(b),ya=baseY-30*w1/mx,yb=baseY-30*w2/mx;
+   const edge=`M${xa},${ya}L${xb},${yb}`;
+   out+=loadGroup('loads:'+index,'第 '+(index+1)+' 筆分布載重');
+   out+=`<path d="${edge}L${xb},${baseY}H${xa}Z" fill="transparent" pointer-events="fill"/>`+loadHit(edge,14);
+   out+=`<path class="load-ink" d="${edge}" fill="none" stroke="#087a70" stroke-width="1.5"/>`;
+   for(let j=0;j<=12;j++){
+     const t=j/12,x=xa+(xb-xa)*t,w=w1+(w2-w1)*t;
+     if(w!==0)out+=`<path class="load-ink" d="M${x},${baseY-30*w/mx}V${baseY}" stroke="#087a70" stroke-width="1.3" marker-end="url(#arrow)"/>`;
+   }
+   const caption=numberOf(w1,'kN/m')+(w1===w2?'':' → '+numberOf(w2,'kN/m'))+' '+labelOf('kN/m');
+   out+=loadLabel('loads:'+index,(xa+xb)/2,Math.max(13,Math.min(ya,yb,baseY)-8),caption,'#087a70')+'</g>';
+ }
+ if(c.mode!=='static'){
+   const wheels=axleLoads({c,L},vehicleTravel());
+   if(wheels.length>1){
+     const xs=wheels.map(w=>X(w.x));
+     out+=`<path d="M${Math.min(...xs)},${y-11}H${Math.max(...xs)}" stroke="#d88a3b" stroke-width="3" opacity=".8" pointer-events="none"/>`;
+   }
+   const active=Number($('#liveChoice').value.replace('axles:',''));
+   for(const load of wheels.sort((a,b)=>Number(b.axleIndex===active)-Number(a.axleIndex===active))){
+     pointLoads.push({load,key:'axles:'+load.axleIndex,name:'車輛第 '+(load.axleIndex+1)+' 軸'});
+   }
+ }
+ for(const {load:l,key,name} of pointLoads){
+   const xx=X(l.x),selected=l.vehicle&&$('#liveChoice').value===key;
+   const color=l.vehicle?(selected?'#a7500f':'#d88a3b'):'#087a70';
+   let path,caption;
+   if(l.type==='moment'){
+     path=`M${xx+(l.p<0?-13:13)},${y-17}a18 18 0 1 ${l.p<0?1:0} ${l.p<0?25:-25} -10`;
+     caption=loadLabel(key,xx,y-45,quantity(l.p,'kN·m',1),color);
+   }else{
+     const top=y-3-(l.p===0?0:28+70*Math.abs(l.p)/(Math.abs(l.p)+35));
+     path=`M${xx},${l.p<0?y-3:top}V${l.p<0?top:y-3}`;
+     caption=loadLabel(key,xx,top-9,quantity(l.p,'kN',1),color);
+   }
+   out+=loadGroup(key,name)+loadHit(path)+`<path class="load-ink" d="${path}" fill="none" stroke="${color}" stroke-width="2" marker-end="url(#arrow)"/>`+caption;
+   if(l.vehicle){
+     out+=`<circle cx="${xx}" cy="${y-9}" r="11" fill="transparent" pointer-events="all"/><circle data-axle="${l.axleIndex}" aria-label="${name}，x = ${quantity(l.x,'m',3)}，軸重 ${quantity(l.p,'kN',2)}" cx="${xx}" cy="${y-9}" r="${selected?6:4.5}" fill="${selected?'#ffe3bb':'#fff5e8'}" stroke="${color}" stroke-width="2"/>`;
+   }
+   out+='</g>';
+ }
+ for(const {key,cx,y:baseline,width,id} of captions){
+   const active=$('#loadDialog').open&&$('#liveChoice').value===key;
+   out+=`<g class="load-caption${active?' is-editing':''}" data-load-key="${key}" aria-hidden="true"><rect x="${cx-width/2-2}" y="${baseline-11}" width="${width+4}" height="15" rx="2" fill="transparent" pointer-events="all"/><use href="#${id}" pointer-events="none"/></g>`;
+ }
  const target=document.activeElement?.closest('#beamWrap [role="button"]')?.dataset;
- out+='</g></svg>';$('#beamWrap').innerHTML=out;
- if(target){const key=target.node===undefined?'span':'node';$('#beamWrap [data-'+key+'="'+target[key]+'"]')?.focus({preventScroll:true});}
+ out+='</svg>';$('#beamWrap').innerHTML=out;
+ if(target){
+   const key=target.loadKey!==undefined?'loadKey':target.node!==undefined?'node':'span';
+   const attr=key==='loadKey'?'load-key':key;
+   $('#beamWrap [data-'+attr+'="'+target[key]+'"]')?.focus({preventScroll:true});
+ }
 $('#modelInfo').textContent=`${c.spans.length} 跨 · 全長 ${quantity(L,'m')} · ${c.loads.length} 筆靜載${c.selfWeight?' ＋ 自重':''}`;
 }
 function chart(id,pts,key,color,env=null,opts={}){let W=Math.max(300,Math.min(1000,Math.floor($('#'+id).clientWidth || 700)-12)),H=190,l=W<540?65:77,r=15,top=20,bottom=30,end=opts.end??model.L;let values=pts.map(p=>p[key]);if(env)values.push(...env.map(p=>p[key+'max']),...env.map(p=>p[key+'min']));let mx=Math.max(...values.map(Math.abs),.01),up=key==='M'&&!opts.time;let X=x=>l+(W-l-r)*x/end,Y=v=>top+(H-top-bottom)/2+(up?1:-1)*v/mx*((H-top-bottom)/2-7),base=Y(0);let lines='';
@@ -173,7 +227,7 @@ function editLiveLoad(kind,index,key,value){
  return '';
 }
 const liveLoads=installLiveLoads({
- config:()=>c,units:()=>units,length:()=>total(c),
+ config:()=>c,units:()=>units,length:()=>total(c),stop,
  onSelect:()=>{drawBeam();if(!dirty&&!busy)sectionCursor.refresh();},front:()=>c.direction===1?vehicleTravel():total(c)-vehicleTravel(),seek:seekVehicle,edit:editLiveLoad,
  enableVehicle:selection=>{c.mode='moving';travel=null;editors();liveLoads.selectVehicle(selection);stale();run();}
 });

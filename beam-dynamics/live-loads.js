@@ -17,12 +17,61 @@ export function closestFrame(frames, distance) {
   return lo>0 && distance-frames[lo-1].front<=frames[lo].front-distance ? lo-1 : lo;
 }
 
-export function installLiveLoads({config,units,length,front,seek,edit,enableVehicle,onSelect}) {
+export function installLiveLoads({config,units,length,front,seek,edit,enableVehicle,onSelect,stop}) {
   const panel=document.getElementById('liveLoads');
   const choice=document.getElementById('liveChoice');
   const fields=document.getElementById('liveFields');
   const feedback=document.getElementById('liveFeedback');
-  let previousMode,signature='';
+  const beam=document.getElementById('beamWrap');
+  const dialog=document.getElementById('loadDialog'),dialogTitle=document.getElementById('loadDialogTitle');
+  const home=document.createComment('inline load inspector');
+  panel.before(home);
+  let previousMode,signature='',anchor=null;
+  const loadTarget='[data-load-key]';
+  function positionDialog(){
+    if(!dialog.open||!anchor||matchMedia('(max-width:600px)').matches)return;
+    const margin=10,w=dialog.offsetWidth,h=dialog.offsetHeight;
+    const x=anchor.x+w+2*margin<=innerWidth?anchor.x+margin:anchor.x-w-margin;
+    dialog.style.left=Math.max(margin,Math.min(innerWidth-w-margin,x))+'px';
+    dialog.style.top=Math.max(margin,Math.min(innerHeight-h-margin,anchor.y-h/3))+'px';
+  }
+  function title(){
+    const {kind,index,item}=selection();
+    if(!item)return;
+    dialogTitle.textContent=kind==='axles'?'調整車輛第 '+(index+1)+' 軸':'調整'+names[item.type]+' · 第 '+(index+1)+' 筆';
+  }
+  function openFromDiagram(target,event){
+    if(!target||dialog.open||![...choice.options].some(o=>o.value===target.dataset.loadKey))return;
+    stop();
+    const box=target.getBoundingClientRect();
+    anchor=event.type==='click'&&event.detail>0?{x:event.clientX,y:event.clientY}:{x:box.left+box.width/2,y:box.top+box.height/2};
+    choice.value=target.dataset.loadKey;build();title();
+    document.getElementById('loadDialogFields').append(panel);
+    dialog.showModal();positionDialog();
+    document.getElementById('loadDialogClose').focus({preventScroll:true});
+    onSelect();
+  }
+  for(const eventName of ['pointerdown','focusin']){
+    beam.addEventListener(eventName,e=>{if(e.target.closest(loadTarget))stop();});
+  }
+  beam.addEventListener('click',e=>openFromDiagram(e.target.closest(loadTarget),e));
+  beam.addEventListener('keydown',e=>{
+    const target=e.target.closest(loadTarget);
+    if(target&&['Enter',' '].includes(e.key)){e.preventDefault();if(!e.repeat)openFromDiagram(target,e);}
+  });
+  document.getElementById('loadDialogClose').onclick=()=>dialog.close();
+  dialog.addEventListener('click',e=>{
+    if(e.target!==dialog)return;
+    const b=dialog.getBoundingClientRect();
+    if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)dialog.close();
+  });
+  dialog.addEventListener('close',()=>{
+    home.after(panel);anchor=null;
+    onSelect();
+    const target=beam.querySelector('[data-load-key="'+choice.value+'"]')||choice;
+    target.focus({preventScroll:true});
+  });
+  window.addEventListener('resize',positionDialog);
   function selection() {
     const [kind,index]=choice.value.split(':');
     const item=config()[kind]?.[Number(index)];
@@ -104,6 +153,7 @@ export function installLiveLoads({config,units,length,front,seek,edit,enableVehi
       feedback.textContent='';
     }
     sync();
+    if(dialog.open){title();positionDialog();}
   }
   choice.addEventListener('change',()=>{
     if(selection().kind==='axles' && config().mode==='static')enableVehicle(choice.value);
