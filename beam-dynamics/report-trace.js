@@ -90,7 +90,7 @@ function movingMethod(model,analysis,frame) {
   const c=model.c, speed=c.speed/3.6, direction=c.direction===1?'d − 偏距':'L − d + 偏距';
   const blocks = [block('h2','車軸位置與移動載重'),
     block('formula',`行進速率 = ${number(c.speed)} / 3.6 = ${number(speed)} m/s。前軸行程 d = ${number(frame.front)} m，t = ${number(frame.t)} s。`),
-    block('p',`每軸座標 x = ${direction}，僅列入落在梁上之軸重。各軸作用力 = 輸入軸重 × ${number(c.factor)}。此步梁上車軸共有 ${frame.result.load.loads.filter(l=>l.vehicle).length} 個。`)];
+    block('p',`每軸座標 x = ${direction}，僅列入落在梁上之軸重。各軸作用力 = 輸入軸重 × ${number(c.factor)} × 組合 L 係數 ${number(c.vehicleFactor??1)}。此步梁上車軸共有 ${frame.result.load.loads.filter(l=>l.vehicle).length} 個。`)];
   if(c.mode==='moving') {
     const distance=model.L+vehicleLength(c);
     blocks.push(block('p',`總行程 ${number(distance)} m，均分基本步長 ${number(analysis.step)} m，另加入車軸通過支承與全梁中央的位置。共求解 ${analysis.frames.length} 個逐位置靜力工況。各斷面固定取樣位置在全部工況中分別取最大與最小值。`));
@@ -214,3 +214,4 @@ export function traceBlocks(model,analysis,frameIndex,x) {
   blocks.push(...sectionWork(model,frame.result,x,analysis.alpha||0),...balance(model,frame.result,analysis.alpha||0,dynamicMode));
   return blocks;
 }
+

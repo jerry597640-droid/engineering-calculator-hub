@@ -25,6 +25,7 @@ export function validate(c,{allowMechanism=false}={}){
  for(const l of c.loads){if(!['point','moment','line'].includes(l.type))throw Error('不支援的載重類型。');if(l.type==='line'){if(![l.a,l.b,l.w1,l.w2].every(num)||l.a<0||l.b>L+1e-8||l.b<=l.a)throw Error('分布載重需滿足 0 ≤ 起點 < 終點 ≤ 梁長。');}else if(![l.x,l.p].every(num)||l.x<0||l.x>L)throw Error('集中載重的位置必須在梁上，數值須為有限數。');}
  if(!Array.isArray(c.axles)||c.axles.length<1||c.axles.length>12||c.axles.some(a=>![a.p,a.offset].every(num)||a.p<=0||a.offset<0)||Math.min(...c.axles.map(a=>a.offset))!==0)throw Error('車輛須有 1–12 軸；軸重 > 0、距前軸距離 ≥ 0，至少一軸位於 0。');
  if(!num(c.factor)||c.factor<=0||c.factor>5||!num(c.speed)||c.speed<=0||c.speed>300||!num(c.damping)||c.damping<0||c.damping>30||!num(c.step)||c.step<0.01||!num(c.dt)||c.dt<0.0001||c.dt>0.1||!num(c.tail)||c.tail<0||c.tail>10||![8,12,24].includes(c.mesh))throw Error('請檢查車速、倍率、阻尼、步長與網格設定。');
+ for(const key of ['gravityFactor','vehicleFactor'])if(c[key]!=null&&(!num(c[key])||c[key]<0||c[key]>10))throw Error('載重組合係數無效。');
  if(!['static','moving','dynamic'].includes(c.mode)||![-1,1].includes(c.direction))throw Error('分析模式或方向錯誤。');
 }
 export function build(c){validate(c);let xs=[0],ss=[0],pos=0;
@@ -42,8 +43,8 @@ export function build(c){validate(c);let xs=[0],ss=[0],pos=0;
  const expand=x=>{let u=zero(n);free.forEach((j,i)=>u[j]=x[i]);return u;};
  return {c,xs,ss,els,n,K,M,k,m,free,factor,omega,expand,constrained,L:pos};
 }
-export function axleLoads(model,front){if(front==null)return [];let {c,L}=model;return c.axles.map((a,axleIndex)=>({type:'point',axleIndex,x:c.direction===1?front-a.offset:L-front+a.offset,p:a.p*c.factor,vehicle:true})).filter(a=>a.x>=-1e-8&&a.x<=L+1e-8).map(a=>({...a,x:Math.max(0,Math.min(L,a.x))}));}
-export function loading(model,front=null){let loads=[...model.c.loads,...axleLoads(model,front)];if(model.c.selfWeight)model.els.forEach(e=>loads.push({type:'line',a:e.a,b:e.b,w1:e.mu*9.80665,w2:e.mu*9.80665}));
+export function axleLoads(model,front){if(front==null)return [];let {c,L}=model;return c.axles.map((a,axleIndex)=>({type:'point',axleIndex,x:c.direction===1?front-a.offset:L-front+a.offset,p:a.p*c.factor*(c.vehicleFactor??1),vehicle:true})).filter(a=>a.x>=-1e-8&&a.x<=L+1e-8).map(a=>({...a,x:Math.max(0,Math.min(L,a.x))}));}
+export function loading(model,front=null){let loads=[...model.c.loads,...axleLoads(model,front)];if(model.c.selfWeight)model.els.forEach(e=>loads.push({type:'line',a:e.a,b:e.b,w1:e.mu*9.80665*(model.c.gravityFactor??1),w2:e.mu*9.80665*(model.c.gravityFactor??1)}));
  let F=zero(model.n),efs=model.els.map(()=>zero(4)),elLoads=model.els.map(()=>[]);
  for(const l of loads){if(l.type==='line'){model.els.forEach((e,i)=>{let a=Math.max(e.a,l.a),b=Math.min(e.b,l.b);if(b<=a)return;elLoads[i].push(l);for(let j=0;j<4;j++)efs[i][j]+=quad(a,b,x=>-intensity(l,x)*shape(x-e.a,e.h)[j]);});}else{let i=model.els.findIndex(e=>l.x>=e.a-1e-8&&l.x<=e.b+1e-8);if(i<0)continue;let e=model.els[i],s=Math.max(0,Math.min(e.h,l.x-e.a)),N=l.type==='moment'?deriv(s,e.h):shape(s,e.h);elLoads[i].push(l);for(let j=0;j<4;j++)efs[i][j]+=N[j]*l.p*(l.type==='moment'?1:-1);}}
  model.els.forEach((e,i)=>e.ids.forEach((j,k)=>F[j]+=efs[i][k]));return {F,efs,elLoads,loads};
@@ -106,3 +107,4 @@ export async function dynamic(model,onProgress=()=>{}){const c=model.c,speed=c.s
  for(let step=0;step<=count;step++){let t=step*dt,front=speed*t,ld=loading(model,front);if(step>0){let pm=mv(model.m,u.map((x,i)=>a0*x+4/dt*v[i]+a[i])),pc=mv(C,u.map((x,i)=>a1*x+v[i])),rhs=model.free.map((id,i)=>ld.F[id]+pm[i]+pc[i]),un=solve(fact,rhs),an=un.map((x,i)=>a0*(x-u[i])-4/dt*v[i]-a[i]),vn=v.map((x,i)=>x+dt*(a[i]+an[i])/2);u=un;v=vn;a=an;}
  frames.push({t,front,result:response(model,ld,model.expand(u),model.expand(v),model.expand(a),alpha)});if(step%30===0){onProgress(step/count);await new Promise(r=>setTimeout(r,0));}}
  return {frames,envelope:envelope(model,frames),dt,alpha};}
+

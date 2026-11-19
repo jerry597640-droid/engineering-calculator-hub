@@ -172,7 +172,7 @@ export function wordReport(blocks) {
   const doc = xmlHeader + '<w:document xmlns:w="'+word+'" xmlns:r="'+od+'" xmlns:wp="'+drawing+'/wordprocessingDrawing" xmlns:a="'+drawing+'/main" xmlns:pic="'+drawing+'/picture"><w:body>'+body+
     '<w:sectPr><w:footerReference w:type="default" r:id="rFooter"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1000" w:right="1100" w:bottom="1080" w:left="1100" w:header="430" w:footer="500" w:gutter="0"/></w:sectPr></w:body></w:document>';
   const footer = xmlHeader + '<w:ftr xmlns:w="'+word+'"><w:p><w:pPr><w:pStyle w:val="Caption"/><w:jc w:val="right"/></w:pPr>' +
-    textRun('BeamLab　｜　第 ')+'<w:fldSimple w:instr=" PAGE ">'+textRun('1')+'</w:fldSimple>'+textRun(' 頁')+'</w:p></w:ftr>';
+    textRun('BeamLab　｜　第 ')+'<w:fldSimple w:instr=" PAGE ">'+textRun('1')+'</w:fldSimple>'+textRun(' 頁／共 ')+'<w:fldSimple w:instr=" NUMPAGES ">'+textRun('1')+'</w:fldSimple>'+textRun(' 頁')+'</w:p></w:ftr>';
   const fonts = xmlHeader + '<w:fonts xmlns:w="'+word+'"><w:font w:name="'+eastFont+'"><w:altName w:val="'+(eastFont === 'Noto Serif CJK TC' ? '標楷體' : 'Noto Serif CJK TC')+'"/><w:family w:val="roman"/><w:pitch w:val="variable"/></w:font><w:font w:name="Times New Roman"><w:altName w:val="Liberation Serif"/><w:family w:val="roman"/><w:pitch w:val="variable"/></w:font></w:fonts>';
   const rels = [['rStyles','styles','styles.xml'],['rFooter','footer','footer1.xml'],['rFonts','fontTable','fontTable.xml']];
   const media = pictures.map((png,i) => {
@@ -183,3 +183,4 @@ export function wordReport(blocks) {
   return zip([['[Content_Types].xml',contentTypes(pictures.length)],['_rels/.rels',relationships([['rDoc','officeDocument','word/document.xml']])],
     ['word/document.xml',doc],['word/styles.xml',styles],['word/footer1.xml',footer],['word/fontTable.xml',fonts],['word/_rels/document.xml.rels',relationships(rels)],...media]);
 }
+

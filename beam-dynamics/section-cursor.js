@@ -53,7 +53,7 @@ export function installSectionCursor({getState,quantity,numberOf,labelOf,readX,w
     if(!cursor){
       cursor=svgNode('g',{class:'section-guide','pointer-events':'none','aria-hidden':'true'});
       if(key){
-        cursor.append(svgNode('line',{y1:18,y2:162}),svgNode('circle',{r:4}),svgNode('circle',{r:3}));
+        cursor.append(svgNode('line',{y1:Number(svg.dataset.plotTop??18),y2:Number(svg.dataset.plotBottom??162)}),svgNode('circle',{r:4}),svgNode('circle',{r:3}));
       }else{
         cursor.append(svgNode('line',{y1:106,y2:148}),svgNode('path',{d:'M-4 103h8l-4 6z'}));
       }
@@ -179,3 +179,4 @@ export function installSectionCursor({getState,quantity,numberOf,labelOf,readX,w
   query.addEventListener('input',()=>{stop();refresh();});
   return {refresh,clear};
 }
+

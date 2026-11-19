@@ -1,6 +1,7 @@
-import {reportBlocks} from './calculation-report.js?v=1.8.0';
-import {wordReport} from './word-report.js';
-import {reportFigures} from './report-plots.js?v=1.4';
+import {peakSummary,components} from './extrema.js';
+import {reportBlocks} from './calculation-report.js?v=1.9.0';
+import {wordReport} from './word-report.js?v=1.9.0';
+import {reportFigures} from './report-plots.js?v=1.9.0';
 
 const el = (tag,text) => { const node=document.createElement(tag); if(text!=null)node.textContent=text;return node; };
 const get = id => document.getElementById(id);
@@ -45,7 +46,7 @@ function preview(session,blocks) {
   root.querySelector('details')?.setAttribute('open','');
 }
 function settings(){
-  return {project:get('reportProject').value.trim(),engineer:get('reportEngineer').value.trim(),detail:get('reportDetail').checked,history:get('reportHistory').checked};
+  return {organization:get('reportOrganization').value.trim(),number:get('reportNumber').value.trim(),revision:get('reportRevision').value.trim(),reviewer:get('reportReviewer').value.trim(),basis:get('reportBasis').value.trim(),notes:get('reportNotes').value.trim(),controls:get('reportControls').checked,project:get('reportProject').value.trim(),engineer:get('reportEngineer').value.trim(),detail:get('reportDetail').checked,history:get('reportHistory').checked};
 }
 function invalidate() {
   if(!reportSession)return;reportSession.version++;revoke(reportSession);get('reportReady').hidden=true;get('reportReady').removeAttribute('href');
@@ -64,7 +65,18 @@ async function generate(download) {
       const plots=await reportFigures(model,analysis,frameIndex,units,at);
       if(!valid())return;session.figures=plots;session.plotX=at;
     }
-    const blocks=reportBlocks(model,analysis,frameIndex,at,units,{...configs,figures:session.figures});
+    if(configs.controls&&!session.controlFigures){
+      const controlFigures={};
+      const peaks=peakSummary(analysis);
+      for(const [key] of components){
+        const control=peaks[key].control;
+        const figs=await reportFigures(model,analysis,control.frame,units,control.x,{component:key});
+        if(!valid())return;
+        controlFigures[key]=figs;
+      }
+      session.controlFigures=controlFigures;
+    }
+    const blocks=reportBlocks(model,analysis,frameIndex,at,units,{...configs,figures:session.figures,controlFigures:session.controlFigures,design:session.design});
     if(!valid())return;
     if(download) {
       const blob=wordReport(blocks);
@@ -84,15 +96,17 @@ const dialog=get('reportDialog');
 dialog.onclose=()=>{if(reportSession)revoke(reportSession);reportSession=null;get('reportPreview').replaceChildren();};
 get('reportClose').onclick=()=>dialog.close();
 get('reportBuild').onclick=()=>generate(false);get('wordExport').onclick=()=>generate(true);
-for(const id of ['reportX','reportProject','reportEngineer','reportDetail','reportHistory'])get(id).addEventListener('input',invalidate);
-export function openCalculationReport(model,analysis,frameIndex,queryX,units) {
+for(const id of ['reportX','reportProject','reportEngineer','reportDetail','reportHistory','reportOrganization','reportNumber','reportRevision','reportReviewer','reportBasis','reportNotes','reportControls'])get(id).addEventListener('input',invalidate);
+export function openCalculationReport(model,analysis,frameIndex,queryX,units,design=null) {
   if(reportSession)revoke(reportSession);
-  reportSession={model,analysis,frameIndex,units,version:0,images:[]};
+  reportSession={model,analysis,frameIndex,units,version:0,images:[],design};
   const x=Number.isFinite(queryX)&&queryX>=0&&queryX<=model.L?queryX:model.L/2;
   get('reportX').max=units.show('m',model.L);get('reportX').value=Number(units.show('m',x).toPrecision(14));get('reportXUnit').textContent=units.label('m');
   get('historyOption').hidden=model.c.mode==='static';get('reportHistory').checked=false;
   get('historyCount').textContent=analysis.frames.length;
   get('reportFrame').textContent=modes[model.c.mode]+' · '+model.c.spans.length+' 跨 · '+(model.c.mode==='static'?'單一載重配置':'第 '+frameIndex+' 步 / '+(analysis.frames.length-1)+'，t = '+Number(analysis.frames[frameIndex].t.toPrecision(6))+' s');
+  get('reportFrame').textContent += design?' · 已附 '+design.cases.length+' 組鋼梁檢核':' · 尚未附強度組合（請先執行「強度與載重組合」）';
   get('reportBuild').disabled=false;get('wordExport').disabled=false;
   invalidate();dialog.showModal();
 }
+

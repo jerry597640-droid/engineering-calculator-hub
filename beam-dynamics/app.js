@@ -1,9 +1,11 @@
+import {installSteelDesign,currentSteelDesign} from './steel-design-ui.js?v=1.9.0';
+import {vehicleLabelLayout,vehicleChartOverlay} from './chart-vehicle.js';
 import {peakSummary,peakLocation,components} from './extrema.js';
 import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.7.1';
-import {installSectionCursor} from './section-cursor.js';
+import {installSectionCursor} from './section-cursor.js?v=1.9.0';
 import {installDiagramEditor} from './diagram-editor.js';
 import {installLayoutEditor} from './span-layout.js';
-import {build,statics,moving,dynamic,axleLoads,maxSpans,total,vehicleLength,validate as validateBeam} from './solver.js?v=1.8.0';
+import {build,statics,moving,dynamic,axleLoads,maxSpans,total,vehicleLength,validate as validateBeam} from './solver.js?v=1.9.0';
 import {unitSystem, resultDimensions, displayNumber} from './units.js';
 import {installWorkspace, arrangePins, selectView} from './workspace.js?v=1.4';
 import {openMaterial,installMaterialEditor,renderMaterialPickers,reconcileManualSpanEdit,assertSpanMaterial} from './material-editor.js?v=1.4.1';
@@ -70,7 +72,7 @@ function editors(){
  $('#modelBadge').textContent=c.spans.length===1?'單跨梁':c.spans.length+' 跨連續梁';$('#layoutBadge').textContent=c.spans.length+' 跨';$('#addSpan').disabled=c.spans.length>=maxSpans;$('#addAxle').disabled=c.axles.length>=12;unitLabels();renderMaterialPickers();renderSectionPickers();liveLoads.refresh();
 }
 function persist(){try{localStorage.setItem('beamlab-model-v1',JSON.stringify(c));$('#saveStatus').textContent='設定已保存在此瀏覽器';}catch{$('#saveStatus').textContent='無法自動儲存，請匯出模型';}}
-function stale(){clearPeaks();generation++;clearTimeout(autoTimer);autoPending=false;stop();dirty=true;sectionCursor.clear();document.body.classList.add('stale');$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;notice('設定已變更，請按「計算分析」更新結果。');persist();try{drawBeam();}catch{}}
+function stale(){document.querySelectorAll('.chart-vehicle').forEach(el=>el.remove());clearPeaks();generation++;clearTimeout(autoTimer);autoPending=false;stop();dirty=true;sectionCursor.clear();document.body.classList.add('stale');$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;notice('設定已變更，請按「計算分析」更新結果。');persist();try{drawBeam();}catch{}}
 function notice(s,error=false){$('#notice').hidden=!s;$('#notice').textContent=s;$('#notice').classList.toggle('error',error);$('#settingsStatus').textContent=s;$('#settingsStatus').hidden=!s;$('#settingsStatus').classList.toggle('error',error);}
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),2400);}
 function svgText(x,y,text,color='#6b7e83',anchor='middle',size=12){return `<text x="${x}" y="${y}" fill="${color}" text-anchor="${anchor}" style="font-size:${size}px">${text}</text>`;}
@@ -182,15 +184,16 @@ function drawBeam(){let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(
  }
 $('#modelInfo').textContent=`${c.spans.length} 跨 · 全長 ${quantity(L,'m')} · ${c.loads.length} 筆靜載${c.selfWeight?' ＋ 自重':''}`;
 }
-function chart(id,pts,key,color,env=null,opts={}){let W=Math.max(300,Math.min(1000,Math.floor($('#'+id).clientWidth || 700)-12)),H=190,l=W<540?65:77,r=15,top=20,bottom=30,end=opts.end??model.L;let values=pts.map(p=>p[key]);if(env)values.push(...env.map(p=>p[key+'max']),...env.map(p=>p[key+'min']));let mx=Math.max(...values.map(Math.abs),.01),up=key==='M'&&!opts.time;let X=x=>l+(W-l-r)*x/end,Y=v=>top+(H-top-bottom)/2+(up?1:-1)*v/mx*((H-top-bottom)/2-7),base=Y(0);let lines='';
+function chart(id,pts,key,color,env=null,opts={}){let W=Math.max(300,Math.min(1000,Math.floor($('#'+id).clientWidth || 700)-12)),l=W<540?65:77,r=15,bottom=30,end=opts.end??model.L;const vehicle=!opts.time&&c.mode!=='static',layout=vehicle?vehicleLabelLayout(model.c,model.L,l,W-r,quantity):null,band=layout?.height??0,H=190+band,top=20+band;let values=pts.map(p=>p[key]);if(env)values.push(...env.map(p=>p[key+'max']),...env.map(p=>p[key+'min']));let mx=Math.max(...values.map(Math.abs),.01),up=key==='M'&&!opts.time;let X=x=>l+(W-l-r)*x/end,Y=v=>top+(H-top-bottom)/2+(up?1:-1)*v/mx*((H-top-bottom)/2-7),base=Y(0);let lines='';
  for(let v of [-mx,0,mx])lines+=`<path d="M${l},${Y(v)}H${W-r}" stroke="${v===0?'#b8c8ca':'#e8eeee'}" ${v===0?'':'stroke-dasharray="3 5"'}/>`+svgText(l-9,Y(v)+4,numberOf(v,resultDimensions[key],Math.abs(units.show(resultDimensions[key],v))>100?0:2),'#819194','end',11);
  for(let i=0;i<=5;i++){let x=end*i/5;lines+=svgText(X(x),H-8,(opts.time?fmt(x,2):numberOf(x,'m',1)),'#819194','middle',11);}
  const path=arr=>arr.map((p,i)=>`${i?'L':'M'}${X(p.x).toFixed(2)},${Y(p.val).toFixed(2)}`).join('');
  if(env){let max=env.map(p=>({x:p.x,val:p[key+'max']})),min=env.map(p=>({x:p.x,val:p[key+'min']}));lines+=`<path d="${path(max)} ${path([...min].reverse()).replace(/^M/,'L')}Z" fill="${color}" opacity=".09"/><path d="${path(max)}" stroke="${color}" fill="none" stroke-dasharray="5 4" opacity=".6"/><path d="${path(min)}" stroke="${color}" fill="none" stroke-dasharray="5 4" opacity=".6"/>`;}
  let ds=path(pts.map(p=>({x:p.x,val:p[key]})));lines+=`<path d="M${X(pts[0].x)},${base} ${ds.replace(/^M/,'L')} L${X(pts.at(-1).x)},${base}Z" fill="${color}" opacity=".12"/><path d="${ds}" stroke="${color}" stroke-width="2.2" fill="none" stroke-linejoin="round"/>`;
  if(!opts.time)model.ss.forEach(x=>{lines+=`<path d="M${X(x)},${top}V${H-bottom}" stroke="#b3c7c8" stroke-dasharray="2 5" opacity=".55"/>`;});
- let peak=pts.reduce((a,p)=>Math.abs(p[key])>Math.abs(a[key])?p:a,pts[0]);lines+=`<circle cx="${X(peak.x)}" cy="${Y(peak[key])}" r="3" fill="${color}"/>`+svgText(Math.max(l+30,Math.min(W-r-30,X(peak.x))),Math.max(14,Math.min(H-bottom-5,Y(peak[key])+(peak[key]*(up?1:-1)>0?16:-10))),numberOf(peak[key],resultDimensions[key]),color);
- $('#'+id).innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" ${opts.time?'':`data-plot-left="${l}" data-plot-right="${W-r}" data-plot-zero="${base}" data-plot-scale="${(up?1:-1)*((H-top-bottom)/2-7)/mx}"`} role="img" aria-label="${key} ${opts.time?'歷時':'分布'}圖"><title>${key}，${opts.time?'時間 s':'座標 '+labelOf('m')}</title>${lines}</svg>`;
+ let peak=pts.reduce((a,p)=>Math.abs(p[key])>Math.abs(a[key])?p:a,pts[0]);lines+=`<circle cx="${X(peak.x)}" cy="${Y(peak[key])}" r="3" fill="${color}"/>`+svgText(Math.max(l+30,Math.min(W-r-30,X(peak.x))),Math.max(top-6,Math.min(H-bottom-5,Y(peak[key])+(peak[key]*(up?1:-1)>0?16:-10))),numberOf(peak[key],resultDimensions[key]),color);
+ if(vehicle)lines+=vehicleChartOverlay({layout,wheels:axleLoads(model,analysis.frames[frameIndex].front),left:l,right:W-r,bottom:H-bottom,X,Y,result:{at:current.at,length:model.L},key,quantity,time:analysis.frames[frameIndex].t});
+ $('#'+id).innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" ${opts.time?'':`data-plot-left="${l}" data-plot-right="${W-r}" data-plot-top="${top}" data-plot-bottom="${H-bottom}" data-plot-zero="${base}" data-plot-scale="${(up?1:-1)*((H-top-bottom)/2-7)/mx}"`} role="img" aria-label="${key} ${opts.time?'歷時':'分布'}圖"><title>${key}，${opts.time?'時間 s':'座標 '+labelOf('m')}</title>${lines}</svg>`;
 }
 function vehicleTravel(){
  const length=total(c),end=length+vehicleLength(c)+(c.mode==='dynamic'?c.speed/3.6*c.tail:0);
@@ -360,8 +363,8 @@ $('#reportBtn').onclick=async()=>{
   if(!model||!analysis||busy||dirty)return;
   stop();
   try {
-    const {openCalculationReport}=await import('./report-ui.js?v=1.8.0');
-    if(model&&analysis&&!busy&&!dirty)openCalculationReport(model,analysis,frameIndex,readPosition('#queryX'),units);
+    const {openCalculationReport}=await import('./report-ui.js?v=1.9.0');
+    if(model&&analysis&&!busy&&!dirty)openCalculationReport(model,analysis,frameIndex,readPosition('#queryX'),units,currentSteelDesign());
   } catch(err) {notice('無法開啟計算報告：'+err.message,true);}
 };
 function changeSupport(i,type,origin){
@@ -399,4 +402,6 @@ document.addEventListener('keydown', event => {
     run(true);
   }
 });
+installSteelDesign({getConfig:()=>c,getUnits:()=>units,persist,stop});
 editors();drawBeam();run();
+

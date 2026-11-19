@@ -217,9 +217,9 @@ async function sectionDrawing(span,index,units) {
   return figure(canvas,'第 '+(index+1)+' 跨斷面','依公稱尺寸繪製，橘色虛線為分析採用的彎曲軸。');
 }
 
-export async function reportFigures(model, analysis, index, units, x) {
+export async function reportFigures(model, analysis, index, units, x, options={}) {
   const frame=analysis.frames[index], blocks=[await modelDrawing(model,frame,units)];
-  for(const [i,span] of model.c.spans.entries())if(span.section){
+  for(const [i,span] of model.c.spans.entries())if(span.section&&!options.component){
     const drawing=await sectionDrawing(span,i,units);if(drawing)blocks.push(drawing);
   }
   const specs=[
@@ -229,7 +229,7 @@ export async function reportFigures(model, analysis, index, units, x) {
   ];
   const envelope=analysis.envelope?.rows;
   const coordinateUnit=units.label('m'), convertX=v=>units.show('m',v);
-  for (const [key,quantity,unit,color,description] of specs) {
+  for (const [key,quantity,unit,color,description] of specs.filter(spec=>!options.component||spec[0]===options.component)) {
     const series=frame.result.points.map(p=>[p.x,units.show(unit,p[key])]);
     const bounds=envelope ? ['min','max'].map(s=>envelope.map(p=>[p.x,units.show(unit,p[key+s])])) : [];
     const canvas=responseDrawing(series,bounds,{quantity,yUnit:units.label(unit),down:key==='M',color,
@@ -237,14 +237,17 @@ export async function reportFigures(model, analysis, index, units, x) {
     const currentStep = envelope ? ' 選定時間 t = '+num(frame.t)+' s。虛線顯示各取樣斷面的全程最大與最小值。' : '';
     blocks.push(await figure(canvas,quantity+'圖',description+currentStep));
   }
-  if (model.c.mode!=='static' && Number.isFinite(x) && x>=0 && x<=model.L) {
-    const unit='kN·m', series=analysis.frames.map(f=>[f.t,units.show(unit,f.result.at(x,x===model.L?-1:1).M)]);
+  if (!options.component && model.c.mode!=='static' && Number.isFinite(x) && x>=0 && x<=model.L) {
+    for(const [key,name,unit,color] of specs){
+    const series=analysis.frames.map(f=>[f.t,units.show(unit,f.result.at(x,x===model.L?-1:1)[key])]);
     const end=series.at(-1)[0], section='x = '+num(convertX(x))+' '+coordinateUnit;
     if(end>0){
-      const canvas=responseDrawing(series,[],{quantity:'M',yUnit:units.label(unit),down:false,color:green,
+      const canvas=responseDrawing(series,[],{quantity:key,yUnit:units.label(unit),down:false,color,
         end,convertX:v=>v,xTitle:'時間 t (s)',mark:series[index]});
-      blocks.push(await figure(canvas,'查詢斷面彎矩歷程',section+(x===model.L?'，採梁端內側值。':'，採斷面右側值。')+'正彎矩向上繪製，圓點標出選定時間 t = '+num(frame.t)+' s。'));
+      blocks.push(await figure(canvas,'查詢斷面'+name+'歷程',section+(x===model.L?'，採梁端內側值。':'，採斷面右側值。')+'正值向上繪製，圓點標出選定時間 t = '+num(frame.t)+' s。'));
     }
+  }
   }
   return blocks;
 }
+

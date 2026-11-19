@@ -1,6 +1,7 @@
+import {steelReportBlocks} from './steel-design.js?v=1.9.0';
 import {peakSummary,peakLocation,components} from './extrema.js';
 import {evaluateSection} from './section-geometry.js';
-import {traceBlocks} from './report-trace.js';
+import {traceBlocks} from './report-trace.js?v=1.9.0';
 import {unitSystem} from './units.js';
 
 const modes = {static:'靜力分析',moving:'車輛移動包絡',dynamic:'車輛動力歷時'};
@@ -176,13 +177,40 @@ export function reportBlocks(model,analysis,frameIndex,x,units,options={}) {
   blocks.push(...traceBlocks(model,analysis,frameIndex,x),...handCheck(model,r));
   blocks.push(h2('指定斷面結果'),p('x = '+q(x,'m')+' '+u('m')+'，採目前報告步的內力及位移。'),
     table(['斷面側別','剪力 ('+u('kN')+')','彎矩 ('+u('kN·m')+')','撓度 ('+u('mm')+')'],[-1,1].filter(s=>!(x===0&&s===-1||x===model.L&&s===1)).map(s=>{const a=r.at(x,s);return [s===-1?'左側':'右側',q(a.V,'kN'),q(a.M,'kN·m'),q(a.D,'mm')];})),
-    h2('分析適用範圍'),p('本模型採平面線彈性、小變形 Euler–Bernoulli 梁，未納入剪切變形、材料非線性、支承脫離及截面強度檢核。控制值與包絡受空間與時間取樣影響，工程採用時應以網格和步長加密覆核。'),
+    h2('分析適用範圍'),p('本模型採平面線彈性、小變形 Euler–Bernoulli 梁，未納入剪切變形、材料非線性、支承脫離。截面強度另見附加的鋼梁檢核章節（需先執行組合檢核）。控制值與包絡受空間與時間取樣影響，工程採用時應以網格和步長加密覆核。'),
     ...(c.mode==='dynamic'?[p('動力模型以給定車軸移動力作用於梁，忽略車輛懸吊與路面不平。質量比例阻尼依第一模態校準。')]:[]));
   if(options.figures?.length)blocks.push(h1('模型與分析圖'),...options.figures);
+  if(options.controls) {
+    const controls=peakSummary(analysis);
+    for(const [key,name,dim] of components) {
+      const control=controls[key].control,step=analysis.frames[control.frame];
+      blocks.push({type:'page'},h1(name+'控制工況明細'),
+        p('第 '+control.frame+' 步，t = '+fmt(step.t)+' s，'+peakLocation(model,analysis,key,control)+'，x = '+q(control.x,'m')+' '+u('m')+'，'+name+' = '+q(control.value,dim)+' '+u(dim)+'。'));
+      if(vehicles)blocks.push(p('前軸 x = '+q(coord(model,step),'m')+' '+u('m')+'。'),
+        table(['軸','梁座標 ('+u('m')+')','施加軸重 ('+u('kN')+')'],c.axles.map((a,i)=>{
+          const position=c.direction===1?step.front-a.offset:model.L-step.front+a.offset;
+          return [String(i+1),q(position,'m'),position>=0&&position<=model.L?q(a.p*c.factor,'kN'):'梁外'];
+        })));
+      blocks.push(...traceBlocks(model,analysis,control.frame,control.x).map(b=>b.type==='h1'?{...b,type:'h2'}:b),
+        table(['支承','反力 ('+u('kN')+')','反力矩 ('+u('kN·m')+')'],step.result.reactions.filter(a=>a.type!=='free').map(a=>[a.label,q(a.R,'kN'),q(a.T,'kN·m')])),
+        ...(options.controlFigures?.[key]||[]));
+    }
+  }
   if(options.detail) blocks.push(...appendix(model,analysis,frameIndex,units,q));
   if(options.history&&vehicles){
     blocks.push(h1('指定斷面逐步歷時'),p('每一步列出 x = '+q(x,'m')+' '+u('m')+' 的斷面值。內部斷面取右側，梁右端取梁內側。'),
       table(['步','時間 (s)','前軸 ('+u('m')+')','V ('+u('kN')+')','M ('+u('kN·m')+')','δ ('+u('mm')+')'],analysis.frames.map((f,i)=>{const a=f.result.at(x,x===model.L?-1:1);return [String(i),fmt(f.t),q(coord(model,f),'m'),q(a.V,'kN'),q(a.M,'kN·m'),q(a.D,'mm')];})));
   }
-  return blocks;
+  blocks.push(...steelReportBlocks(options.design,units));
+  const date=options.date||new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei'}).format(new Date());
+  const cover=[{type:'title',text:'梁結構分析計算報告書'},p(options.project||'工程名稱待填'),
+    table(['文件資料','內容'],[
+      ['編製單位',options.organization||'待填'],['文件編號',options.number||'待填'],['版次',options.revision||'待填'],
+      ['日期',date],['計算者',options.engineer||'待填'],['覆核者',options.reviewer||'待填'],
+      ['分析程式','梁析 BeamLab v1.9'],['設計及載重依據',options.basis||'由計算者填寫'],
+      ['審查說明',options.notes||'由計算者填寫']]),
+    p('本報告記錄所列模型與工況的分析結果。專案載重依據、設計條件及覆核簽署請由負責人員完成。'),
+    {type:'page'},h1('章節目錄'),...blocks.filter(b=>b.type==='h1').map(b=>p(b.text)),{type:'page'}];
+  return [...cover,...blocks];
 }
+
