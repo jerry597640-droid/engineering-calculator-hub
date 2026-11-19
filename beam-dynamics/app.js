@@ -1,8 +1,9 @@
+import {peakSummary,peakLocation,components} from './extrema.js';
 import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.7.1';
 import {installSectionCursor} from './section-cursor.js';
 import {installDiagramEditor} from './diagram-editor.js';
 import {installLayoutEditor} from './span-layout.js';
-import {build,statics,moving,dynamic,axleLoads,maxSpans,total,vehicleLength,validate as validateBeam} from './solver.js?v=1.6.0';
+import {build,statics,moving,dynamic,axleLoads,maxSpans,total,vehicleLength,validate as validateBeam} from './solver.js?v=1.8.0';
 import {unitSystem, resultDimensions, displayNumber} from './units.js';
 import {installWorkspace, arrangePins, selectView} from './workspace.js?v=1.4';
 import {openMaterial,installMaterialEditor,renderMaterialPickers,reconcileManualSpanEdit,assertSpanMaterial} from './material-editor.js?v=1.4.1';
@@ -69,7 +70,7 @@ function editors(){
  $('#modelBadge').textContent=c.spans.length===1?'單跨梁':c.spans.length+' 跨連續梁';$('#layoutBadge').textContent=c.spans.length+' 跨';$('#addSpan').disabled=c.spans.length>=maxSpans;$('#addAxle').disabled=c.axles.length>=12;unitLabels();renderMaterialPickers();renderSectionPickers();liveLoads.refresh();
 }
 function persist(){try{localStorage.setItem('beamlab-model-v1',JSON.stringify(c));$('#saveStatus').textContent='設定已保存在此瀏覽器';}catch{$('#saveStatus').textContent='無法自動儲存，請匯出模型';}}
-function stale(){generation++;clearTimeout(autoTimer);autoPending=false;stop();dirty=true;sectionCursor.clear();document.body.classList.add('stale');$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;notice('設定已變更，請按「計算分析」更新結果。');persist();try{drawBeam();}catch{}}
+function stale(){clearPeaks();generation++;clearTimeout(autoTimer);autoPending=false;stop();dirty=true;sectionCursor.clear();document.body.classList.add('stale');$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;notice('設定已變更，請按「計算分析」更新結果。');persist();try{drawBeam();}catch{}}
 function notice(s,error=false){$('#notice').hidden=!s;$('#notice').textContent=s;$('#notice').classList.toggle('error',error);$('#settingsStatus').textContent=s;$('#settingsStatus').hidden=!s;$('#settingsStatus').classList.toggle('error',error);}
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),2400);}
 function svgText(x,y,text,color='#6b7e83',anchor='middle',size=12){return `<text x="${x}" y="${y}" fill="${color}" text-anchor="${anchor}" style="font-size:${size}px">${text}</text>`;}
@@ -236,11 +237,43 @@ function refreshStepInfo() {
   const detail = c.mode === 'dynamic' ? `時間步長 ${fmt(analysis.dt,5)} s` : `移動步長 ≤ ${quantity(analysis.step,'m',3)}`;
   $('#stepInfo').textContent = `${detail} · ${analysis.frames.length} ${c.mode === 'dynamic' ? '時刻' : '位置'}`;
 }
+const peakCards=new Map(components.map(([key])=>[key,$('[data-peak="'+key+'"]')]));
+const chartKeys={M:'moment',V:'shear',D:'deflection'};
+let displayedPeaks=null;
+function clearPeaks(){
+ displayedPeaks=null;$('#peakCards').hidden=true;$('#peakScope').textContent='';
+ $('#peakEmpty').hidden=false;$('#peakEmpty').textContent='等待更新分析結果';
+}
+function renderPeaks(fullSweep){
+ const peaks=peakSummary(analysis,fullSweep?null:frameIndex);
+ displayedPeaks=peaks;
+ $('#peakEmpty').hidden=true;$('#peakCards').hidden=false;
+ $('#peakScope').textContent=(c.mode==='static'?'靜力':fullSweep?(c.mode==='dynamic'?'全程動力歷時':'全程移動載重'):(c.mode==='dynamic'?'目前時刻':'目前車位'))+' · 按絕對值比較';
+ for(const [key,,unit] of components){
+   const card=peakCards.get(key),part=name=>card.querySelector('[data-part="'+name+'"]');
+   const {min,max,control}=peaks[key],value=control.value,frame=analysis.frames[control.frame];
+   const sign=value===0?'':key==='D'?(value<0?'向下':'向上'):(value<0?'負':'正')+(key==='M'?'彎矩':'剪力');
+   part('value').textContent=numberOf(Math.abs(value),unit);
+   part('unit').textContent=labelOf(unit);part('sense').textContent=sign;
+   part('range').textContent='最小 '+numberOf(min.value,unit)+' ／ 最大 '+numberOf(max.value,unit);
+   part('section').textContent=value===0?'全梁為零':peakLocation(model,analysis,key,control)+' · x = '+quantity(control.x,'m',3);
+   const moving=value!==0&&c.mode!=='static';
+   part('frame').hidden=!moving;
+   if(moving)part('frame').textContent='前軸 x = '+quantity(c.direction===1?frame.front:model.L-frame.front,'m',3)+(c.mode==='dynamic'?' · t = '+fmt(frame.t,3)+' s':'');
+   card.querySelector('button').disabled=value===0;
+ }
+}
+$('#peakCards').addEventListener('click',event=>{
+ const button=event.target.closest('.peak-jump');
+ if(!button||!displayedPeaks||dirty||busy)return;
+ const key=button.closest('[data-peak]').dataset.peak,peak=displayedPeaks[key].control;
+ stop();frameIndex=peak.frame;$('#queryX').value=entryValue(peak.x,'m');
+ $('[data-result="'+chartKeys[key]+'"]').click();renderResults();
+ $('#'+chartKeys[key]+'Chart').closest('.card').scrollIntoView({block:'nearest'});
+});
 function renderResults(){if(!analysis)return;refreshStepInfo();current=analysis.frames[frameIndex].result;if(c.mode!=='static')travel=analysis.frames[frameIndex].front;liveLoads.sync(document.activeElement);let env=c.mode!=='static'&&$('#showEnvelope').checked?analysis.envelope:null;
  drawBeam();chart('momentChart',current.points,'M','#087a70',env?.rows);chart('shearChart',current.points,'V','#4a75ba',env?.rows);chart('deflectionChart',current.points,'D','#9b75ae',env?.rows);
- let pts=env?env.rows.flatMap(p=>[{x:p.x,M:p.Mmin,V:p.Vmin,D:p.Dmin},{x:p.x,M:p.Mmax,V:p.Vmax,D:p.Dmax}]):current.points;
- let maxM=pts.reduce((a,p)=>p.M>a.M?p:a,pts[0]),minM=pts.reduce((a,p)=>p.M<a.M?p:a,pts[0]),maxV=pts.reduce((a,p)=>Math.abs(p.V)>Math.abs(a.V)?p:a,pts[0]),maxD=pts.reduce((a,p)=>Math.abs(p.D)>Math.abs(a.D)?p:a,pts[0]);
- for(let [id,p,key,unit] of [['maxM',maxM,'M','kN·m'],['minM',minM,'M','kN·m'],['maxV',maxV,'V','kN'],['maxD',maxD,'D','mm']]){$('#'+id).textContent=numberOf(id==='maxM'?Math.max(0,p[key]):id==='minM'?Math.min(0,p[key]):Math.abs(p[key]),unit);$('#'+id+'pos').textContent=`${labelOf(unit)} · x = ${quantity(p.x,'m')}`;}
+ renderPeaks(Boolean(env));
  $('#reactionBody').innerHTML=current.reactions.filter(p=>p.type!=='free').map(p=>{let i=current.reactions.indexOf(p),e=analysis.envelope?.R[i];return `<tr><td>${p.label} · ${supportNames[p.type]}</td><td>${numberOf(p.x,'m')}</td><td>${numberOf(p.R,'kN')}</td><td>${numberOf(p.T,'kN·m')}</td><td>${e?numberOf(e.min,'kN'):'—'}</td><td>${e?numberOf(e.max,'kN'):'—'}</td></tr>`;}).join('');
  $('#resultMode').textContent=c.mode==='static'?'靜力':c.mode==='moving'?(env?'移動包絡':'目前位置'):(env?'動力包絡':'目前時刻');
  let frame=analysis.frames[frameIndex];$('#positionLabel').textContent=`前軸 ${quantity(c.direction===1?frame.front:model.L-frame.front,'m')}`;$('#timeLabel').textContent=`t = ${fmt(frame.t,3)} s`;$('#frameRange').value=frameIndex;
@@ -254,7 +287,7 @@ async function run(goToResults=false){if(busy)return;clearTimeout(autoTimer);aut
  movingSweep=c.mode==='moving'?analysis:null;frameIndex=0;if(c.mode!=='static')selectTravelFrame(vehicleTravel());current=analysis.frames[frameIndex].result;dirty=false;document.body.classList.remove('stale','analysis-invalid');$('#csvBtn').disabled=false;$('#reportBtn').disabled=false;$('#exchangeBtn').disabled=false;$('#printBtn').disabled=false;$('#playback').hidden=c.mode==='static';$('#historyPanel').hidden=c.mode==='static';$('#frameRange').max=analysis.frames.length-1;refreshStepInfo();
 
  notice(c.mode==='dynamic'?'動力模式：考慮梁的質量與阻尼；車輛採移動力模型，未含車橋耦合。':c.mode==='moving'?'移動包絡採逐位置靜力計算，不含振動慣性效應。':'');persist();arrangePins();if(goToResults===true)selectView('results',true);renderResults();history();
- }catch(e){if(started!==generation)return;dirty=true;document.body.classList.add('stale','analysis-invalid');notice(e.message,true);$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;}finally{busy=false;$('#runBtn').disabled=false;$('#commandRun').disabled=false;$('#runBtn').textContent='計算分析';$('.sidebar').classList.remove('busy');$$('[data-mode]').forEach(b=>b.disabled=false);$('#importBtn').disabled=false;if(autoPending)scheduleLiveAnalysis();}}
+ }catch(e){if(started!==generation)return;clearPeaks();dirty=true;document.body.classList.add('stale','analysis-invalid');notice(e.message,true);$('#csvBtn').disabled=true;$('#reportBtn').disabled=true;$('#exchangeBtn').disabled=true;$('#printBtn').disabled=true;}finally{busy=false;$('#runBtn').disabled=false;$('#commandRun').disabled=false;$('#runBtn').textContent='計算分析';$('.sidebar').classList.remove('busy');$$('[data-mode]').forEach(b=>b.disabled=false);$('#importBtn').disabled=false;if(autoPending)scheduleLiveAnalysis();}}
 function stop(){playing=false;cancelAnimationFrame(raf);$('#playBtn').textContent='播放';}
 function play(){if(!analysis||dirty)return;if(playing){stop();return;}playing=true;$('#playBtn').textContent='暫停';let last=0;function tick(t){if(!playing)return;if(t-last>70){last=t;frameIndex=(frameIndex+Math.max(1,Math.floor(analysis.frames.length/180)))%analysis.frames.length;renderResults();}raf=requestAnimationFrame(tick);}raf=requestAnimationFrame(tick);}
 function download(name,type,data){let a=document.createElement('a'),url=URL.createObjectURL(new Blob([data],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);}
@@ -266,12 +299,22 @@ function csv() {
   const value = (n, dim) => n == null ? '' : units.show(dim, n);
   const section = p => [value(p.V,'kN'), value(p.M,'kN·m'), value(p.D,'mm')];
   const rows = [
-    ['BeamLab v1.1', `force ${force}`, `length ${length}`, `mass ${units.prefs.mass}`, `deflection ${deflection}`],
+    ['BeamLab v1.8', `force ${force}`, `length ${length}`, `mass ${units.prefs.mass}`, `deflection ${deflection}`],
     ['mode', c.mode], ['mesh_elements',model.els.length], ['vehicle_factor',c.factor], ['direction',c.direction],
     ['frequency_Hz',model.omega/(2*Math.PI)], ['time_step_s',analysis.dt ?? ''], ['CURRENT DIAGRAM'],
     [`x_${length}`,`V_${force}`,`M_${moment}`,`D_${deflection}`],
   ];
   current.points.forEach(p => rows.push([value(p.x,'m'), ...section(p)]));
+  for(const scope of (analysis.envelope?['CURRENT','FULL SWEEP']:['CURRENT'])){
+    const summary=peakSummary(analysis,scope==='CURRENT'?frameIndex:null);
+    rows.push([scope+' BEAM PEAKS'],['quantity','unit','max_abs','signed_at_peak','min','max','span_and_side','x_'+length,'frame','front_x_'+length,'time_s']);
+    for(const [key,,unit] of components){
+      const {control,min,max}=summary[key],f=analysis.frames[control.frame],hasPeak=control.value!==0;
+      rows.push([key,labelOf(unit),value(Math.abs(control.value),unit),value(control.value,unit),value(min.value,unit),value(max.value,unit),
+        hasPeak?peakLocation(model,analysis,key,control):'',hasPeak?value(control.x,'m'):'',hasPeak?control.frame:'',
+        hasPeak&&c.mode!=='static'?value(c.direction===1?f.front:model.L-f.front,'m'):'',hasPeak&&c.mode!=='static'?f.t:'']);
+    }
+  }
   rows.push(['SUPPORT REACTIONS'],['support',`x_${length}`,`R_${force}`,`T_${moment}`,`Rmin_${force}`,`Rmax_${force}`]);
   current.reactions.forEach((r,i) => {
     const bounds=analysis.envelope?.R[i];
@@ -317,7 +360,7 @@ $('#reportBtn').onclick=async()=>{
   if(!model||!analysis||busy||dirty)return;
   stop();
   try {
-    const {openCalculationReport}=await import('./report-ui.js?v=1.4');
+    const {openCalculationReport}=await import('./report-ui.js?v=1.8.0');
     if(model&&analysis&&!busy&&!dirty)openCalculationReport(model,analysis,frameIndex,readPosition('#queryX'),units);
   } catch(err) {notice('無法開啟計算報告：'+err.message,true);}
 };

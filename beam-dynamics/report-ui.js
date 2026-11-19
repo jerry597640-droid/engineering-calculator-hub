@@ -1,4 +1,4 @@
-import {reportBlocks} from './calculation-report.js?v=1.4';
+import {reportBlocks} from './calculation-report.js?v=1.8.0';
 import {wordReport} from './word-report.js';
 import {reportFigures} from './report-plots.js?v=1.4';
 

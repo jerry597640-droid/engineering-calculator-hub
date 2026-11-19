@@ -1,10 +1,10 @@
+import {peakSummary,peakLocation,components} from './extrema.js';
 import {evaluateSection} from './section-geometry.js';
 import {traceBlocks} from './report-trace.js';
 import {unitSystem} from './units.js';
 
 const modes = {static:'靜力分析',moving:'車輛移動包絡',dynamic:'車輛動力歷時'};
 const supports = {pin:'鉸支承',roller:'滾動支承',fixed:'固定端',free:'自由節點'};
-const components = [['M','彎矩','kN·m'],['V','剪力','kN'],['D','撓度','mm']];
 const h1 = text => ({type:'h1',text});
 const h2 = text => ({type:'h2',text});
 const p = text => ({type:'p',text});
@@ -104,15 +104,14 @@ function handCheck(m,r) {
   return rows;
 }
 
-function extrema(model,analysis,r,units,q) {
-  const envelope=analysis.envelope, out=[];
+function extrema(model,analysis,units,q) {
+  const peaks=peakSummary(analysis),out=[];
   for(const [key,name,dim] of components){
-    for(const [direction,label] of [['min','最小'],['max','最大']]){
-      const field=envelope?key+direction:key;
-      const pts=envelope?envelope.rows:r.points;
-      const best=pts.reduce((a,b)=>(direction==='min'?a[field]<=b[field]:a[field]>=b[field])?a:b);
-      const f=envelope?analysis.frames[best[field+'Frame']]:null;
-      out.push([name+label,q(best[field],dim)+' '+units.label(dim),q(best.x,'m'),f?fmt(f.t):'—',f?q(coord(model,f),'m'):'—']);
+    for(const [direction,label] of [['control','絕對值控制'],['min','最小'],['max','最大']]){
+      const p=peaks[key][direction],f=analysis.frames[p.frame];
+      const governed=p.value!==0 || direction!=='control';
+      const vehicle=governed&&model.c.mode!=='static';
+      out.push([name+label,q(p.value,dim)+' '+units.label(dim),governed?peakLocation(model,analysis,key,p):'全梁為零',governed?q(p.x,'m'):'—',vehicle?fmt(f.t):'—',vehicle?q(coord(model,f),'m'):'—']);
     }
   }
   return out;
@@ -144,11 +143,11 @@ export function reportBlocks(model,analysis,frameIndex,x,units,options={}) {
   const fr=analysis.frames[frameIndex],r=fr.result,c=model.c, u=d=>units.label(d),q=(v,d)=>fmt(units.show(d,v));
   const vehicles=hasVehicle(model), last=analysis.frames.length-1;
   const meta=[options.project&&'工程名稱　'+options.project,options.engineer&&'計算者　'+options.engineer,'報告日期　'+(options.date||new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()))].filter(Boolean);
-  const peak=extrema(model,analysis,r,units,q);
+  const peak=extrema(model,analysis,units,q);
   const steps=vehicles?'。全程 '+(last+1)+' 組結果（第 0 至 '+last+' 步），本次列印第 '+frameIndex+' 步，t = '+fmt(fr.t)+' s，前軸座標 '+q(coord(model,fr),'m')+' '+u('m'):'';
   const blocks=[{type:'title',text:'梁結構分析計算報告'},p(meta.join('　／　')),p(modes[c.mode]+'，共 '+c.spans.length+' 跨，梁長 '+q(model.L,'m')+' '+u('m')+'，指定斷面 x = '+q(x,'m')+' '+u('m')+steps+'。'),
-    h1('控制值與支承反力'),p(vehicles?'控制值取各取樣斷面全程的最大值與最小值。下列反力另列所選步結果。':'控制值取本載重配置的斷面取樣結果。'),
-    table(['控制量','數值','斷面 x ('+u('m')+')','時間 (s)','前軸 x ('+u('m')+')'],peak,[1.5,2.5,1.7,1.4,1.7]),
+    h1('控制值與支承反力'),p((vehicles?'比較全程各已計算步的全梁極值。':'比較本載重配置的全梁極值。')+'絕對值控制列保留受力或變形方向的正負號。'),
+    table(['控制量','帶號數值','位置','斷面 x ('+u('m')+')','時間 (s)','前軸 x ('+u('m')+')'],peak,[1.7,2,2.1,1.3,1.2,1.5]),
     table(['支承','位置 ('+u('m')+')','反力 ('+u('kN')+')','反力矩 ('+u('kN·m')+')'],r.reactions.filter(a=>a.type!=='free').map(a=>[a.label+' '+supports[a.type],q(a.x,'m'),q(a.R,'kN'),q(a.T,'kN·m')])),
   ];
   if(vehicles) {

@@ -1,3 +1,4 @@
+import {hermiteCubic,derivative,unitRoots} from './extrema.js';
 /* BeamLab: independently implemented Euler–Bernoulli / Newmark solver.
  * Units: kN, m, s; displacement upward+, rotation CCW+, applied P/w downward+.
  * No third-party solver source is incorporated. */
@@ -58,7 +59,40 @@ export function response(model,load,u,v=zero(model.n),acc=zero(model.n),alpha=0)
  const D=dot(shape(s,e.h),e.ids.map(j=>u[j]))*1000;return {x,V:tiny(V),M:tiny(B),D:tiny(D)};}
  function at(x,side=1){let i=side<0?els.findIndex(e=>x<=e.b+1e-9):els.findIndex(e=>x<e.b-1e-9);if(i<0)i=els.length-1;return atElement(i,Math.max(0,Math.min(els[i].h,x-els[i].a)),side);}
  const hasInertia=alpha!==0||acc.some(a=>a!==0);
- let points=[];els.forEach((e,i)=>{let sp=[0,e.h/4,e.h/2,3*e.h/4,e.h];load.elLoads[i].filter(l=>l.type!=='line'&&l.x>e.a+1e-8&&l.x<e.b-1e-8).forEach(l=>sp.push(l.x-e.a));sp.sort((a,b)=>a-b);for(let j=0;j<sp.length;j++){const x=sp[j];const jump=load.elLoads[i].some(l=>l.type!=='line'&&Math.abs(l.x-e.a-x)<1e-9)&&x>1e-8&&x<e.h-1e-8;points.push(atElement(i,x,j===sp.length-1||jump?-1:1));if(jump)points.push(atElement(i,x,1));if(j>0){let lo=sp[j-1]+1e-8,hi=x-1e-8,vl=atElement(i,lo).V,vh=atElement(i,hi).V;if(vl*vh<0){for(let k=0;k<25;k++){let mid=(lo+hi)/2,vm=atElement(i,mid).V;if(vm*vl>0){lo=mid;vl=vm;}else hi=mid;}points.push(atElement(i,(lo+hi)/2));}}}});
+ const points=[];
+ els.forEach((e,i)=>{
+   const dofs=e.ids.map(j=>u[j]);
+   const slope=derivative(hermiteCubic(dofs,e.h));
+   const effective=hasInertia?hermiteCubic(e.ids.map(j=>acc[j]+alpha*v[j]),e.h).map(a=>a*e.mu):[0,0,0,0];
+   const cuts=[0,e.h/4,e.h/2,3*e.h/4,e.h],jumps=[];
+   for(const loadItem of load.elLoads[i]){
+     if(loadItem.type==='line'){
+       const left=intensity(loadItem,e.a),right=intensity(loadItem,e.b);
+       effective[0]+=left;effective[1]+=right-left;
+     }else if(loadItem.x>e.a+1e-9&&loadItem.x<e.b-1e-9){
+       jumps.push(loadItem.x-e.a);
+     }
+   }
+   cuts.push(...jumps,...unitRoots(slope).map(r=>r*e.h),...unitRoots(effective).map(r=>r*e.h));
+   cuts.sort((a,b)=>a-b);
+   const stations=[...new Set(cuts)];
+   let previous=null;
+   for(const s of stations){
+     const jump=jumps.some(j=>Math.abs(j-s)<1e-12*e.h);
+     const face=atElement(i,s,jump||s===stations.at(-1)?-1:1);
+     face.side=jump||s===stations.at(-1)?-1:s===0?1:0;
+     if(previous&&previous.V*face.V<0){
+       let lo=previous.x-e.a,hi=s;
+       for(let j=0;j<35;j++){
+         const mid=(lo+hi)/2;
+         if(previous.V*atElement(i,mid).V>0)lo=mid;else hi=mid;
+       }
+       points.push({...atElement(i,(lo+hi)/2),side:0});
+     }
+     points.push(face);previous=face;
+     if(jump){previous={...atElement(i,s,1),side:1};points.push(previous);}
+   }
+ });
  points.sort((a,b)=>a.x-b.x);const reactions=model.ss.map((x,i)=>{let j=model.xs.findIndex(z=>Math.abs(z-x)<1e-7)*2;return {label:String.fromCharCode(65+i),x,R:model.c.supports[i]==='free'?0:tiny(res[j]),T:model.c.supports[i]==='fixed'?tiny(res[j+1]):0,type:model.c.supports[i]};});
  return {u,v,acc,at,points,reactions,ends,residual:Math.max(0,...model.free.map(i=>Math.abs(res[i]))),load};
 }
