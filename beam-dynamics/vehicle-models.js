@@ -54,14 +54,10 @@ export function vehicleBody(c,{frontX,scale,wheelY=78,interactive=false}){
   out+=`<g data-vehicle-wheel="${i}" ${interactive?`data-load-key="axles:${i}" tabindex="0" role="button" aria-label="調整車輛第 ${i+1} 軸" aria-haspopup="dialog"`:''}><title>第 ${i+1} 軸</title><circle cx="${-a.offset}" cy="0" r="${Math.max(dim.radius,14/scale)}" fill="transparent" pointer-events="${interactive?'all':'none'}"/><circle cx="${-a.offset}" cy="0" r="${dim.radius}" fill="#2b4148" stroke="#fff" stroke-width=".03"/><circle cx="${-a.offset}" cy="0" r="${dim.radius*.38}" fill="#cbd9da"/></g>`;
  });return out+'</g>';
 }
-export function vehicleLane(c,{front,length,left,right,width}){
+export function vehicleLane(c,{front,length,left,right,width,contactY}){
  const scale=(right-left)/length,frontX=left+(c.direction===1?front:length-front)*scale;
- const drawing=vehicleDrawing(c,{frontX,scale,wheelY:100,interactive:true});
- let out='<g class="vehicle-lane"><text x="'+left+'" y="19" fill="#82551f" font-size="13">'+esc(vehicleDescription(c))+' · 車身等比例縮圖／虛線對應輪軸座標</text>';
- out+='<path d="M'+left+',110H'+right+'" stroke="#d9e4e4" stroke-dasharray="4 4"/>';
- for(const a of c.axles){const x=c.direction===1?front-a.offset:length-front+a.offset;if(x>=0&&x<=length)out+=`<path d="M${frontX-c.direction*a.offset*drawing.scale},${100+drawing.radius}L${left+x*scale},142V232" fill="none" stroke="#c58b44" stroke-dasharray="3 4" opacity=".4" pointer-events="none"/>`;}
- out+=drawing.svg;
- return out+'</g>';
+ const dim=vehicleShape(c),wheelY=contactY-dim.radius*scale;
+ return '<g class="vehicle-lane"><text x="'+left+'" y="19" fill="#82551f" font-size="13">'+esc(vehicleDescription(c))+' · 車身、輪軸與載重共用比例</text>'+vehicleBody(c,{frontX,scale,wheelY,interactive:true})+'</g>';
 }
 export function renderVehiclePicker(c,quantity){
  const select=document.getElementById('vehicleType');

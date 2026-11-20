@@ -1,6 +1,6 @@
-import {applyVehicleModel,renderVehiclePicker,vehicleLane} from './vehicle-models.js?v=1.11.0';
+import {applyVehicleModel,renderVehiclePicker,vehicleLane,vehicleShape} from './vehicle-models.js?v=1.11.1';
 import {installSteelDesign,currentSteelDesign} from './steel-design-ui.js?v=1.9.0';
-import {vehicleLabelLayout,vehicleChartOverlay} from './chart-vehicle.js?v=1.11.0';
+import {vehicleLabelLayout,vehicleChartOverlay} from './chart-vehicle.js?v=1.11.1';
 import {peakSummary,peakLocation,components} from './extrema.js';
 import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.7.1';
 import {installSectionCursor} from './section-cursor.js?v=1.10.0';
@@ -86,9 +86,10 @@ function loadHit(path,width=20){
  return `<path class="load-hit" d="${path}" fill="none" stroke="transparent" stroke-width="${width}" vector-effect="non-scaling-stroke" pointer-events="stroke"/>`;
 }
 function drawBeam(){renderVehiclePicker(c,quantity);let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(1000,Math.floor($('#beamWrap').clientWidth || 700)-12)),H=c.mode==='static'?230:350,pad=W<540?35:65,scale=(W-2*pad)/L,X=x=>pad+x*scale,y=125;
- let out=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" data-beam-offset="${c.mode==='static'?0:120}" data-plot-left="${pad}" data-plot-right="${W-pad}" role="group" aria-label="梁模型、支承與載重"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5L5 0" stroke="#819b9f" stroke-width="1"/></pattern></defs>`;
- if(c.mode!=='static')out+=vehicleLane(c,{front:vehicleTravel(),length:L,left:pad,right:W-pad,width:W});
- out+=`<g transform="translate(0,${c.mode==='static'?0:120})">`;
+ const shift=c.mode==='static'?0:Math.max(120,vehicleShape(c).height*scale+30-y);H=230+shift;
+ let out=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" data-beam-offset="${shift}" data-plot-left="${pad}" data-plot-right="${W-pad}" role="group" aria-label="梁模型、支承與載重"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5L5 0" stroke="#819b9f" stroke-width="1"/></pattern></defs>`;
+ if(c.mode!=='static')out+=vehicleLane(c,{front:vehicleTravel(),length:L,left:pad,right:W-pad,width:W,contactY:y+shift});
+ out+=`<g transform="translate(0,${shift})">`;
  out+=`<rect x="${pad}" y="${y}" width="${W-pad*2}" height="8" rx="2" fill="#27434c"/>`;
  let x=0;
  c.spans.forEach((member,i)=>{
@@ -148,10 +149,6 @@ function drawBeam(){renderVehiclePicker(c,quantity);let L=total(c);if(!(L>0))ret
  }
  if(c.mode!=='static'){
    const wheels=axleLoads({c,L},vehicleTravel());
-   if(wheels.length>1){
-     const xs=wheels.map(w=>X(w.x));
-     out+=`<path d="M${Math.min(...xs)},${y-11}H${Math.max(...xs)}" stroke="#d88a3b" stroke-width="3" opacity=".8" pointer-events="none"/>`;
-   }
    const active=Number($('#liveChoice').value.replace('axles:',''));
    for(const load of wheels.sort((a,b)=>Number(b.axleIndex===active)-Number(a.axleIndex===active))){
      pointLoads.push({load,key:'axles:'+load.axleIndex,name:'車輛第 '+(load.axleIndex+1)+' 軸'});
@@ -166,12 +163,12 @@ function drawBeam(){renderVehiclePicker(c,quantity);let L=total(c);if(!(L>0))ret
      caption=loadLabel(key,xx,y-45,quantity(l.p,'kN·m',1),color);
    }else{
      const top=y-3-(l.p===0?0:28+70*Math.abs(l.p)/(Math.abs(l.p)+35));
-     path=`M${xx},${l.p<0?y-3:top}V${l.p<0?top:y-3}`;
+     path=`M${xx},${l.p<0?(l.vehicle?y:y-3):top}V${l.p<0?top:(l.vehicle?y:y-3)}`;
      caption=loadLabel(key,xx,top-9,quantity(l.p,'kN',1),color);
    }
    out+=loadGroup(key,name)+loadHit(path)+`<path class="load-ink" d="${path}" fill="none" stroke="${color}" stroke-width="2" marker-end="url(#arrow)"/>`+caption;
    if(l.vehicle){
-     out+=`<circle cx="${xx}" cy="${y-9}" r="11" fill="transparent" pointer-events="all"/><circle data-axle="${l.axleIndex}" aria-label="${name}，x = ${quantity(l.x,'m',3)}，軸重 ${quantity(l.p,'kN',2)}" cx="${xx}" cy="${y-9}" r="${selected?6:4.5}" fill="${selected?'#ffe3bb':'#fff5e8'}" stroke="${color}" stroke-width="2"/>`;
+     out+=`<circle cx="${xx}" cy="${y}" r="11" fill="transparent" pointer-events="all"/><circle data-axle="${l.axleIndex}" aria-label="${name}，x = ${quantity(l.x,'m',3)}，軸重 ${quantity(l.p,'kN',2)}" cx="${xx}" cy="${y}" r="3" fill="${selected?'#ffe3bb':'#fff5e8'}" stroke="${color}" stroke-width="2"/>`;
    }
    out+='</g>';
  }

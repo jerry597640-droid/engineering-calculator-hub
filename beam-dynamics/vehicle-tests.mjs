@@ -7,7 +7,7 @@ for(const v of vehicleModels)for(const direction of [1,-1]){
  const m=build(c),front=8,loads=axleLoads(m,front),r=statics(m,front);
  const P=loads.reduce((s,a)=>s+a.p,0),RB=loads.reduce((s,a)=>s+a.p*a.x/12,0);
  assert.ok(Math.abs(r.reactions[1].R-RB)<1e-6);assert.ok(Math.abs(r.reactions[0].R-(P-RB))<1e-6);
- const svg=vehicleLane(c,{front,length:12,left:50,right:650,width:700});
+ const svg=vehicleLane(c,{front,length:12,left:50,right:650,width:700,contactY:300});
  assert.doesNotMatch(svg,/NaN|undefined/);assert.equal((svg.match(/data-vehicle-wheel=/g)||[]).length,c.axles.length);
  assert.match(vehicleDescription(c),/示範/);c.axles[0].p+=1;assert.match(vehicleDescription(c),/自訂/);
  assert.equal(applyVehicleModel(c,'custom').axles,c.axles);
@@ -25,7 +25,7 @@ for(const v of vehicleModels)for(const direction of [1,-1]){
  const quantity=(v,u)=>`${v} ${u}`,layout=vehicleLabelLayout(c,12,50,650,quantity);
  for(const key of ['M','V','D']){
  const svg=vehicleChartOverlay({layout,wheels,left:50,right:650,bottom:400,X:x=>50+50*x,Y:v=>300-v,result:{...r,length:12},key,quantity,time:1,config:c,front});
- assert.doesNotMatch(svg,/NaN|undefined/);assert.match(svg,/class="vehicle-body"/);
+ assert.doesNotMatch(svg,/NaN|undefined/);assert.match(svg,/class="vehicle-body"/);assert.ok(svg.includes(`scale(${direction*50},50)`));assert.ok(svg.includes(`translate(${50+50*(direction===1?front:12-front)},${layout.height-5-(await import("./vehicle-models.js")).vehicleShape(c).radius*50})`));
  for(const a of wheels)assert.ok(svg.includes(`data-x="${a.x}" data-force="${a.p}"`));
  }
 }
