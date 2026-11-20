@@ -21,6 +21,14 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 // Representative silhouette dimensions (m); illustrative, not manufacturer-specific.
 const outlines={car:{height:1.45,front:.95,back:1,radius:.31},bus:{height:3.2,front:2.2,back:3,radius:.5},truck:{height:3.3,front:1.3,back:1.5,radius:.5},forklift:{height:2.2,front:.45,back:.55,radius:.3},aerial:{height:2.4,front:.35,back:.35,radius:.2},custom:{height:1,front:.5,back:.5,radius:.3}};
 export function vehicleShape(c){return {...outlines[vehicleModel(c)?.id||'custom']};}
+// Fit the whole coordinate system, never resize the vehicle independently of its loads.
+export function vehiclePlotBounds(c,length,left,right,width){
+ const heightLimit=width<540?85:120;
+ const available=right-left;
+ const plotWidth=Math.min(available,length*heightLimit/vehicleShape(c).height);
+ const inset=(available-plotWidth)/2;
+ return {left:left+inset,right:right-inset,scale:plotWidth/length};
+}
 export function vehicleDrawing(c,{frontX,scale,maxHeight=74,wheelY=100,interactive=false}){
  const dim=vehicleShape(c),drawScale=Math.min(scale,maxHeight/dim.height);
  const svg=vehicleBody(c,{frontX,scale:drawScale,wheelY,interactive});

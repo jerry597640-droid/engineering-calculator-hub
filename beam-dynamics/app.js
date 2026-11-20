@@ -1,6 +1,6 @@
-import {applyVehicleModel,renderVehiclePicker,vehicleLane,vehicleShape} from './vehicle-models.js?v=1.11.1';
+import {applyVehicleModel,renderVehiclePicker,vehicleLane,vehicleShape,vehiclePlotBounds} from './vehicle-models.js?v=1.11.2';
 import {installSteelDesign,currentSteelDesign} from './steel-design-ui.js?v=1.9.0';
-import {vehicleLabelLayout,vehicleChartOverlay} from './chart-vehicle.js?v=1.11.1';
+import {vehicleLabelLayout,vehicleChartOverlay} from './chart-vehicle.js?v=1.11.2';
 import {peakSummary,peakLocation,components} from './extrema.js';
 import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.7.1';
 import {installSectionCursor} from './section-cursor.js?v=1.10.0';
@@ -86,6 +86,7 @@ function loadHit(path,width=20){
  return `<path class="load-hit" d="${path}" fill="none" stroke="transparent" stroke-width="${width}" vector-effect="non-scaling-stroke" pointer-events="stroke"/>`;
 }
 function drawBeam(){renderVehiclePicker(c,quantity);let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(1000,Math.floor($('#beamWrap').clientWidth || 700)-12)),H=c.mode==='static'?230:350,pad=W<540?35:65,scale=(W-2*pad)/L,X=x=>pad+x*scale,y=125;
+ if(c.mode!=='static'){const fit=vehiclePlotBounds(c,L,pad,W-pad,W);pad=fit.left;scale=fit.scale;}
  const shift=c.mode==='static'?0:Math.max(120,vehicleShape(c).height*scale+30-y);H=230+shift;
  let out=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" data-beam-offset="${shift}" data-plot-left="${pad}" data-plot-right="${W-pad}" role="group" aria-label="梁模型、支承與載重"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5L5 0" stroke="#819b9f" stroke-width="1"/></pattern></defs>`;
  if(c.mode!=='static')out+=vehicleLane(c,{front:vehicleTravel(),length:L,left:pad,right:W-pad,width:W,contactY:y+shift});
@@ -185,7 +186,7 @@ function drawBeam(){renderVehiclePicker(c,quantity);let L=total(c);if(!(L>0))ret
  }
 $('#modelInfo').textContent=`${c.spans.length} 跨 · 全長 ${quantity(L,'m')} · ${c.loads.length} 筆靜載${c.selfWeight?' ＋ 自重':''}`;
 }
-function chart(id,pts,key,color,env=null,opts={}){let W=Math.max(300,Math.min(1000,Math.floor($('#'+id).clientWidth || 700)-12)),l=W<540?65:77,r=15,bottom=30,end=opts.end??model.L;const vehicle=!opts.time&&c.mode!=='static',layout=vehicle?vehicleLabelLayout(model.c,model.L,l,W-r,quantity):null,band=layout?.height??0,H=190+band,top=20+band;let values=pts.map(p=>p[key]);if(env)values.push(...env.map(p=>p[key+'max']),...env.map(p=>p[key+'min']));let mx=Math.max(...values.map(Math.abs),.01),up=key==='M'&&!opts.time;let X=x=>l+(W-l-r)*x/end,Y=v=>top+(H-top-bottom)/2+(up?1:-1)*v/mx*((H-top-bottom)/2-7),base=Y(0);let lines='';
+function chart(id,pts,key,color,env=null,opts={}){let W=Math.max(300,Math.min(1000,Math.floor($('#'+id).clientWidth || 700)-12)),l=W<540?65:77,r=15,bottom=30,end=opts.end??model.L;const vehicle=!opts.time&&c.mode!=='static';if(vehicle){const fit=vehiclePlotBounds(model.c,model.L,l,W-r,W);l=fit.left;r=W-fit.right;}const layout=vehicle?vehicleLabelLayout(model.c,model.L,l,W-r,quantity):null,band=layout?.height??0,H=190+band,top=20+band;let values=pts.map(p=>p[key]);if(env)values.push(...env.map(p=>p[key+'max']),...env.map(p=>p[key+'min']));let mx=Math.max(...values.map(Math.abs),.01),up=key==='M'&&!opts.time;let X=x=>l+(W-l-r)*x/end,Y=v=>top+(H-top-bottom)/2+(up?1:-1)*v/mx*((H-top-bottom)/2-7),base=Y(0);let lines='';
  for(let v of [-mx,0,mx])lines+=`<path d="M${l},${Y(v)}H${W-r}" stroke="${v===0?'#b8c8ca':'#e8eeee'}" ${v===0?'':'stroke-dasharray="3 5"'}/>`+svgText(l-9,Y(v)+4,numberOf(v,resultDimensions[key],Math.abs(units.show(resultDimensions[key],v))>100?0:2),'#819194','end',11);
  for(let i=0;i<=5;i++){let x=end*i/5;lines+=svgText(X(x),H-8,(opts.time?fmt(x,2):numberOf(x,'m',1)),'#819194','middle',11);}
  const path=arr=>arr.map((p,i)=>`${i?'L':'M'}${X(p.x).toFixed(2)},${Y(p.val).toFixed(2)}`).join('');
