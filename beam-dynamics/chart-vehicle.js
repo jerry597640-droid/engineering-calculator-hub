@@ -1,4 +1,4 @@
-import {vehicleBody,vehicleShape,vehicleDescription} from './vehicle-models.js?v=1.11.2';
+import {vehicleBody,vehicleShape,vehicleDescription} from './vehicle-models.js?v=1.11.3';
 // Reserve label lanes using the whole vehicle so playback never changes chart height.
 export function vehicleLabelLayout(config, length, left, right, quantity) {
   const scale = (right - left) / length;

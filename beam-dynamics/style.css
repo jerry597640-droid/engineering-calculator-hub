@@ -113,3 +113,6 @@ label{font-size:14px}.hub-return{font-size:14px;align-self:center;text-decoratio
 
 .chart>svg[data-plot-left]{max-height:none;height:auto;display:block}
 .vehicle-body [role=button]:focus circle{stroke-width:.06px}
+
+/* Keep SVG user units from enlarging on wide desktop panels. */
+#beamWrap>svg,.chart>svg[data-plot-left]{max-width:1000px;margin-inline:auto}

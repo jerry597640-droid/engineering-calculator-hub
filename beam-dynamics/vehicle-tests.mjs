@@ -34,8 +34,10 @@ console.log('Uniform silhouette scaling and M/V/D actual axle coordinate/weight 
 const {vehiclePlotBounds,vehicleShape}=await import('./vehicle-models.js');
 for(const v of vehicleModels)for(const width of [340,1000])for(const length of [2,5,10,40]){
  const c=applyVehicleModel(base,v.id),fit=vehiclePlotBounds(c,length,65,width-15,width);
- assert.ok(fit.scale*vehicleShape(c).height<=(width<540?85:120)+1e-8);
+ assert.ok(fit.scale*vehicleShape(c).height<=(width<540?50:70)+1e-8);
  assert.ok(fit.left>=65&&fit.right<=width-15);
  assert.ok(Math.abs((fit.right-fit.left)/length-fit.scale)<1e-8);
 }
 console.log('Vehicle height limits and shared plot scale passed at mobile/desktop widths and 2–40 m spans.');
+
+const bus=applyVehicleModel(base,"bus");bus.axles[1].offset=2;const fitBus=vehiclePlotBounds(bus,5,65,985,1000);assert.ok(fitBus.scale*3.2<=70);assert.ok(fitBus.scale*7.2<=240);

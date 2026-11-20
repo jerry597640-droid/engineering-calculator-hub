@@ -23,9 +23,11 @@ const outlines={car:{height:1.45,front:.95,back:1,radius:.31},bus:{height:3.2,fr
 export function vehicleShape(c){return {...outlines[vehicleModel(c)?.id||'custom']};}
 // Fit the whole coordinate system, never resize the vehicle independently of its loads.
 export function vehiclePlotBounds(c,length,left,right,width){
- const heightLimit=width<540?85:120;
+ const heightLimit=width<540?50:70;
+ const shape=vehicleShape(c),bodyLength=Math.max(...c.axles.map(a=>a.offset),0)+shape.front+shape.back+(c.vehicleType==='forklift'?1.05:0);
+ const vehicleWidthLimit=width<540?160:240;
  const available=right-left;
- const plotWidth=Math.min(available,length*heightLimit/vehicleShape(c).height);
+ const plotWidth=Math.min(available,length*Math.min(heightLimit/shape.height,vehicleWidthLimit/bodyLength));
  const inset=(available-plotWidth)/2;
  return {left:left+inset,right:right-inset,scale:plotWidth/length};
 }
