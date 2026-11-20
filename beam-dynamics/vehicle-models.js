@@ -18,53 +18,57 @@ export function applyVehicleModel(c,id){
  return {...c,vehicleType:v.id,axles:structuredClone(v.axles),speed:v.speed,factor:1};
 }
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Representative silhouette dimensions (m); illustrative, not manufacturer-specific.
+const outlines={car:{height:1.45,front:.95,back:1,radius:.31},bus:{height:3.2,front:2.2,back:3,radius:.5},truck:{height:3.3,front:1.3,back:1.5,radius:.5},forklift:{height:2.2,front:.45,back:.55,radius:.3},aerial:{height:2.4,front:.35,back:.35,radius:.2},custom:{height:1,front:.5,back:.5,radius:.3}};
+export function vehicleShape(c){return {...outlines[vehicleModel(c)?.id||'custom']};}
+export function vehicleDrawing(c,{frontX,scale,maxHeight=74,wheelY=100,interactive=false}){
+ const dim=vehicleShape(c),drawScale=Math.min(scale,maxHeight/dim.height);
+ const svg=vehicleBody(c,{frontX,scale:drawScale,wheelY,interactive});
+ return {svg,scale:drawScale,radius:dim.radius*drawScale};
+}
 export function vehicleBody(c,{frontX,scale,wheelY=78,interactive=false}){
- const kind=vehicleModel(c)?.id||'custom',rear=Math.max(...c.axles.map(a=>a.offset))*scale;
- const direction=c.direction===-1?-1:1,pad=Math.max(8,Math.min(18,scale*.7)),left=-rear-pad,right=pad;
- const cabin=Math.max(left+4,-Math.max(20,Math.min(36,rear*.42))),bodyY=-29;
+ const kind=vehicleModel(c)?.id||'custom',dim=vehicleShape(c),rear=Math.max(...c.axles.map(a=>a.offset));
+ const dir=c.direction===-1?-1:1,left=-rear-dim.back,right=dim.front,h=dim.height-dim.radius;
+ const cabin=Math.max(left+.2,-1),paint='#e7ae5d',glass='#d6eef0';
+ const rect=(x,y,w,z,fill)=>`<rect x="${x}" y="${y}" width="${Math.max(.01,w)}" height="${z}" rx=".06" fill="${fill}" stroke="#765936" stroke-width=".035"/>`;
+ const line=d=>`<path d="${d}" fill="none" stroke="#605d51" stroke-width=".05" stroke-linejoin="round"/>`;
  let body='';
- const rect=(x,y,w,h,fill,rx=3)=>`<rect x="${x}" y="${y}" width="${Math.max(1,w)}" height="${h}" rx="${rx}" fill="${fill}" stroke="#876132" stroke-width="1.4"/>`;
- const line=(d,color='#805a2b',width=2)=>`<path d="${d}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linejoin="round"/>`;
- const glass='#d6eef0',paint='#e7ae5d';
  if(kind==='car'){
-  body=`<path d="M${left},-8V-23L${left+rear*.22},-27L${left+rear*.35},-42H${cabin}L${right-3},-25L${right+5},-21V-8Z" fill="${paint}" stroke="#876132" stroke-width="1.5"/>`;
-  body+=`<path d="M${left+rear*.39},-38H${cabin-2}L${right-10},-27H${left+rear*.27}Z" fill="${glass}"/>`;
+  body=`<path d="M${left},0V${-h*.45}L${left+.7},${-h*.56}L${left+1.15},${-h}H${cabin}L${right-.55},${-h*.5}H${right}V0Z" fill="${paint}" stroke="#765936" stroke-width=".035"/>`;
+  body+=`<path d="M${left+1.2},${-h*.9}H${cabin-.08}L${right-.65},${-h*.5}H${left+.83}Z" fill="${glass}"/>`;
  }else if(kind==='bus'){
-  body=rect(left,-45,right-left+4,37,paint,6);
-  const count=Math.max(2,Math.min(9,Math.floor((right-left)/24))),width=(right-left-12)/count;
-  for(let i=0;i<count;i++)body+=rect(left+6+i*width,-39,width-4,15,glass,2);
-  body+=line(`M${left+4},-18H${right}`,'#b47a36',3);
+  body=rect(left,-h,right-left,h,paint);const n=Math.max(2,Math.ceil((right-left)/1.2)),w=(right-left-.3)/n;
+  for(let i=0;i<n;i++)body+=rect(left+.15+i*w,-h+.15,w-.12,h*.4,glass);
+  body+=line(`M${left},${-h*.25}H${right}`);
  }else if(kind==='truck'){
-  body=rect(left,-45,Math.max(4,cabin-left-4),32,'#d3dedc',2)+`<path d="M${cabin},-8V-40H${right-8}L${right+5},-24V-8Z" fill="${paint}" stroke="#876132" stroke-width="1.5"/>`;
-  body+=`<path d="M${cabin+4},-36H${right-11}L${right},-25H${cabin+4}Z" fill="${glass}"/>`;
+  body=rect(left,-h,Math.max(.1,cabin-left-.1),h*.9,'#c5d7d5')+`<path d="M${cabin},0V${-h*.83}H${right-.4}L${right},${-h*.5}V0Z" fill="${paint}" stroke="#765936" stroke-width=".035"/>`;
+  body+=`<path d="M${cabin+.12},${-h*.76}H${right-.47}L${right-.15},${-h*.52}H${cabin+.12}Z" fill="${glass}"/>`;
  }else if(kind==='forklift'){
-  body=rect(left,-27,right-left,19,paint)+line(`M${left+5},-27V-56H${right-3}V-27`,'#645d50',3)+line(`M${right+6},-60V-5H${right+25}M${right+11},-60V-9`,'#645d50',3);
-  body+=rect(left+8,-37,Math.max(5,rear*.24),10,'#334b52');
+  body=rect(left,-h*.4,right-left,h*.4,paint)+line(`M${left+.15},${-h*.4}V${-h}H${right-.1}V${-h*.4}M${right},${-h}V.12H${right+1.05}M${right+.08},${-h}V.08`);
+  body+=rect(left+.3,-h*.55,.4,h*.15,'#334b52');
  }else if(kind==='aerial'){
-  body=rect(left,-23,right-left,15,paint)+line(`M${left+5},-24L${right-5},-39L${left+5},-55M${right-5},-24L${left+5},-39L${right-5},-55`,'#876132',3)+rect(left-4,-60,right-left+8,5,paint,1)+line(`M${left-4},-60V-77H${right+4}V-60M${left-4},-69H${right+4}`,'#876132',2);
- }else body=rect(left,-19,right-left,11,'#b9cfcc');
- body+=line(`M${left},-7H${right}`,'#344b50',4);
- let out=`<g class="vehicle-body" transform="translate(${frontX},${wheelY}) scale(${direction},1)"><g pointer-events="none">${body}</g>`;
+  body=rect(left,-h*.25,right-left,h*.25,paint)+line(`M${left+.15},${-h*.26}L${right-.15},${-h*.4}L${left+.15},${-h*.54}M${right-.15},${-h*.26}L${left+.15},${-h*.4}L${right-.15},${-h*.54}`)+rect(left,-h*.57,right-left,.08,paint)+line(`M${left},${-h*.57}V${-h}H${right}V${-h*.57}M${left},${-h*.8}H${right}`);
+ }else body=rect(left,-h*.4,right-left,h*.4,'#b9cfcc');
+ let out=`<g class="vehicle-body" data-drawing-scale="${scale}" transform="translate(${frontX},${wheelY}) scale(${dir*scale},${scale})"><g pointer-events="none">${body}</g>`;
  c.axles.forEach((a,i)=>{
-  const x=-a.offset*scale,key='axles:'+i;
-  out+=`<g data-vehicle-wheel="${i}" ${interactive?`data-load-key="${key}" tabindex="0" role="button" aria-label="調整車輛第 ${i+1} 軸" aria-haspopup="dialog"`:''}>`;
-  out+=`<title>第 ${i+1} 軸 · 點選調整軸重與軸距</title><circle cx="${x}" cy="0" r="14" fill="transparent" pointer-events="${interactive?'all':'none'}"/><circle cx="${x}" cy="0" r="8" fill="#2b4148" stroke="#fff" stroke-width="1.5"/><circle cx="${x}" cy="0" r="3" fill="#d4e1e2"/></g>`;
- });
- return out+'</g>';
+  out+=`<g data-vehicle-wheel="${i}" ${interactive?`data-load-key="axles:${i}" tabindex="0" role="button" aria-label="調整車輛第 ${i+1} 軸" aria-haspopup="dialog"`:''}><title>第 ${i+1} 軸</title><circle cx="${-a.offset}" cy="0" r="${Math.max(dim.radius,14/scale)}" fill="transparent" pointer-events="${interactive?'all':'none'}"/><circle cx="${-a.offset}" cy="0" r="${dim.radius}" fill="#2b4148" stroke="#fff" stroke-width=".03"/><circle cx="${-a.offset}" cy="0" r="${dim.radius*.38}" fill="#cbd9da"/></g>`;
+ });return out+'</g>';
 }
 export function vehicleLane(c,{front,length,left,right,width}){
  const scale=(right-left)/length,frontX=left+(c.direction===1?front:length-front)*scale;
- let out='<g class="vehicle-lane"><text x="'+left+'" y="19" fill="#82551f" font-size="13">'+esc(vehicleDescription(c))+' · 車身示意／輪軸依座標</text>';
+ const drawing=vehicleDrawing(c,{frontX,scale,wheelY:100,interactive:true});
+ let out='<g class="vehicle-lane"><text x="'+left+'" y="19" fill="#82551f" font-size="13">'+esc(vehicleDescription(c))+' · 車身等比例縮圖／虛線對應輪軸座標</text>';
  out+='<path d="M'+left+',110H'+right+'" stroke="#d9e4e4" stroke-dasharray="4 4"/>';
- for(const a of c.axles){const x=c.direction===1?front-a.offset:length-front+a.offset;if(x>=0&&x<=length)out+=`<path d="M${left+x*scale},109V232" stroke="#c58b44" stroke-dasharray="3 4" opacity=".4" pointer-events="none"/>`;}
- out+=vehicleBody(c,{frontX,scale,wheelY:100,interactive:true});
+ for(const a of c.axles){const x=c.direction===1?front-a.offset:length-front+a.offset;if(x>=0&&x<=length)out+=`<path d="M${frontX-c.direction*a.offset*drawing.scale},${100+drawing.radius}L${left+x*scale},142V232" fill="none" stroke="#c58b44" stroke-dasharray="3 4" opacity=".4" pointer-events="none"/>`;}
+ out+=drawing.svg;
  return out+'</g>';
 }
 export function renderVehiclePicker(c,quantity){
  const select=document.getElementById('vehicleType');
  if(!select.options.length)select.innerHTML='<option value="custom">自訂車輛／保留現有軸列</option>'+vehicleModels.map(v=>'<option value="'+v.id+'">'+v.name+'</option>').join('');
  select.value=vehicleModel(c)?.id||'custom';
- const span=Math.max(...c.axles.map(a=>a.offset),1),scale=Math.min(45,180/span);
- document.getElementById('vehiclePreview').innerHTML='<svg viewBox="0 0 260 130" role="img" aria-label="'+esc(vehicleDescription(c))+'側視示意">'+vehicleBody(c,{frontX:c.direction===1?225:35,scale,wheelY:105})+'</svg>';
+ const span=Math.max(...c.axles.map(a=>a.offset),1),dim=vehicleShape(c),extra=c.vehicleType==='forklift'?1.05:0,scale=Math.min(45,220/(span+dim.front+dim.back+extra),82/dim.height);
+ const previewFront=c.direction===1?20+(span+dim.back)*scale:240-(span+dim.back)*scale;
+ document.getElementById('vehiclePreview').innerHTML='<svg viewBox="0 0 260 130" role="img" aria-label="'+esc(vehicleDescription(c))+'側視示意">'+vehicleDrawing(c,{frontX:previewFront,scale,maxHeight:82,wheelY:105}).svg+'</svg>';
  document.getElementById('vehicleSummary').textContent=vehicleDescription(c)+' · '+c.axles.length+' 軸 · 輸入總重 '+quantity(c.axles.reduce((s,a)=>s+a.p,0),'kN',1)+' · 軸列長 '+quantity(span===1&&Math.max(...c.axles.map(a=>a.offset))===0?0:Math.max(...c.axles.map(a=>a.offset)),'m',2);
 }

@@ -1,6 +1,6 @@
-import {applyVehicleModel,renderVehiclePicker,vehicleLane} from './vehicle-models.js?v=1.10.0';
+import {applyVehicleModel,renderVehiclePicker,vehicleLane} from './vehicle-models.js?v=1.11.0';
 import {installSteelDesign,currentSteelDesign} from './steel-design-ui.js?v=1.9.0';
-import {vehicleLabelLayout,vehicleChartOverlay} from './chart-vehicle.js';
+import {vehicleLabelLayout,vehicleChartOverlay} from './chart-vehicle.js?v=1.11.0';
 import {peakSummary,peakLocation,components} from './extrema.js';
 import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.7.1';
 import {installSectionCursor} from './section-cursor.js?v=1.10.0';
@@ -196,7 +196,7 @@ function chart(id,pts,key,color,env=null,opts={}){let W=Math.max(300,Math.min(10
  let ds=path(pts.map(p=>({x:p.x,val:p[key]})));lines+=`<path d="M${X(pts[0].x)},${base} ${ds.replace(/^M/,'L')} L${X(pts.at(-1).x)},${base}Z" fill="${color}" opacity=".12"/><path d="${ds}" stroke="${color}" stroke-width="2.2" fill="none" stroke-linejoin="round"/>`;
  if(!opts.time)model.ss.forEach(x=>{lines+=`<path d="M${X(x)},${top}V${H-bottom}" stroke="#b3c7c8" stroke-dasharray="2 5" opacity=".55"/>`;});
  let peak=pts.reduce((a,p)=>Math.abs(p[key])>Math.abs(a[key])?p:a,pts[0]);lines+=`<circle cx="${X(peak.x)}" cy="${Y(peak[key])}" r="3" fill="${color}"/>`+svgText(Math.max(l+30,Math.min(W-r-30,X(peak.x))),Math.max(top-6,Math.min(H-bottom-5,Y(peak[key])+(peak[key]*(up?1:-1)>0?16:-10))),numberOf(peak[key],resultDimensions[key]),color);
- if(vehicle)lines+=vehicleChartOverlay({layout,wheels:axleLoads(model,analysis.frames[frameIndex].front),left:l,right:W-r,bottom:H-bottom,X,Y,result:{at:current.at,length:model.L},key,quantity,time:analysis.frames[frameIndex].t});
+ if(vehicle)lines+=vehicleChartOverlay({layout,wheels:axleLoads(model,analysis.frames[frameIndex].front),left:l,right:W-r,bottom:H-bottom,X,Y,result:{at:current.at,length:model.L},key,quantity,time:analysis.frames[frameIndex].t,config:model.c,front:analysis.frames[frameIndex].front});
  $('#'+id).innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" ${opts.time?'':`data-plot-left="${l}" data-plot-right="${W-r}" data-plot-top="${top}" data-plot-bottom="${H-bottom}" data-plot-zero="${base}" data-plot-scale="${(up?1:-1)*((H-top-bottom)/2-7)/mx}"`} role="img" aria-label="${key} ${opts.time?'歷時':'分布'}圖"><title>${key}，${opts.time?'時間 s':'座標 '+labelOf('m')}</title>${lines}</svg>`;
 }
 function vehicleTravel(){
