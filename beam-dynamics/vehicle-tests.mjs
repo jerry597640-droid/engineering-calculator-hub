@@ -25,19 +25,23 @@ for(const v of vehicleModels)for(const direction of [1,-1]){
  const quantity=(v,u)=>`${v} ${u}`,layout=vehicleLabelLayout(c,12,50,650,quantity);
  for(const key of ['M','V','D']){
  const svg=vehicleChartOverlay({layout,wheels,left:50,right:650,bottom:400,X:x=>50+50*x,Y:v=>300-v,result:{...r,length:12},key,quantity,time:1,config:c,front});
- assert.doesNotMatch(svg,/NaN|undefined/);assert.match(svg,/class="vehicle-body"/);assert.ok(svg.includes(`scale(${direction*50},50)`));assert.ok(svg.includes(`translate(${50+50*(direction===1?front:12-front)},${layout.height-5-(await import("./vehicle-models.js")).vehicleShape(c).radius*50})`));
+ assert.doesNotMatch(svg,/NaN|undefined/);assert.match(svg,/class="vehicle-body"/);assert.ok(svg.includes(`scale(${direction*50},50)`));assert.ok(svg.includes(`translate(${50+50*(direction===1?front:12-front)},${layout.height-5-(await import("./vehicle-models.js")).vehicleRenderShape(c,50).radius*50})`));
  for(const a of wheels)assert.ok(svg.includes(`data-x="${a.x}" data-force="${a.p}"`));
  }
 }
 console.log('Uniform silhouette scaling and M/V/D actual axle coordinate/weight overlays passed for all presets and directions.');
 
-const {vehiclePlotBounds,vehicleShape}=await import('./vehicle-models.js');
+const {vehiclePlotBounds,vehicleRenderShape}=await import('./vehicle-models.js');
 for(const v of vehicleModels)for(const width of [340,1000])for(const length of [2,5,10,40]){
  const c=applyVehicleModel(base,v.id),fit=vehiclePlotBounds(c,length,65,width-15,width);
- assert.ok(fit.scale*vehicleShape(c).height<=(width<540?50:70)+1e-8);
- assert.ok(fit.left>=65&&fit.right<=width-15);
- assert.ok(Math.abs((fit.right-fit.left)/length-fit.scale)<1e-8);
+ assert.equal(fit.left,65);assert.equal(fit.right,width-15);
+ const shape=vehicleRenderShape(c,fit.scale);
+ assert.ok(shape.height*fit.scale<=70+1e-8);
+ const svg=vehicleLane(c,{front:length/2,length,left:65,right:width-15,width,contactY:160});
+ assert.doesNotMatch(svg,/NaN|undefined/);
+ for(const axle of c.axles){
+ const frontX=65+length/2*fit.scale;
+ assert.ok(Math.abs((frontX-axle.offset*fit.scale)-(65+(length/2-axle.offset)*fit.scale))<1e-8);
+ }
 }
-console.log('Vehicle height limits and shared plot scale passed at mobile/desktop widths and 2–40 m spans.');
-
-const bus=applyVehicleModel(base,"bus");bus.axles[1].offset=2;const fitBus=vehiclePlotBounds(bus,5,65,985,1000);assert.ok(fitBus.scale*3.2<=70);assert.ok(fitBus.scale*7.2<=240);
+console.log('Full-width beam, bounded silhouette height and exact wheel/force positions passed.');

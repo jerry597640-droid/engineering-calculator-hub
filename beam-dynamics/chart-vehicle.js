@@ -1,4 +1,4 @@
-import {vehicleBody,vehicleShape,vehicleDescription} from './vehicle-models.js?v=1.11.3';
+import {vehicleBody,vehicleRenderShape,vehicleDescription} from './vehicle-models.js?v=1.12.0';
 // Reserve label lanes using the whole vehicle so playback never changes chart height.
 export function vehicleLabelLayout(config, length, left, right, quantity) {
   const scale = (right - left) / length;
@@ -15,7 +15,7 @@ export function vehicleLabelLayout(config, length, left, right, quantity) {
     lanes[lane] = label.position + label.width;
     label.lane = lane;
   }
-  return {labels, height: 60 + vehicleShape(config).height*scale + lanes.length * 22};
+  return {labels, height: 60 + vehicleRenderShape(config,scale).height*scale + lanes.length * 22};
 }
 
 const escapeText = value => String(value).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -26,7 +26,7 @@ export function vehicleChartOverlay({layout, wheels, left, right, bottom, X, Y, 
   const caption = vehicleDescription(config)+' · t = ' + time.toFixed(3) + ' s' + (wheels.length ? '' : ' · 輪軸均在梁外');
   let svg = '<g class="chart-vehicle" pointer-events="none"><text x="' + left + '" y="13" fill="#96530f" font-size="12">' + escapeText(caption) + '</text>';
   const frontX=X(config.direction===1?front:result.length-front);
-  const scale=(right-left)/result.length,radius=vehicleShape(config).radius*scale;
+  const scale=(right-left)/result.length,radius=vehicleRenderShape(config,scale).radius*scale;
   svg+=`<defs><clipPath id="vehicle-clip-${key}"><rect x="${left}" y="20" width="${right-left}" height="${rail-20}"/></clipPath></defs><g clip-path="url(#vehicle-clip-${key})">`+vehicleBody(config,{frontX,scale,wheelY:rail-radius})+'</g>';
   svg += '<path d="M' + left + ',' + rail + 'H' + right + '" stroke="#e6c5a0" fill="none"/>';
   for (const wheel of wheels) {

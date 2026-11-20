@@ -21,15 +21,11 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 // Representative silhouette dimensions (m); illustrative, not manufacturer-specific.
 const outlines={car:{height:1.45,front:.95,back:1,radius:.31},bus:{height:3.2,front:2.2,back:3,radius:.5},truck:{height:3.3,front:1.3,back:1.5,radius:.5},forklift:{height:2.2,front:.45,back:.55,radius:.3},aerial:{height:2.4,front:.35,back:.35,radius:.2},custom:{height:1,front:.5,back:.5,radius:.3}};
 export function vehicleShape(c){return {...outlines[vehicleModel(c)?.id||'custom']};}
-// Fit the whole coordinate system, never resize the vehicle independently of its loads.
-export function vehiclePlotBounds(c,length,left,right,width){
- const heightLimit=width<540?50:70;
- const shape=vehicleShape(c),bodyLength=Math.max(...c.axles.map(a=>a.offset),0)+shape.front+shape.back+(c.vehicleType==='forklift'?1.05:0);
- const vehicleWidthLimit=width<540?160:240;
- const available=right-left;
- const plotWidth=Math.min(available,length*Math.min(heightLimit/shape.height,vehicleWidthLimit/bodyLength));
- const inset=(available-plotWidth)/2;
- return {left:left+inset,right:right-inset,scale:plotWidth/length};
+// Keep the beam full width. Only silhouette height/overhangs adapt; axle coordinates never move.
+export function vehiclePlotBounds(c,length,left,right,width){return {left,right,scale:(right-left)/length};}
+export function vehicleRenderShape(c,scale){
+ const dim=vehicleShape(c),ratio=Math.min(1,70/(dim.height*scale));
+ return Object.fromEntries(Object.entries(dim).map(([key,value])=>[key,value*ratio]));
 }
 export function vehicleDrawing(c,{frontX,scale,maxHeight=74,wheelY=100,interactive=false}){
  const dim=vehicleShape(c),drawScale=Math.min(scale,maxHeight/dim.height);
@@ -37,7 +33,7 @@ export function vehicleDrawing(c,{frontX,scale,maxHeight=74,wheelY=100,interacti
  return {svg,scale:drawScale,radius:dim.radius*drawScale};
 }
 export function vehicleBody(c,{frontX,scale,wheelY=78,interactive=false}){
- const kind=vehicleModel(c)?.id||'custom',dim=vehicleShape(c),rear=Math.max(...c.axles.map(a=>a.offset));
+ const kind=vehicleModel(c)?.id||'custom',dim=vehicleRenderShape(c,scale),rear=Math.max(...c.axles.map(a=>a.offset));
  const dir=c.direction===-1?-1:1,left=-rear-dim.back,right=dim.front,h=dim.height-dim.radius;
  const cabin=Math.max(left+.2,-1),paint='#e7ae5d',glass='#d6eef0';
  const rect=(x,y,w,z,fill)=>`<rect x="${x}" y="${y}" width="${Math.max(.01,w)}" height="${z}" rx=".06" fill="${fill}" stroke="#765936" stroke-width=".035"/>`;
@@ -66,8 +62,8 @@ export function vehicleBody(c,{frontX,scale,wheelY=78,interactive=false}){
 }
 export function vehicleLane(c,{front,length,left,right,width,contactY}){
  const scale=(right-left)/length,frontX=left+(c.direction===1?front:length-front)*scale;
- const dim=vehicleShape(c),wheelY=contactY-dim.radius*scale;
- return '<g class="vehicle-lane"><text x="'+left+'" y="19" fill="#82551f" font-size="13">'+esc(vehicleDescription(c))+' · 車身、輪軸與載重共用比例</text>'+vehicleBody(c,{frontX,scale,wheelY,interactive:true})+'</g>';
+ const dim=vehicleRenderShape(c,scale),wheelY=contactY-dim.radius*scale;
+ return '<g class="vehicle-lane"><text x="'+left+'" y="19" fill="#82551f" font-size="13">'+esc(vehicleDescription(c))+' · 車身示意縮放 · 輪軸依實際位置</text>'+vehicleBody(c,{frontX,scale,wheelY,interactive:true})+'</g>';
 }
 export function renderVehiclePicker(c,quantity){
  const select=document.getElementById('vehicleType');

@@ -1,6 +1,6 @@
-import {applyVehicleModel,renderVehiclePicker,vehicleLane,vehicleShape,vehiclePlotBounds} from './vehicle-models.js?v=1.11.3';
+import {applyVehicleModel,renderVehiclePicker,vehicleLane,vehicleRenderShape,vehiclePlotBounds} from './vehicle-models.js?v=1.12.0';
 import {installSteelDesign,currentSteelDesign} from './steel-design-ui.js?v=1.9.0';
-import {vehicleLabelLayout,vehicleChartOverlay} from './chart-vehicle.js?v=1.11.3';
+import {vehicleLabelLayout,vehicleChartOverlay} from './chart-vehicle.js?v=1.12.0';
 import {peakSummary,peakLocation,components} from './extrema.js';
 import {installLiveLoads,closestFrame,movingAtDistance} from './live-loads.js?v=1.7.1';
 import {installSectionCursor} from './section-cursor.js?v=1.10.0';
@@ -87,7 +87,7 @@ function loadHit(path,width=20){
 }
 function drawBeam(){renderVehiclePicker(c,quantity);let L=total(c);if(!(L>0))return;let W=Math.max(310,Math.min(1000,Math.floor($('#beamWrap').clientWidth || 700)-12)),H=c.mode==='static'?230:350,pad=W<540?35:65,scale=(W-2*pad)/L,X=x=>pad+x*scale,y=125;
  if(c.mode!=='static'){const fit=vehiclePlotBounds(c,L,pad,W-pad,W);pad=fit.left;scale=fit.scale;}
- const shift=c.mode==='static'?0:Math.max(120,vehicleShape(c).height*scale+30-y);H=230+shift;
+ const shift=c.mode==='static'?0:Math.max(35,vehicleRenderShape(c,scale).height*scale+40-y);H=230+shift;
  let out=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" data-beam-offset="${shift}" data-plot-left="${pad}" data-plot-right="${W-pad}" role="group" aria-label="梁模型、支承與載重"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5L5 0" stroke="#819b9f" stroke-width="1"/></pattern></defs>`;
  if(c.mode!=='static')out+=vehicleLane(c,{front:vehicleTravel(),length:L,left:pad,right:W-pad,width:W,contactY:y+shift});
  out+=`<g transform="translate(0,${shift})">`;
