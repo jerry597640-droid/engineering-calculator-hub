@@ -213,8 +213,8 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}.skip-link{position:fixed;l
     "id": "rebar-embedment-private",
     "name": "植筋深度計算器",
     "category": "材料與配筋",
-    "description": "植筋深度設計與檢核，含劈裂與抗拔安全係數及計算書資料比對。",
-    "url": "https://jerry597640-droid.github.io/engineering-calculator-hub/rebar-embedment/",
+    "description": "登入授權帳號後使用植筋深度設計與檢核。",
+    "url": "https://rebar-embedment-private.hsujerry.chatgpt.site/",
     "code": "REBAR",
     "favorite": false
   },
@@ -414,6 +414,8 @@ let startupWarning='';try{const v=localStorage.getItem(KEY);if(v!==null)tools=va
 {const marker='engineering-calculator-hub.rebar-embedment-private.v1';let apply=true;try{apply=!localStorage.getItem(marker)}catch{}if(apply){const addon=SEED.find(t=>t.id==='rebar-embedment-private');if(addon&&!tools.some(t=>t.id===addon.id||t.url.replace(/\/$/,'')===addon.url.replace(/\/$/,'')))tools.push(structuredClone(addon));try{localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1')}catch{startupWarning='植筋深度計算器已載入；請匯出清單保存新增項目。'}}}
 // Replace only the previous temporary private link; keep user customizations.
 {const marker='engineering-calculator-hub.rebar-embedment-public.v1';let apply=true;try{apply=!localStorage.getItem(marker)}catch{}if(apply){const t=tools.find(t=>t.id==='rebar-embedment-private');if(t&&t.url.replace(/\/$/,'')==='https://github.com/jerry597640-droid/rebar-embedment-calculator'){t.url='https://jerry597640-droid.github.io/engineering-calculator-hub/rebar-embedment/';if(t.description==='私人版：登入 GitHub 後下載 index.html 開啟；線上版建置中。')t.description='植筋深度設計與檢核，含劈裂與抗拔安全係數及計算書資料比對。'}try{localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1')}catch{startupWarning='植筋深度計算器已更新；請匯出清單保存變更。'}}}
+// Move the previous default rebar link to its authenticated site.
+{const marker='engineering-calculator-hub.rebar-embedment-auth.v1';let apply=true;try{apply=!localStorage.getItem(marker)}catch{}if(apply){const t=tools.find(t=>t.id==='rebar-embedment-private');if(t&&['https://jerry597640-droid.github.io/engineering-calculator-hub/rebar-embedment','https://github.com/jerry597640-droid/rebar-embedment-calculator'].includes(t.url.replace(/\/$/,''))){t.url='https://rebar-embedment-private.hsujerry.chatgpt.site/';if(['私人版：登入 GitHub 後下載 index.html 開啟；線上版建置中。','植筋深度設計與檢核，含劈裂與抗拔安全係數及計算書資料比對。'].includes(t.description))t.description='登入授權帳號後使用植筋深度設計與檢核。'}try{localStorage.setItem(KEY,JSON.stringify({version:1,tools}));localStorage.setItem(marker,'1')}catch{startupWarning='植筋深度計算器已更新；請匯出清單保存變更。'}}}
 // Add BeamLab once; preserve names, favorites, custom links and ordering.
 { const marker='engineering-calculator-hub.beam-dynamics.v1';let apply=true;
  try{apply=!localStorage.getItem(marker)}catch{}
