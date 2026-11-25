@@ -1,0 +1,5636 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RC柱配筋與雙軸向彎矩互制分析程式 (NewRCBiax Web)</title>
+  <meta name="description" content="依據《鋼筋混凝土學 (土木406-112)》第七章與 ACI 318-19 規範開發之鋼筋混凝土柱配筋分析與 3D P-M-M 雙軸彎矩互制曲面即時互動網頁程式。" />
+  <style>
+/* RC Column Biaxial Analysis & Design — Precision Structural CAD Theme */
+
+:root {
+  --rc-bg: #f3f5f8;
+  --rc-surface: #ffffff;
+  --rc-surface-alt: #f8fafc;
+  --rc-border: #d5dde7;
+  --rc-border-strong: #94a3b8;
+  --rc-ink: #0f172a;
+  --rc-muted: #475569;
+  --rc-accent: #1d4ed8;
+  --rc-accent-soft: #eff6ff;
+  --rc-success: #059669;
+  --rc-success-soft: #ecfdf5;
+  --rc-warning: #d97706;
+  --rc-warning-soft: #fffbeb;
+  --rc-danger: #dc2626;
+  --rc-danger-soft: #fef2f2;
+  --rc-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --rc-radius: 8px;
+}
+
+html.dark {
+  --rc-bg: #0b1120;
+  --rc-surface: #111827;
+  --rc-surface-alt: #1e293b;
+  --rc-border: #263244;
+  --rc-border-strong: #475569;
+  --rc-ink: #f1f5f9;
+  --rc-muted: #94a3b8;
+  --rc-accent: #3b82f6;
+  --rc-accent-soft: rgba(59, 130, 246, 0.16);
+  --rc-success: #10b981;
+  --rc-success-soft: rgba(16, 185, 129, 0.14);
+  --rc-warning: #f59e0b;
+  --rc-warning-soft: rgba(245, 158, 11, 0.14);
+  --rc-danger: #ef4444;
+  --rc-danger-soft: rgba(239, 68, 68, 0.15);
+  --rc-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--rc-bg);
+  color: var(--rc-ink);
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13.5px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Header Bar */
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 18px;
+  background: var(--rc-surface);
+  border-bottom: 1px solid var(--rc-border);
+  box-shadow: var(--rc-shadow);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--rc-accent);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.brand-sub {
+  font-size: 11.5px;
+  color: var(--rc-muted);
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Controls */
+label.field-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--rc-muted);
+  margin-bottom: 3px;
+}
+
+input[type="number"],
+input[type="text"],
+select {
+  width: 100%;
+  padding: 5px 8px;
+  font-size: 13px;
+  color: var(--rc-ink);
+  background: var(--rc-surface-alt);
+  border: 1px solid var(--rc-border);
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input[type="number"]:focus,
+input[type="text"]:focus,
+select:focus {
+  border-color: var(--rc-accent);
+  box-shadow: 0 0 0 2px var(--rc-accent-soft);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 11px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 5px;
+  border: 1px solid var(--rc-border);
+  background: var(--rc-surface);
+  color: var(--rc-ink);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.05s;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--rc-surface-alt);
+  border-color: var(--rc-border-strong);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--rc-accent);
+  border-color: var(--rc-accent);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+  background: var(--rc-accent);
+}
+
+.btn-danger {
+  color: var(--rc-danger);
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.btn-danger:hover {
+  background: var(--rc-danger-soft);
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.btn.active {
+  background: var(--rc-accent-soft);
+  border-color: var(--rc-accent);
+  color: var(--rc-accent);
+}
+
+.seg-group {
+  display: inline-flex;
+  border: 1px solid var(--rc-border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--rc-surface-alt);
+}
+
+.seg-btn {
+  border: none;
+  background: transparent;
+  color: var(--rc-muted);
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.seg-btn + .seg-btn {
+  border-left: 1px solid var(--rc-border);
+}
+
+.seg-btn.active {
+  background: var(--rc-surface);
+  color: var(--rc-accent);
+}
+
+/* Main Workspace Grid */
+.workspace {
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 14px 16px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 360px minmax(360px, 1.15fr) minmax(320px, 0.95fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+@media (max-width: 1240px) {
+  .main-grid {
+    grid-template-columns: 340px 1fr;
+  }
+  .col-pm2d {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 820px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  background: var(--rc-surface);
+  border: 1px solid var(--rc-border);
+  border-radius: var(--rc-radius);
+  box-shadow: var(--rc-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 9px 13px;
+  border-bottom: 1px solid var(--rc-border);
+  background: var(--rc-surface-alt);
+}
+
+.panel-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rc-ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.panel-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+/* Left Column Sections */
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.form-row-mat {
+  display: grid;
+  grid-template-columns: 0.9fr 0.95fr 1.25fr;
+  gap: 8px;
+}
+
+.form-row-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.canvas-wrap {
+  position: relative;
+  width: 100%;
+  background: var(--rc-surface);
+  border: 1px solid var(--rc-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.section-canvas-wrap {
+  height: 255px;
+  flex-shrink: 0;
+}
+
+.plot3d-wrap {
+  flex: 1;
+  min-height: 460px;
+}
+
+.plot2d-wrap {
+  flex: 1;
+  min-height: 360px;
+}
+
+.canvas-wrap > canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.toolbar-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 8px;
+  background: var(--rc-surface-alt);
+  border: 1px solid var(--rc-border);
+  border-radius: 6px;
+}
+
+.stat-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--rc-muted);
+}
+
+.stat-val {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.badge-ok {
+  background: var(--rc-success-soft);
+  color: var(--rc-success);
+}
+
+.badge-warn {
+  background: var(--rc-warning-soft);
+  color: var(--rc-warning);
+}
+
+.badge-ng {
+  background: var(--rc-danger-soft);
+  color: var(--rc-danger);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dot-ok { background: var(--rc-success); box-shadow: 0 0 0 3px var(--rc-success-soft); }
+.dot-ng { background: var(--rc-danger); box-shadow: 0 0 0 3px var(--rc-danger-soft); }
+.dot-warn { background: var(--rc-warning); box-shadow: 0 0 0 3px var(--rc-warning-soft); }
+
+/* Selected Bar Editor Strip */
+.selected-bar-box {
+  padding: 8px 10px;
+  border: 1px solid var(--rc-accent);
+  background: var(--rc-accent-soft);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Load Case List */
+.load-card {
+  border: 1px solid var(--rc-border);
+  border-radius: 6px;
+  padding: 8px;
+  background: var(--rc-surface-alt);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.load-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+/* Status Verdict Box (under P-M Curve) */
+.verdict-box {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--rc-border);
+  background: var(--rc-surface-alt);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.verdict-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.verdict-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.verdict-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rc-border);
+}
+
+/* Bottom Tabbed Panel */
+.tabs-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--rc-border);
+  background: var(--rc-surface-alt);
+}
+
+.tab-btn {
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--rc-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tab-btn:hover {
+  color: var(--rc-ink);
+}
+
+.tab-btn.active {
+  color: var(--rc-accent);
+  border-bottom-color: var(--rc-accent);
+}
+
+.tab-content {
+  padding: 14px;
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Tables */
+.table-scroll {
+  overflow: auto;
+  max-height: 360px;
+  border: 1px solid var(--rc-border);
+  border-radius: 6px;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+table.data-table th {
+  position: sticky;
+  top: 0;
+  background: var(--rc-surface-alt);
+  color: var(--rc-muted);
+  font-weight: 700;
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--rc-border);
+  white-space: nowrap;
+}
+
+table.data-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--rc-border);
+  vertical-align: middle;
+}
+
+table.data-table tr:hover td {
+  background: var(--rc-surface-alt);
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 12px;
+}
+
+.info-card {
+  border: 1px solid var(--rc-border);
+  border-radius: 6px;
+  padding: 12px;
+  background: var(--rc-surface-alt);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-card h3 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.kv-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  padding: 3px 0;
+  border-bottom: 1px dashed var(--rc-border);
+}
+
+.kv-row:last-child {
+  border-bottom: none;
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: none;
+  place-items: center;
+  z-index: 60;
+  padding: 16px;
+}
+
+.modal-backdrop.open {
+  display: grid;
+}
+
+.modal-box {
+  width: min(680px, 100%);
+  max-height: 85vh;
+  overflow: auto;
+  background: var(--rc-surface);
+  border: 1px solid var(--rc-border);
+  border-radius: 10px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+textarea.code-input {
+  width: 100%;
+  min-height: 170px;
+  padding: 10px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 12.5px;
+  color: var(--rc-ink);
+  background: var(--rc-surface-alt);
+  border: 1px solid var(--rc-border);
+  border-radius: 6px;
+}
+
+.hint-text {
+  font-size: 11.5px;
+  color: var(--rc-muted);
+}
+
+.divider {
+  height: 1px;
+  background: var(--rc-border);
+  margin: 2px 0;
+}
+
+</style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark">RC</div>
+      <div>
+        <h1>RC柱配筋與雙軸向彎矩互制分析系統</h1>
+        <div class="brand-sub">依據《鋼筋混凝土學 (土木406-112)》第七章 &amp; ACI 318-19 / 土木401-110 規範</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <select id="presetSelect" aria-label="教材範例預設" style="width: auto; min-width: 225px;">
+      </select>
+      <button id="btnImportTxt" class="btn btn-sm" type="button">匯入 NewRCBiax .txt</button>
+      <button id="btnExportTxt" class="btn btn-sm" type="button">匯出斷面 .txt</button>
+      <button id="btnCodeSettings" class="btn btn-sm" type="button">規範參數 / 說明</button>
+      <button id="btnTheme" class="btn btn-sm" type="button" title="切換深/淺色主題">深色主題</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- Top 3-Column Engineering Workbench -->
+    <section class="main-grid">
+      <!-- Column 1: Geometry, Interactive Rebar Editor, Loads -->
+      <article class="panel">
+        <div class="panel-header">
+          <div class="panel-title">1. 斷面資料與自由配筋編輯</div>
+          <div class="seg-group" role="group" aria-label="斷面形狀">
+            <button id="btnShapeRect" class="seg-btn active" type="button">矩形柱</button>
+            <button id="btnShapeCirc" class="seg-btn" type="button">圓形柱</button>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <!-- Geometry & Material Inputs -->
+          <div id="rectDimsRow" class="form-row-3">
+            <div>
+              <label class="field-label" for="inpB">柱寬 b (cm)</label>
+              <input id="inpB" type="number" min="15" max="300" step="1" value="50" />
+            </div>
+            <div>
+              <label class="field-label" for="inpH">柱深 h (cm)</label>
+              <input id="inpH" type="number" min="15" max="300" step="1" value="35" />
+            </div>
+            <div>
+              <label class="field-label" for="inpCoverCenter">保護層+半徑 d'</label>
+              <input id="inpCoverCenter" type="number" min="2" max="15" step="0.5" value="6.5" />
+            </div>
+          </div>
+
+          <div id="circDimsRow" class="form-row-2" style="display: none;">
+            <div>
+              <label class="field-label" for="inpDiam">柱直徑 D (cm)</label>
+              <input id="inpDiam" type="number" min="20" max="300" step="1" value="50" />
+            </div>
+            <div>
+              <label class="field-label" for="inpCoverCenterCirc">外緣至主筋中心 d'</label>
+              <input id="inpCoverCenterCirc" type="number" min="2" max="15" step="0.5" value="6.5" />
+            </div>
+          </div>
+
+          <div class="form-row-mat">
+            <div>
+              <label class="field-label" for="inpFc">fc' (kgf/cm²)</label>
+              <input id="inpFc" type="number" min="140" max="1000" step="10" value="280" />
+            </div>
+            <div>
+              <label class="field-label" for="inpFy">fy (kgf/cm²)</label>
+              <input id="inpFy" type="number" min="2800" max="7000" step="100" value="4200" />
+            </div>
+            <div>
+              <label class="field-label" for="selHoop">橫向鋼筋型式</label>
+              <select id="selHoop">
+                <option value="tied">橫箍柱 φ=0.65</option>
+                <option value="spiral">螺箍柱 φ=0.75</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Rebar Canvas Controls -->
+          <div class="toolbar-strip">
+            <div class="seg-group" role="group" aria-label="編輯模式">
+              <button id="btnModeSelect" class="seg-btn active" type="button">選取/拖曳</button>
+              <button id="btnModeAdd" class="seg-btn" type="button">+ 點擊加筋</button>
+            </div>
+            <select id="selActiveBar" aria-label="主筋號數" style="width: auto; flex: 1; min-width: 95px;"></select>
+            <select id="selSnap" aria-label="格線吸附" style="width: auto;">
+              <option value="0.5">吸附 0.5cm</option>
+              <option value="1">吸附 1cm</option>
+              <option value="2.5">吸附 2.5cm</option>
+              <option value="0">自由移動</option>
+            </select>
+          </div>
+
+          <!-- Interactive Section Canvas -->
+          <div class="canvas-wrap section-canvas-wrap">
+            <canvas id="sectionCanvas"></canvas>
+          </div>
+
+          <div class="toolbar-strip" style="justify-content: space-between;">
+            <span id="coordReadout" class="hint-text mono">點擊或拖曳鋼筋即時更新互制圖 (Shift+點擊可加筋)</span>
+            <label style="display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; cursor: pointer;">
+              <input id="chkShowNA" type="checkbox" /> 顯示中性軸
+            </label>
+          </div>
+
+          <!-- Selected Bar Quick Editor (shown when a bar is selected) -->
+          <div id="selectedBarBox" class="selected-bar-box" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong id="selBarTitle" style="font-size: 12px;">已選取鋼筋 #1</strong>
+              <div style="display: flex; gap: 4px;">
+                <button id="btnMirrorX" class="btn btn-sm" type="button" title="對幾何中心左右鏡射新增">左右鏡射</button>
+                <button id="btnMirrorY" class="btn btn-sm" type="button" title="對幾何中心上下鏡射新增">上下鏡射</button>
+                <button id="btnDeleteBar" class="btn btn-sm btn-danger" type="button">刪除</button>
+              </div>
+            </div>
+            <div class="form-row-3">
+              <div>
+                <label class="field-label" for="inpBarX">X (cm)</label>
+                <input id="inpBarX" type="number" step="0.1" />
+              </div>
+              <div>
+                <label class="field-label" for="inpBarY">Y (cm)</label>
+                <input id="inpBarY" type="number" step="0.1" />
+              </div>
+              <div>
+                <label class="field-label" for="inpBarFy">fy (kgf/cm²)</label>
+                <input id="inpBarFy" type="number" step="100" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Parametric Array Generator -->
+          <div class="load-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 12px;">快速生成對稱配筋陣列</strong>
+              <button id="btnApplyArray" class="btn btn-sm btn-primary" type="button">套用陣列</button>
+            </div>
+            <div id="rectArrayInputs" class="form-row-3">
+              <div>
+                <label class="field-label" for="inpNx">X 向根數 nx</label>
+                <input id="inpNx" type="number" min="2" max="15" value="4" />
+              </div>
+              <div>
+                <label class="field-label" for="inpNy">Y 向根數 ny</label>
+                <input id="inpNy" type="number" min="2" max="15" value="3" />
+              </div>
+              <div>
+                <label class="field-label" for="selArrayPattern">排列型式</label>
+                <select id="selArrayPattern">
+                  <option value="perimeter">周邊環置</option>
+                  <option value="two-face-y">上下雙面</option>
+                  <option value="two-face-x">左右雙面</option>
+                </select>
+              </div>
+            </div>
+            <div id="circArrayInputs" class="form-row-2" style="display: none;">
+              <div>
+                <label class="field-label" for="inpCircN">環狀鋼筋根數 N</label>
+                <input id="inpCircN" type="number" min="6" max="32" step="1" value="8" />
+              </div>
+              <div>
+                <label class="field-label" for="inpCircAng">起始角度 (°)</label>
+                <input id="inpCircAng" type="number" min="0" max="360" step="15" value="0" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Summary Strip -->
+          <div class="stat-strip">
+            <div class="stat-cell">
+              <span class="stat-label">鋼筋比 Ast / Ag</span>
+              <span class="stat-val mono">
+                <span id="lblRho">0.0290</span>
+                <span id="badgeRho" class="badge badge-ok" style="margin-left: 3px;">OK</span>
+              </span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">純軸壓強度 Po / φPn,max</span>
+              <span id="lblPo" class="stat-val mono">617.3 / 321.0 tf</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">塑性中心 P.C. (cm)</span>
+              <span id="lblPC" class="stat-val mono">(25.00, 17.50)</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- 2. Load Inputs -->
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="font-size: 13px;">2. 設計載重 (Load)</strong>
+            <div style="display: flex; gap: 6px;">
+              <button id="btnDLHelper" class="btn btn-sm" type="button">1.2D+1.6L 試算</button>
+              <button id="btnAddLoad" class="btn btn-sm" type="button">+ 新增組別</button>
+            </div>
+          </div>
+          <div id="loadCasesContainer" style="display: flex; flex-direction: column; gap: 6px;"></div>
+        </div>
+      </article>
+
+      <!-- Column 2: 3D P-M-M Interaction Surface -->
+      <article class="panel">
+        <div class="panel-header">
+          <div class="panel-title">3D 柱軸載重與雙軸向彎矩互制曲面 (P-M-M Surface)</div>
+          <div class="seg-group" role="group" aria-label="曲面顯示範圍">
+            <button id="btnViewQuad" class="seg-btn active" type="button">1/4 象限剖面</button>
+            <button id="btnViewLoadQuad" class="seg-btn" type="button">載重象限</button>
+            <button id="btnViewFull" class="seg-btn" type="button">完整 360°</button>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <div class="toolbar-strip" style="justify-content: space-between;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <label style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer;">
+                <input id="chkShowNominal" type="checkbox" checked /> 標稱強度網格 (Pn)
+              </label>
+              <label style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer;">
+                <input id="chkShowDesign" type="checkbox" checked /> 設計強度內殼 (φPn)
+              </label>
+            </div>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+              <button class="btn btn-sm cam-preset" data-preset="iso" type="button">等角 3D</button>
+              <button class="btn btn-sm cam-preset" data-preset="frontMx" type="button">P-Mx</button>
+              <button class="btn btn-sm cam-preset" data-preset="sideMy" type="button">P-My</button>
+              <button class="btn btn-sm cam-preset" data-preset="topContour" type="button">Mx-My 俯視</button>
+            </div>
+          </div>
+
+          <div class="canvas-wrap plot3d-wrap">
+            <canvas id="plot3dCanvas"></canvas>
+          </div>
+          <div class="hint-text" style="display: flex; justify-content: space-between;">
+            <span>滑鼠左鍵拖曳可自由旋轉 3D 曲面，滾輪縮放，滑過頂點可檢視精確座標</span>
+            <span class="mono">色階：紫(受拉) → 青(平衡) → 黃(受壓)</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Column 3: 2D P-M Curve + Safety Verdict -->
+      <article class="panel col-pm2d">
+        <div class="panel-header">
+          <div class="panel-title">2D 互制曲線剖面 (P-M Curve)</div>
+          <div class="seg-group" role="group" aria-label="2D剖面模式">
+            <button id="btnSliceAzimuth" class="seg-btn active" type="button">載重彎矩剖面</button>
+            <button id="btnSliceTheta" class="seg-btn" type="button">指定中性軸角 θ</button>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <div id="thetaSliderRow" class="toolbar-strip" style="display: none; justify-content: space-between;">
+            <label for="rngTheta" style="font-size: 12px; font-weight: 600;">中性軸與 X 軸夾角 θ：</label>
+            <input id="rngTheta" type="range" min="0" max="355" step="5" value="40" style="flex: 1; accent-color: var(--rc-accent);" />
+            <span id="lblThetaVal" class="mono" style="font-weight: 700; min-width: 42px; text-align: right;">40°</span>
+          </div>
+
+          <div class="canvas-wrap plot2d-wrap">
+            <canvas id="plot2dCanvas"></canvas>
+          </div>
+
+          <!-- Safety Verdict Box (Matching NewRCBiax2021 bottom readout!) -->
+          <div id="verdictBox" class="verdict-box">
+            <div class="verdict-main">
+              <div class="verdict-status">
+                <span id="verdictDot" class="dot dot-ok"></span>
+                <span id="verdictStatusText">Load &lt; Design Strength (安全 OK)</span>
+              </div>
+              <span id="verdictZoneBadge" class="badge badge-ok">Compression-Controlled Section</span>
+            </div>
+
+            <div class="verdict-metrics">
+              <div class="stat-cell">
+                <span class="stat-label">檢核比 D/C</span>
+                <span id="valDC" class="stat-val mono">0.942</span>
+              </div>
+              <div class="stat-cell">
+                <span class="stat-label">合成彎矩 Mu</span>
+                <span id="valMu" class="stat-val mono">22.10 tf-m</span>
+              </div>
+              <div class="stat-cell">
+                <span class="stat-label">折減係數 φ / εt</span>
+                <span id="valPhiEps" class="stat-val mono">0.650 / 0.001</span>
+              </div>
+              <div class="stat-cell">
+                <span class="stat-label">設計容量 (φMn, φPn)</span>
+                <span id="valCap" class="stat-val mono">23.5 / 138.0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Bottom Tabbed Engineering Tools & Tables -->
+    <section class="panel">
+      <div class="tabs-header" role="tablist">
+        <button class="tab-btn active" data-tab="tabRebarTable" type="button">鋼筋座標明細表 (任意增刪/調整)</button>
+        <button class="tab-btn" data-tab="tabAutoDesign" type="button">自動最佳化配筋設計 (Auto-Design)</button>
+        <button class="tab-btn" data-tab="tabTextbookChecks" type="button">教材近似法對照 &amp; 箍筋規範檢核</button>
+        <button class="tab-btn" data-tab="tabDataExport" type="button">互制曲面數據表與匯出 (Biax .txt / .csv)</button>
+      </div>
+
+      <!-- Tab 1: Rebar Table -->
+      <div id="tabRebarTable" class="tab-content active">
+        <div class="toolbar-strip" style="justify-content: space-between; margin-bottom: 10px;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button id="btnAddBarRow" class="btn btn-sm btn-primary" type="button">+ 新增單根鋼筋</button>
+            <button id="btnClearBars" class="btn btn-sm btn-danger" type="button">清空全部鋼筋</button>
+            <span class="hint-text">提示：您可以直接在上方斷面圖拖曳鋼筋，或於下表精確輸入 X, Y 座標與號數</span>
+          </div>
+          <span id="rebarTotalSummary" class="mono" style="font-weight: 700;">總計：10 根，Ast = 50.67 cm²</span>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>X 座標 (cm)</th>
+                <th>Y 座標 (cm)</th>
+                <th>鋼筋號數</th>
+                <th>標稱面積 As (cm²)</th>
+                <th>降伏強度 fy (kgf/cm²)</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="rebarTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 2: Auto-Design -->
+      <div id="tabAutoDesign" class="tab-content">
+        <div class="form-row-4" style="margin-bottom: 10px;">
+          <div>
+            <label class="field-label" for="adMinBar">最小主筋號數</label>
+            <select id="adMinBar"></select>
+          </div>
+          <div>
+            <label class="field-label" for="adMaxBar">最大主筋號數</label>
+            <select id="adMaxBar"></select>
+          </div>
+          <div>
+            <label class="field-label" for="adMaxRho">最大允許鋼筋比 ρg</label>
+            <select id="adMaxRho">
+              <option value="0.04">4.0% (實務建議上限)</option>
+              <option value="0.06" selected>6.0% (耐震規範上限 §18.4)</option>
+              <option value="0.08">8.0% (一般規範上限 §10.6)</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="adPattern">自動配筋型式</label>
+            <select id="adPattern">
+              <option value="perimeter">四周均勻配筋 (推薦)</option>
+              <option value="two-face-y">上下雙面集中配筋</option>
+              <option value="two-face-x">左右雙面集中配筋</option>
+            </select>
+          </div>
+        </div>
+        <div class="toolbar-strip" style="margin-bottom: 10px;">
+          <button id="btnRunAutoDesign" class="btn btn-primary" type="button">執行 3D 自動配筋搜尋</button>
+          <span id="autoDesignStatus" class="hint-text">依據目前斷面尺寸、材料與全部設計載重組，進行 3D 雙軸應變諧合搜尋最經濟配筋</span>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>方案</th>
+                <th>配筋說明</th>
+                <th>鋼筋總面積 Ast (cm²)</th>
+                <th>鋼筋比 ρg</th>
+                <th>最大檢核比 D/C</th>
+                <th>破壞模式</th>
+                <th>套用</th>
+              </tr>
+            </thead>
+            <tbody id="autoDesignBody">
+              <tr><td colspan="7" class="hint-text">點擊「執行 3D 自動配筋搜尋」以產生符合規範與安全需求之建議配筋方案</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 3: Textbook Approx Comparison & Code Detailing -->
+      <div id="tabTextbookChecks" class="tab-content">
+        <div class="compare-grid" id="textbookCompareGrid"></div>
+      </div>
+
+      <!-- Tab 4: Biax Data Table & Export -->
+      <div id="tabDataExport" class="tab-content">
+        <div class="toolbar-strip" style="justify-content: space-between; margin-bottom: 10px;">
+          <span class="hint-text">欄位對照《鋼筋混凝土學 (土木406-112)》p.7-35~36 NewRCBiax 輸出格式 (依 θ=0°~355° 與應變狀態)</span>
+          <div style="display: flex; gap: 6px;">
+            <button id="btnDownloadBiaxTxt" class="btn btn-sm btn-primary" type="button">下載 Biax 結果 (.txt)</button>
+            <button id="btnDownloadCsv" class="btn btn-sm" type="button">下載 CSV 表格 (.csv)</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table mono">
+            <thead>
+              <tr>
+                <th>theta (°)</th>
+                <th>Mn (tf-m)</th>
+                <th>Pn (tf)</th>
+                <th>fiMn (tf-m)</th>
+                <th>fiPn (tf)</th>
+                <th>Curvature (1/cm)</th>
+                <th>epsilonT</th>
+                <th>Mxx (tf-m)</th>
+                <th>Myy (tf-m)</th>
+              </tr>
+            </thead>
+            <tbody id="biaxTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Import NewRCBiax .txt -->
+  <div id="modalImport" class="modal-backdrop">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 15px;">匯入 NewRCBiax 文字輸入檔 (教材 p.7-34 格式)</h3>
+        <button class="btn btn-sm modal-close" type="button">關閉</button>
+      </div>
+      <div class="hint-text">可貼上或選擇文字檔 (.txt)，格式：第1列為「編號 fc'」，第2列為「h b」，第3列為「X座標」，第4列起為「Y座標 fy 鋼筋號數矩陣」。</div>
+      <input id="fileImportInput" type="file" accept=".txt" />
+      <textarea id="txtImportArea" class="code-input"></textarea>
+      <div id="importError" style="color: var(--rc-danger); font-size: 12px; display: none;"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn modal-close" type="button">取消</button>
+        <button id="btnConfirmImport" class="btn btn-primary" type="button">解析並載入斷面</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Code Settings & Formulas -->
+  <div id="modalCode" class="modal-backdrop">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 15px;">規範設定與理論說明 (土木406-112 / ACI 318-19)</h3>
+        <button class="btn btn-sm modal-close" type="button">關閉</button>
+      </div>
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input id="chkDeductConcrete" type="checkbox" checked />
+        <span><strong>扣除壓力區鋼筋排擠混凝土面積 (0.85 fc' As)</strong> — NewRCBiax 與例題 7.1(4)/7.8 採用此精確式</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input id="chkSimplifySD420" type="checkbox" />
+        <span><strong>SD420 降伏應變簡化取 εty = 0.002</strong> — 勾選時符合例題 7.3/7.4 簡化值；取消則依精確式 fy / Es (NewRCBiax 預設)</span>
+      </label>
+      <div class="info-card">
+        <h3>核心計算準則</h3>
+        <div class="kv-row"><span>極限壓應變 εu</span><span class="mono">0.003 (ACI 318-19 §22.2.2)</span></div>
+        <div class="kv-row"><span>鋼筋彈性模數 Es</span><span class="mono">2.04 × 10⁶ kgf/cm²</span></div>
+        <div class="kv-row"><span>等值矩形應力塊 β1</span><span class="mono">fc'≤280: 0.85；每增 70 減 0.05 (下限 0.65)</span></div>
+        <div class="kv-row"><span>彎矩計算基準點</span><span class="mono">塑性中心 (Plastic Centroid, §7.8)</span></div>
+        <div class="kv-row"><span>雙軸互制判定</span><span class="mono">3D 應變諧合界限面射線交點檢核 (§7.15)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 1.2D + 1.6L Helper -->
+  <div id="modalDL" class="modal-backdrop">
+    <div class="modal-box" style="width: min(440px, 100%);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 15px;">載重因數組合試算 (Pu = 1.2D + 1.6L)</h3>
+        <button class="btn btn-sm modal-close" type="button">關閉</button>
+      </div>
+      <div class="form-row-2">
+        <div><label class="field-label">靜載軸力 PD (tf)</label><input id="dlPD" type="number" value="50" step="1" /></div>
+        <div><label class="field-label">活載軸力 PL (tf)</label><input id="dlPL" type="number" value="44" step="1" /></div>
+        <div><label class="field-label">靜載彎矩 MDx (tf-m)</label><input id="dlMDx" type="number" value="4" step="0.5" /></div>
+        <div><label class="field-label">活載彎矩 MLx (tf-m)</label><input id="dlMLx" type="number" value="3.5" step="0.5" /></div>
+        <div><label class="field-label">靜載彎矩 MDy (tf-m)</label><input id="dlMDy" type="number" value="7.5" step="0.5" /></div>
+        <div><label class="field-label">活載彎矩 MLy (tf-m)</label><input id="dlMLy" type="number" value="6.5" step="0.5" /></div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn modal-close" type="button">取消</button>
+        <button id="btnApplyDL" class="btn btn-primary" type="button">套用至第一組設計載重</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+(function() {
+"use strict";
+const __mods = {};
+
+// === Module ./rebarDB.js ===
+__mods['./rebarDB.js'] = (function() {
+const __exp = {};
+/**
+ * Taiwan CNS 560 / ASTM Reinforcing Bar Database & Concrete Code Helpers
+ * Based on 《鋼筋混凝土學 (土木406-112)》 & ACI 318-19 / 土木401-110
+ */
+
+const ES_DEFAULT = 2.04e6; // kgf/cm^2 (Section 7.6, Eq. 7.20, Page 7-12)
+const EPS_U = 0.003;       // Ultimate concrete compression strain (ACI 318-19 22.2.2.1)
+
+const REBAR_DB = {
+  3:  { id: 3,  label: 'D10 (#3)',  cns: 'D10', astm: '#3',  db: 0.953, area: 0.713 },
+  4:  { id: 4,  label: 'D13 (#4)',  cns: 'D13', astm: '#4',  db: 1.270, area: 1.267 },
+  5:  { id: 5,  label: 'D16 (#5)',  cns: 'D16', astm: '#5',  db: 1.588, area: 1.986 },
+  6:  { id: 6,  label: 'D19 (#6)',  cns: 'D19', astm: '#6',  db: 1.905, area: 2.865 },
+  7:  { id: 7,  label: 'D22 (#7)',  cns: 'D22', astm: '#7',  db: 2.223, area: 3.871 },
+  8:  { id: 8,  label: 'D25 (#8)',  cns: 'D25', astm: '#8',  db: 2.540, area: 5.067 },
+  9:  { id: 9,  label: 'D29 (#9)',  cns: 'D29', astm: '#9',  db: 2.865, area: 6.469 },
+  10: { id: 10, label: 'D32 (#10)', cns: 'D32', astm: '#10', db: 3.226, area: 8.143 },
+  11: { id: 11, label: 'D36 (#11)', cns: 'D36', astm: '#11', db: 3.581, area: 10.07 },
+  14: { id: 14, label: 'D43 (#14)', cns: 'D43', astm: '#14', db: 4.300, area: 14.52 },
+  18: { id: 18, label: 'D57 (#18)', cns: 'D57', astm: '#18', db: 5.733, area: 25.81 },
+};
+
+const REBAR_LIST = Object.values(REBAR_DB);
+
+function getBarInfo(barId) {
+  return REBAR_DB[barId] || REBAR_DB[8];
+}
+
+/**
+ * Whitney stress block depth factor beta1 (土木401-110 / ACI 318-19)
+ * @param {number} fc Concrete compressive strength in kgf/cm^2
+ */
+function calcBeta1(fc) {
+  if (fc <= 280) return 0.85;
+  const b1 = 0.85 - (0.05 * (fc - 280)) / 70;
+  return Math.max(0.65, b1);
+}
+
+/**
+ * Steel yield strain epsilon_ty
+ * @param {number} fy Steel yield strength in kgf/cm^2
+ * @param {boolean} simplifySD420 If true, uses 0.002 for fy === 4200 per ACI 318-19 / Ex 7.3-7.4
+ * @param {number} Es Elastic modulus in kgf/cm^2
+ */
+function calcEpsTy(fy, simplifySD420 = false, Es = ES_DEFAULT) {
+  if (simplifySD420 && Math.abs(fy - 4200) < 1e-6) {
+    return 0.002;
+  }
+  return fy / Es;
+}
+
+/**
+ * Strength reduction factor phi per ACI 318-19 / 土木401-110 Fig. 7.17
+ * @param {number} epsT Net tensile strain in extreme tension steel (tension > 0)
+ * @param {number} epsTy Yield strain of extreme tension steel
+ * @param {'tied'|'spiral'} hoopType Transverse reinforcement type
+ */
+function calcPhi(epsT, epsTy, hoopType = 'tied') {
+  const phiMin = hoopType === 'spiral' ? 0.75 : 0.65;
+  const epsTClamped = epsT;
+  if (epsTClamped <= epsTy) {
+    return { phi: phiMin, zone: 'compression' };
+  }
+  if (epsTClamped >= epsTy + 0.003) {
+    return { phi: 0.90, zone: 'tension' };
+  }
+  const phi = phiMin + ((0.90 - phiMin) * (epsTClamped - epsTy)) / 0.003;
+  return { phi, zone: 'transition' };
+}
+
+/**
+ * Axial cap factor alpha (0.80 for tied, 0.85 for spiral)
+ */
+function getAxialCapFactor(hoopType = 'tied') {
+  return hoopType === 'spiral' ? 0.85 : 0.80;
+}
+
+__exp.getBarInfo = getBarInfo;
+__exp.calcBeta1 = calcBeta1;
+__exp.calcEpsTy = calcEpsTy;
+__exp.calcPhi = calcPhi;
+__exp.getAxialCapFactor = getAxialCapFactor;
+__exp.ES_DEFAULT = ES_DEFAULT;
+__exp.EPS_U = EPS_U;
+__exp.REBAR_DB = REBAR_DB;
+__exp.REBAR_LIST = REBAR_LIST;
+return __exp;
+})();
+
+// === Module ./rcEngine.js ===
+__mods['./rcEngine.js'] = (function() {
+const __exp = {};
+/**
+ * RC Column Biaxial Bending & Axial Load Interaction Engine
+ * Follows 《鋼筋混凝土學 (土木406-112)》 Chapter 7 & ACI 318-19 / 土木401-110
+ *
+ * Coordinate convention (matches NewRCBiax2021 & Textbook Fig. 7.19 / p.7-34):
+ * - Cross-section lies in [0, b] x [0, h] (x horizontal width b, y vertical height h)
+ * - Moments about Plastic Centroid (x_pc, y_pc):
+ *     M_nx = sum F_i * (y_i - y_pc)   (bending about X-axis, positive when +y is in compression / e_y > 0)
+ *     M_ny = sum F_i * (x_i - x_pc)   (bending about Y-axis, positive when +x is in compression / e_x > 0)
+ * - Units: length [cm], stress [kgf/cm^2], force [tf] (1000 kgf), moment [tf-m] (10^5 kgf-cm)
+ */
+
+const { ES_DEFAULT, EPS_U, getBarInfo, calcBeta1, calcEpsTy, calcPhi, getAxialCapFactor } = __mods['./rebarDB.js'];
+
+const KGF_TO_TF = 1e-3;
+const KGFCM_TO_TFM = 1e-5;
+
+/**
+ * Create polygon for rectangular or circular section
+ */
+function buildSectionPolygon(section) {
+  if (section.shape === 'circular') {
+    const D = section.diameter;
+    const R = D / 2;
+    const cx = R;
+    const cy = R;
+    const nSeg = 96;
+    // Scale radius slightly so inscribed N-gon area equals exact pi*R^2
+    const areaScale = Math.sqrt((2 * Math.PI) / (nSeg * Math.sin((2 * Math.PI) / nSeg)));
+    const rAdj = R * areaScale;
+    const pts = [];
+    for (let i = 0; i < nSeg; i++) {
+      const a = (2 * Math.PI * i) / nSeg;
+      pts.push({ x: cx + rAdj * Math.cos(a), y: cy + rAdj * Math.sin(a) });
+    }
+    return pts;
+  }
+  const b = section.b;
+  const h = section.h;
+  return [
+    { x: 0, y: 0 },
+    { x: b, y: 0 },
+    { x: b, y: h },
+    { x: 0, y: h },
+  ];
+}
+
+/**
+ * Polygon area and centroid via Green's theorem (counter-clockwise)
+ */
+function polygonAreaCentroid(poly) {
+  const n = poly.length;
+  if (n < 3) return { area: 0, cx: 0, cy: 0 };
+  let a2 = 0;
+  let cx6 = 0;
+  let cy6 = 0;
+  for (let i = 0; i < n; i++) {
+    const p1 = poly[i];
+    const p2 = poly[(i + 1) % n];
+    const cross = p1.x * p2.y - p2.x * p1.y;
+    a2 += cross;
+    cx6 += (p1.x + p2.x) * cross;
+    cy6 += (p1.y + p2.y) * cross;
+  }
+  const area = Math.abs(a2) * 0.5;
+  if (area < 1e-12) return { area: 0, cx: 0, cy: 0 };
+  const sign = a2 >= 0 ? 1 : -1;
+  return {
+    area,
+    cx: (cx6 * sign) / (6 * area),
+    cy: (cy6 * sign) / (6 * area),
+  };
+}
+
+/**
+ * Sutherland-Hodgman clip polygon against half-plane: x*ux + y*uy >= sCut
+ */
+function clipPolygonHalfPlane(poly, ux, uy, sCut) {
+  const n = poly.length;
+  if (n === 0) return [];
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const cur = poly[i];
+    const nxt = poly[(i + 1) % n];
+    const dCur = cur.x * ux + cur.y * uy - sCut;
+    const dNxt = nxt.x * ux + nxt.y * uy - sCut;
+    const inCur = dCur >= -1e-11;
+    const inNxt = dNxt >= -1e-11;
+    if (inCur) {
+      out.push(cur);
+      if (!inNxt) {
+        const t = dCur / (dCur - dNxt);
+        out.push({
+          x: cur.x + t * (nxt.x - cur.x),
+          y: cur.y + t * (nxt.y - cur.y),
+        });
+      }
+    } else if (inNxt) {
+      const t = dCur / (dCur - dNxt);
+      out.push({
+        x: cur.x + t * (nxt.x - cur.x),
+        y: cur.y + t * (nxt.y - cur.y),
+      });
+    }
+  }
+  return out;
+}
+
+/**
+ * Normalize bar array with resolved area & fy
+ */
+function normalizeBars(bars, defaultFy = 4200) {
+  return (bars || []).map((bar, idx) => {
+    const info = getBarInfo(bar.barId ?? 8);
+    const area = bar.area != null ? bar.area : info.area;
+    const db = bar.db != null ? bar.db : info.db;
+    const fy = bar.fy != null ? bar.fy : defaultFy;
+    return {
+      id: bar.id ?? `b-${idx}`,
+      x: Number(bar.x),
+      y: Number(bar.y),
+      barId: bar.barId ?? 8,
+      area,
+      db,
+      fy,
+    };
+  });
+}
+
+/**
+ * Compute section properties, plastic centroid, Po, Pnt
+ */
+function computeSectionSummary(config) {
+  const {
+    shape = 'rectangular',
+    b = 50,
+    h = 35,
+    diameter = 50,
+    fc = 280,
+    fy = 4200,
+    hoopType = 'tied',
+    deductConcrete = true,
+    simplifySD420 = false,
+    Es = ES_DEFAULT,
+  } = config;
+
+  const poly = buildSectionPolygon({ shape, b, h, diameter });
+  const { area: Ag, cx: xg, cy: yg } = polygonAreaCentroid(poly);
+  const bars = normalizeBars(config.bars, fy);
+  const beta1 = calcBeta1(fc);
+  const phiMin = hoopType === 'spiral' ? 0.75 : 0.65;
+  const alphaCap = getAxialCapFactor(hoopType);
+
+  let Ast = 0;
+  let sumSteelFy = 0;
+  let sumSteelNet = 0;
+  let sumSteelNetX = 0;
+  let sumSteelNetY = 0;
+
+  for (const bar of bars) {
+    Ast += bar.area;
+    sumSteelFy += bar.area * bar.fy;
+    const effFy = deductConcrete ? bar.fy - 0.85 * fc : bar.fy;
+    sumSteelNet += bar.area * effFy;
+    sumSteelNetX += bar.area * effFy * bar.x;
+    sumSteelNetY += bar.area * effFy * bar.y;
+  }
+
+  const concCapKgf = 0.85 * fc * Ag;
+  const PoKgf = concCapKgf + sumSteelNet;
+  const Po = PoKgf * KGF_TO_TF;
+  const Pnt = sumSteelFy * KGF_TO_TF; // positive magnitude of pure tension capacity
+
+  const xpc = PoKgf > 1e-9 ? (concCapKgf * xg + sumSteelNetX) / PoKgf : xg;
+  const ypc = PoKgf > 1e-9 ? (concCapKgf * yg + sumSteelNetY) / PoKgf : yg;
+
+  const rhoG = Ag > 0 ? Ast / Ag : 0;
+  const phiPnMax = alphaCap * phiMin * Po;
+  const phiPnt = 0.90 * Pnt;
+
+  return {
+    poly,
+    Ag,
+    xg,
+    yg,
+    xpc,
+    ypc,
+    Ast,
+    rhoG,
+    beta1,
+    phiMin,
+    alphaCap,
+    Po,
+    Pnt,
+    phiPnMax,
+    phiPnt,
+    bars,
+    fc,
+    fy,
+    hoopType,
+    deductConcrete,
+    simplifySD420,
+    Es,
+  };
+}
+
+/**
+ * Evaluate exact cross-section state for a given compression normal angle alpha (rad)
+ * and neutral axis depth c (cm) from extreme compression fiber.
+ *
+ * @param {object} summary Output of computeSectionSummary
+ * @param {number} alpha Compression direction angle in radians: u = (cos(alpha), sin(alpha))
+ * @param {number} c Neutral axis depth (cm). Use Infinity for pure compression, -Infinity for pure tension.
+ */
+function evaluateSectionState(summary, alpha, c) {
+  const {
+    poly,
+    xpc,
+    ypc,
+    bars,
+    fc,
+    beta1,
+    hoopType,
+    deductConcrete,
+    simplifySD420,
+    Es,
+    Po,
+    phiPnMax,
+  } = summary;
+
+  const ux = Math.cos(alpha);
+  const uy = Math.sin(alpha);
+
+  // Angle of NA with X-axis (deg), matching NewRCBiax2021 convention
+  // When alpha = pi/2 (+y compression), NA is horizontal (theta = 0 deg)
+  let thetaDeg = ((Math.PI / 2 - alpha) * 180) / Math.PI;
+  thetaDeg = ((thetaDeg % 360) + 360) % 360;
+
+  let sMax = -Infinity;
+  let sMin = Infinity;
+  for (const p of poly) {
+    const s = p.x * ux + p.y * uy;
+    if (s > sMax) sMax = s;
+    if (s < sMin) sMin = s;
+  }
+  const Dalpha = sMax - sMin;
+
+  let sBarMin = Infinity;
+  let extremeBar = null;
+  for (const bar of bars) {
+    const s = bar.x * ux + bar.y * uy;
+    if (s < sBarMin) {
+      sBarMin = s;
+      extremeBar = bar;
+    }
+  }
+  const dt = extremeBar ? sMax - sBarMin : Dalpha;
+  const epsTy = calcEpsTy(extremeBar ? extremeBar.fy : summary.fy, simplifySD420, Es);
+
+  // Special case: Pure Compression (c === Infinity)
+  if (!Number.isFinite(c) && c > 0) {
+    const epsT = -EPS_U;
+    const { phi, zone } = calcPhi(epsT, epsTy, hoopType);
+    return {
+      alpha,
+      thetaDeg,
+      c: Infinity,
+      a: Dalpha,
+      curvature: 0,
+      epsT,
+      epsTy,
+      phi,
+      zone,
+      Pn: Po,
+      Mnx: 0,
+      Mny: 0,
+      Mn: 0,
+      phiPn: Math.min(phi * Po, phiPnMax),
+      phiMnx: 0,
+      phiMny: 0,
+      phiMn: 0,
+      capped: true,
+    };
+  }
+
+  // Special case: Pure Tension (c === -Infinity or c <= 0)
+  if ((!Number.isFinite(c) && c < 0) || c <= 0) {
+    let PnKgf = 0;
+    let MnxKgfCm = 0;
+    let MnyKgfCm = 0;
+    for (const bar of bars) {
+      const F = -bar.area * bar.fy;
+      PnKgf += F;
+      MnxKgfCm += F * (bar.y - ypc);
+      MnyKgfCm += F * (bar.x - xpc);
+    }
+    const Pn = PnKgf * KGF_TO_TF;
+    const Mnx = MnxKgfCm * KGFCM_TO_TFM;
+    const Mny = MnyKgfCm * KGFCM_TO_TFM;
+    const Mn = Math.hypot(Mnx, Mny);
+    const phi = 0.90;
+    return {
+      alpha,
+      thetaDeg,
+      c: -Infinity,
+      a: 0,
+      curvature: 0,
+      epsT: 1.0,
+      epsTy,
+      phi,
+      zone: 'tension',
+      Pn,
+      Mnx,
+      Mny,
+      Mn,
+      phiPn: phi * Pn,
+      phiMnx: phi * Mnx,
+      phiMny: phi * Mny,
+      phiMn: phi * Mn,
+      capped: false,
+    };
+  }
+
+  // General finite c > 0
+  const a = beta1 * c;
+  const sBlockCut = sMax - a;
+
+  let CcKgf = 0;
+  let McxKgfCm = 0;
+  let McyKgfCm = 0;
+
+  if (a > 1e-9) {
+    const clipped =
+      sBlockCut <= sMin
+        ? poly
+        : clipPolygonHalfPlane(poly, ux, uy, sBlockCut);
+    const { area: Ac, cx, cy } = polygonAreaCentroid(clipped);
+    if (Ac > 0) {
+      CcKgf = 0.85 * fc * Ac;
+      McxKgfCm = CcKgf * (cy - ypc);
+      McyKgfCm = CcKgf * (cx - xpc);
+    }
+  }
+
+  let FsTotalKgf = 0;
+  let MsxKgfCm = 0;
+  let MsyKgfCm = 0;
+
+  const sNA = sMax - c;
+  for (const bar of bars) {
+    const s = bar.x * ux + bar.y * uy;
+    // Compression strain positive, tension negative
+    const eps = (EPS_U * (s - sNA)) / c;
+    let fs = Es * eps;
+    if (fs > bar.fy) fs = bar.fy;
+    if (fs < -bar.fy) fs = -bar.fy;
+
+    let effStress = fs;
+    if (deductConcrete && s >= sBlockCut) {
+      effStress -= 0.85 * fc;
+    }
+
+    const F = bar.area * effStress;
+    FsTotalKgf += F;
+    MsxKgfCm += F * (bar.y - ypc);
+    MsyKgfCm += F * (bar.x - xpc);
+  }
+
+  const Pn = (CcKgf + FsTotalKgf) * KGF_TO_TF;
+  const Mnx = (McxKgfCm + MsxKgfCm) * KGFCM_TO_TFM;
+  const Mny = (McyKgfCm + MsyKgfCm) * KGFCM_TO_TFM;
+  const Mn = Math.hypot(Mnx, Mny);
+
+  // Net tensile strain in extreme tension steel (positive = tension)
+  const epsT = (EPS_U * (dt - c)) / c;
+  const { phi, zone } = calcPhi(epsT, epsTy, hoopType);
+
+  const rawPhiPn = phi * Pn;
+  const capped = rawPhiPn > phiPnMax;
+  const phiPn = capped ? phiPnMax : rawPhiPn;
+  const phiMnx = phi * Mnx;
+  const phiMny = phi * Mny;
+  const phiMn = phi * Mn;
+
+  return {
+    alpha,
+    thetaDeg,
+    c,
+    a,
+    curvature: EPS_U / c,
+    epsT,
+    epsTy,
+    phi,
+    zone,
+    Pn,
+    Mnx,
+    Mny,
+    Mn,
+    phiPn,
+    phiMnx,
+    phiMny,
+    phiMn,
+    capped,
+  };
+}
+
+/**
+ * Build a smooth, code-accurate list of strain/depth states along a single compression angle alpha
+ */
+function computePMCurveAtAlpha(summary, alpha) {
+  const { poly, bars, beta1, simplifySD420, Es } = summary;
+  const ux = Math.cos(alpha);
+  const uy = Math.sin(alpha);
+
+  let sMax = -Infinity;
+  let sMin = Infinity;
+  for (const p of poly) {
+    const s = p.x * ux + p.y * uy;
+    if (s > sMax) sMax = s;
+    if (s < sMin) sMin = s;
+  }
+  const Dalpha = sMax - sMin;
+
+  let sBarMin = Infinity;
+  let extremeBar = null;
+  for (const bar of bars) {
+    const s = bar.x * ux + bar.y * uy;
+    if (s < sBarMin) {
+      sBarMin = s;
+      extremeBar = bar;
+    }
+  }
+  const dt = extremeBar ? sMax - sBarMin : Dalpha;
+  const epsTy = calcEpsTy(extremeBar ? extremeBar.fy : summary.fy, simplifySD420, Es);
+
+  // Use effective sweep depth in case bars are all near compression face
+  const dSweep = Math.max(dt, 0.35 * Dalpha);
+  const cFull = Dalpha / beta1;
+
+  // Generate monotone decreasing sequence of c from very large down to near 0
+  const cList = [];
+  // High-compression zone (between cFull * 2.5 and cFull)
+  cList.push(cFull * 3.0, cFull * 1.5, cFull * 1.15, cFull * 1.0001);
+
+  // c values from cFull down to dSweep * epsU / (epsU + epsTy) (balanced point)
+  const cbSweep = (dSweep * EPS_U) / (EPS_U + epsTy);
+  const ctSweep = (dSweep * EPS_U) / (EPS_U + epsTy + 0.003);
+
+  const addRange = (cStart, cEnd, steps) => {
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const val = cStart + (cEnd - cStart) * t;
+      if (val > 1e-4) cList.push(val);
+    }
+  };
+
+  if (cFull > cbSweep * 1.02) {
+    addRange(cFull, cbSweep * 1.01, 14);
+  }
+  // Exact compression-controlled boundary & transition zone
+  if (dt > 1e-4) {
+    const cbTrue = (dt * EPS_U) / (EPS_U + epsTy);
+    const ctTrue = (dt * EPS_U) / (EPS_U + epsTy + 0.003);
+    addRange(Math.max(cbSweep, cbTrue), ctTrue, 10);
+    addRange(ctTrue * 0.99, Math.max(0.06 * Dalpha, ctTrue * 0.35), 10);
+  } else {
+    addRange(cbSweep, 0.06 * Dalpha, 16);
+  }
+  // Deep tension zone (logarithmic down to 0.015 * Dalpha)
+  for (let i = 1; i <= 6; i++) {
+    const val = 0.06 * Dalpha * Math.pow(0.18, i / 6);
+    if (val > 1e-4) cList.push(val);
+  }
+
+  // Sort strictly descending & deduplicate
+  cList.sort((a, b) => b - a);
+  const uniqC = [];
+  for (const val of cList) {
+    if (uniqC.length === 0 || uniqC[uniqC.length - 1] - val > 1e-4) {
+      uniqC.push(val);
+    }
+  }
+
+  const states = [evaluateSectionState(summary, alpha, Infinity)];
+  for (const c of uniqC) {
+    states.push(evaluateSectionState(summary, alpha, c));
+  }
+  states.push(evaluateSectionState(summary, alpha, -Infinity));
+
+  return states;
+}
+
+/**
+ * Parameterize a uniform ring index across all azimuths using normalized neutral-axis ratio
+ * or extreme-steel strain so the 3D surface mesh forms clean rings!
+ */
+function buildSweepRatios(summary) {
+  // Using epsT_eff (extreme tension strain relative to d_sweep) guarantees matching transition rings!
+  const epsTy = calcEpsTy(summary.fy, summary.simplifySD420, summary.Es);
+  return [
+    { type: 'compPole' },
+    { type: 'cFullMult', mult: 1.8 },
+    { type: 'cFullMult', mult: 1.25 },
+    { type: 'cFullMult', mult: 1.0 },
+    { type: 'epsRatio', eps: -0.0020 },
+    { type: 'epsRatio', eps: -0.0014 },
+    { type: 'epsRatio', eps: -0.0008 },
+    { type: 'epsRatio', eps: -0.0002 },
+    { type: 'epsRatio', eps: 0.0004 },
+    { type: 'epsRatio', eps: 0.0009 },
+    { type: 'epsRatio', eps: 0.0014 },
+    { type: 'epsRatio', eps: epsTy * 0.92 },
+    { type: 'epsRatio', eps: epsTy },           // Compression-controlled limit
+    { type: 'epsRatio', eps: epsTy + 0.0006 },
+    { type: 'epsRatio', eps: epsTy + 0.0012 },
+    { type: 'epsRatio', eps: epsTy + 0.0018 },
+    { type: 'epsRatio', eps: epsTy + 0.0024 },
+    { type: 'epsRatio', eps: epsTy + 0.0030 },  // Tension-controlled limit
+    { type: 'epsRatio', eps: epsTy + 0.0045 },
+    { type: 'epsRatio', eps: epsTy + 0.0070 },
+    { type: 'epsRatio', eps: epsTy + 0.0110 },
+    { type: 'epsRatio', eps: epsTy + 0.0180 },
+    { type: 'epsRatio', eps: epsTy + 0.0320 },
+    { type: 'epsRatio', eps: epsTy + 0.0650 },
+    { type: 'epsRatio', eps: epsTy + 0.1600 },
+    { type: 'epsRatio', eps: epsTy + 0.4500 },
+    { type: 'tensPole' },
+  ];
+}
+
+/**
+ * Compute full 360-degree 3D P-M-M interaction surfaces (both nominal & design)
+ * @param {object} config Column configuration
+ * @param {number} nAzimuth Number of angular steps around 360 deg (default 72 = 5 deg step)
+ */
+function computeInteractionSurface(config, nAzimuth = 72) {
+  const summary = computeSectionSummary(config);
+  const { poly, bars, beta1, phiPnMax } = summary;
+  const sweepSpecs = buildSweepRatios(summary);
+  const nRings = sweepSpecs.length;
+
+  const nominalGrid = []; // [nAzimuth][nRings]
+  const designGrid = [];  // [nAzimuth][nRings]
+
+  for (let j = 0; j < nAzimuth; j++) {
+    const alpha = (2 * Math.PI * j) / nAzimuth;
+    const ux = Math.cos(alpha);
+    const uy = Math.sin(alpha);
+
+    let sMax = -Infinity;
+    let sMin = Infinity;
+    for (const p of poly) {
+      const s = p.x * ux + p.y * uy;
+      if (s > sMax) sMax = s;
+      if (s < sMin) sMin = s;
+    }
+    const Dalpha = sMax - sMin;
+
+    let sBarMin = Infinity;
+    for (const bar of bars) {
+      const s = bar.x * ux + bar.y * uy;
+      if (s < sBarMin) sBarMin = s;
+    }
+    const dt = bars.length > 0 ? sMax - sBarMin : Dalpha;
+    const dSweep = Math.max(dt, 0.35 * Dalpha);
+    const cFull = Dalpha / beta1;
+
+    const ringStates = [];
+    for (const spec of sweepSpecs) {
+      let cVal;
+      if (spec.type === 'compPole') {
+        cVal = Infinity;
+      } else if (spec.type === 'tensPole') {
+        cVal = -Infinity;
+      } else if (spec.type === 'cFullMult') {
+        cVal = cFull * spec.mult;
+      } else {
+        cVal = (dSweep * EPS_U) / (EPS_U + spec.eps);
+      }
+      ringStates.push(evaluateSectionState(summary, alpha, cVal));
+    }
+
+    // Enforce monotonic decreasing Pn from compPole to tensPole (in case cFullMult < epsRatio)
+    // Wait: cFullMult might be slightly below or above eps = -0.0020 depending on geometry,
+    // so compute exact c values for finite specs and sort descending by c!
+    const finiteStates = ringStates.slice(1, -1).sort((a, b) => b.c - a.c);
+    const orderedStates = [ringStates[0], ...finiteStates, ringStates[ringStates.length - 1]];
+
+    nominalGrid.push(orderedStates);
+
+    // Design grid: clone and clamp/insert cap crossing cleanly
+    const dStates = orderedStates.map((st) => ({ ...st }));
+    // Find where raw phi*Pn crosses phiPnMax so plateau edge is sharp
+    for (let k = 0; k < dStates.length - 1; k++) {
+      const s0 = orderedStates[k];
+      const s1 = orderedStates[k + 1];
+      const raw0 = s0.phi * s0.Pn;
+      const raw1 = s1.phi * s1.Pn;
+      if (raw0 > phiPnMax && raw1 < phiPnMax && Number.isFinite(s1.c)) {
+        // Bisection between cHigh and cLow to get exact cap exit point
+        let cHi = Number.isFinite(s0.c) ? s0.c : Math.max(Dalpha * 5, s1.c * 4);
+        let cLo = s1.c;
+        let best = null;
+        for (let iter = 0; iter < 14; iter++) {
+          const cMid = 0.5 * (cHi + cLo);
+          const stMid = evaluateSectionState(summary, alpha, cMid);
+          best = stMid;
+          if (stMid.phi * stMid.Pn > phiPnMax) {
+            cHi = cMid;
+          } else {
+            cLo = cMid;
+          }
+        }
+        if (best) {
+          dStates[k] = {
+            ...best,
+            phiPn: phiPnMax,
+            capped: true,
+          };
+        }
+        break;
+      }
+    }
+    designGrid.push(dStates);
+  }
+
+  // Triangulate closed surfaces (each point: [Mnx, Mny, Pn] or [phiMnx, phiMny, phiPn])
+  const nominalTriangles = triangulateGrid(nominalGrid, false);
+  const designTriangles = triangulateGrid(designGrid, true);
+
+  return {
+    summary,
+    nAzimuth,
+    nRings,
+    nominalGrid,
+    designGrid,
+    nominalTriangles,
+    designTriangles,
+  };
+}
+
+function triangulateGrid(grid, isDesign) {
+  const nAz = grid.length;
+  const nR = grid[0].length;
+  const tris = [];
+
+  const getPt = (st) =>
+    isDesign
+      ? { x: st.phiMnx, y: st.phiMny, z: st.phiPn, state: st }
+      : { x: st.Mnx, y: st.Mny, z: st.Pn, state: st };
+
+  for (let j = 0; j < nAz; j++) {
+    const jNext = (j + 1) % nAz;
+    for (let k = 0; k < nR - 1; k++) {
+      const p00 = getPt(grid[j][k]);
+      const p10 = getPt(grid[jNext][k]);
+      const p01 = getPt(grid[j][k + 1]);
+      const p11 = getPt(grid[jNext][k + 1]);
+
+      if (k === 0) {
+        // Top cap fan from pole p00
+        tris.push([p00, p01, p11]);
+      } else if (k === nR - 2) {
+        // Bottom cap fan to pole p01
+        tris.push([p00, p01, p10]);
+      } else {
+        tris.push([p00, p01, p11]);
+        tris.push([p00, p11, p10]);
+      }
+    }
+  }
+  return tris;
+}
+
+/**
+ * Moller-Trumbore ray-triangle intersection: ray = t * dir (t > 0) from origin (0,0,0)
+ */
+function intersectRayTriangle(dir, v0, v1, v2) {
+  const EPS = 1e-9;
+  const e1x = v1.x - v0.x;
+  const e1y = v1.y - v0.y;
+  const e1z = v1.z - v0.z;
+  const e2x = v2.x - v0.x;
+  const e2y = v2.y - v0.y;
+  const e2z = v2.z - v0.z;
+
+  const px = dir.y * e2z - dir.z * e2y;
+  const py = dir.z * e2x - dir.x * e2z;
+  const pz = dir.x * e2y - dir.y * e2x;
+
+  const det = e1x * px + e1y * py + e1z * pz;
+  if (Math.abs(det) < EPS) return null;
+  const invDet = 1 / det;
+
+  // Origin is (0, 0, 0), so T = -v0
+  const tx = -v0.x;
+  const ty = -v0.y;
+  const tz = -v0.z;
+
+  const u = (tx * px + ty * py + tz * pz) * invDet;
+  if (u < -1e-5 || u > 1 + 1e-5) return null;
+
+  const qx = ty * e1z - tz * e1y;
+  const qy = tz * e1x - tx * e1z;
+  const qz = tx * e1y - ty * e1x;
+
+  const v = (dir.x * qx + dir.y * qy + dir.z * qz) * invDet;
+  if (v < -1e-5 || u + v > 1 + 1e-5) return null;
+
+  const t = (e2x * qx + e2y * qy + e2z * qz) * invDet;
+  if (t <= 1e-7) return null;
+
+  const w = 1 - u - v;
+  return { t, w, u, v };
+}
+
+/**
+ * Intersect ray from origin through (Mux, Muy, Pu) with a closed triangulated surface
+ */
+function intersectRayWithSurface(triangles, Mux, Muy, Pu) {
+  const mag = Math.hypot(Mux, Muy, Pu);
+  if (mag < 1e-9) {
+    return null;
+  }
+  const dir = { x: Mux, y: Muy, z: Pu };
+  let best = null;
+  for (const [v0, v1, v2] of triangles) {
+    const hit = intersectRayTriangle(dir, v0, v1, v2);
+    if (hit && (best === null || hit.t > best.t)) {
+      // Wait: if origin is inside surface, there is 1 positive hit;
+      // if asymmetric plastic centroid shifts origin slightly, pick largest positive t
+      best = {
+        ...hit,
+        v0,
+        v1,
+        v2,
+      };
+    }
+  }
+  if (!best) return null;
+  const { t, w, u, v, v0, v1, v2 } = best;
+  const epsT = w * v0.state.epsT + u * v1.state.epsT + v * v2.state.epsT;
+  const phi = w * v0.state.phi + u * v1.state.phi + v * v2.state.phi;
+  const epsTy = w * v0.state.epsTy + u * v1.state.epsTy + v * v2.state.epsTy;
+  const capped = (w * (v0.state.capped ? 1 : 0) + u * (v1.state.capped ? 1 : 0) + v * (v2.state.capped ? 1 : 0)) > 0.5;
+
+  // Pick shortest circular interpolation for thetaDeg
+  const th0 = v0.state.thetaDeg;
+  const d1 = ((v1.state.thetaDeg - th0 + 540) % 360) - 180;
+  const d2 = ((v2.state.thetaDeg - th0 + 540) % 360) - 180;
+  const thetaDeg = ((th0 + u * d1 + v * d2) % 360 + 360) % 360;
+
+  return {
+    t,
+    x: t * Mux,
+    y: t * Muy,
+    z: t * Pu,
+    M: t * Math.hypot(Mux, Muy),
+    P: t * Pu,
+    epsT,
+    epsTy,
+    phi,
+    capped,
+    thetaDeg,
+  };
+}
+
+/**
+ * Extract 2D P-M interaction curve slice along the vertical half-plane
+ * defined by direction (dirX, dirY) in (Mx, My) space.
+ * Returns ordered array of { M, P, epsT, phi, capped, thetaDeg } from top pole to bottom pole.
+ */
+function sliceSurfaceAtMomentAzimuth(grid, isDesign, dirX, dirY) {
+  const norm = Math.hypot(dirX, dirY);
+  const ux = norm > 1e-9 ? dirX / norm : 1;
+  const uy = norm > 1e-9 ? dirY / norm : 0;
+  // Normal to vertical half-plane: n = (-uy, ux)
+  const nx = -uy;
+  const ny = ux;
+
+  const nAz = grid.length;
+  const nR = grid[0].length;
+  const getPt = (st) =>
+    isDesign
+      ? { x: st.phiMnx, y: st.phiMny, z: st.phiPn, state: st }
+      : { x: st.Mnx, y: st.Mny, z: st.Pn, state: st };
+
+  // For each horizontal ring k, find the crossing in positive half-plane (p . u >= 0)
+  const pts = [];
+  pts.push({
+    M: 0,
+    P: getPt(grid[0][0]).z,
+    epsT: grid[0][0].epsT,
+    phi: grid[0][0].phi,
+    capped: grid[0][0].capped,
+    thetaDeg: 0,
+  });
+
+  for (let k = 1; k < nR - 1; k++) {
+    let bestCross = null;
+    for (let j = 0; j < nAz; j++) {
+      const jNext = (j + 1) % nAz;
+      const p0 = getPt(grid[j][k]);
+      const p1 = getPt(grid[jNext][k]);
+      const s0 = p0.x * nx + p0.y * ny;
+      const s1 = p1.x * nx + p1.y * ny;
+
+      if ((s0 >= -1e-9 && s1 <= 1e-9) || (s0 <= 1e-9 && s1 >= -1e-9)) {
+        const denom = s0 - s1;
+        const t = Math.abs(denom) < 1e-12 ? 0.5 : s0 / denom;
+        if (t < -1e-5 || t > 1 + 1e-5) continue;
+        const tc = Math.max(0, Math.min(1, t));
+        const mx = p0.x + tc * (p1.x - p0.x);
+        const my = p0.y + tc * (p1.y - p0.y);
+        const radial = mx * ux + my * uy;
+        if (radial >= -1e-5) {
+          const pz = p0.z + tc * (p1.z - p0.z);
+          const th0 = p0.state.thetaDeg;
+          const dth = ((p1.state.thetaDeg - th0 + 540) % 360) - 180;
+          const cand = {
+            M: Math.max(0, radial),
+            P: pz,
+            epsT: p0.state.epsT + tc * (p1.state.epsT - p0.state.epsT),
+            phi: p0.state.phi + tc * (p1.state.phi - p0.state.phi),
+            capped: p0.state.capped && p1.state.capped,
+            thetaDeg: ((th0 + tc * dth) % 360 + 360) % 360,
+          };
+          if (!bestCross || cand.M > bestCross.M) {
+            bestCross = cand;
+          }
+        }
+      }
+    }
+    if (bestCross) {
+      pts.push(bestCross);
+    }
+  }
+
+  const bot = getPt(grid[0][nR - 1]);
+  pts.push({
+    M: Math.max(0, bot.x * ux + bot.y * uy),
+    P: bot.z,
+    epsT: bot.state.epsT,
+    phi: bot.state.phi,
+    capped: bot.state.capped,
+    thetaDeg: 0,
+  });
+
+  return pts;
+}
+
+/**
+ * Evaluate a design load case (Pu, Mux, Muy) against the computed 3D interaction surface
+ */
+function checkLoadCase(surface, load) {
+  const { summary, nominalTriangles, designTriangles } = surface;
+  const Pu = Number(load.Pu) || 0;
+  const Mux = Number(load.Mux) || 0;
+  const Muy = Number(load.Muy) || 0;
+  const Mu = Math.hypot(Mux, Muy);
+
+  // Special case: zero load
+  if (Math.abs(Pu) < 1e-6 && Mu < 1e-6) {
+    return {
+      Pu,
+      Mux,
+      Muy,
+      Mu,
+      dcRatio: 0,
+      isSafe: true,
+      zone: 'compression',
+      zoneLabel: 'Compression-Controlled Section (壓力控制斷面)',
+      statusLabel: 'Load < Design Strength (安全 OK)',
+      phi: summary.phiMin,
+      epsT: -EPS_U,
+      thetaClosest: 0,
+      capDesign: { M: 0, P: summary.phiPnMax },
+      capNominal: { M: 0, P: summary.Po },
+    };
+  }
+
+  // Special case: purely axial load (Mux = 0, Muy = 0)
+  if (Mu < 1e-7) {
+    if (Pu >= 0) {
+      const dc = summary.phiPnMax > 0 ? Pu / summary.phiPnMax : Infinity;
+      return {
+        Pu,
+        Mux,
+        Muy,
+        Mu,
+        dcRatio: dc,
+        isSafe: dc <= 1.0 + 1e-6,
+        zone: 'compression',
+        zoneLabel: 'Compression-Controlled Section (壓力控制斷面)',
+        statusLabel: dc <= 1.0 + 1e-6 ? 'Load < Design Strength (安全 OK)' : 'Load > Design Strength (不安全 NG)',
+        phi: summary.phiMin,
+        epsT: -EPS_U,
+        thetaClosest: 0,
+        capDesign: { M: 0, P: summary.phiPnMax, x: 0, y: 0, z: summary.phiPnMax },
+        capNominal: { M: 0, P: summary.Po, x: 0, y: 0, z: summary.Po },
+      };
+    } else {
+      const dc = summary.phiPnt > 0 ? Math.abs(Pu) / summary.phiPnt : Infinity;
+      return {
+        Pu,
+        Mux,
+        Muy,
+        Mu,
+        dcRatio: dc,
+        isSafe: dc <= 1.0 + 1e-6,
+        zone: 'tension',
+        zoneLabel: 'Tension-Controlled Section (拉力控制斷面)',
+        statusLabel: dc <= 1.0 + 1e-6 ? 'Load < Design Strength (安全 OK)' : 'Load > Design Strength (不安全 NG)',
+        phi: 0.90,
+        epsT: 1.0,
+        thetaClosest: 0,
+        capDesign: { M: 0, P: -summary.phiPnt, x: 0, y: 0, z: -summary.phiPnt },
+        capNominal: { M: 0, P: -summary.Pnt, x: 0, y: 0, z: -summary.Pnt },
+      };
+    }
+  }
+
+  const hitD = intersectRayWithSurface(designTriangles, Mux, Muy, Pu);
+  const hitN = intersectRayWithSurface(nominalTriangles, Mux, Muy, Pu);
+
+  const dcRatio = hitD ? 1 / hitD.t : Infinity;
+  const isSafe = dcRatio <= 1.0 + 1e-5;
+  const epsT = hitD ? hitD.epsT : 0;
+  const epsTy = hitD ? hitD.epsTy : calcEpsTy(summary.fy, summary.simplifySD420, summary.Es);
+
+  let zone = 'compression';
+  let zoneLabel = 'Compression-Controlled Section (壓力控制斷面)';
+  if (hitD && hitD.capped) {
+    zone = 'compression';
+    zoneLabel = 'Compression-Controlled Section (壓力控制斷面 - 軸壓上限區)';
+  } else if (epsT >= epsTy + 0.003) {
+    zone = 'tension';
+    zoneLabel = 'Tension-Controlled Section (拉力控制斷面)';
+  } else if (epsT > epsTy) {
+    zone = 'transition';
+    zoneLabel = 'Transition Zone (壓力-拉力過渡斷面)';
+  }
+
+  return {
+    Pu,
+    Mux,
+    Muy,
+    Mu,
+    dcRatio,
+    isSafe,
+    zone,
+    zoneLabel,
+    statusLabel: isSafe ? 'Load < Design Strength (安全 OK)' : 'Load > Design Strength (不安全 NG)',
+    phi: hitD ? hitD.phi : summary.phiMin,
+    epsT,
+    thetaClosest: hitD ? Math.round(hitD.thetaDeg) : 0,
+    thetaExact: hitD ? hitD.thetaDeg : 0,
+    capDesign: hitD,
+    capNominal: hitN,
+  };
+}
+
+/**
+ * Textbook Section 7.13 & 7.14 Approximate Methods Comparison:
+ * - Bresler Reciprocal Load Method (Eq. 7.30)
+ * - Load Contour Method (Eq. 7.27)
+ */
+function computeTextbookApproxChecks(surface, load) {
+  const { summary, designGrid } = surface;
+  const Pu = Number(load.Pu) || 0;
+  const Mux = Math.abs(Number(load.Mux) || 0);
+  const Muy = Math.abs(Number(load.Muy) || 0);
+
+  // Uniaxial curves: +X bending (Mux -> alpha=pi/2), +Y bending (Muy -> alpha=0)
+  // Find index j for alpha = 0 (index 0) and alpha = pi/2 (nAzimuth / 4)
+  const nAz = designGrid.length;
+  const curveY = computePMCurveAtAlpha(summary, 0);          // pure My bending (about Y-axis)
+  const curveX = computePMCurveAtAlpha(summary, Math.PI / 2); // pure Mx bending (about X-axis)
+
+  // Interpolate uniaxial nominal Mn at given Pn = Pu / phi_est
+  const interpAtP = (curve, targetP, usePhi) => {
+    for (let i = 0; i < curve.length - 1; i++) {
+      const a = curve[i];
+      const b = curve[i + 1];
+      const pa = usePhi ? a.phiPn : a.Pn;
+      const pb = usePhi ? b.phiPn : b.Pn;
+      if ((pa >= targetP && pb <= targetP) || (pa <= targetP && pb >= targetP)) {
+        const denom = pa - pb;
+        const t = Math.abs(denom) < 1e-9 ? 0 : (pa - targetP) / denom;
+        const ma = usePhi ? a.phiMn : a.Mn;
+        const mb = usePhi ? b.phiMn : b.Mn;
+        return Math.abs(ma + t * (mb - ma));
+      }
+    }
+    return 0;
+  };
+
+  // Interpolate uniaxial P at fixed eccentricity e = M / P
+  const interpPAtEccentricity = (curve, eCm) => {
+    if (eCm <= 1e-6) return summary.Po;
+    // Scan from top to bottom for M/P crossing eCm (in cm -> e_m = M(tf-m)/P(tf) = eCm/100)
+    const targetSlope = eCm / 100; // M / P in meters
+    for (let i = 0; i < curve.length - 1; i++) {
+      const a = curve[i];
+      const b = curve[i + 1];
+      const fa = a.Mn - targetSlope * a.Pn;
+      const fb = b.Mn - targetSlope * b.Pn;
+      if (fa <= 0 && fb >= 0) {
+        const denom = fb - fa;
+        const t = Math.abs(denom) < 1e-9 ? 0 : -fa / denom;
+        return a.Pn + t * (b.Pn - a.Pn);
+      }
+    }
+    return 0;
+  };
+
+  // 1) Load Contour Method (Eq. 7.27) at phi = phiMin (or nominal Pn = Pu/phiMin)
+  const phiEst = summary.phiMin;
+  const phiMnxo = interpAtP(curveX, Pu, true);
+  const phiMnyo = interpAtP(curveY, Pu, true);
+
+  // Estimate alpha per Bresler (typically 1.15 ~ 1.55; textbook p.7-33 uses ~1.27 for C7.8)
+  const omega = (summary.rhoG * summary.fy) / summary.fc;
+  const pRatio = summary.Po > 0 ? (Pu / phiEst) / summary.Po : 0;
+  // Smooth empirical approximation to ACI Design Manual Fig B.4 beta curve
+  const betaApprox = Math.max(0.55, Math.min(0.75, 0.54 + 0.14 * Math.min(pRatio, 1) + 0.06 * Math.min(omega, 0.8)));
+  const alphaContour = Math.log(0.5) / Math.log(betaApprox);
+
+  let contourRatio = Infinity;
+  if (phiMnxo > 1e-6 && phiMnyo > 1e-6) {
+    contourRatio =
+      Math.pow(Mux / phiMnxo, alphaContour) +
+      Math.pow(Muy / phiMnyo, alphaContour);
+  } else if (Mux < 1e-6 && Muy < 1e-6 && Pu <= summary.phiPnMax) {
+    contourRatio = Pu / summary.phiPnMax;
+  }
+
+  // 2) Bresler Reciprocal Load Method (Eq. 7.30), valid for Pn >= 0.10 Po
+  let bresler = { valid: false, reason: '僅適用於 Pn ≥ 0.10 Po (受壓區)' };
+  if (Pu > 1e-6) {
+    const PnReq = Pu / phiEst;
+    if (PnReq >= 0.10 * summary.Po) {
+      const ex = (Muy * 100) / Pu; // cm
+      const ey = (Mux * 100) / Pu; // cm
+      const Pnyo = interpPAtEccentricity(curveY, ex);
+      const Pnxo = interpPAtEccentricity(curveX, ey);
+      if (Pnyo > 1e-6 && Pnxo > 1e-6 && summary.Po > 1e-6) {
+        const invPn = 1 / Pnxo + 1 / Pnyo - 1 / summary.Po;
+        const PnBresler = invPn > 0 ? 1 / invPn : 0;
+        const phiPnBresler = Math.min(phiEst * PnBresler, summary.phiPnMax);
+        bresler = {
+          valid: true,
+          ex,
+          ey,
+          Pnxo,
+          Pnyo,
+          PnBresler,
+          phiPnBresler,
+          dcRatio: phiPnBresler > 1e-6 ? Pu / phiPnBresler : Infinity,
+          isSafe: Pu <= phiPnBresler + 1e-5,
+        };
+      }
+    }
+  }
+
+  return {
+    phiMnxo,
+    phiMnyo,
+    alphaContour,
+    contourRatio,
+    contourSafe: contourRatio <= 1.0 + 1e-5,
+    bresler,
+  };
+}
+
+/**
+ * Generate 9-column NewRCBiax2021 output table rows (for Page 7-36 export)
+ */
+function exportBiaxTableRows(surface) {
+  const rows = [];
+  const { nominalGrid, designGrid } = surface;
+  for (let j = 0; j < nominalGrid.length; j++) {
+    const nCol = nominalGrid[j];
+    const dCol = designGrid[j];
+    for (let k = 0; k < nCol.length; k++) {
+      const n = nCol[k];
+      const d = dCol[k];
+      rows.push({
+        theta: Number(n.thetaDeg.toFixed(1)),
+        Mn: Number(n.Mn.toFixed(2)),
+        Pn: Number(n.Pn.toFixed(2)),
+        fiMn_max: Number(d.phiMn.toFixed(2)),
+        fiPn_max: Number(d.phiPn.toFixed(2)),
+        Curvature: Number.isFinite(n.c) ? n.curvature : 0,
+        epsilonT: Number(n.epsT.toFixed(6)),
+        Mxx: Number(n.Mnx.toFixed(2)),
+        Myy: Number(n.Mny.toFixed(2)),
+      });
+    }
+  }
+  return rows;
+}
+
+__exp.buildSectionPolygon = buildSectionPolygon;
+__exp.polygonAreaCentroid = polygonAreaCentroid;
+__exp.clipPolygonHalfPlane = clipPolygonHalfPlane;
+__exp.normalizeBars = normalizeBars;
+__exp.computeSectionSummary = computeSectionSummary;
+__exp.evaluateSectionState = evaluateSectionState;
+__exp.computePMCurveAtAlpha = computePMCurveAtAlpha;
+__exp.buildSweepRatios = buildSweepRatios;
+__exp.computeInteractionSurface = computeInteractionSurface;
+__exp.intersectRayWithSurface = intersectRayWithSurface;
+__exp.sliceSurfaceAtMomentAzimuth = sliceSurfaceAtMomentAzimuth;
+__exp.checkLoadCase = checkLoadCase;
+__exp.computeTextbookApproxChecks = computeTextbookApproxChecks;
+__exp.exportBiaxTableRows = exportBiaxTableRows;
+return __exp;
+})();
+
+// === Module ./autoDesign.js ===
+__mods['./autoDesign.js'] = (function() {
+const __exp = {};
+/**
+ * RC Column Auto-Design & Code Detailing Check Module
+ * Based on 《鋼筋混凝土學 (土木406-112)》 Section 7.1, 7.3, 7.10, 7.15 & ACI 318-19
+ */
+
+const { REBAR_LIST, getBarInfo } = __mods['./rebarDB.js'];
+const { computeInteractionSurface, checkLoadCase } = __mods['./rcEngine.js'];
+
+/**
+ * Generate rectangular perimeter rebar array (nx along X width b, ny along Y height h)
+ * Matching C7.8 style: nx bars on top & bottom edges, ny-2 intermediate bars on left & right edges
+ */
+function generateRectPerimeterBars({ b, h, coverCenter, nx, ny, barId, fy, mode = 'perimeter' }) {
+  const xMin = coverCenter;
+  const xMax = b - coverCenter;
+  const yMin = coverCenter;
+  const yMax = h - coverCenter;
+  const bars = [];
+
+  if (xMax <= xMin || yMax <= yMin) return bars;
+
+  if (mode === 'two-face-y') {
+    // Bars concentrated on top and bottom edges (resisting Mx)
+    for (let iy = 0; iy < 2; iy++) {
+      const y = iy === 0 ? yMin : yMax;
+      for (let ix = 0; ix < nx; ix++) {
+        const x = nx === 1 ? b / 2 : xMin + (ix * (xMax - xMin)) / (nx - 1);
+        bars.push({ x: Number(x.toFixed(2)), y: Number(y.toFixed(2)), barId, fy });
+      }
+    }
+    return bars;
+  }
+
+  if (mode === 'two-face-x') {
+    // Bars concentrated on left and right edges (resisting My)
+    for (let ix = 0; ix < 2; ix++) {
+      const x = ix === 0 ? xMin : xMax;
+      for (let iy = 0; iy < ny; iy++) {
+        const y = ny === 1 ? h / 2 : yMin + (iy * (yMax - yMin)) / (ny - 1);
+        bars.push({ x: Number(x.toFixed(2)), y: Number(y.toFixed(2)), barId, fy });
+      }
+    }
+    return bars;
+  }
+
+  // Full perimeter
+  for (let iy = 0; iy < ny; iy++) {
+    const y = ny === 1 ? h / 2 : yMin + (iy * (yMax - yMin)) / (ny - 1);
+    if (iy === 0 || iy === ny - 1) {
+      for (let ix = 0; ix < nx; ix++) {
+        const x = nx === 1 ? b / 2 : xMin + (ix * (xMax - xMin)) / (nx - 1);
+        bars.push({ x: Number(x.toFixed(2)), y: Number(y.toFixed(2)), barId, fy });
+      }
+    } else {
+      bars.push({ x: Number(xMin.toFixed(2)), y: Number(y.toFixed(2)), barId, fy });
+      if (nx > 1) {
+        bars.push({ x: Number(xMax.toFixed(2)), y: Number(y.toFixed(2)), barId, fy });
+      }
+    }
+  }
+  return bars;
+}
+
+/**
+ * Generate circular ring rebar array (nBars evenly placed around radius R - coverCenter)
+ */
+function generateCircularRingBars({ diameter, coverCenter, nBars, barId, fy, startAngleDeg = 0 }) {
+  const R = diameter / 2;
+  const rBar = R - coverCenter;
+  if (rBar <= 0 || nBars <= 0) return [];
+  const bars = [];
+  for (let i = 0; i < nBars; i++) {
+    const a = ((startAngleDeg + (360 * i) / nBars) * Math.PI) / 180;
+    bars.push({
+      x: Number((R + rBar * Math.cos(a)).toFixed(2)),
+      y: Number((R + rBar * Math.sin(a)).toFixed(2)),
+      barId,
+      fy,
+    });
+  }
+  return bars;
+}
+
+/**
+ * Check minimum center-to-center bar spacing and constructability (ACI 318-19 25.2.3)
+ */
+function checkBarClearSpacing(bars) {
+  let minClear = Infinity;
+  let minPair = null;
+  for (let i = 0; i < bars.length; i++) {
+    for (let j = i + 1; j < bars.length; j++) {
+      const a = bars[i];
+      const b = bars[j];
+      const infoA = getBarInfo(a.barId);
+      const infoB = getBarInfo(b.barId);
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      const clear = dist - 0.5 * (infoA.db + infoB.db);
+      if (clear < minClear) {
+        minClear = clear;
+        minPair = [a, b, Math.max(4.0, 1.5 * Math.max(infoA.db, infoB.db))];
+      }
+    }
+  }
+  const reqClear = minPair ? minPair[2] : 4.0;
+  return {
+    minClear: Number.isFinite(minClear) ? minClear : null,
+    reqClear,
+    ok: !Number.isFinite(minClear) || minClear >= reqClear - 0.05,
+  };
+}
+
+/**
+ * Check ACI 318-19 / 土木406-112 Section 7.1 & 7.3 Detailing Rules
+ */
+function checkCodeDetailing(config, summary) {
+  const { shape, b, h, diameter, fc, hoopType, tieBarId = 3, clearCover = 4.0, fyt = 4200 } = config;
+  const bars = summary.bars;
+  const rhoG = summary.rhoG;
+
+  // 1. Longitudinal steel ratio check (Section 7.1, p.7-1)
+  const rhoMinOk = rhoG >= 0.01 - 1e-6;
+  const rhoMaxOk = rhoG <= 0.08 + 1e-6;
+  const rhoSeismicOk = rhoG <= 0.06 + 1e-6;
+
+  // 2. Minimum bar count check
+  const minBarsReq = shape === 'circular' ? (hoopType === 'spiral' ? 6 : 6) : 4;
+  const countOk = bars.length >= minBarsReq;
+
+  // 3. Clear spacing check
+  const spacingCheck = checkBarClearSpacing(bars);
+
+  // 4. Transverse reinforcement rules (Section 7.3, p.7-5 ~ 7-9)
+  const maxMainDb = bars.reduce((m, r) => Math.max(m, r.db), 0);
+  const maxMainBarId = bars.reduce((m, r) => Math.max(m, r.barId), 0);
+  const tieInfo = getBarInfo(tieBarId);
+
+  if (hoopType === 'tied') {
+    const reqTieId = maxMainBarId >= 11 ? 4 : 3; // D10 for <=D32, D13 for >=D36
+    const tieSizeOk = tieBarId >= reqTieId;
+    const minDim = shape === 'circular' ? diameter : Math.min(b, h);
+    const sMax = maxMainDb > 0
+      ? Math.min(16 * maxMainDb, 48 * tieInfo.db, minDim)
+      : minDim;
+    return {
+      rhoMinOk,
+      rhoMaxOk,
+      rhoSeismicOk,
+      countOk,
+      minBarsReq,
+      spacingCheck,
+      transverse: {
+        type: 'tied',
+        reqTieLabel: getBarInfo(reqTieId).label,
+        tieSizeOk,
+        sMax: Number(sMax.toFixed(1)),
+        note: '無橫向支承主筋至有支承者之淨距不得大於 15 cm (§7.3(3))',
+      },
+    };
+  } else {
+    // Spiral column (Eq. 7.14, p.7-9)
+    const D = shape === 'circular' ? diameter : Math.min(b, h);
+    const Dc = Math.max(1, D - 2 * clearCover);
+    const Ag = summary.Ag;
+    const Ach = (Math.PI * Dc * Dc) / 4;
+    const rhoSMin = Ach > 0 ? 0.45 * (Ag / Ach - 1) * (fc / Math.min(fyt, 7000)) : 0;
+    const sMaxRec = rhoSMin > 0 ? (4 * tieInfo.area) / (rhoSMin * Dc) : 7.5;
+    return {
+      rhoMinOk,
+      rhoMaxOk,
+      rhoSeismicOk,
+      countOk,
+      minBarsReq,
+      spacingCheck,
+      transverse: {
+        type: 'spiral',
+        Dc: Number(Dc.toFixed(1)),
+        Ach: Number(Ach.toFixed(1)),
+        rhoSMin: Number(rhoSMin.toFixed(5)),
+        sMaxRec: Number(Math.min(7.5 + tieInfo.db, sMaxRec).toFixed(1)),
+        note: '螺箍筋淨間距須介於 2.5 cm 至 7.5 cm，鋼筋直徑不得小於 10 mm (§7.3)',
+      },
+    };
+  }
+}
+
+/**
+ * Automatic Rebar Design Search
+ * Tests practical symmetric layouts against the exact 3D P-M-M interaction surface!
+ */
+function autoDesignRebar(baseConfig, loadCases, options = {}) {
+  const {
+    coverCenter = 6.5,
+    minBarId = 5,   // D16
+    maxBarId = 10,  // D32
+    maxRho = 0.06,  // default seismic cap 6% (or 8%)
+    pattern = baseConfig.shape === 'circular' ? 'circular' : 'perimeter',
+    maxResults = 8,
+  } = options;
+
+  const validLoads = (loadCases || []).filter((l) => l && (Math.abs(l.Pu) > 1e-6 || Math.abs(l.Mux) > 1e-6 || Math.abs(l.Muy) > 1e-6));
+  const targetLoads = validLoads.length > 0 ? validLoads : [{ Pu: 130, Mux: 10.4, Muy: 19.5 }];
+
+  const barCandidates = REBAR_LIST.filter((r) => r.id >= minBarId && r.id <= maxBarId);
+  const candidates = [];
+
+  if (baseConfig.shape === 'circular') {
+    for (const barInfo of barCandidates) {
+      for (let nBars = 6; nBars <= 24; nBars += 2) {
+        const bars = generateCircularRingBars({
+          diameter: baseConfig.diameter,
+          coverCenter,
+          nBars,
+          barId: barInfo.id,
+          fy: baseConfig.fy,
+        });
+        const sp = checkBarClearSpacing(bars);
+        if (!sp.ok) continue;
+        const Ast = nBars * barInfo.area;
+        const Ag = (Math.PI * baseConfig.diameter * baseConfig.diameter) / 4;
+        const rhoG = Ast / Ag;
+        if (rhoG < 0.01 - 1e-5 || rhoG > maxRho + 1e-5) continue;
+        candidates.push({
+          desc: `${nBars}-${barInfo.cns} (圓形環狀均佈)`,
+          nx: nBars,
+          ny: 1,
+          barId: barInfo.id,
+          barLabel: barInfo.label,
+          nBars,
+          Ast,
+          rhoG,
+          bars,
+        });
+      }
+    }
+  } else {
+    const { b, h } = baseConfig;
+    const Ag = b * h;
+    for (const barInfo of barCandidates) {
+      if (pattern === 'two-face-y' || pattern === 'two-face-x') {
+        const maxPerFace = 8;
+        for (let nf = 2; nf <= maxPerFace; nf++) {
+          const bars = generateRectPerimeterBars({
+            b,
+            h,
+            coverCenter,
+            nx: pattern === 'two-face-y' ? nf : 2,
+            ny: pattern === 'two-face-x' ? nf : 2,
+            barId: barInfo.id,
+            fy: baseConfig.fy,
+            mode: pattern,
+          });
+          const sp = checkBarClearSpacing(bars);
+          if (!sp.ok) continue;
+          const nBars = bars.length;
+          const Ast = nBars * barInfo.area;
+          const rhoG = Ast / Ag;
+          if (rhoG < 0.01 - 1e-5 || rhoG > maxRho + 1e-5) continue;
+          candidates.push({
+            desc: `${nBars}-${barInfo.cns} (${pattern === 'two-face-y' ? '上下雙面配筋' : '左右雙面配筋'})`,
+            nx: pattern === 'two-face-y' ? nf : 2,
+            ny: pattern === 'two-face-x' ? nf : 2,
+            barId: barInfo.id,
+            barLabel: barInfo.label,
+            nBars,
+            Ast,
+            rhoG,
+            bars,
+          });
+        }
+      } else {
+        for (let nx = 2; nx <= 7; nx++) {
+          for (let ny = 2; ny <= 7; ny++) {
+            const bars = generateRectPerimeterBars({
+              b,
+              h,
+              coverCenter,
+              nx,
+              ny,
+              barId: barInfo.id,
+              fy: baseConfig.fy,
+              mode: 'perimeter',
+            });
+            const sp = checkBarClearSpacing(bars);
+            if (!sp.ok) continue;
+            const nBars = bars.length;
+            const Ast = nBars * barInfo.area;
+            const rhoG = Ast / Ag;
+            if (rhoG < 0.01 - 1e-5 || rhoG > maxRho + 1e-5) continue;
+            candidates.push({
+              desc: `${nBars}-${barInfo.cns} (${nx}×${ny} 周邊配筋)`,
+              nx,
+              ny,
+              barId: barInfo.id,
+              barLabel: barInfo.label,
+              nBars,
+              Ast,
+              rhoG,
+              bars,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // Sort candidates by Ast ascending so we evaluate lightest steel ratios first
+  candidates.sort((a, b) => a.Ast - b.Ast || a.nBars - b.nBars);
+
+  const feasible = [];
+  // Coarse pass (36 azimuths) then exact pass (72 azimuths) for feasible candidates
+  for (const cand of candidates) {
+    // Quick axial upper bound filter before building full 3D surface
+    const testCfg = { ...baseConfig, bars: cand.bars };
+    const coarseSurf = computeInteractionSurface(testCfg, 36);
+    let maxDcCoarse = 0;
+    for (const lc of targetLoads) {
+      const res = checkLoadCase(coarseSurf, lc);
+      if (res.dcRatio > maxDcCoarse) maxDcCoarse = res.dcRatio;
+    }
+    if (maxDcCoarse <= 1.03) {
+      const exactSurf = computeInteractionSurface(testCfg, 72);
+      let maxDc = 0;
+      let worstRes = null;
+      for (const lc of targetLoads) {
+        const res = checkLoadCase(exactSurf, lc);
+        if (res.dcRatio > maxDc) {
+          maxDc = res.dcRatio;
+          worstRes = res;
+        }
+      }
+      if (maxDc <= 1.0) {
+        feasible.push({
+          ...cand,
+          maxDc,
+          worstRes,
+        });
+        if (feasible.length >= maxResults * 2) break;
+      }
+    }
+  }
+
+  feasible.sort((a, b) => a.Ast - b.Ast || a.maxDc - b.maxDc);
+  return {
+    totalEvaluated: candidates.length,
+    results: feasible.slice(0, maxResults),
+  };
+}
+
+__exp.generateRectPerimeterBars = generateRectPerimeterBars;
+__exp.generateCircularRingBars = generateCircularRingBars;
+__exp.checkBarClearSpacing = checkBarClearSpacing;
+__exp.checkCodeDetailing = checkCodeDetailing;
+__exp.autoDesignRebar = autoDesignRebar;
+return __exp;
+})();
+
+// === Module ./biaxIO.js ===
+__mods['./biaxIO.js'] = (function() {
+const __exp = {};
+/**
+ * NewRCBiax2021 Input/Output Parser & Exporter + Textbook Presets
+ * Matches formats documented in 《鋼筋混凝土學 (土木406-112)》 p.7-34 & p.7-36
+ */
+
+const { getBarInfo } = __mods['./rebarDB.js'];
+const { exportBiaxTableRows } = __mods['./rcEngine.js'];
+
+/**
+ * Parse NewRCBiax2021 text input file (Page 7-34)
+ * Format:
+ *   Name    fc'
+ *           h    b
+ *                x1   x2   ...
+ *   y1  fy1  #1   #2   ...
+ *   y2  fy2  #1   #2   ...
+ */
+function parseNewRCBiaxInput(text) {
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !l.startsWith('#') && !l.startsWith('//'));
+
+  if (lines.length < 4) {
+    throw new Error('輸入檔格式錯誤：至少需要斷面名稱/fc\'、h/b、X座標與Y列資料');
+  }
+
+  const headerTokens = lines[0].split(/\s+/);
+  const name = headerTokens[0] || 'Column';
+  const fc = Number(headerTokens[1]);
+  if (!Number.isFinite(fc) || fc <= 0) {
+    throw new Error('無法解析混凝土強度 fc\'');
+  }
+
+  const dimTokens = lines[1].split(/\s+/).map(Number);
+  const h = dimTokens[0];
+  const b = dimTokens[1];
+  if (!Number.isFinite(h) || !Number.isFinite(b) || h <= 0 || b <= 0) {
+    throw new Error('無法解析斷面尺寸 h 與 b');
+  }
+
+  const xCoords = lines[2].split(/\s+/).map(Number);
+  if (xCoords.some((v) => !Number.isFinite(v))) {
+    throw new Error('無法解析鋼筋 X 座標');
+  }
+
+  const bars = [];
+  let defaultFy = 4200;
+  for (let r = 3; r < lines.length; r++) {
+    const cols = lines[r].split(/\s+/).map(Number);
+    if (cols.length < 2 + xCoords.length) {
+      throw new Error(`第 ${r + 1} 列欄位數不足，應有 y, fy 與 ${xCoords.length} 個鋼筋號數`);
+    }
+    const y = cols[0];
+    const fy = cols[1];
+    if (r === 3 && Number.isFinite(fy) && fy > 0) defaultFy = fy;
+    for (let c = 0; c < xCoords.length; c++) {
+      const barNum = cols[2 + c];
+      if (barNum > 0) {
+        const info = getBarInfo(barNum);
+        bars.push({
+          x: xCoords[c],
+          y,
+          barId: info.id,
+          fy,
+        });
+      }
+    }
+  }
+
+  return {
+    name,
+    shape: 'rectangular',
+    b,
+    h,
+    fc,
+    fy: defaultFy,
+    hoopType: 'tied',
+    deductConcrete: true,
+    simplifySD420: false,
+    bars,
+  };
+}
+
+/**
+ * Format current rectangular section as NewRCBiax2021 .txt input
+ */
+function formatNewRCBiaxInput(config) {
+  const name = (config.name || 'RC_COL').replace(/\s+/g, '_');
+  const bars = config.bars || [];
+  const xs = Array.from(new Set(bars.map((r) => Number(r.x.toFixed(2))))).sort((a, b) => a - b);
+  const ys = Array.from(new Set(bars.map((r) => Number(r.y.toFixed(2))))).sort((a, b) => a - b);
+
+  const lines = [];
+  lines.push(`${name}\t${config.fc}`);
+  lines.push(`\t${config.h}\t${config.b}`);
+  lines.push(`\t\t${xs.join('\t')}`);
+  for (const y of ys) {
+    const rowBars = bars.filter((r) => Math.abs(r.y - y) < 0.05);
+    const fy = rowBars[0]?.fy ?? config.fy;
+    const cells = xs.map((x) => {
+      const found = rowBars.find((r) => Math.abs(r.x - x) < 0.05);
+      return found ? found.barId : 0;
+    });
+    lines.push(`${y}\t${fy}\t${cells.join('\t')}`);
+  }
+  return lines.join('\n');
+}
+
+/**
+ * Format 9-column Biax_[name].txt output table (Page 7-36)
+ */
+function formatBiaxOutputTxt(surface) {
+  const rows = exportBiaxTableRows(surface);
+  const header = ['theta', 'Mn', 'Pn', 'fiMn_max', 'fiPn_max', 'Curvature', 'epsilonT', 'Mxx', 'Myy'].join('\t');
+  const body = rows
+    .map((r) =>
+      [
+        r.theta,
+        r.Mn,
+        r.Pn,
+        r.fiMn_max,
+        r.fiPn_max,
+        r.Curvature.toExponential(2),
+        r.epsilonT,
+        r.Mxx,
+        r.Myy,
+      ].join('\t')
+    )
+    .join('\n');
+  return `${header}\n${body}\n`;
+}
+
+function formatBiaxOutputCsv(surface) {
+  const rows = exportBiaxTableRows(surface);
+  const header = 'theta(deg),Mn(tf-m),Pn(tf),phiMn(tf-m),phiPn(tf),Curvature(1/cm),epsilonT,Mxx(tf-m),Myy(tf-m)';
+  const body = rows
+    .map((r) =>
+      [r.theta, r.Mn, r.Pn, r.fiMn_max, r.fiPn_max, r.Curvature.toExponential(3), r.epsilonT, r.Mxx, r.Myy].join(',')
+    )
+    .join('\n');
+  return `${header}\n${body}\n`;
+}
+
+/**
+ * Built-in Presets directly from attached image.png & 《鋼筋混凝土學 (土木406-112)》
+ */
+const PRESETS = [
+  {
+    id: 'c78',
+    label: '例題 7.8 / C7.8 (附圖範例 50×35, 10-D25)',
+    config: {
+      name: 'C7.8',
+      shape: 'rectangular',
+      b: 50,
+      h: 35,
+      diameter: 50,
+      fc: 280,
+      fy: 4200,
+      hoopType: 'tied',
+      tieBarId: 3,
+      clearCover: 4.0,
+      deductConcrete: true,
+      simplifySD420: false,
+      bars: [
+        { x: 6.5, y: 6.5, barId: 8 },
+        { x: 18.83, y: 6.5, barId: 8 },
+        { x: 31.17, y: 6.5, barId: 8 },
+        { x: 43.5, y: 6.5, barId: 8 },
+        { x: 6.5, y: 17.5, barId: 8 },
+        { x: 43.5, y: 17.5, barId: 8 },
+        { x: 6.5, y: 28.5, barId: 8 },
+        { x: 18.83, y: 28.5, barId: 8 },
+        { x: 31.17, y: 28.5, barId: 8 },
+        { x: 43.5, y: 28.5, barId: 8 },
+      ],
+    },
+    loads: [{ id: 'L1', name: '設計載重 1', Pu: 130, Mux: 10.4, Muy: 19.5 }],
+  },
+  {
+    id: 'ex710',
+    label: '習題 7.10 (雙軸 40×50, 16-D25)',
+    config: {
+      name: 'Ex7.10',
+      shape: 'rectangular',
+      b: 40,
+      h: 50,
+      diameter: 50,
+      fc: 280,
+      fy: 4200,
+      hoopType: 'tied',
+      tieBarId: 3,
+      clearCover: 4.0,
+      deductConcrete: true,
+      simplifySD420: false,
+      bars: [
+        // 5x5 perimeter = 16 bars
+        { x: 6.5, y: 6.5, barId: 8 }, { x: 13.25, y: 6.5, barId: 8 }, { x: 20, y: 6.5, barId: 8 }, { x: 26.75, y: 6.5, barId: 8 }, { x: 33.5, y: 6.5, barId: 8 },
+        { x: 6.5, y: 15.75, barId: 8 }, { x: 33.5, y: 15.75, barId: 8 },
+        { x: 6.5, y: 25, barId: 8 }, { x: 33.5, y: 25, barId: 8 },
+        { x: 6.5, y: 34.25, barId: 8 }, { x: 33.5, y: 34.25, barId: 8 },
+        { x: 6.5, y: 43.5, barId: 8 }, { x: 13.25, y: 43.5, barId: 8 }, { x: 20, y: 43.5, barId: 8 }, { x: 26.75, y: 43.5, barId: 8 }, { x: 33.5, y: 43.5, barId: 8 },
+      ],
+    },
+    loads: [{ id: 'L1', name: '設計載重', Pu: 200, Mux: 24.0, Muy: 17.2 }],
+  },
+  {
+    id: 'ex79_asym',
+    label: '習題 7.9 (非對稱配筋 50×35, 5-D25)',
+    config: {
+      name: 'Ex7.9_Asym',
+      shape: 'rectangular',
+      b: 50,
+      h: 35,
+      diameter: 50,
+      fc: 280,
+      fy: 4200,
+      hoopType: 'tied',
+      tieBarId: 3,
+      clearCover: 4.0,
+      deductConcrete: true,
+      simplifySD420: false,
+      bars: [
+        { x: 6.5, y: 6.5, barId: 8 },
+        { x: 6.5, y: 17.5, barId: 8 },
+        { x: 6.5, y: 28.5, barId: 8 },
+        { x: 43.5, y: 6.5, barId: 8 },
+        { x: 43.5, y: 28.5, barId: 8 },
+      ],
+    },
+    loads: [{ id: 'L1', name: '1.2D+1.6L', Pu: 64, Mux: 0, Muy: 30.4 }],
+  },
+  {
+    id: 'ex71',
+    label: '例題 7.1 (單軸矩柱 30×50, 6-D25)',
+    config: {
+      name: 'Ex7.1',
+      shape: 'rectangular',
+      b: 30,
+      h: 50,
+      diameter: 50,
+      fc: 280,
+      fy: 4200,
+      hoopType: 'tied',
+      tieBarId: 3,
+      clearCover: 4.0,
+      deductConcrete: true,
+      simplifySD420: false,
+      bars: [
+        { x: 6.5, y: 6.5, barId: 8 }, { x: 15, y: 6.5, barId: 8 }, { x: 23.5, y: 6.5, barId: 8 },
+        { x: 6.5, y: 43.5, barId: 8 }, { x: 15, y: 43.5, barId: 8 }, { x: 23.5, y: 43.5, barId: 8 },
+      ],
+    },
+    loads: [{ id: 'L1', name: '例題 7.4 載重', Pu: 36, Mux: 33.6, Muy: 0 }],
+  },
+  {
+    id: 'spiral50',
+    label: '螺箍圓柱範例 (D=50 cm, 8-D25)',
+    config: {
+      name: 'Spiral50',
+      shape: 'circular',
+      b: 50,
+      h: 50,
+      diameter: 50,
+      fc: 280,
+      fy: 4200,
+      hoopType: 'spiral',
+      tieBarId: 3,
+      clearCover: 4.0,
+      deductConcrete: true,
+      simplifySD420: false,
+      bars: Array.from({ length: 8 }, (_, i) => {
+        const a = (2 * Math.PI * i) / 8;
+        return {
+          x: Number((25 + 18.5 * Math.cos(a)).toFixed(2)),
+          y: Number((25 + 18.5 * Math.sin(a)).toFixed(2)),
+          barId: 8,
+        };
+      }),
+    },
+    loads: [{ id: 'L1', name: '雙軸載重', Pu: 180, Mux: 16.0, Muy: 12.0 }],
+  },
+];
+
+__exp.parseNewRCBiaxInput = parseNewRCBiaxInput;
+__exp.formatNewRCBiaxInput = formatNewRCBiaxInput;
+__exp.formatBiaxOutputTxt = formatBiaxOutputTxt;
+__exp.formatBiaxOutputCsv = formatBiaxOutputCsv;
+__exp.PRESETS = PRESETS;
+return __exp;
+})();
+
+// === Module ./sectionEditor.js ===
+__mods['./sectionEditor.js'] = (function() {
+const __exp = {};
+/**
+ * Interactive 2D RC Cross-Section Canvas Editor
+ * Supports:
+ * - Click-to-add bars, drag-to-move bars in real time, click-to-select, delete
+ * - Grid snapping, cover guide lines, Plastic Centroid (P.C.) & Geometric Center (G.C.)
+ * - Neutral axis & compression block preview overlay
+ */
+
+const { getBarInfo } = __mods['./rebarDB.js'];
+
+class SectionEditor {
+  constructor(canvas, callbacks) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.cb = callbacks || {};
+
+    this.state = {
+      config: null,
+      summary: null,
+      selectedBarIdx: -1,
+      hoverBarIdx: -1,
+      toolMode: 'select', // 'select' | 'add'
+      activeBarId: 8,
+      snapStep: 0.5,      // cm (0 = free)
+      showNA: false,
+      naAlpha: Math.PI / 2,
+      naC: null,
+      naBeta1: 0.85,
+    };
+
+    this.draggingIdx = -1;
+    this.dragOffset = { dx: 0, dy: 0 };
+    this.transform = { ox: 0, oy: 0, scale: 1, maxDim: 50 };
+
+    this._bindEvents();
+  }
+
+  setData(patch) {
+    Object.assign(this.state, patch);
+    this.render();
+  }
+
+  _getCanvasPoint(evt) {
+    const rect = this.canvas.getBoundingClientRect();
+    return {
+      px: evt.clientX - rect.left,
+      py: evt.clientY - rect.top,
+    };
+  }
+
+  _worldToScreen(wx, wy) {
+    const { ox, oy, scale } = this.transform;
+    return {
+      sx: ox + wx * scale,
+      sy: oy - wy * scale,
+    };
+  }
+
+  _screenToWorld(sx, sy) {
+    const { ox, oy, scale } = this.transform;
+    return {
+      wx: (sx - ox) / scale,
+      wy: (oy - sy) / scale,
+    };
+  }
+
+  _snapVal(val) {
+    const step = this.state.snapStep;
+    if (!step || step <= 0) return Number(val.toFixed(2));
+    return Number((Math.round(val / step) * step).toFixed(2));
+  }
+
+  _clampToSection(wx, wy, barDb) {
+    const cfg = this.state.config;
+    if (!cfg) return { x: wx, y: wy };
+    const margin = Math.max(1.5, barDb * 0.6);
+    if (cfg.shape === 'circular') {
+      const R = cfg.diameter / 2;
+      const dx = wx - R;
+      const dy = wy - R;
+      const dist = Math.hypot(dx, dy);
+      const maxR = Math.max(0.5, R - margin);
+      if (dist > maxR && dist > 1e-6) {
+        return {
+          x: Number((R + (dx / dist) * maxR).toFixed(2)),
+          y: Number((R + (dy / dist) * maxR).toFixed(2)),
+        };
+      }
+      return { x: this._snapVal(wx), y: this._snapVal(wy) };
+    }
+    const x = Math.max(margin, Math.min(cfg.b - margin, this._snapVal(wx)));
+    const y = Math.max(margin, Math.min(cfg.h - margin, this._snapVal(wy)));
+    return { x: Number(x.toFixed(2)), y: Number(y.toFixed(2)) };
+  }
+
+  _findBarAt(px, py) {
+    const cfg = this.state.config;
+    if (!cfg || !cfg.bars) return -1;
+    const hitRadiusPx = 11;
+    let bestIdx = -1;
+    let bestDist = Infinity;
+    for (let i = 0; i < cfg.bars.length; i++) {
+      const bar = cfg.bars[i];
+      const { sx, sy } = this._worldToScreen(bar.x, bar.y);
+      const d = Math.hypot(px - sx, py - sy);
+      if (d <= hitRadiusPx && d < bestDist) {
+        bestDist = d;
+        bestIdx = i;
+      }
+    }
+    return bestIdx;
+  }
+
+  _bindEvents() {
+    this.canvas.addEventListener('pointerdown', (e) => {
+      if (!this.state.config) return;
+      const { px, py } = this._getCanvasPoint(e);
+      const hitIdx = this._findBarAt(px, py);
+
+      if (e.button === 2) {
+        // Right click removes bar if hit
+        if (hitIdx >= 0 && this.cb.onDeleteBar) {
+          this.cb.onDeleteBar(hitIdx);
+        }
+        return;
+      }
+
+      if (hitIdx >= 0) {
+        this.draggingIdx = hitIdx;
+        const bar = this.state.config.bars[hitIdx];
+        const w = this._screenToWorld(px, py);
+        this.dragOffset = { dx: bar.x - w.wx, dy: bar.y - w.wy };
+        this.canvas.setPointerCapture(e.pointerId);
+        if (this.cb.onSelectBar) this.cb.onSelectBar(hitIdx);
+      } else if (this.state.toolMode === 'add' || e.shiftKey) {
+        const w = this._screenToWorld(px, py);
+        const info = getBarInfo(this.state.activeBarId);
+        const clamped = this._clampToSection(w.wx, w.wy, info.db);
+        if (this.cb.onAddBar) {
+          this.cb.onAddBar(clamped.x, clamped.y, this.state.activeBarId);
+        }
+      } else {
+        if (this.cb.onSelectBar) this.cb.onSelectBar(-1);
+      }
+    });
+
+    this.canvas.addEventListener('pointermove', (e) => {
+      if (!this.state.config) return;
+      const { px, py } = this._getCanvasPoint(e);
+
+      if (this.draggingIdx >= 0) {
+        const w = this._screenToWorld(px, py);
+        const bar = this.state.config.bars[this.draggingIdx];
+        if (!bar) return;
+        const info = getBarInfo(bar.barId);
+        const clamped = this._clampToSection(w.wx + this.dragOffset.dx, w.wy + this.dragOffset.dy, info.db);
+        if (this.cb.onMoveBar) {
+          this.cb.onMoveBar(this.draggingIdx, clamped.x, clamped.y, true);
+        }
+        return;
+      }
+
+      const hoverIdx = this._findBarAt(px, py);
+      if (hoverIdx !== this.state.hoverBarIdx) {
+        this.state.hoverBarIdx = hoverIdx;
+        this.canvas.style.cursor =
+          hoverIdx >= 0 ? 'grab' : this.state.toolMode === 'add' ? 'crosshair' : 'default';
+        this.render();
+      }
+      if (this.cb.onHoverCoords) {
+        const w = this._screenToWorld(px, py);
+        this.cb.onHoverCoords(w.wx, w.wy, hoverIdx);
+      }
+    });
+
+    const endDrag = (e) => {
+      if (this.draggingIdx >= 0) {
+        const idx = this.draggingIdx;
+        this.draggingIdx = -1;
+        this.canvas.style.cursor = 'grab';
+        try { this.canvas.releasePointerCapture(e.pointerId); } catch {}
+        const bar = this.state.config?.bars[idx];
+        if (bar && this.cb.onMoveBar) {
+          this.cb.onMoveBar(idx, bar.x, bar.y, false);
+        }
+      }
+    };
+
+    this.canvas.addEventListener('pointerup', endDrag);
+    this.canvas.addEventListener('pointercancel', endDrag);
+    this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  render() {
+    const canvas = this.canvas;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width < 10 || rect.height < 10) return;
+
+    if (canvas.width !== Math.round(rect.width * dpr) || canvas.height !== Math.round(rect.height * dpr)) {
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+    }
+
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    const W = rect.width;
+    const H = rect.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const cfg = this.state.config;
+    const summary = this.state.summary;
+    if (!cfg) {
+      ctx.restore();
+      return;
+    }
+
+    const secW = cfg.shape === 'circular' ? cfg.diameter : cfg.b;
+    const secH = cfg.shape === 'circular' ? cfg.diameter : cfg.h;
+
+    const padLeft = 42;
+    const padRight = 18;
+    const padTop = 24;
+    const padBottom = 36;
+    const availW = Math.max(40, W - padLeft - padRight);
+    const availH = Math.max(40, H - padTop - padBottom);
+    const scale = Math.min(availW / secW, availH / secH);
+
+    const drawW = secW * scale;
+    const drawH = secH * scale;
+    const ox = padLeft + (availW - drawW) * 0.5;
+    const oy = padTop + (availH - drawH) * 0.5 + drawH;
+
+    this.transform = { ox, oy, scale, maxDim: Math.max(secW, secH) };
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const axisColor = isDark ? '#94a3b8' : '#334155';
+    const gridColor = isDark ? 'rgba(148,163,184,0.14)' : 'rgba(100,116,139,0.14)';
+    const concFill = isDark ? '#1e293b' : '#f1f5f9';
+    const concStroke = isDark ? '#e2e8f0' : '#0f172a';
+    const hoopStroke = isDark ? '#64748b' : '#94a3b8';
+
+    // Draw concrete cross-section
+    ctx.save();
+    ctx.fillStyle = concFill;
+    ctx.strokeStyle = concStroke;
+    ctx.lineWidth = 2;
+
+    if (cfg.shape === 'circular') {
+      const c = this._worldToScreen(secW / 2, secH / 2);
+      const rPx = (secW / 2) * scale;
+      ctx.beginPath();
+      ctx.arc(c.sx, c.sy, rPx, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Clip for internal grid & NA
+      ctx.clip();
+    } else {
+      const pBL = this._worldToScreen(0, 0);
+      ctx.beginPath();
+      ctx.rect(pBL.sx, pBL.sy - drawH, drawW, drawH);
+      ctx.fill();
+      ctx.stroke();
+      ctx.clip();
+    }
+
+    // Internal grid lines (every 5 cm or 10 cm)
+    const gridStep = Math.max(secW, secH) > 60 ? 10 : 5;
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    for (let x = gridStep; x < secW; x += gridStep) {
+      const p0 = this._worldToScreen(x, 0);
+      const p1 = this._worldToScreen(x, secH);
+      ctx.beginPath();
+      ctx.moveTo(p0.sx, p0.sy);
+      ctx.lineTo(p1.sx, p1.sy);
+      ctx.stroke();
+    }
+    for (let y = gridStep; y < secH; y += gridStep) {
+      const p0 = this._worldToScreen(0, y);
+      const p1 = this._worldToScreen(secW, y);
+      ctx.beginPath();
+      ctx.moveTo(p0.sx, p0.sy);
+      ctx.lineTo(p1.sx, p1.sy);
+      ctx.stroke();
+    }
+
+    // Optional Neutral Axis & Compression Block Overlay
+    if (this.state.showNA && summary && Number.isFinite(this.state.naC) && this.state.naC > 0) {
+      const alpha = this.state.naAlpha;
+      const ux = Math.cos(alpha);
+      const uy = Math.sin(alpha);
+      let sMax = -Infinity;
+      for (const p of summary.poly) {
+        const s = p.x * ux + p.y * uy;
+        if (s > sMax) sMax = s;
+      }
+      const a = this.state.naBeta1 * this.state.naC;
+      const sNA = sMax - this.state.naC;
+      const sBlock = sMax - a;
+
+      // Shade Whitney stress block (s >= sBlock)
+      const diag = Math.hypot(secW, secH) * 1.5;
+      const tx = -uy;
+      const ty = ux;
+      const pBlock1 = this._worldToScreen(sBlock * ux - diag * tx, sBlock * uy - diag * ty);
+      const pBlock2 = this._worldToScreen(sBlock * ux + diag * tx, sBlock * uy + diag * ty);
+      const pTop2 = this._worldToScreen((sMax + diag) * ux + diag * tx, (sMax + diag) * uy + diag * ty);
+      const pTop1 = this._worldToScreen((sMax + diag) * ux - diag * tx, (sMax + diag) * uy - diag * ty);
+
+      ctx.fillStyle = isDark ? 'rgba(56, 189, 248, 0.18)' : 'rgba(37, 99, 235, 0.14)';
+      ctx.beginPath();
+      ctx.moveTo(pBlock1.sx, pBlock1.sy);
+      ctx.lineTo(pBlock2.sx, pBlock2.sy);
+      ctx.lineTo(pTop2.sx, pTop2.sy);
+      ctx.lineTo(pTop1.sx, pTop1.sy);
+      ctx.closePath();
+      ctx.fill();
+
+      // Neutral Axis dashed line (s = sNA)
+      const pNA1 = this._worldToScreen(sNA * ux - diag * tx, sNA * uy - diag * ty);
+      const pNA2 = this._worldToScreen(sNA * ux + diag * tx, sNA * uy + diag * ty);
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      ctx.moveTo(pNA1.sx, pNA1.sy);
+      ctx.lineTo(pNA2.sx, pNA2.sy);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Draw transverse hoop / spiral line at clearCover
+    const cover = cfg.clearCover ?? 4.0;
+    ctx.strokeStyle = hoopStroke;
+    ctx.lineWidth = 1.5;
+    if (cfg.shape === 'circular') {
+      const c = this._worldToScreen(secW / 2, secH / 2);
+      const rHoop = Math.max(2, (secW / 2 - cover) * scale);
+      ctx.beginPath();
+      ctx.arc(c.sx, c.sy, rHoop, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (secW > 2 * cover && secH > 2 * cover) {
+      const pH = this._worldToScreen(cover, cover);
+      ctx.beginPath();
+      ctx.roundRect(pH.sx, pH.sy - (secH - 2 * cover) * scale, (secW - 2 * cover) * scale, (secH - 2 * cover) * scale, 4);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+
+    // Redraw crisp concrete border on top of clip
+    ctx.strokeStyle = concStroke;
+    ctx.lineWidth = 2;
+    if (cfg.shape === 'circular') {
+      const c = this._worldToScreen(secW / 2, secH / 2);
+      ctx.beginPath();
+      ctx.arc(c.sx, c.sy, (secW / 2) * scale, 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      const pBL = this._worldToScreen(0, 0);
+      ctx.strokeRect(pBL.sx, pBL.sy - drawH, drawW, drawH);
+    }
+
+    // Geometric Center & Plastic Centroid markers
+    if (summary) {
+      const gc = this._worldToScreen(summary.xg, summary.yg);
+      const pc = this._worldToScreen(summary.xpc, summary.ypc);
+      const isAsym = Math.hypot(summary.xpc - summary.xg, summary.ypc - summary.yg) > 0.05;
+
+      if (isAsym) {
+        ctx.strokeStyle = hoopStroke;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(gc.sx, gc.sy, 4, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Plastic centroid crosshair
+      ctx.strokeStyle = '#059669';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(pc.sx - 6, pc.sy);
+      ctx.lineTo(pc.sx + 6, pc.sy);
+      ctx.moveTo(pc.sx, pc.sy - 6);
+      ctx.lineTo(pc.sx, pc.sy + 6);
+      ctx.stroke();
+      ctx.fillStyle = '#059669';
+      ctx.font = '600 10px ui-monospace, SFMono-Regular, monospace';
+      ctx.fillText('PC', pc.sx + 7, pc.sy - 5);
+    }
+
+    // Draw Rebars
+    const bars = cfg.bars || [];
+    for (let i = 0; i < bars.length; i++) {
+      const bar = bars[i];
+      const info = getBarInfo(bar.barId);
+      const { sx, sy } = this._worldToScreen(bar.x, bar.y);
+      const rPx = Math.max(4.2, (info.db * 0.5) * scale);
+      const isSelected = i === this.state.selectedBarIdx;
+      const isHover = i === this.state.hoverBarIdx;
+
+      if (isSelected || isHover) {
+        ctx.beginPath();
+        ctx.arc(sx, sy, rPx + 4, 0, Math.PI * 2);
+        ctx.fillStyle = isSelected ? 'rgba(37, 99, 235, 0.22)' : 'rgba(59, 130, 246, 0.14)';
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#2563eb';
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.arc(sx, sy, rPx, 0, Math.PI * 2);
+      ctx.fillStyle = isSelected ? '#2563eb' : isDark ? '#e2e8f0' : '#ffffff';
+      ctx.fill();
+      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = isSelected ? '#1d4ed8' : isDark ? '#38bdf8' : '#0f172a';
+      ctx.stroke();
+    }
+
+    // Draw Axis Rulers & Ticks (matching image.png!)
+    ctx.fillStyle = axisColor;
+    ctx.strokeStyle = axisColor;
+    ctx.lineWidth = 1;
+    ctx.font = '11px ui-monospace, SFMono-Regular, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+
+    const tickStepX = secW <= 40 ? 10 : secW <= 80 ? 10 : 20;
+    for (let x = 0; x <= secW + 0.01; x += tickStepX) {
+      const p = this._worldToScreen(x, 0);
+      ctx.beginPath();
+      ctx.moveTo(p.sx, p.sy);
+      ctx.lineTo(p.sx, p.sy + 4);
+      ctx.stroke();
+      ctx.fillText(String(Math.round(x)), p.sx, p.sy + 6);
+    }
+    ctx.font = '600 12px sans-serif';
+    ctx.fillText(cfg.shape === 'circular' ? 'D (cm)' : 'b (cm)', ox + drawW * 0.5, oy + 20);
+
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.font = '11px ui-monospace, SFMono-Regular, monospace';
+    const tickStepY = secH <= 40 ? 5 : secH <= 80 ? 10 : 20;
+    for (let y = 0; y <= secH + 0.01; y += tickStepY) {
+      const p = this._worldToScreen(0, y);
+      ctx.beginPath();
+      ctx.moveTo(p.sx, p.sy);
+      ctx.lineTo(p.sx - 4, p.sy);
+      ctx.stroke();
+      ctx.fillText(String(Math.round(y)), p.sx - 6, p.sy);
+    }
+
+    ctx.save();
+    ctx.translate(ox - 30, oy - drawH * 0.5);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.font = '600 12px sans-serif';
+    ctx.fillText(cfg.shape === 'circular' ? 'D (cm)' : 'h (cm)', 0, 0);
+    ctx.restore();
+
+    // Title above section
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.font = '700 13px sans-serif';
+    ctx.fillStyle = isDark ? '#f1f5f9' : '#0f172a';
+    const title = cfg.name || (cfg.shape === 'circular' ? `圓柱 D=${cfg.diameter}cm` : `${cfg.b}×${cfg.h} cm`);
+    ctx.fillText(`${title} (${bars.length} 根主筋)`, ox + drawW * 0.5, oy - drawH - 6);
+
+    ctx.restore();
+  }
+}
+
+__exp.SectionEditor = SectionEditor;
+return __exp;
+})();
+
+// === Module ./plot3d.js ===
+__mods['./plot3d.js'] = (function() {
+const __exp = {};
+/**
+ * Interactive 3D P-M-M Interaction Surface Canvas Renderer
+ * Pure Canvas 2D with 3D perspective/orthographic projection & painter's depth sorting.
+ * Zero external dependencies — works offline & inside CSP sandboxes at 60fps.
+ */
+
+function viridisLike(t) {
+  // Smooth purple -> indigo -> teal/cyan -> lime -> gold/yellow (matches image.png!)
+  const stops = [
+    [0.00, [94, 58, 168]],
+    [0.25, [68, 114, 196]],
+    [0.50, [36, 178, 172]],
+    [0.75, [132, 208, 92]],
+    [1.00, [246, 206, 62]],
+  ];
+  const u = Math.max(0, Math.min(1, t));
+  for (let i = 0; i < stops.length - 1; i++) {
+    const [t0, c0] = stops[i];
+    const [t1, c1] = stops[i + 1];
+    if (u <= t1) {
+      const f = (u - t0) / (t1 - t0);
+      const r = Math.round(c0[0] + f * (c1[0] - c0[0]));
+      const g = Math.round(c0[1] + f * (c1[1] - c0[1]));
+      const b = Math.round(c0[2] + f * (c1[2] - c0[2]));
+      return `rgb(${r},${g},${b})`;
+    }
+  }
+  return 'rgb(246,206,62)';
+}
+
+function niceStep(range, targetTicks = 5) {
+  if (range <= 0) return 10;
+  const rough = range / targetTicks;
+  const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+  const norm = rough / pow;
+  if (norm < 1.5) return 1 * pow;
+  if (norm < 3.5) return 2 * pow;
+  if (norm < 7.5) return 5 * pow;
+  return 10 * pow;
+}
+
+class Plot3D {
+  constructor(canvas, callbacks) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.cb = callbacks || {};
+
+    this.cam = {
+      az: (-38 * Math.PI) / 180,
+      el: (20 * Math.PI) / 180,
+      zoom: 1.0,
+    };
+
+    this.state = {
+      surface: null,
+      loadResults: [],
+      viewMode: 'quadrant', // 'quadrant' (1/4 cutaway like image.png) | 'loadQuad' | 'full'
+      showNominal: true,
+      showDesign: true,
+    };
+
+    this.dragging = false;
+    this.lastMouse = { x: 0, y: 0 };
+    this.projectedVertices = [];
+    this.hoverPt = null;
+
+    this._bindEvents();
+  }
+
+  setData(patch) {
+    Object.assign(this.state, patch);
+    this.render();
+  }
+
+  setCameraPreset(preset) {
+    if (preset === 'iso') {
+      this.cam.az = (-38 * Math.PI) / 180;
+      this.cam.el = (20 * Math.PI) / 180;
+      this.cam.zoom = 1.0;
+    } else if (preset === 'frontMx') {
+      // Look along +My toward P-Mx plane
+      this.cam.az = (90 * Math.PI) / 180;
+      this.cam.el = (2 * Math.PI) / 180;
+      this.cam.zoom = 1.05;
+    } else if (preset === 'sideMy') {
+      // Look along +Mx toward P-My plane
+      this.cam.az = 0;
+      this.cam.el = (2 * Math.PI) / 180;
+      this.cam.zoom = 1.05;
+    } else if (preset === 'topContour') {
+      this.cam.az = (45 * Math.PI) / 180;
+      this.cam.el = (86 * Math.PI) / 180;
+      this.cam.zoom = 1.05;
+    }
+    this.render();
+  }
+
+  _bindEvents() {
+    this.canvas.addEventListener('pointerdown', (e) => {
+      this.dragging = true;
+      this.lastMouse = { x: e.clientX, y: e.clientY };
+      this.canvas.setPointerCapture(e.pointerId);
+      this.canvas.style.cursor = 'grabbing';
+    });
+
+    this.canvas.addEventListener('pointermove', (e) => {
+      if (this.dragging) {
+        const dx = e.clientX - this.lastMouse.x;
+        const dy = e.clientY - this.lastMouse.y;
+        this.lastMouse = { x: e.clientX, y: e.clientY };
+        this.cam.az -= dx * 0.0085;
+        this.cam.el = Math.max(-Math.PI * 0.48, Math.min(Math.PI * 0.48, this.cam.el + dy * 0.0075));
+        this.render();
+        return;
+      }
+
+      // Hover detection near surface vertices
+      const rect = this.canvas.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      let best = null;
+      let bestD = 12;
+      for (const v of this.projectedVertices) {
+        const d = Math.hypot(v.sx - px, v.sy - py);
+        if (d < bestD) {
+          bestD = d;
+          best = v;
+        }
+      }
+      if (best !== this.hoverPt) {
+        this.hoverPt = best;
+        this.render();
+      }
+    });
+
+    const endDrag = (e) => {
+      if (this.dragging) {
+        this.dragging = false;
+        this.canvas.style.cursor = 'grab';
+        try { this.canvas.releasePointerCapture(e.pointerId); } catch {}
+      }
+    };
+    this.canvas.addEventListener('pointerup', endDrag);
+    this.canvas.addEventListener('pointercancel', endDrag);
+
+    this.canvas.addEventListener(
+      'wheel',
+      (e) => {
+        e.preventDefault();
+        const factor = e.deltaY > 0 ? 0.92 : 1.09;
+        this.cam.zoom = Math.max(0.55, Math.min(2.6, this.cam.zoom * factor));
+        this.render();
+      },
+      { passive: false }
+    );
+    this.canvas.style.cursor = 'grab';
+  }
+
+  render() {
+    const canvas = this.canvas;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width < 20 || rect.height < 20) return;
+
+    if (canvas.width !== Math.round(rect.width * dpr) || canvas.height !== Math.round(rect.height * dpr)) {
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+    }
+
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    const W = rect.width;
+    const H = rect.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const textColor = isDark ? '#cbd5e1' : '#334155';
+    const titleColor = isDark ? '#f1f5f9' : '#0f172a';
+    const gridLineColor = isDark ? 'rgba(148,163,184,0.18)' : 'rgba(100,116,139,0.22)';
+    const boxEdgeColor = isDark ? 'rgba(148,163,184,0.45)' : 'rgba(51,65,85,0.45)';
+
+    const surface = this.state.surface;
+    if (!surface) {
+      ctx.restore();
+      return;
+    }
+
+    const { nominalGrid, designGrid, summary } = surface;
+    const loads = this.state.loadResults || [];
+
+    // Determine active quadrant sign if viewMode is 'quadrant' or 'loadQuad'
+    let quadFilter = null;
+    if (this.state.viewMode === 'quadrant') {
+      quadFilter = { sx: 1, sy: 1 };
+    } else if (this.state.viewMode === 'loadQuad') {
+      const primary = loads[0];
+      const sx = primary && primary.Mux < -1e-6 ? -1 : 1;
+      const sy = primary && primary.Muy < -1e-6 ? -1 : 1;
+      quadFilter = { sx, sy };
+    }
+
+    // Compute bounds
+    let maxAbsM = 10;
+    let maxP = Math.max(100, summary.Po * 1.05);
+    let minP = Math.min(-50, -summary.Pnt * 1.15);
+
+    for (const col of nominalGrid) {
+      for (const st of col) {
+        maxAbsM = Math.max(maxAbsM, Math.abs(st.Mnx), Math.abs(st.Mny));
+        maxP = Math.max(maxP, st.Pn);
+        minP = Math.min(minP, st.Pn);
+      }
+    }
+    for (const lr of loads) {
+      maxAbsM = Math.max(maxAbsM, Math.abs(lr.Mux) * 1.1, Math.abs(lr.Muy) * 1.1);
+      maxP = Math.max(maxP, lr.Pu * 1.1);
+      minP = Math.min(minP, lr.Pu * 1.1);
+    }
+
+    const mStep = niceStep(maxAbsM, 3);
+    const mBound = Math.ceil((maxAbsM * 1.06) / mStep) * mStep;
+    const pStep = niceStep(maxP - minP, 5);
+    const pMin = Math.floor(minP / pStep) * pStep;
+    const pMax = Math.ceil((maxP * 1.04) / pStep) * pStep;
+
+    const mxMin = quadFilter ? (quadFilter.sx > 0 ? 0 : -mBound) : -mBound;
+    const mxMax = quadFilter ? (quadFilter.sx > 0 ? mBound : 0) : mBound;
+    const myMin = quadFilter ? (quadFilter.sy > 0 ? 0 : -mBound) : -mBound;
+    const myMax = quadFilter ? (quadFilter.sy > 0 ? mBound : 0) : mBound;
+
+    const mxMid = 0.5 * (mxMin + mxMax);
+    const myMid = 0.5 * (myMin + myMax);
+    const pMid = 0.5 * (pMin + pMax);
+    const mSpan = Math.max(1e-3, mxMax - mxMin);
+    const pSpan = Math.max(1e-3, pMax - pMin);
+
+    // Camera basis vectors
+    const { az, el, zoom } = this.cam;
+    const cosAz = Math.cos(az);
+    const sinAz = Math.sin(az);
+    const cosEl = Math.cos(el);
+    const sinEl = Math.sin(el);
+
+    const right = { x: -sinAz, y: cosAz, z: 0 };
+    const up = { x: -sinEl * cosAz, y: -sinEl * sinAz, z: cosEl };
+    const fwd = { x: cosEl * cosAz, y: cosEl * sinAz, z: sinEl };
+
+    const cxScreen = W * 0.51;
+    const cyScreen = H * 0.49;
+    const scalePx = Math.min(W, H) * 0.37 * zoom;
+
+    const project = (mx, my, p) => {
+      const nx = ((mx - mxMid) / mSpan) * 1.35;
+      const ny = ((my - myMid) / mSpan) * 1.35;
+      const nz = ((p - pMid) / pSpan) * 1.55;
+
+      const xCam = nx * right.x + ny * right.y + nz * right.z;
+      const yCam = nx * up.x + ny * up.y + nz * up.z;
+      const zCam = nx * fwd.x + ny * fwd.y + nz * fwd.z;
+
+      const persp = 1 / (1 - zCam * 0.14);
+      return {
+        sx: cxScreen + xCam * scalePx * persp,
+        sy: cyScreen - yCam * scalePx * persp,
+        depth: zCam, // higher zCam is closer to camera!
+      };
+    };
+
+    // Draw 3D Bounding Box Back Walls & Floor Grid
+    const mxWall = fwd.x >= 0 ? mxMin : mxMax;
+    const myWall = fwd.y >= 0 ? myMin : myMax;
+    const pFloor = fwd.z >= 0 ? pMin : pMax;
+
+    ctx.lineWidth = 1;
+    // Floor grid lines (at pFloor)
+    ctx.strokeStyle = gridLineColor;
+    ctx.setLineDash([3, 3]);
+    for (let x = mxMin; x <= mxMax + 1e-6; x += mStep) {
+      const a = project(x, myMin, pFloor);
+      const b = project(x, myMax, pFloor);
+      ctx.beginPath();
+      ctx.moveTo(a.sx, a.sy);
+      ctx.lineTo(b.sx, b.sy);
+      ctx.stroke();
+    }
+    for (let y = myMin; y <= myMax + 1e-6; y += mStep) {
+      const a = project(mxMin, y, pFloor);
+      const b = project(mxMax, y, pFloor);
+      ctx.beginPath();
+      ctx.moveTo(a.sx, a.sy);
+      ctx.lineTo(b.sx, b.sy);
+      ctx.stroke();
+    }
+
+    // Vertical wall grids (P ticks)
+    for (let p = pMin; p <= pMax + 1e-6; p += pStep) {
+      const a = project(mxWall, myMin, p);
+      const b = project(mxWall, myMax, p);
+      const c = project(mxMin, myWall, p);
+      const d = project(mxMax, myWall, p);
+      ctx.beginPath();
+      ctx.moveTo(a.sx, a.sy);
+      ctx.lineTo(b.sx, b.sy);
+      ctx.moveTo(c.sx, c.sy);
+      ctx.lineTo(d.sx, d.sy);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // Bounding Box Frame Edges
+    ctx.strokeStyle = boxEdgeColor;
+    ctx.lineWidth = 1.2;
+    const boxEdges = [
+      [[mxMin, myMin, pFloor], [mxMax, myMin, pFloor]],
+      [[mxMin, myMax, pFloor], [mxMax, myMax, pFloor]],
+      [[mxMin, myMin, pFloor], [mxMin, myMax, pFloor]],
+      [[mxMax, myMin, pFloor], [mxMax, myMax, pFloor]],
+      [[mxWall, myWall, pMin], [mxWall, myWall, pMax]],
+      [[mxWall, myMin, pMin], [mxWall, myMin, pMax]],
+      [[mxMin, myWall, pMin], [mxMin, myWall, pMax]],
+    ];
+    for (const [p0, p1] of boxEdges) {
+      const a = project(p0[0], p0[1], p0[2]);
+      const b = project(p1[0], p1[1], p1[2]);
+      ctx.beginPath();
+      ctx.moveTo(a.sx, a.sy);
+      ctx.lineTo(b.sx, b.sy);
+      ctx.stroke();
+    }
+
+    // Origin P-axis vertical reference line (when full 360)
+    if (!quadFilter) {
+      const p0 = project(0, 0, pMin);
+      const p1 = project(0, 0, pMax);
+      ctx.strokeStyle = isDark ? 'rgba(226,232,240,0.28)' : 'rgba(15,23,42,0.22)';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(p0.sx, p0.sy);
+      ctx.lineTo(p1.sx, p1.sy);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Build sorted 3D primitives (design shaded quads + nominal wireframe segments)
+    const primitives = [];
+    this.projectedVertices = [];
+
+    const inActiveQuadrant = (x, y) => {
+      if (!quadFilter) return true;
+      return x * quadFilter.sx >= -0.02 * mBound && y * quadFilter.sy >= -0.02 * mBound;
+    };
+
+    const nAz = nominalGrid.length;
+    const nR = nominalGrid[0].length;
+
+    // 1. Design surface shaded faces
+    if (this.state.showDesign) {
+      const dProj = designGrid.map((col) =>
+        col.map((st) => ({
+          ...project(st.phiMnx, st.phiMny, st.phiPn),
+          x: st.phiMnx,
+          y: st.phiMny,
+          z: st.phiPn,
+          st,
+        }))
+      );
+
+      for (let j = 0; j < nAz; j++) {
+        const jNext = (j + 1) % nAz;
+        for (let k = 0; k < nR - 1; k++) {
+          const p00 = dProj[j][k];
+          const p10 = dProj[jNext][k];
+          const p01 = dProj[j][k + 1];
+          const p11 = dProj[jNext][k + 1];
+
+          const avgX = 0.25 * (p00.x + p10.x + p01.x + p11.x);
+          const avgY = 0.25 * (p00.y + p10.y + p01.y + p11.y);
+          if (!inActiveQuadrant(avgX, avgY)) continue;
+
+          // Compute lighting normal in normalized world coords
+          const ux = (p10.x - p00.x) / mSpan;
+          const uy = (p10.y - p00.y) / mSpan;
+          const uz = (p10.z - p00.z) / pSpan;
+          const vx = (p01.x - p00.x) / mSpan;
+          const vy = (p01.y - p00.y) / mSpan;
+          const vz = (p01.z - p00.z) / pSpan;
+          const nx = uy * vz - uz * vy;
+          const ny = uz * vx - ux * vz;
+          const nz = ux * vy - uy * vx;
+          const nLen = Math.hypot(nx, ny, nz) || 1;
+          const dot = Math.abs((nx * fwd.x + ny * fwd.y + nz * fwd.z) / nLen);
+
+          const shade = 0.45 + 0.55 * dot;
+          const fill = p00.st.capped && p01.st.capped
+            ? `rgba(${Math.round(55 * shade)}, ${Math.round(65 * shade)}, ${Math.round(78 * shade)}, 0.84)`
+            : isDark
+              ? `rgba(${Math.round(71 * shade)}, ${Math.round(85 * shade)}, ${Math.round(105 * shade)}, 0.78)`
+              : `rgba(${Math.round(45 * shade)}, ${Math.round(55 * shade)}, ${Math.round(68 * shade)}, 0.80)`;
+
+          const depth = 0.25 * (p00.depth + p10.depth + p01.depth + p11.depth);
+          primitives.push({
+            type: 'quad',
+            depth,
+            pts: [p00, p01, p11, p10],
+            fill,
+            stroke: isDark ? 'rgba(148,163,184,0.22)' : 'rgba(15,23,42,0.20)',
+          });
+        }
+      }
+    }
+
+    // 2. Nominal surface wireframe mesh (colored by height P, matching image.png!)
+    if (this.state.showNominal) {
+      const nProj = nominalGrid.map((col) =>
+        col.map((st) => {
+          const pr = project(st.Mnx, st.Mny, st.Pn);
+          return { ...pr, x: st.Mnx, y: st.Mny, z: st.Pn, st };
+        })
+      );
+
+      const pRange = Math.max(1e-3, summary.Po + summary.Pnt);
+
+      for (let j = 0; j < nAz; j++) {
+        const jNext = (j + 1) % nAz;
+        for (let k = 0; k < nR; k++) {
+          const p0 = nProj[j][k];
+          if (inActiveQuadrant(p0.x, p0.y) && j % 2 === 0 && k % 2 === 0) {
+            this.projectedVertices.push(p0);
+          }
+          // Vertical meridian segment along k -> k+1
+          if (k < nR - 1) {
+            const p1 = nProj[j][k + 1];
+            const mx = 0.5 * (p0.x + p1.x);
+            const my = 0.5 * (p0.y + p1.y);
+            if (inActiveQuadrant(mx, my)) {
+              const tColor = (0.5 * (p0.z + p1.z) + summary.Pnt) / pRange;
+              primitives.push({
+                type: 'line',
+                depth: 0.5 * (p0.depth + p1.depth) + 0.002,
+                a: p0,
+                b: p1,
+                color: viridisLike(tColor),
+                width: 1.05,
+                alpha: 0.85,
+              });
+            }
+          }
+          // Horizontal latitude ring segment j -> jNext
+          const pRing = nProj[jNext][k];
+          const rmx = 0.5 * (p0.x + pRing.x);
+          const rmy = 0.5 * (p0.y + pRing.y);
+          if (inActiveQuadrant(rmx, rmy)) {
+            const tColor = (0.5 * (p0.z + pRing.z) + summary.Pnt) / pRange;
+            primitives.push({
+              type: 'line',
+              depth: 0.5 * (p0.depth + pRing.depth) + 0.002,
+              a: p0,
+              b: pRing,
+              color: viridisLike(tColor),
+              width: 0.95,
+              alpha: 0.72,
+            });
+          }
+        }
+      }
+    }
+
+    // 3. Load points & rays into depth sort
+    for (let i = 0; i < loads.length; i++) {
+      const lr = loads[i];
+      const oPt = project(0, 0, 0);
+      const lPt = project(lr.Mux, lr.Muy, lr.Pu);
+      const lFloor = project(lr.Mux, lr.Muy, pFloor);
+
+      // Vertical drop projection onto floor
+      primitives.push({
+        type: 'dashed',
+        depth: 0.5 * (lPt.depth + lFloor.depth) + 0.01,
+        a: lPt,
+        b: lFloor,
+        color: lr.isSafe ? '#10b981' : '#ef4444',
+        width: 1.2,
+      });
+
+      // Radial ray to capacity
+      const endPt = lr.capNominal
+        ? project(lr.capNominal.x, lr.capNominal.y, lr.capNominal.z)
+        : lPt;
+      primitives.push({
+        type: 'line',
+        depth: 0.5 * (oPt.depth + endPt.depth) + 0.015,
+        a: oPt,
+        b: endPt,
+        color: isDark ? '#f8fafc' : '#0f172a',
+        width: 1.6,
+        alpha: 0.9,
+      });
+
+      primitives.push({
+        type: 'marker',
+        depth: lPt.depth + 0.05,
+        pt: lPt,
+        isSafe: lr.isSafe,
+        label: `L${i + 1}`,
+      });
+    }
+
+    // Sort back-to-front (smaller zCam drawn first)
+    primitives.sort((a, b) => a.depth - b.depth);
+
+    for (const pr of primitives) {
+      if (pr.type === 'quad') {
+        ctx.fillStyle = pr.fill;
+        ctx.strokeStyle = pr.stroke;
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        ctx.moveTo(pr.pts[0].sx, pr.pts[0].sy);
+        ctx.lineTo(pr.pts[1].sx, pr.pts[1].sy);
+        ctx.lineTo(pr.pts[2].sx, pr.pts[2].sy);
+        ctx.lineTo(pr.pts[3].sx, pr.pts[3].sy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else if (pr.type === 'line') {
+        ctx.save();
+        ctx.globalAlpha = pr.alpha ?? 1;
+        ctx.strokeStyle = pr.color;
+        ctx.lineWidth = pr.width;
+        ctx.beginPath();
+        ctx.moveTo(pr.a.sx, pr.a.sy);
+        ctx.lineTo(pr.b.sx, pr.b.sy);
+        ctx.stroke();
+        ctx.restore();
+      } else if (pr.type === 'dashed') {
+        ctx.save();
+        ctx.setLineDash([4, 3]);
+        ctx.strokeStyle = pr.color;
+        ctx.lineWidth = pr.width;
+        ctx.beginPath();
+        ctx.moveTo(pr.a.sx, pr.a.sy);
+        ctx.lineTo(pr.b.sx, pr.b.sy);
+        ctx.stroke();
+        ctx.restore();
+      } else if (pr.type === 'marker') {
+        const { sx, sy } = pr.pt;
+        ctx.save();
+        ctx.fillStyle = pr.isSafe ? '#10b981' : '#ef4444';
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = titleColor;
+        ctx.font = '700 11px ui-monospace, SFMono-Regular, monospace';
+        ctx.fillText(pr.label, sx + 8, sy - 4);
+        ctx.restore();
+      }
+    }
+
+    // Draw Axis Tick Labels around bounding box edges
+    ctx.fillStyle = textColor;
+    ctx.font = '11px ui-monospace, SFMono-Regular, monospace';
+
+    // P ticks on true left-most vertical edge among all 4 box corners
+    const vertCorners = [
+      [mxMin, myMin],
+      [mxMax, myMin],
+      [mxMin, myMax],
+      [mxMax, myMax],
+    ];
+    let leftCorner = vertCorners[0];
+    let minSx = Infinity;
+    for (const c of vertCorners) {
+      const pr = project(c[0], c[1], pMid);
+      if (pr.sx < minSx) {
+        minSx = pr.sx;
+        leftCorner = c;
+      }
+    }
+    const pTickEdgeX = leftCorner[0];
+    const pTickEdgeY = leftCorner[1];
+
+    // Draw crisp vertical axis line on left-most edge
+    const pBotPt = project(pTickEdgeX, pTickEdgeY, pMin);
+    const pTopPt = project(pTickEdgeX, pTickEdgeY, pMax);
+    ctx.strokeStyle = boxEdgeColor;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(pBotPt.sx, pBotPt.sy);
+    ctx.lineTo(pTopPt.sx, pTopPt.sy);
+    ctx.stroke();
+
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let p = pMin; p <= pMax + 1e-6; p += pStep) {
+      const pt = project(pTickEdgeX, pTickEdgeY, p);
+      ctx.fillText(String(Math.round(p)), pt.sx - 7, pt.sy);
+    }
+    const pMidPt = project(pTickEdgeX, pTickEdgeY, pMid);
+    ctx.save();
+    ctx.translate(pMidPt.sx - 40, pMidPt.sy);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.font = '700 12px sans-serif';
+    ctx.fillStyle = titleColor;
+    ctx.fillText('P (tf)', 0, 0);
+    ctx.restore();
+
+    // Helper for outward screen normal on floor edge
+    const boxCenterFloor = project(mxMid, myMid, pFloor);
+    const getOutwardNormal = (a, b) => {
+      const tx = b.sx - a.sx;
+      const ty = b.sy - a.sy;
+      const len = Math.hypot(tx, ty) || 1;
+      let nx = -ty / len;
+      let ny = tx / len;
+      const midX = 0.5 * (a.sx + b.sx);
+      const midY = 0.5 * (a.sy + b.sy);
+      if (nx * (midX - boxCenterFloor.sx) + ny * (midY - boxCenterFloor.sy) < 0) {
+        nx = -nx;
+        ny = -ny;
+      }
+      return { nx, ny };
+    };
+
+    // Mx ticks on front-most (lowest on screen) X-parallel floor edge
+    const mxEdgeY0 = project(mxMid, myMin, pFloor);
+    const mxEdgeY1 = project(mxMid, myMax, pFloor);
+    const yForMx = mxEdgeY0.sy >= mxEdgeY1.sy ? myMin : myMax;
+    const mxA = project(mxMin, yForMx, pFloor);
+    const mxB = project(mxMax, yForMx, pFloor);
+    const mxOut = getOutwardNormal(mxA, mxB);
+
+    if (Math.hypot(mxB.sx - mxA.sx, mxB.sy - mxA.sy) > 20) {
+      ctx.font = '11px ui-monospace, SFMono-Regular, monospace';
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let x = mxMin; x <= mxMax + 1e-6; x += mStep) {
+        const pt = project(x, yForMx, pFloor);
+        ctx.fillText(String(Math.round(x)), pt.sx + mxOut.nx * 14, pt.sy + mxOut.ny * 14);
+      }
+      const mxLbl = project(mxMid, yForMx, pFloor);
+      ctx.font = '700 12px sans-serif';
+      ctx.fillStyle = titleColor;
+      ctx.fillText('Mx (tf-m)', mxLbl.sx + mxOut.nx * 32, mxLbl.sy + mxOut.ny * 32);
+    }
+
+    // My ticks on front-most (lowest on screen) Y-parallel floor edge
+    const myEdgeX0 = project(mxMin, myMid, pFloor);
+    const myEdgeX1 = project(mxMax, myMid, pFloor);
+    const xForMy = myEdgeX0.sy >= myEdgeX1.sy ? mxMin : mxMax;
+    const myA = project(xForMy, myMin, pFloor);
+    const myB = project(xForMy, myMax, pFloor);
+    const myOut = getOutwardNormal(myA, myB);
+
+    if (Math.hypot(myB.sx - myA.sx, myB.sy - myA.sy) > 20) {
+      const mxEndPt = project(xForMy, yForMx, pFloor);
+      ctx.font = '11px ui-monospace, SFMono-Regular, monospace';
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let y = myMin; y <= myMax + 1e-6; y += mStep) {
+        const pt = project(xForMy, y, pFloor);
+        if (Math.hypot(pt.sx - mxEndPt.sx, pt.sy - mxEndPt.sy) < 8) continue;
+        ctx.fillText(String(Math.round(y)), pt.sx + myOut.nx * 14, pt.sy + myOut.ny * 14);
+      }
+      const myLbl = project(xForMy, myMid, pFloor);
+      ctx.font = '700 12px sans-serif';
+      ctx.fillStyle = titleColor;
+      ctx.fillText('My (tf-m)', myLbl.sx + myOut.nx * 32, myLbl.sy + myOut.ny * 32);
+    }
+
+    // Title
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.font = '700 15px sans-serif';
+    ctx.fillStyle = titleColor;
+    ctx.fillText('P-M-M Surface', W * 0.5, 10);
+
+    // Hover vertex tooltip
+    if (this.hoverPt) {
+      const st = this.hoverPt.st;
+      ctx.save();
+      ctx.fillStyle = '#2563eb';
+      ctx.beginPath();
+      ctx.arc(this.hoverPt.sx, this.hoverPt.sy, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      const lines = [
+        `θ=${st.thetaDeg.toFixed(0)}° | εt=${st.epsT.toFixed(4)} | φ=${st.phi.toFixed(2)}`,
+        `Pn=${st.Pn.toFixed(1)} tf, Mnx=${st.Mnx.toFixed(1)}, Mny=${st.Mny.toFixed(1)}`,
+        `φPn=${st.phiPn.toFixed(1)} tf, φMnx=${st.phiMnx.toFixed(1)}, φMny=${st.phiMny.toFixed(1)}`,
+      ];
+      ctx.font = '11px ui-monospace, SFMono-Regular, monospace';
+      const boxW = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 16;
+      const boxH = 52;
+      const bx = Math.min(W - boxW - 8, Math.max(8, this.hoverPt.sx + 10));
+      const by = Math.max(8, this.hoverPt.sy - boxH - 8);
+      ctx.fillStyle = isDark ? 'rgba(15,23,42,0.92)' : 'rgba(255,255,255,0.95)';
+      ctx.strokeStyle = isDark ? '#475569' : '#cbd5e1';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(bx, by, boxW, boxH, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = titleColor;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      lines.forEach((line, idx) => {
+        ctx.fillText(line, bx + 8, by + 6 + idx * 14);
+      });
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+}
+
+__exp.Plot3D = Plot3D;
+return __exp;
+})();
+
+// === Module ./plot2d.js ===
+__mods['./plot2d.js'] = (function() {
+const __exp = {};
+/**
+ * Interactive 2D P-M Interaction Curve Canvas Renderer
+ * Matches NewRCBiax2021 right-hand P-M Curve plot & Textbook Fig. 7.18
+ */
+
+const { sliceSurfaceAtMomentAzimuth, computePMCurveAtAlpha } = __mods['./rcEngine.js'];
+
+function niceStep(range, targetTicks = 6) {
+  if (range <= 0) return 10;
+  const rough = range / targetTicks;
+  const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+  const norm = rough / pow;
+  if (norm < 1.5) return 1 * pow;
+  if (norm < 3.5) return 2 * pow;
+  if (norm < 7.5) return 5 * pow;
+  return 10 * pow;
+}
+
+class Plot2D {
+  constructor(canvas, callbacks) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.cb = callbacks || {};
+
+    this.state = {
+      surface: null,
+      loadResults: [],
+      sliceMode: 'azimuth', // 'azimuth' | 'theta'
+      fixedThetaDeg: 40,
+    };
+
+    this.hoverPt = null;
+    this.screenPoints = [];
+    this._bindEvents();
+  }
+
+  setData(patch) {
+    Object.assign(this.state, patch);
+    this.render();
+  }
+
+  _bindEvents() {
+    this.canvas.addEventListener('pointermove', (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+
+      let best = null;
+      let bestDist = 18;
+      for (const sp of this.screenPoints) {
+        const d = Math.hypot(sp.sx - px, sp.sy - py);
+        if (d < bestDist) {
+          bestDist = d;
+          best = sp;
+        }
+      }
+      if (best !== this.hoverPt) {
+        this.hoverPt = best;
+        this.render();
+        if (this.cb.onHoverCurveState) {
+          this.cb.onHoverCurveState(best ? best.raw : null);
+        }
+      }
+    });
+
+    this.canvas.addEventListener('pointerleave', () => {
+      if (this.hoverPt) {
+        this.hoverPt = null;
+        this.render();
+        if (this.cb.onHoverCurveState) {
+          this.cb.onHoverCurveState(null);
+        }
+      }
+    });
+  }
+
+  render() {
+    const canvas = this.canvas;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width < 20 || rect.height < 20) return;
+
+    if (canvas.width !== Math.round(rect.width * dpr) || canvas.height !== Math.round(rect.height * dpr)) {
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+    }
+
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    const W = rect.width;
+    const H = rect.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const textColor = isDark ? '#cbd5e1' : '#334155';
+    const titleColor = isDark ? '#f1f5f9' : '#0f172a';
+    const gridColor = isDark ? 'rgba(148,163,184,0.18)' : 'rgba(100,116,139,0.22)';
+    const borderColor = isDark ? '#64748b' : '#334155';
+    const nomColor = isDark ? '#60a5fa' : '#1d4ed8';
+    const desColor = isDark ? '#f87171' : '#dc2626';
+
+    const surface = this.state.surface;
+    if (!surface) {
+      ctx.restore();
+      return;
+    }
+
+    const loads = this.state.loadResults || [];
+    const primary = loads[0];
+
+    let nomPts = [];
+    let desPts = [];
+    let subtitle = '';
+
+    if (this.state.sliceMode === 'theta') {
+      const thetaDeg = this.state.fixedThetaDeg;
+      const alpha = ((90 - thetaDeg) * Math.PI) / 180;
+      const rawCurve = computePMCurveAtAlpha(surface.summary, alpha);
+      nomPts = rawCurve.map((st) => ({
+        M: st.Mn,
+        P: st.Pn,
+        epsT: st.epsT,
+        phi: st.phi,
+        c: st.c,
+        thetaDeg: st.thetaDeg,
+        alpha: st.alpha,
+        kind: 'nominal',
+      }));
+      // Build sharp plateau design curve
+      const phiPnMax = surface.summary.phiPnMax;
+      desPts = rawCurve.map((st) => ({
+        M: st.phiMn,
+        P: st.phiPn,
+        epsT: st.epsT,
+        phi: st.phi,
+        c: st.c,
+        thetaDeg: st.thetaDeg,
+        alpha: st.alpha,
+        capped: st.capped,
+        kind: 'design',
+      }));
+      // Smooth plateau transition corner
+      for (let i = 0; i < rawCurve.length - 1; i++) {
+        const a = rawCurve[i];
+        const b = rawCurve[i + 1];
+        if (a.phi * a.Pn > phiPnMax && b.phi * b.Pn < phiPnMax) {
+          const t = (a.phi * a.Pn - phiPnMax) / (a.phi * a.Pn - b.phi * b.Pn);
+          const mEdge = a.phiMn + t * (b.phiMn - a.phiMn);
+          desPts.splice(i + 1, 0, {
+            M: mEdge,
+            P: phiPnMax,
+            epsT: a.epsT + t * (b.epsT - a.epsT),
+            phi: a.phi + t * (b.phi - a.phi),
+            thetaDeg: a.thetaDeg,
+            alpha: a.alpha,
+            capped: true,
+            kind: 'design',
+          });
+          break;
+        }
+      }
+      subtitle = `θ = ${thetaDeg.toFixed(0)}° (固定中性軸角)`;
+    } else {
+      const dirX = primary && primary.Mu > 1e-6 ? primary.Mux : 1;
+      const dirY = primary && primary.Mu > 1e-6 ? primary.Muy : 0;
+      nomPts = sliceSurfaceAtMomentAzimuth(surface.nominalGrid, false, dirX, dirY).map((p) => ({
+        ...p,
+        kind: 'nominal',
+      }));
+      desPts = sliceSurfaceAtMomentAzimuth(surface.designGrid, true, dirX, dirY).map((p) => ({
+        ...p,
+        kind: 'design',
+      }));
+      const thetaInfo = primary && primary.Mu > 1e-6 ? `θ ≈ ${primary.thetaClosest}°` : 'Mx 單軸剖面';
+      subtitle = `${thetaInfo} (依外力彎矩方向剖面)`;
+    }
+
+    // Determine nice bounds
+    let maxM = 10;
+    let maxP = Math.max(100, surface.summary.Po * 1.05);
+    let minP = Math.min(-50, -surface.summary.Pnt * 1.1);
+    for (const p of nomPts) {
+      maxM = Math.max(maxM, p.M);
+      maxP = Math.max(maxP, p.P);
+      minP = Math.min(minP, p.P);
+    }
+    for (const lr of loads) {
+      maxM = Math.max(maxM, lr.Mu * 1.08);
+      maxP = Math.max(maxP, lr.Pu * 1.08);
+      minP = Math.min(minP, lr.Pu * 1.08);
+    }
+
+    const mStep = niceStep(maxM, 4);
+    const mMax = Math.ceil((maxM * 1.06) / mStep) * mStep;
+    const pStep = niceStep(maxP - minP, 6);
+    const pMin = Math.floor(minP / pStep) * pStep;
+    const pMax = Math.ceil((maxP * 1.04) / pStep) * pStep;
+
+    const padLeft = 56;
+    const padRight = 22;
+    const padTop = 38;
+    const padBottom = 46;
+    const plotW = Math.max(60, W - padLeft - padRight);
+    const plotH = Math.max(60, H - padTop - padBottom);
+
+    const toScreen = (m, p) => ({
+      sx: padLeft + (m / mMax) * plotW,
+      sy: padTop + ((pMax - p) / (pMax - pMin)) * plotH,
+    });
+
+    // Plot area background
+    ctx.fillStyle = isDark ? 'rgba(15, 23, 42, 0.45)' : 'rgba(255, 255, 255, 0.85)';
+    ctx.fillRect(padLeft, padTop, plotW, plotH);
+
+    // Grid lines
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    for (let m = mStep; m < mMax; m += mStep) {
+      const p0 = toScreen(m, pMin);
+      const p1 = toScreen(m, pMax);
+      ctx.beginPath();
+      ctx.moveTo(p0.sx, p0.sy);
+      ctx.lineTo(p1.sx, p1.sy);
+      ctx.stroke();
+    }
+    for (let p = pMin; p <= pMax + 1e-6; p += pStep) {
+      const p0 = toScreen(0, p);
+      const p1 = toScreen(mMax, p);
+      ctx.beginPath();
+      ctx.moveTo(p0.sx, p0.sy);
+      ctx.lineTo(p1.sx, p1.sy);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // P = 0 solid baseline
+    if (pMin < 0 && pMax > 0) {
+      const z0 = toScreen(0, 0);
+      const z1 = toScreen(mMax, 0);
+      ctx.strokeStyle = isDark ? 'rgba(148,163,184,0.45)' : 'rgba(51,65,85,0.4)';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(z0.sx, z0.sy);
+      ctx.lineTo(z1.sx, z1.sy);
+      ctx.stroke();
+    }
+
+    // Plot border
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 1.3;
+    ctx.strokeRect(padLeft, padTop, plotW, plotH);
+
+    // Clip to plot area for curves
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(padLeft, padTop, plotW, plotH);
+    ctx.clip();
+
+    this.screenPoints = [];
+
+    // Draw Nominal Curve (Blue)
+    if (nomPts.length > 1) {
+      ctx.strokeStyle = nomColor;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      nomPts.forEach((pt, idx) => {
+        const s = toScreen(pt.M, pt.P);
+        if (idx === 0) ctx.moveTo(s.sx, s.sy);
+        else ctx.lineTo(s.sx, s.sy);
+        this.screenPoints.push({ sx: s.sx, sy: s.sy, raw: pt });
+      });
+      ctx.stroke();
+    }
+
+    // Draw Design Curve (Red/Coral)
+    if (desPts.length > 1) {
+      ctx.strokeStyle = desColor;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      desPts.forEach((pt, idx) => {
+        const s = toScreen(pt.M, pt.P);
+        if (idx === 0) ctx.moveTo(s.sx, s.sy);
+        else ctx.lineTo(s.sx, s.sy);
+        this.screenPoints.push({ sx: s.sx, sy: s.sy, raw: pt });
+      });
+      ctx.stroke();
+    }
+
+    // Draw Load Rays & Diamonds
+    const origin = toScreen(0, 0);
+    for (let i = 0; i < loads.length; i++) {
+      const lr = loads[i];
+      const lp = toScreen(lr.Mu, lr.Pu);
+      const rayEnd = lr.capNominal
+        ? toScreen(lr.capNominal.M, lr.capNominal.P)
+        : lp;
+
+      ctx.strokeStyle = isDark ? '#e2e8f0' : '#0f172a';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(origin.sx, origin.sy);
+      ctx.lineTo(rayEnd.sx, rayEnd.sy);
+      ctx.stroke();
+
+      // Design intersection tick dot
+      if (lr.capDesign) {
+        const dp = toScreen(lr.capDesign.M, lr.capDesign.P);
+        ctx.fillStyle = desColor;
+        ctx.beginPath();
+        ctx.arc(dp.sx, dp.sy, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Load Diamond Marker (matching image.png!)
+      const r = 5.5;
+      ctx.fillStyle = lr.isSafe ? '#10b981' : '#ef4444';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(lp.sx, lp.sy - r);
+      ctx.lineTo(lp.sx + r, lp.sy);
+      ctx.lineTo(lp.sx, lp.sy + r);
+      ctx.lineTo(lp.sx - r, lp.sy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = titleColor;
+      ctx.font = '700 11px ui-monospace, SFMono-Regular, monospace';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(`L${i + 1}`, lp.sx + 7, lp.sy - 3);
+    }
+
+    ctx.restore();
+
+    // Ticks & Labels
+    ctx.fillStyle = textColor;
+    ctx.font = '11px ui-monospace, SFMono-Regular, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (let m = 0; m <= mMax + 1e-6; m += mStep) {
+      const p = toScreen(m, pMin);
+      ctx.fillText(String(Math.round(m)), p.sx, p.sy + 5);
+    }
+    ctx.font = '700 12px sans-serif';
+    ctx.fillStyle = titleColor;
+    ctx.fillText('M (tf-m)', padLeft + plotW * 0.5, padTop + plotH + 22);
+
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.font = '11px ui-monospace, SFMono-Regular, monospace';
+    ctx.fillStyle = textColor;
+    for (let p = pMin; p <= pMax + 1e-6; p += pStep) {
+      const pt = toScreen(0, p);
+      ctx.fillText(String(Math.round(p)), padLeft - 7, pt.sy);
+    }
+
+    ctx.save();
+    ctx.translate(16, padTop + plotH * 0.5);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.font = '700 12px sans-serif';
+    ctx.fillStyle = titleColor;
+    ctx.fillText('P (tf)', 0, 0);
+    ctx.restore();
+
+    // Title & Legend
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.font = '700 15px sans-serif';
+    ctx.fillStyle = titleColor;
+    ctx.fillText('P-M Curve', padLeft + plotW * 0.5, 6);
+
+    ctx.font = '11px sans-serif';
+    ctx.fillStyle = textColor;
+    ctx.fillText(subtitle, padLeft + plotW * 0.5, 23);
+
+    // Compact legend inside top-right of plot
+    const legX = padLeft + plotW - 108;
+    const legY = padTop + 8;
+    ctx.fillStyle = isDark ? 'rgba(15,23,42,0.82)' : 'rgba(255,255,255,0.88)';
+    ctx.strokeStyle = isDark ? '#334155' : '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(legX, legY, 100, 42, 5);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = '11px sans-serif';
+    ctx.strokeStyle = nomColor;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(legX + 8, legY + 13);
+    ctx.lineTo(legX + 24, legY + 13);
+    ctx.stroke();
+    ctx.fillStyle = titleColor;
+    ctx.fillText('標稱強度 Pn', legX + 29, legY + 13);
+
+    ctx.strokeStyle = desColor;
+    ctx.beginPath();
+    ctx.moveTo(legX + 8, legY + 29);
+    ctx.lineTo(legX + 24, legY + 29);
+    ctx.stroke();
+    ctx.fillText('設計強度 φPn', legX + 29, legY + 29);
+
+    // Hover Tooltip
+    if (this.hoverPt) {
+      const r = this.hoverPt.raw;
+      ctx.save();
+      ctx.fillStyle = r.kind === 'design' ? desColor : nomColor;
+      ctx.beginPath();
+      ctx.arc(this.hoverPt.sx, this.hoverPt.sy, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      const lines = [
+        `${r.kind === 'design' ? '設計強度 (φP, φM)' : '標稱強度 (Pn, Mn)'}`,
+        `M = ${r.M.toFixed(2)} tf-m | P = ${r.P.toFixed(1)} tf`,
+        `εt = ${r.epsT.toFixed(4)} | φ = ${r.phi.toFixed(3)}`,
+      ];
+      ctx.font = '11px ui-monospace, SFMono-Regular, monospace';
+      const bw = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 14;
+      const bh = 50;
+      const bx = Math.min(W - bw - 8, Math.max(padLeft + 6, this.hoverPt.sx + 10));
+      const by = Math.max(padTop + 4, this.hoverPt.sy - bh - 8);
+      ctx.fillStyle = isDark ? 'rgba(15,23,42,0.92)' : 'rgba(255,255,255,0.96)';
+      ctx.strokeStyle = isDark ? '#475569' : '#cbd5e1';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, bh, 6);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = titleColor;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      lines.forEach((line, idx) => ctx.fillText(line, bx + 7, by + 6 + idx * 14));
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+}
+
+__exp.Plot2D = Plot2D;
+return __exp;
+})();
+
+// === Module ./app.js ===
+__mods['./app.js'] = (function() {
+const __exp = {};
+/**
+ * Main Application Controller
+ * Connects SectionEditor, Plot3D, Plot2D, rcEngine, autoDesign, and biaxIO
+ */
+
+const { REBAR_LIST, getBarInfo } = __mods['./rebarDB.js'];
+const { computeInteractionSurface, checkLoadCase, computeTextbookApproxChecks, exportBiaxTableRows } = __mods['./rcEngine.js'];
+const { generateRectPerimeterBars, generateCircularRingBars, checkCodeDetailing, autoDesignRebar } = __mods['./autoDesign.js'];
+const { PRESETS, parseNewRCBiaxInput, formatNewRCBiaxInput, formatBiaxOutputTxt, formatBiaxOutputCsv } = __mods['./biaxIO.js'];
+const { SectionEditor } = __mods['./sectionEditor.js'];
+const { Plot3D } = __mods['./plot3d.js'];
+const { Plot2D } = __mods['./plot2d.js'];
+
+// Application State
+const initialPreset = PRESETS[0];
+const appState = {
+  config: structuredClone(initialPreset.config),
+  loads: structuredClone(initialPreset.loads),
+  coverCenter: 6.5,
+  selectedBarIdx: -1,
+  activeBarId: 8,
+  toolMode: 'select',
+  snapStep: 0.5,
+  showNA: false,
+  hoverCurveState: null,
+  surface: null,
+  loadResults: [],
+  viewMode3D: 'quadrant',
+  showNominal3D: true,
+  showDesign3D: true,
+  sliceMode2D: 'azimuth',
+  fixedThetaDeg: 40,
+};
+
+// DOM References
+const $ = (id) => document.getElementById(id);
+
+const sectionEditor = new SectionEditor($('sectionCanvas'), {
+  onSelectBar: (idx) => {
+    appState.selectedBarIdx = idx;
+    syncSelectedBarBox();
+    renderRebarTable();
+    sectionEditor.setData({ selectedBarIdx: idx });
+  },
+  onMoveBar: (idx, x, y, isDragging) => {
+    if (!appState.config.bars[idx]) return;
+    appState.config.bars[idx].x = x;
+    appState.config.bars[idx].y = y;
+    syncSelectedBarBox();
+    recomputeAndRender(isDragging ? 36 : 72, !isDragging);
+  },
+  onAddBar: (x, y, barId) => {
+    appState.config.bars.push({ x, y, barId, fy: appState.config.fy });
+    appState.selectedBarIdx = appState.config.bars.length - 1;
+    syncSelectedBarBox();
+    recomputeAndRender(72, true);
+  },
+  onDeleteBar: (idx) => {
+    appState.config.bars.splice(idx, 1);
+    appState.selectedBarIdx = -1;
+    syncSelectedBarBox();
+    recomputeAndRender(72, true);
+  },
+  onHoverCoords: (wx, wy, hoverIdx) => {
+    const el = $('coordReadout');
+    if (hoverIdx >= 0 && appState.config.bars[hoverIdx]) {
+      const b = appState.config.bars[hoverIdx];
+      const info = getBarInfo(b.barId);
+      el.textContent = `鋼筋 #${hoverIdx + 1} (${info.cns})：X=${b.x.toFixed(2)}, Y=${b.y.toFixed(2)} cm (右鍵或 Delete 可刪除)`;
+    } else {
+      el.textContent = `游標位置：X=${wx.toFixed(1)}, Y=${wy.toFixed(1)} cm（拖曳鋼筋可即時更新，Shift+點擊新增）`;
+    }
+  },
+});
+
+const plot3d = new Plot3D($('plot3dCanvas'));
+
+const plot2d = new Plot2D($('plot2dCanvas'), {
+  onHoverCurveState: (raw) => {
+    appState.hoverCurveState = raw;
+    updateNAOverlay();
+  },
+});
+
+// Core Recompute & Render Pipeline
+let rafPending = false;
+function recomputeAndRender(nAzimuth = 72, updateTables = true) {
+  if (rafPending && nAzimuth < 72) return;
+  if (nAzimuth < 72) {
+    rafPending = true;
+    requestAnimationFrame(() => {
+      rafPending = false;
+      runCompute(nAzimuth, false);
+    });
+  } else {
+    runCompute(nAzimuth, updateTables);
+  }
+}
+
+function runCompute(nAzimuth, updateTables) {
+  const surface = computeInteractionSurface(appState.config, nAzimuth);
+  appState.surface = surface;
+  appState.loadResults = appState.loads.map((lc) => checkLoadCase(surface, lc));
+
+  // Sync Section Summary
+  const sum = surface.summary;
+  $('lblRho').textContent = sum.rhoG.toFixed(4);
+  const badge = $('badgeRho');
+  if (sum.rhoG >= 0.01 - 1e-6 && sum.rhoG <= 0.06 + 1e-6) {
+    badge.className = 'badge badge-ok';
+    badge.textContent = `${(sum.rhoG * 100).toFixed(2)}% OK`;
+  } else if (sum.rhoG > 0.06 && sum.rhoG <= 0.08 + 1e-6) {
+    badge.className = 'badge badge-warn';
+    badge.textContent = `${(sum.rhoG * 100).toFixed(2)}% >6%`;
+  } else {
+    badge.className = 'badge badge-ng';
+    badge.textContent = sum.rhoG < 0.01 ? '<1% NG' : '>8% NG';
+  }
+  $('lblPo').textContent = `${sum.Po.toFixed(1)} / ${sum.phiPnMax.toFixed(1)} tf`;
+  $('lblPC').textContent = `(${sum.xpc.toFixed(2)}, ${sum.ypc.toFixed(2)})`;
+
+  // Sync Safety Verdict Box (primary or worst load case)
+  let worst = appState.loadResults[0];
+  for (const r of appState.loadResults) {
+    if (r.dcRatio > (worst?.dcRatio ?? -1)) worst = r;
+  }
+  if (worst) {
+    $('verdictDot').className = `dot ${worst.isSafe ? 'dot-ok' : 'dot-ng'}`;
+    $('verdictStatusText').textContent = worst.statusLabel;
+    const zBadge = $('verdictZoneBadge');
+    zBadge.textContent = worst.zoneLabel;
+    zBadge.className = `badge ${
+      worst.zone === 'compression' ? 'badge-warn' : worst.zone === 'transition' ? 'badge-ok' : 'badge-ok'
+    }`;
+    if (!worst.isSafe) zBadge.className = 'badge badge-ng';
+
+    $('valDC').textContent = Number.isFinite(worst.dcRatio) ? worst.dcRatio.toFixed(3) : '∞';
+    $('valDC').style.color = worst.isSafe ? 'var(--rc-success)' : 'var(--rc-danger)';
+    $('valMu').textContent = `${worst.Mu.toFixed(2)} tf-m`;
+    $('valPhiEps').textContent = `${worst.phi.toFixed(3)} / ${worst.epsT.toFixed(4)}`;
+    $('valCap').textContent = worst.capDesign
+      ? `${worst.capDesign.M.toFixed(1)} / ${worst.capDesign.P.toFixed(1)}`
+      : `0 / ${sum.phiPnMax.toFixed(1)}`;
+  }
+
+  // Update load case D/C badges live without losing input focus
+  document.querySelectorAll('.load-dc-badge').forEach((el) => {
+    const idx = Number(el.dataset.idx);
+    const res = appState.loadResults[idx];
+    if (res) {
+      el.className = `badge load-dc-badge ${res.isSafe ? 'badge-ok' : 'badge-ng'}`;
+      el.textContent = `D/C=${Number.isFinite(res.dcRatio) ? res.dcRatio.toFixed(3) : '∞'}`;
+    }
+  });
+
+  // Update Canvases
+  updateNAOverlay();
+  sectionEditor.setData({
+    config: appState.config,
+    summary: sum,
+    selectedBarIdx: appState.selectedBarIdx,
+    toolMode: appState.toolMode,
+    activeBarId: appState.activeBarId,
+    snapStep: appState.snapStep,
+    showNA: appState.showNA,
+  });
+
+  plot3d.setData({
+    surface,
+    loadResults: appState.loadResults,
+    viewMode: appState.viewMode3D,
+    showNominal: appState.showNominal3D,
+    showDesign: appState.showDesign3D,
+  });
+
+  plot2d.setData({
+    surface,
+    loadResults: appState.loadResults,
+    sliceMode: appState.sliceMode2D,
+    fixedThetaDeg: appState.fixedThetaDeg,
+  });
+
+  if (updateTables) {
+    renderRebarTable();
+    renderTextbookChecks();
+    renderBiaxTable();
+  }
+}
+
+function updateNAOverlay() {
+  if (!appState.showNA || !appState.surface) {
+    sectionEditor.setData({ showNA: false });
+    return;
+  }
+  const sum = appState.surface.summary;
+  let alpha = ((90 - appState.fixedThetaDeg) * Math.PI) / 180;
+  let c = null;
+
+  if (appState.hoverCurveState && Number.isFinite(appState.hoverCurveState.c)) {
+    alpha = appState.hoverCurveState.alpha ?? ((90 - appState.hoverCurveState.thetaDeg) * Math.PI) / 180;
+    c = appState.hoverCurveState.c;
+  } else {
+    const primary = appState.loadResults[0];
+    if (primary && primary.Mu > 1e-6) {
+      alpha = ((90 - primary.thetaExact) * Math.PI) / 180;
+      // Estimate c from epsT at intersection
+      const ux = Math.cos(alpha);
+      const uy = Math.sin(alpha);
+      let sMax = -Infinity;
+      let sBarMin = Infinity;
+      for (const p of sum.poly) sMax = Math.max(sMax, p.x * ux + p.y * uy);
+      for (const b of sum.bars) sBarMin = Math.min(sBarMin, b.x * ux + b.y * uy);
+      const dt = sum.bars.length > 0 ? sMax - sBarMin : 30;
+      c = (dt * 0.003) / Math.max(1e-4, 0.003 + primary.epsT);
+    } else {
+      c = (appState.config.h || appState.config.diameter) * 0.5;
+    }
+  }
+  sectionEditor.setData({
+    showNA: true,
+    naAlpha: alpha,
+    naC: c,
+    naBeta1: sum.beta1,
+  });
+}
+
+// UI Sync Helpers
+function syncAllInputsFromState() {
+  const cfg = appState.config;
+  const isCirc = cfg.shape === 'circular';
+  $('btnShapeRect').classList.toggle('active', !isCirc);
+  $('btnShapeCirc').classList.toggle('active', isCirc);
+  $('rectDimsRow').style.display = isCirc ? 'none' : 'grid';
+  $('circDimsRow').style.display = isCirc ? 'grid' : 'none';
+  $('rectArrayInputs').style.display = isCirc ? 'none' : 'grid';
+  $('circArrayInputs').style.display = isCirc ? 'grid' : 'none';
+
+  $('inpB').value = cfg.b;
+  $('inpH').value = cfg.h;
+  $('inpDiam').value = cfg.diameter || 50;
+  $('inpCoverCenter').value = appState.coverCenter;
+  $('inpCoverCenterCirc').value = appState.coverCenter;
+  $('inpFc').value = cfg.fc;
+  $('inpFy').value = cfg.fy;
+  $('selHoop').value = cfg.hoopType;
+  $('chkDeductConcrete').checked = cfg.deductConcrete !== false;
+  $('chkSimplifySD420').checked = Boolean(cfg.simplifySD420);
+
+  renderLoadCases();
+  syncSelectedBarBox();
+}
+
+function syncSelectedBarBox() {
+  const box = $('selectedBarBox');
+  const idx = appState.selectedBarIdx;
+  if (idx < 0 || !appState.config.bars[idx]) {
+    box.style.display = 'none';
+    return;
+  }
+  const bar = appState.config.bars[idx];
+  const info = getBarInfo(bar.barId);
+  box.style.display = 'flex';
+  $('selBarTitle').textContent = `已選取鋼筋 #${idx + 1} (${info.cns})`;
+  $('inpBarX').value = bar.x;
+  $('inpBarY').value = bar.y;
+  $('inpBarFy').value = bar.fy ?? appState.config.fy;
+  $('selActiveBar').value = String(bar.barId);
+}
+
+function renderLoadCases() {
+  const container = $('loadCasesContainer');
+  container.innerHTML = '';
+  appState.loads.forEach((lc, idx) => {
+    const card = document.createElement('div');
+    card.className = 'load-card';
+    const res = appState.loadResults[idx];
+    const badgeHtml = res
+      ? `<span class="badge load-dc-badge ${res.isSafe ? 'badge-ok' : 'badge-ng'}" data-idx="${idx}">D/C=${
+          Number.isFinite(res.dcRatio) ? res.dcRatio.toFixed(3) : '∞'
+        }</span>`
+      : `<span class="badge load-dc-badge" data-idx="${idx}"></span>`;
+    card.innerHTML = `
+      <div class="load-card-head">
+        <strong style="font-size:12px;">L${idx + 1}: ${lc.name || '載重組'}</strong>
+        <div style="display:flex; gap:6px; align-items:center;">
+          ${badgeHtml}
+          ${appState.loads.length > 1 ? `<button class="btn btn-sm btn-danger del-load" data-idx="${idx}" type="button">移除</button>` : ''}
+        </div>
+      </div>
+      <div class="form-row-3">
+        <div>
+          <label class="field-label">Pu (tf)</label>
+          <input class="load-inp mono" data-idx="${idx}" data-field="Pu" type="number" step="5" value="${lc.Pu}" />
+        </div>
+        <div>
+          <label class="field-label">Mux (tf-m)</label>
+          <input class="load-inp mono" data-idx="${idx}" data-field="Mux" type="number" step="0.5" value="${lc.Mux}" />
+        </div>
+        <div>
+          <label class="field-label">Muy (tf-m)</label>
+          <input class="load-inp mono" data-idx="${idx}" data-field="Muy" type="number" step="0.5" value="${lc.Muy}" />
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  container.querySelectorAll('.load-inp').forEach((inp) => {
+    inp.addEventListener('input', (e) => {
+      const idx = Number(e.target.dataset.idx);
+      const field = e.target.dataset.field;
+      appState.loads[idx][field] = Number(e.target.value) || 0;
+      recomputeAndRender(72, true);
+    });
+  });
+
+  container.querySelectorAll('.del-load').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const idx = Number(e.target.dataset.idx);
+      appState.loads.splice(idx, 1);
+      renderLoadCases();
+      recomputeAndRender(72, true);
+    });
+  });
+}
+
+function renderRebarTable() {
+  const tbody = $('rebarTableBody');
+  const bars = appState.config.bars || [];
+  let totalAs = 0;
+
+  tbody.innerHTML = '';
+  bars.forEach((bar, idx) => {
+    const info = getBarInfo(bar.barId);
+    totalAs += info.area;
+    const tr = document.createElement('tr');
+    if (idx === appState.selectedBarIdx) {
+      tr.style.background = 'var(--rc-accent-soft)';
+    }
+
+    const barOptions = REBAR_LIST.map(
+      (r) => `<option value="${r.id}" ${r.id === bar.barId ? 'selected' : ''}>${r.label}</option>`
+    ).join('');
+
+    tr.innerHTML = `
+      <td class="mono">${idx + 1}</td>
+      <td><input class="tbl-bar-inp mono" data-idx="${idx}" data-field="x" type="number" step="0.1" value="${bar.x}" style="width:82px;" /></td>
+      <td><input class="tbl-bar-inp mono" data-idx="${idx}" data-field="y" type="number" step="0.1" value="${bar.y}" style="width:82px;" /></td>
+      <td><select class="tbl-bar-sel" data-idx="${idx}" style="width:115px;">${barOptions}</select></td>
+      <td class="mono">${info.area.toFixed(3)}</td>
+      <td><input class="tbl-bar-inp mono" data-idx="${idx}" data-field="fy" type="number" step="100" value="${bar.fy ?? appState.config.fy}" style="width:88px;" /></td>
+      <td>
+        <div style="display:flex; gap:4px;">
+          <button class="btn btn-sm tbl-sel-btn" data-idx="${idx}" type="button">選取</button>
+          <button class="btn btn-sm btn-danger tbl-del-btn" data-idx="${idx}" type="button">刪除</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  $('rebarTotalSummary').textContent = `總計：${bars.length} 根，Ast = ${totalAs.toFixed(2)} cm²`;
+
+  tbody.querySelectorAll('.tbl-bar-inp').forEach((inp) => {
+    inp.addEventListener('change', (e) => {
+      const idx = Number(e.target.dataset.idx);
+      const field = e.target.dataset.field;
+      appState.config.bars[idx][field] = Number(e.target.value) || 0;
+      syncSelectedBarBox();
+      recomputeAndRender(72, true);
+    });
+  });
+
+  tbody.querySelectorAll('.tbl-bar-sel').forEach((sel) => {
+    sel.addEventListener('change', (e) => {
+      const idx = Number(e.target.dataset.idx);
+      appState.config.bars[idx].barId = Number(e.target.value);
+      syncSelectedBarBox();
+      recomputeAndRender(72, true);
+    });
+  });
+
+  tbody.querySelectorAll('.tbl-sel-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      appState.selectedBarIdx = Number(e.target.dataset.idx);
+      syncSelectedBarBox();
+      renderRebarTable();
+      sectionEditor.setData({ selectedBarIdx: appState.selectedBarIdx });
+    });
+  });
+
+  tbody.querySelectorAll('.tbl-del-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const idx = Number(e.target.dataset.idx);
+      appState.config.bars.splice(idx, 1);
+      if (appState.selectedBarIdx === idx) appState.selectedBarIdx = -1;
+      syncSelectedBarBox();
+      recomputeAndRender(72, true);
+    });
+  });
+}
+
+function renderTextbookChecks() {
+  if (!appState.surface) return;
+  const grid = $('textbookCompareGrid');
+  const sum = appState.surface.summary;
+  const primaryLoad = appState.loads[0] || { Pu: 0, Mux: 0, Muy: 0 };
+  const exactRes = appState.loadResults[0];
+  const approx = computeTextbookApproxChecks(appState.surface, primaryLoad);
+  const detailing = checkCodeDetailing(appState.config, sum);
+
+  const breslerHtml = approx.bresler.valid
+    ? `
+      <div class="kv-row"><span>單軸偏心強度 Pnxo / Pnyo</span><span class="mono">${approx.bresler.Pnxo.toFixed(1)} / ${approx.bresler.Pnyo.toFixed(1)} tf</span></div>
+      <div class="kv-row"><span>Bresler 倒數法 φPn</span><span class="mono">${approx.bresler.phiPnBresler.toFixed(1)} tf</span></div>
+      <div class="kv-row"><span>檢核結果 (Pu = ${primaryLoad.Pu} tf)</span><span class="badge ${approx.bresler.isSafe ? 'badge-ok' : 'badge-ng'}">D/C=${approx.bresler.dcRatio.toFixed(3)} ${approx.bresler.isSafe ? 'OK' : 'NG'}</span></div>
+    `
+    : `<div class="hint-text">${approx.bresler.reason}（規範建議軸力小於 0.10 Po 時改以純雙軸彎矩檢核）</div>`;
+
+  const transverseHtml =
+    detailing.transverse.type === 'tied'
+      ? `
+        <div class="kv-row"><span>最小橫箍筋號數要求</span><span class="mono">${detailing.transverse.reqTieLabel}</span></div>
+        <div class="kv-row"><span>橫箍筋最大間距 smax</span><span class="mono">${detailing.transverse.sMax} cm</span></div>
+        <div class="hint-text">${detailing.transverse.note}</div>
+      `
+      : `
+        <div class="kv-row"><span>核心直徑 Dc / 面積 Ach</span><span class="mono">${detailing.transverse.Dc} cm / ${detailing.transverse.Ach} cm²</span></div>
+        <div class="kv-row"><span>最小螺箍筋體積比 ρs,min</span><span class="mono">${detailing.transverse.rhoSMin}</span></div>
+        <div class="kv-row"><span>建議最大螺距 (依 D10)</span><span class="mono">${detailing.transverse.sMaxRec} cm</span></div>
+        <div class="hint-text">${detailing.transverse.note}</div>
+      `;
+
+  grid.innerHTML = `
+    <div class="info-card">
+      <h3>1. 3D 精確應變諧合分析 (§7.15)</h3>
+      <div class="kv-row"><span>分析基準點 (塑性中心)</span><span class="mono">(${sum.xpc.toFixed(2)}, ${sum.ypc.toFixed(2)}) cm</span></div>
+      <div class="kv-row"><span>設計強度交點 (φMn, φPn)</span><span class="mono">${exactRes?.capDesign ? `${exactRes.capDesign.M.toFixed(2)} tf-m, ${exactRes.capDesign.P.toFixed(1)} tf` : '-'}</span></div>
+      <div class="kv-row"><span>標稱強度交點 (Mn, Pn)</span><span class="mono">${exactRes?.capNominal ? `${exactRes.capNominal.M.toFixed(2)} tf-m, ${exactRes.capNominal.P.toFixed(1)} tf` : '-'}</span></div>
+      <div class="kv-row"><span>檢核比 D/C 與判定</span><span class="badge ${exactRes?.isSafe ? 'badge-ok' : 'badge-ng'}">D/C=${exactRes?.dcRatio?.toFixed(3) ?? '-'} ${exactRes?.isSafe ? 'OK' : 'NG'}</span></div>
+    </div>
+
+    <div class="info-card">
+      <h3>2. 載重等高線法近似檢核 (§7.13 Eq. 7.27)</h3>
+      <div class="kv-row"><span>單軸設計彎矩 φMnxo / φMnyo</span><span class="mono">${approx.phiMnxo.toFixed(2)} / ${approx.phiMnyo.toFixed(2)} tf-m</span></div>
+      <div class="kv-row"><span>估計指數 α = log(0.5)/log(β)</span><span class="mono">${approx.alphaContour.toFixed(3)}</span></div>
+      <div class="kv-row"><span>(Mux/φMnxo)^α + (Muy/φMnyo)^α</span><span class="badge ${approx.contourSafe ? 'badge-ok' : 'badge-ng'}">${Number.isFinite(approx.contourRatio) ? approx.contourRatio.toFixed(3) : '∞'} ${approx.contourSafe ? '≤ 1.0 OK' : '> 1.0 NG'}</span></div>
+    </div>
+
+    <div class="info-card">
+      <h3>3. Bresler 載重倒數法 (§7.14 Eq. 7.30)</h3>
+      ${breslerHtml}
+    </div>
+
+    <div class="info-card">
+      <h3>4. 鋼筋比、淨距與箍筋規範檢核 (§7.1, §7.3)</h3>
+      <div class="kv-row"><span>縱向鋼筋比 ρg (0.01~0.08)</span><span class="badge ${detailing.rhoMinOk && detailing.rhoMaxOk ? (detailing.rhoSeismicOk ? 'badge-ok' : 'badge-warn') : 'badge-ng'}">${(sum.rhoG * 100).toFixed(2)}%</span></div>
+      <div class="kv-row"><span>主筋最小根數 (≥${detailing.minBarsReq})</span><span class="badge ${detailing.countOk ? 'badge-ok' : 'badge-ng'}">${sum.bars.length} 根</span></div>
+      <div class="kv-row"><span>主筋最小淨距 (需求 ≥${detailing.spacingCheck.reqClear.toFixed(1)} cm)</span><span class="badge ${detailing.spacingCheck.ok ? 'badge-ok' : 'badge-ng'}">${detailing.spacingCheck.minClear != null ? `${detailing.spacingCheck.minClear.toFixed(2)} cm` : '-'}</span></div>
+      ${transverseHtml}
+    </div>
+  `;
+}
+
+function renderBiaxTable() {
+  if (!appState.surface) return;
+  const rows = exportBiaxTableRows(appState.surface);
+  const tbody = $('biaxTableBody');
+  // Render up to 360 representative rows cleanly (every other azimuth if needed for DOM speed, full export in download!)
+  const sliceRows = rows.filter((_, idx) => idx % 2 === 0).slice(0, 400);
+  tbody.innerHTML = sliceRows
+    .map(
+      (r) => `
+      <tr>
+        <td>${r.theta}</td>
+        <td>${r.Mn}</td>
+        <td>${r.Pn}</td>
+        <td>${r.fiMn_max}</td>
+        <td>${r.fiPn_max}</td>
+        <td>${r.Curvature.toExponential(2)}</td>
+        <td>${r.epsilonT}</td>
+        <td>${r.Mxx}</td>
+        <td>${r.Myy}</td>
+      </tr>
+    `
+    )
+    .join('');
+}
+
+function downloadFile(filename, content, mime = 'text/plain;charset=utf-8') {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// Populate Select Dropdowns & Wire Events
+function initUI() {
+  // Presets
+  const pSel = $('presetSelect');
+  PRESETS.forEach((p) => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.label;
+    pSel.appendChild(opt);
+  });
+  pSel.addEventListener('change', (e) => {
+    const found = PRESETS.find((p) => p.id === e.target.value);
+    if (!found) return;
+    appState.config = structuredClone(found.config);
+    appState.loads = structuredClone(found.loads);
+    appState.selectedBarIdx = -1;
+    syncAllInputsFromState();
+    recomputeAndRender(72, true);
+  });
+
+  // Rebar dropdowns
+  const fillBarSel = (el, defaultId) => {
+    el.innerHTML = REBAR_LIST.map(
+      (r) => `<option value="${r.id}" ${r.id === defaultId ? 'selected' : ''}>${r.label}</option>`
+    ).join('');
+  };
+  fillBarSel($('selActiveBar'), 8);
+  fillBarSel($('adMinBar'), 5);
+  fillBarSel($('adMaxBar'), 10);
+
+  $('selActiveBar').addEventListener('change', (e) => {
+    const barId = Number(e.target.value);
+    appState.activeBarId = barId;
+    if (appState.selectedBarIdx >= 0 && appState.config.bars[appState.selectedBarIdx]) {
+      appState.config.bars[appState.selectedBarIdx].barId = barId;
+      syncSelectedBarBox();
+      recomputeAndRender(72, true);
+    } else {
+      sectionEditor.setData({ activeBarId: barId });
+    }
+  });
+
+  // Shape toggle
+  $('btnShapeRect').addEventListener('click', () => {
+    if (appState.config.shape === 'rectangular') return;
+    appState.config.shape = 'rectangular';
+    appState.config.bars = generateRectPerimeterBars({
+      b: appState.config.b,
+      h: appState.config.h,
+      coverCenter: appState.coverCenter,
+      nx: Number($('inpNx').value) || 4,
+      ny: Number($('inpNy').value) || 3,
+      barId: appState.activeBarId,
+      fy: appState.config.fy,
+      mode: $('selArrayPattern').value,
+    });
+    appState.selectedBarIdx = -1;
+    syncAllInputsFromState();
+    recomputeAndRender(72, true);
+  });
+
+  $('btnShapeCirc').addEventListener('click', () => {
+    if (appState.config.shape === 'circular') return;
+    appState.config.shape = 'circular';
+    appState.config.diameter = appState.config.diameter || Math.max(appState.config.b, appState.config.h);
+    appState.config.bars = generateCircularRingBars({
+      diameter: appState.config.diameter,
+      coverCenter: appState.coverCenter,
+      nBars: Number($('inpCircN').value) || 8,
+      barId: appState.activeBarId,
+      fy: appState.config.fy,
+      startAngleDeg: Number($('inpCircAng').value) || 0,
+    });
+    appState.selectedBarIdx = -1;
+    syncAllInputsFromState();
+    recomputeAndRender(72, true);
+  });
+
+  // Geometry & Material inputs
+  const bindNum = (id, handler) => {
+    $(id).addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      if (Number.isFinite(val) && val > 0) {
+        handler(val);
+        recomputeAndRender(72, true);
+      }
+    });
+  };
+  bindNum('inpB', (v) => (appState.config.b = v));
+  bindNum('inpH', (v) => (appState.config.h = v));
+  bindNum('inpDiam', (v) => (appState.config.diameter = v));
+  bindNum('inpFc', (v) => (appState.config.fc = v));
+  bindNum('inpFy', (v) => {
+    appState.config.fy = v;
+    appState.config.bars.forEach((b) => (b.fy = v));
+  });
+  $('inpCoverCenter').addEventListener('input', (e) => (appState.coverCenter = Number(e.target.value) || 6.5));
+  $('inpCoverCenterCirc').addEventListener('input', (e) => (appState.coverCenter = Number(e.target.value) || 6.5));
+
+  $('selHoop').addEventListener('change', (e) => {
+    appState.config.hoopType = e.target.value;
+    recomputeAndRender(72, true);
+  });
+
+  // Editor mode & snap
+  $('btnModeSelect').addEventListener('click', () => {
+    appState.toolMode = 'select';
+    $('btnModeSelect').classList.add('active');
+    $('btnModeAdd').classList.remove('active');
+    sectionEditor.setData({ toolMode: 'select' });
+  });
+  $('btnModeAdd').addEventListener('click', () => {
+    appState.toolMode = 'add';
+    $('btnModeAdd').classList.add('active');
+    $('btnModeSelect').classList.remove('active');
+    sectionEditor.setData({ toolMode: 'add' });
+  });
+  $('selSnap').addEventListener('change', (e) => {
+    appState.snapStep = Number(e.target.value);
+    sectionEditor.setData({ snapStep: appState.snapStep });
+  });
+  $('chkShowNA').addEventListener('change', (e) => {
+    appState.showNA = e.target.checked;
+    updateNAOverlay();
+  });
+
+  // Selected bar controls
+  const updateSelBarField = (field, val) => {
+    const idx = appState.selectedBarIdx;
+    if (idx < 0 || !appState.config.bars[idx]) return;
+    appState.config.bars[idx][field] = val;
+    recomputeAndRender(72, true);
+  };
+  $('inpBarX').addEventListener('change', (e) => updateSelBarField('x', Number(e.target.value) || 0));
+  $('inpBarY').addEventListener('change', (e) => updateSelBarField('y', Number(e.target.value) || 0));
+  $('inpBarFy').addEventListener('change', (e) => updateSelBarField('fy', Number(e.target.value) || appState.config.fy));
+
+  $('btnDeleteBar').addEventListener('click', () => {
+    if (appState.selectedBarIdx >= 0) {
+      appState.config.bars.splice(appState.selectedBarIdx, 1);
+      appState.selectedBarIdx = -1;
+      syncSelectedBarBox();
+      recomputeAndRender(72, true);
+    }
+  });
+
+  const mirrorBar = (axis) => {
+    const bar = appState.config.bars[appState.selectedBarIdx];
+    if (!bar) return;
+    const w = appState.config.shape === 'circular' ? appState.config.diameter : appState.config.b;
+    const h = appState.config.shape === 'circular' ? appState.config.diameter : appState.config.h;
+    const nx = axis === 'x' ? Number((w - bar.x).toFixed(2)) : bar.x;
+    const ny = axis === 'y' ? Number((h - bar.y).toFixed(2)) : bar.y;
+    const exists = appState.config.bars.some((b) => Math.hypot(b.x - nx, b.y - ny) < 0.2);
+    if (!exists) {
+      appState.config.bars.push({ x: nx, y: ny, barId: bar.barId, fy: bar.fy ?? appState.config.fy });
+      recomputeAndRender(72, true);
+    }
+  };
+  $('btnMirrorX').addEventListener('click', () => mirrorBar('x'));
+  $('btnMirrorY').addEventListener('click', () => mirrorBar('y'));
+
+  // Quick Array Generator
+  $('btnApplyArray').addEventListener('click', () => {
+    if (appState.config.shape === 'circular') {
+      appState.config.bars = generateCircularRingBars({
+        diameter: appState.config.diameter,
+        coverCenter: appState.coverCenter,
+        nBars: Number($('inpCircN').value) || 8,
+        barId: appState.activeBarId,
+        fy: appState.config.fy,
+        startAngleDeg: Number($('inpCircAng').value) || 0,
+      });
+    } else {
+      appState.config.bars = generateRectPerimeterBars({
+        b: appState.config.b,
+        h: appState.config.h,
+        coverCenter: appState.coverCenter,
+        nx: Number($('inpNx').value) || 4,
+        ny: Number($('inpNy').value) || 3,
+        barId: appState.activeBarId,
+        fy: appState.config.fy,
+        mode: $('selArrayPattern').value,
+      });
+    }
+    appState.selectedBarIdx = -1;
+    syncSelectedBarBox();
+    recomputeAndRender(72, true);
+  });
+
+  // Load cases
+  $('btnAddLoad').addEventListener('click', () => {
+    appState.loads.push({
+      id: `L${Date.now()}`,
+      name: `載重組 ${appState.loads.length + 1}`,
+      Pu: 100,
+      Mux: 15,
+      Muy: 10,
+    });
+    renderLoadCases();
+    recomputeAndRender(72, true);
+  });
+
+  // 3D View controls
+  const setViewMode3D = (mode) => {
+    appState.viewMode3D = mode;
+    $('btnViewQuad').classList.toggle('active', mode === 'quadrant');
+    $('btnViewLoadQuad').classList.toggle('active', mode === 'loadQuad');
+    $('btnViewFull').classList.toggle('active', mode === 'full');
+    plot3d.setData({ viewMode: mode });
+  };
+  $('btnViewQuad').addEventListener('click', () => setViewMode3D('quadrant'));
+  $('btnViewLoadQuad').addEventListener('click', () => setViewMode3D('loadQuad'));
+  $('btnViewFull').addEventListener('click', () => setViewMode3D('full'));
+
+  $('chkShowNominal').addEventListener('change', (e) => {
+    appState.showNominal3D = e.target.checked;
+    plot3d.setData({ showNominal: appState.showNominal3D });
+  });
+  $('chkShowDesign').addEventListener('change', (e) => {
+    appState.showDesign3D = e.target.checked;
+    plot3d.setData({ showDesign: appState.showDesign3D });
+  });
+  document.querySelectorAll('.cam-preset').forEach((btn) => {
+    btn.addEventListener('click', () => plot3d.setCameraPreset(btn.dataset.preset));
+  });
+
+  // 2D Slice controls
+  $('btnSliceAzimuth').addEventListener('click', () => {
+    appState.sliceMode2D = 'azimuth';
+    $('btnSliceAzimuth').classList.add('active');
+    $('btnSliceTheta').classList.remove('active');
+    $('thetaSliderRow').style.display = 'none';
+    plot2d.setData({ sliceMode: 'azimuth' });
+  });
+  $('btnSliceTheta').addEventListener('click', () => {
+    appState.sliceMode2D = 'theta';
+    $('btnSliceTheta').classList.add('active');
+    $('btnSliceAzimuth').classList.remove('active');
+    $('thetaSliderRow').style.display = 'flex';
+    const primary = appState.loadResults[0];
+    if (primary && primary.Mu > 1e-6) {
+      appState.fixedThetaDeg = Math.round(primary.thetaClosest / 5) * 5;
+      $('rngTheta').value = String(appState.fixedThetaDeg);
+      $('lblThetaVal').textContent = `${appState.fixedThetaDeg}°`;
+    }
+    plot2d.setData({ sliceMode: 'theta', fixedThetaDeg: appState.fixedThetaDeg });
+  });
+  $('rngTheta').addEventListener('input', (e) => {
+    appState.fixedThetaDeg = Number(e.target.value);
+    $('lblThetaVal').textContent = `${appState.fixedThetaDeg}°`;
+    plot2d.setData({ fixedThetaDeg: appState.fixedThetaDeg });
+    updateNAOverlay();
+  });
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('active'));
+      btn.classList.add('active');
+      $(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Rebar table buttons
+  $('btnAddBarRow').addEventListener('click', () => {
+    const cx = appState.config.shape === 'circular' ? appState.config.diameter / 2 : appState.config.b / 2;
+    const cy = appState.config.shape === 'circular' ? appState.config.diameter / 2 : appState.config.h / 2;
+    appState.config.bars.push({ x: Number(cx.toFixed(1)), y: Number(cy.toFixed(1)), barId: appState.activeBarId, fy: appState.config.fy });
+    appState.selectedBarIdx = appState.config.bars.length - 1;
+    syncSelectedBarBox();
+    recomputeAndRender(72, true);
+  });
+  $('btnClearBars').addEventListener('click', () => {
+    appState.config.bars = [];
+    appState.selectedBarIdx = -1;
+    syncSelectedBarBox();
+    recomputeAndRender(72, true);
+  });
+
+  // Auto-Design
+  $('btnRunAutoDesign').addEventListener('click', () => {
+    $('autoDesignStatus').textContent = '正在搜尋最佳化 3D 配筋方案...';
+    setTimeout(() => {
+      const res = autoDesignRebar(appState.config, appState.loads, {
+        coverCenter: appState.coverCenter,
+        minBarId: Number($('adMinBar').value),
+        maxBarId: Number($('adMaxBar').value),
+        maxRho: Number($('adMaxRho').value),
+        pattern: $('adPattern').value,
+        maxResults: 8,
+      });
+      $('autoDesignStatus').textContent = `已評估 ${res.totalEvaluated} 種合法對稱排列，找到 ${res.results.length} 組安全經濟配筋方案`;
+      const tbody = $('autoDesignBody');
+      if (res.results.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="color:var(--rc-danger);">找不到滿足此斷面與載重之配筋方案，請加大斷面尺寸、提高材料強度或放寬最大鋼筋比</td></tr>';
+        return;
+      }
+      tbody.innerHTML = '';
+      res.results.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="mono">#${idx + 1}</td>
+          <td><strong>${item.desc}</strong></td>
+          <td class="mono">${item.Ast.toFixed(2)}</td>
+          <td class="mono">${(item.rhoG * 100).toFixed(2)}%</td>
+          <td class="mono" style="color:var(--rc-success); font-weight:700;">${item.maxDc.toFixed(3)}</td>
+          <td>${item.worstRes?.zoneLabel || '-'}</td>
+          <td><button class="btn btn-sm btn-primary apply-ad" data-idx="${idx}" type="button">套用此配筋</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll('.apply-ad').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const item = res.results[Number(e.target.dataset.idx)];
+          if (!item) return;
+          appState.config.bars = structuredClone(item.bars);
+          appState.selectedBarIdx = -1;
+          syncSelectedBarBox();
+          recomputeAndRender(72, true);
+        });
+      });
+    }, 20);
+  });
+
+  // Downloads & Modals
+  $('btnExportTxt').addEventListener('click', () => {
+    const txt = formatNewRCBiaxInput(appState.config);
+    downloadFile(`${appState.config.name || 'RC_Column'}_input.txt`, txt);
+  });
+  $('btnDownloadBiaxTxt').addEventListener('click', () => {
+    if (!appState.surface) return;
+    downloadFile(`Biax_${appState.config.name || 'RC_Column'}.txt`, formatBiaxOutputTxt(appState.surface));
+  });
+  $('btnDownloadCsv').addEventListener('click', () => {
+    if (!appState.surface) return;
+    downloadFile(`Biax_${appState.config.name || 'RC_Column'}.csv`, formatBiaxOutputCsv(appState.surface));
+  });
+
+  // Modals open/close
+  document.querySelectorAll('.modal-close').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      btn.closest('.modal-backdrop').classList.remove('open');
+    });
+  });
+
+  $('btnImportTxt').addEventListener('click', () => {
+    $('txtImportArea').value = formatNewRCBiaxInput(appState.config);
+    $('importError').style.display = 'none';
+    $('modalImport').classList.add('open');
+  });
+  $('fileImportInput').addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => ($('txtImportArea').value = String(reader.result || ''));
+    reader.readAsText(file);
+  });
+  $('btnConfirmImport').addEventListener('click', () => {
+    try {
+      const cfg = parseNewRCBiaxInput($('txtImportArea').value);
+      appState.config = { ...appState.config, ...cfg };
+      appState.selectedBarIdx = -1;
+      syncAllInputsFromState();
+      recomputeAndRender(72, true);
+      $('modalImport').classList.remove('open');
+    } catch (err) {
+      $('importError').textContent = err.message;
+      $('importError').style.display = 'block';
+    }
+  });
+
+  $('btnCodeSettings').addEventListener('click', () => $('modalCode').classList.add('open'));
+  $('chkDeductConcrete').addEventListener('change', (e) => {
+    appState.config.deductConcrete = e.target.checked;
+    recomputeAndRender(72, true);
+  });
+  $('chkSimplifySD420').addEventListener('change', (e) => {
+    appState.config.simplifySD420 = e.target.checked;
+    recomputeAndRender(72, true);
+  });
+
+  $('btnDLHelper').addEventListener('click', () => $('modalDL').classList.add('open'));
+  $('btnApplyDL').addEventListener('click', () => {
+    const Pu = 1.2 * (Number($('dlPD').value) || 0) + 1.6 * (Number($('dlPL').value) || 0);
+    const Mux = 1.2 * (Number($('dlMDx').value) || 0) + 1.6 * (Number($('dlMLx').value) || 0);
+    const Muy = 1.2 * (Number($('dlMDy').value) || 0) + 1.6 * (Number($('dlMLy').value) || 0);
+    if (!appState.loads[0]) appState.loads[0] = { id: 'L1', name: '1.2D+1.6L', Pu: 0, Mux: 0, Muy: 0 };
+    appState.loads[0].name = '1.2D+1.6L';
+    appState.loads[0].Pu = Number(Pu.toFixed(2));
+    appState.loads[0].Mux = Number(Mux.toFixed(2));
+    appState.loads[0].Muy = Number(Muy.toFixed(2));
+    renderLoadCases();
+    recomputeAndRender(72, true);
+    $('modalDL').classList.remove('open');
+  });
+
+  // Theme Toggle
+  $('btnTheme').addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    $('btnTheme').textContent = isDark ? '淺色主題' : '深色主題';
+    sectionEditor.render();
+    plot3d.render();
+    plot2d.render();
+  });
+
+  // Delete key shortcut for selected bar
+  window.addEventListener('keydown', (e) => {
+    if (
+      (e.key === 'Delete' || e.key === 'Backspace') &&
+      appState.selectedBarIdx >= 0 &&
+      !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)
+    ) {
+      appState.config.bars.splice(appState.selectedBarIdx, 1);
+      appState.selectedBarIdx = -1;
+      syncSelectedBarBox();
+      recomputeAndRender(72, true);
+    }
+  });
+
+  // Responsive canvas resize
+  const ro = new ResizeObserver(() => {
+    sectionEditor.render();
+    plot3d.render();
+    plot2d.render();
+  });
+  ro.observe($('sectionCanvas').parentElement);
+  ro.observe($('plot3dCanvas').parentElement);
+  ro.observe($('plot2dCanvas').parentElement);
+}
+
+initUI();
+syncAllInputsFromState();
+recomputeAndRender(72, true);
+
+
+return __exp;
+})();
+
+})();
+</script>
+</body>
+</html>
