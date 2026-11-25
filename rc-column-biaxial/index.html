@@ -669,10 +669,12 @@ textarea.code-input {
     </div>
 
     <div class="header-actions">
+      <a class="btn btn-sm" href="https://jerry597640-droid.github.io/engineering-calculator-hub/">← 工程計算工具中心</a>
       <select id="presetSelect" aria-label="教材範例預設" style="width: auto; min-width: 225px;">
       </select>
       <button id="btnImportTxt" class="btn btn-sm" type="button">匯入 NewRCBiax .txt</button>
       <button id="btnExportTxt" class="btn btn-sm" type="button">匯出斷面 .txt</button>
+      <button id="btnReportOpen" class="btn btn-sm btn-primary" type="button">匯出圖形／完整報告</button>
       <button id="btnCodeSettings" class="btn btn-sm" type="button">規範參數 / 說明</button>
       <button id="btnTheme" class="btn btn-sm" type="button" title="切換深/淺色主題">深色主題</button>
     </div>
@@ -1076,6 +1078,23 @@ textarea.code-input {
       </div>
     </section>
   </main>
+
+  <div id="modalReport" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <h3 id="reportTitle" style="margin:0">匯出圖形與完整報告書</h3>
+        <button class="btn btn-sm modal-close" type="button">關閉</button>
+      </div>
+      <p class="hint-text">圖形匯出目前畫面與角度；報告包含全部載重、配筋明細、計算過程、檢核結果及三張圖。匯出前請先調整想要的圖形視角。</p>
+      <div class="form-row-2">
+        <div><label class="field-label" for="reportProject">工程名稱（選填）</label><input id="reportProject" type="text" maxlength="100" placeholder="輸入工程名稱" /></div>
+        <div><label class="field-label" for="reportMember">柱編號／備註（選填）</label><input id="reportMember" type="text" maxlength="100" placeholder="例如 C1" /></div>
+      </div>
+      <div class="toolbar-strip"><button id="btnPngSection" class="btn btn-sm" type="button">下載斷面配筋圖 PNG</button><button id="btnPng3D" class="btn btn-sm" type="button">下載 3D 互制圖 PNG</button><button id="btnPng2D" class="btn btn-sm" type="button">下載 2D 互制圖 PNG</button></div>
+      <div class="toolbar-strip"><button id="btnReportHtml" class="btn btn-primary" type="button">下載完整報告書 HTML</button><button id="btnReportPrint" class="btn" type="button">預覽／列印或另存 PDF</button></div>
+      <p class="hint-text">HTML 報告可用瀏覽器開啟、列印及另存 PDF，也可用 Word 開啟再另存為 Word 格式。</p>
+    </div>
+  </div>
 
   <!-- Modal: Import NewRCBiax .txt -->
   <div id="modalImport" class="modal-backdrop">
@@ -5622,7 +5641,141 @@ function initUI() {
   ro.observe($('plot2dCanvas').parentElement);
 }
 
+// Export the actual current analysis state and the three rendered views.
+function exportEsc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function reportNumber(value, digits = 3) {
+  return Number.isFinite(value) ? Number(value).toFixed(digits) : '無交點／無法計算';
+}
+function reportCanvas(id) {
+  const original = $(id);
+  if (!original || !original.width || !original.height) throw new Error('圖形尚未完成繪製，請稍後再試。');
+  const copy = document.createElement('canvas');
+  copy.width = original.width; copy.height = original.height;
+  const ctx = copy.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, copy.width, copy.height);
+  ctx.drawImage(original, 0, 0);
+  return copy.toDataURL('image/png');
+}
+function reportDownloadPng(id, filename) {
+  try {
+    const a = document.createElement('a');
+    a.href = reportCanvas(id); a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  } catch (error) { alert('圖形匯出失敗：' + error.message); }
+}
+function makeReport() {
+  if (!appState.surface) throw new Error('尚無分析結果。');
+  // Force a full calculation so that an export cannot capture an intermediate drag calculation.
+  runCompute(72, true);
+  const cfg = appState.config, summary = appState.surface.summary;
+  const detailing = checkCodeDetailing(cfg, summary);
+  const fmt = reportNumber, e = exportEsc;
+  const project = e($('reportProject').value.trim() || '未填寫');
+  const member = e($('reportMember').value.trim() || cfg.name || '未填寫');
+  const dimensions = cfg.shape === 'circular'
+    ? '圓柱，直徑 D = ' + fmt(cfg.diameter, 2) + ' cm'
+    : '矩形柱，b × h = ' + fmt(cfg.b, 2) + ' × ' + fmt(cfg.h, 2) + ' cm';
+  const rows = summary.bars.map((b, i) => '<tr><td>' + (i + 1) + '</td><td>' + e(getBarInfo(b.barId).label) + '</td><td>' +
+    fmt(b.x, 2) + '</td><td>' + fmt(b.y, 2) + '</td><td>' + fmt(b.area, 3) + '</td><td>' + fmt(b.fy, 0) + '</td></tr>').join('');
+  const loadRows = appState.loads.map((lc, i) => {
+    const r = appState.loadResults[i], cap = r.capDesign;
+    return '<tr><td>' + e(lc.name || ('載重 ' + (i + 1))) + '</td><td>' + fmt(r.Pu, 2) + '</td><td>' +
+      fmt(r.Mux, 2) + '</td><td>' + fmt(r.Muy, 2) + '</td><td>' + fmt(r.Mu, 2) + '</td><td>' +
+      (cap ? fmt(cap.M, 2) : '無交點') + '</td><td>' + (cap ? fmt(cap.P, 2) : '無交點') + '</td><td>' +
+      fmt(r.dcRatio) + '</td><td>' + (r.isSafe ? 'OK' : 'NG') + '</td></tr>';
+  }).join('');
+  const perLoad = appState.loads.map((lc, i) => {
+    const r = appState.loadResults[i], cap = r.capDesign;
+    const approx = computeTextbookApproxChecks(appState.surface, lc);
+    const b = approx.bresler;
+    const breslerText = b.valid
+      ? 'Pnxo = ' + fmt(b.Pnxo,2) + ' tf；Pnyo = ' + fmt(b.Pnyo,2) + ' tf；φPn = ' + fmt(b.phiPnBresler,2) +
+        ' tf；Pu / φPn = ' + fmt(b.dcRatio) + '（' + (b.isSafe ? 'OK' : 'NG') + '）'
+      : '未適用：' + e(b.reason || '無法求得有效交點');
+    return '<div class="case"><h3>' + (i + 1) + '. ' + e(lc.name || '設計載重') + '</h3>' +
+      '<p>Pu = ' + fmt(r.Pu,2) + ' tf；Mux = ' + fmt(r.Mux,2) + ' tf·m；Muy = ' + fmt(r.Muy,2) +
+      ' tf·m。合成彎矩 Mu = √(Mux² + Muy²) = ' + fmt(r.Mu,2) + ' tf·m。</p>' +
+      '<p>設計強度面射線交點：φM = ' + (cap ? fmt(cap.M,2) : '無交點') + ' tf·m；φP = ' +
+      (cap ? fmt(cap.P,2) : '無交點') + ' tf；φ = ' + fmt(r.phi,3) + '；εt = ' + fmt(r.epsT,5) +
+      '；' + e(r.zoneLabel) + '。</p>' +
+      '<p>以載重向量由原點射向設計強度面，交點比例 t = 1 / (D/C)；D/C = ' + fmt(r.dcRatio) +
+      '，' + (r.isSafe ? '≤ 1，判定 OK' : '> 1 或無有效交點，判定 NG') +
+      '。純軸力依軸壓／軸拉上限處理；零載重 D/C = 0。</p>' +
+      '<p><strong>載重等高線近似：</strong>φMnxo = ' + fmt(approx.phiMnxo,2) + '、φMnyo = ' + fmt(approx.phiMnyo,2) +
+      ' tf·m，估計指數 α = ' + fmt(approx.alphaContour) + '；互制值 = ' + fmt(approx.contourRatio) +
+      '（' + (approx.contourSafe ? 'OK' : 'NG／不適用') + '）。</p>' +
+      '<p><strong>Bresler 倒數法近似：</strong>' + breslerText + '。</p></div>';
+  }).join('');
+  const trans = detailing.transverse.type === 'tied'
+    ? '橫箍筋最小號數 ' + e(detailing.transverse.reqTieLabel) + '；最大間距參考值 ' + fmt(detailing.transverse.sMax,1) + ' cm。'
+    : '螺箍核心直徑 Dc = ' + fmt(detailing.transverse.Dc,1) + ' cm；核心面積 Ach = ' + fmt(detailing.transverse.Ach,1) +
+      ' cm²；ρs,min = ' + fmt(detailing.transverse.rhoSMin,5) + '；參考最大間距 ' + fmt(detailing.transverse.sMaxRec,1) + ' cm。';
+  const sumSteel = summary.bars.reduce((total, b) => total + b.area * (b.fy - (summary.deductConcrete ? 0.85 * summary.fc : 0)), 0);
+  const conc = 0.85 * summary.fc * summary.Ag;
+  const image = (id, title, note) => '<figure><h3>' + title + '</h3><img src="' + reportCanvas(id) +
+    '" alt="' + title + '"><figcaption>' + note + '</figcaption></figure>';
+  return '<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><title>RC柱配筋與雙軸互制分析報告</title>' +
+    '<style>body{font:14px/1.6 "Microsoft JhengHei",sans-serif;color:#172338;max-width:1000px;margin:32px auto;padding:0 22px}' +
+    'h1{font-size:24px;border-bottom:3px solid #28588c;padding-bottom:12px}h2{font-size:18px;color:#174a7c;margin-top:28px;border-bottom:1px solid #aabed0}' +
+    'h3{font-size:15px}table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}th,td{border:1px solid #9aabba;padding:5px;text-align:center}' +
+    'th{background:#eaf1f7}figure,.case{margin:14px 0;break-inside:avoid}img{display:block;max-width:100%;height:auto;border:1px solid #d5dfe8}' +
+    'figcaption,.note{font-size:12px;color:#455468}.print{position:sticky;top:0;background:#fff;padding:8px;border-bottom:1px solid #ddd}' +
+    '@media print{body{margin:0;padding:0}.print{display:none}h2,h3{break-after:avoid}tr{break-inside:avoid}@page{size:A4;margin:14mm}}</style></head><body>' +
+    '<div class="print"><button onclick="window.print()">列印／另存 PDF</button>　可使用瀏覽器列印選擇「另存 PDF」。</div>' +
+    '<h1>RC 柱配筋與雙軸向彎矩互制分析報告書</h1><p>工程：' + project + '　｜　柱編號／備註：' + member +
+    '　｜　輸出時間：' + e(new Date().toLocaleString('zh-TW', {timeZone:'Asia/Taipei'})) + '</p>' +
+    '<p class="note">依原程式採用之《鋼筋混凝土學》與 ACI 318-19 計算假設呈現。此報告由既有計算引擎產生，未經獨立驗算；實際設計應確認現行適用規範、設計條件與結果。</p>' +
+    '<h2>一、斷面與材料輸入</h2><p>' + dimensions + '；混凝土 fc′ = ' + fmt(summary.fc,0) + ' kgf/cm²；主筋預設 fy = ' +
+    fmt(summary.fy,0) + ' kgf/cm²；橫向鋼筋：' + (summary.hoopType === 'spiral' ? '螺箍柱' : '橫箍柱') +
+    '。鋼筋中心設定距離 = ' + fmt(appState.coverCenter,2) + ' cm（僅供生成陣列；實際座標如下）。</p>' +
+    '<p>混凝土強度塊扣除壓力區鋼筋面積：' + (summary.deductConcrete ? '是' : '否') +
+    '；SD420 降伏應變簡化為 0.002：' + (summary.simplifySD420 ? '是' : '否') +
+    '；Es = ' + fmt(summary.Es,0) + ' kgf/cm²；極限壓應變 εu = 0.003；β1 = ' + fmt(summary.beta1) + '。</p>' +
+    '<h2>二、斷面與配筋圖</h2>' + image('sectionCanvas','斷面配筋圖','顯示目前斷面及配筋編輯畫面。') +
+    '<h3>縱向鋼筋明細</h3><table><thead><tr><th>序號</th><th>號數</th><th>X (cm)</th><th>Y (cm)</th><th>As (cm²)</th><th>fy (kgf/cm²)</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+    '<h2>三、斷面基本計算</h2><p>總斷面積 Ag = ' + fmt(summary.Ag,2) + ' cm²；Ast = ΣAs = ' + fmt(summary.Ast,3) +
+    ' cm²；ρg = Ast / Ag = ' + fmt(summary.rhoG,5) + ' = ' + fmt(summary.rhoG*100,2) + '%。</p>' +
+    '<p>Po = [0.85fc′Ag + ΣAs(fy ' + (summary.deductConcrete ? '− 0.85fc′' : '（未扣除混凝土）') +
+    ')] / 1000 = (' + fmt(conc,1) + ' + ' + fmt(sumSteel,1) + ') / 1000 = ' + fmt(summary.Po,2) + ' tf。</p>' +
+    '<p>最大設計軸壓強度 φPn,max = α × φmin × Po = ' + fmt(summary.alphaCap,2) + ' × ' + fmt(summary.phiMin,2) +
+    ' × ' + fmt(summary.Po,2) + ' = ' + fmt(summary.phiPnMax,2) + ' tf；純軸拉設計強度絕對值 φPnt = ' + fmt(summary.phiPnt,2) +
+    ' tf。塑性中心 (Xpc, Ypc) = (' + fmt(summary.xpc,2) + ', ' + fmt(summary.ypc,2) + ') cm。</p>' +
+    '<h2>四、分析方法與假設</h2><p>採平面斷面與應變諧合，混凝土等值應力塊深度 a = β1c，混凝土壓力 Cc = 0.85fc′Ac；' +
+    '各鋼筋應力依 εs 與 Es 計算並限制於 ±fy，依設定扣除壓力區鋼筋排擠混凝土應力。Pn = Cc + ΣFs，' +
+    'Mnx、Mny 為各內力對塑性中心之力矩和；以應變對應強度折減係數 φ 並套用軸壓上限。</p>' +
+    '<p>互制面依 72 個方向離散建立並以三角網格插值；D/C 是載重向量與設計強度面交點的比例。圖示及 2D 剖面為匯出當下視角，' +
+    '檢核結果列出全部載重組合。不同方法結果皆為原程式數值，近似法不取代應變諧合分析。</p>' +
+    '<h2>五、設計載重與互制檢核</h2><p>符號及單位：軸力 Pu 受壓為正，受拉為負；Pu 為 tf，Mux、Muy、Mu 與 φM 為 tf·m。</p>' +
+    '<table><thead><tr><th>組合</th><th>Pu</th><th>Mux</th><th>Muy</th><th>Mu</th><th>φM</th><th>φP</th><th>D/C</th><th>判定</th></tr></thead><tbody>' + loadRows + '</tbody></table>' + perLoad +
+    '<h2>六、互制圖</h2>' + image('plot3dCanvas','3D P–Mx–My 互制曲面','依當前 3D 顯示範圍、角度及標稱／設計曲面選項輸出。') +
+    image('plot2dCanvas','2D P–M 互制剖面','依當前載重彎矩或指定中性軸角度剖面輸出。') +
+    '<h2>七、配筋與箍筋參考檢核</h2><p>主筋比 1%～8%：' + (detailing.rhoMinOk && detailing.rhoMaxOk ? '符合' : '不符合') +
+    '；主筋根數 ' + summary.bars.length + ' 根，最低參考 ' + detailing.minBarsReq + ' 根：' + (detailing.countOk ? '符合' : '不符合') +
+    '；最小淨距 = ' + (detailing.spacingCheck.minClear == null ? '無法判定' : fmt(detailing.spacingCheck.minClear,2)+' cm') +
+    '，程式參考需求 ≥ ' + fmt(detailing.spacingCheck.reqClear,2) + ' cm：' + (detailing.spacingCheck.minClear == null ? '無法判定' : (detailing.spacingCheck.ok ? '符合' : '不符合')) + '。</p><p>' + trans + e(detailing.transverse.note) + '</p>' +
+    '<p class="note">箍筋計算使用原程式預設參數；未輸入實際箍筋間距時，僅列參考上限，不能判定實際配置合格。剪力、長柱二階效應、耐震細節及其他未提供之條件應另行檢核。</p>' +
+    '</body></html>';
+}
+function setupReportExport() {
+  $('btnReportOpen').addEventListener('click', () => $('modalReport').classList.add('open'));
+  $('btnPngSection').addEventListener('click', () => reportDownloadPng('sectionCanvas', 'RC_column_section.png'));
+  $('btnPng3D').addEventListener('click', () => reportDownloadPng('plot3dCanvas', 'RC_column_PMM_3D.png'));
+  $('btnPng2D').addEventListener('click', () => reportDownloadPng('plot2dCanvas', 'RC_column_PM_2D.png'));
+  $('btnReportHtml').addEventListener('click', () => {
+    try { downloadFile('RC_column_biaxial_report.html', makeReport(), 'text/html;charset=utf-8'); }
+    catch (error) { alert('報告匯出失敗：' + error.message); }
+  });
+  $('btnReportPrint').addEventListener('click', () => {
+    const win = window.open('', '_blank');
+    if (!win) { alert('瀏覽器封鎖了報告預覽視窗，請允許彈出視窗後重試，或下載 HTML 報告。'); return; }
+    try { win.document.open(); win.document.write(makeReport()); win.document.close(); }
+    catch (error) { win.close(); alert('報告產生失敗：' + error.message); }
+  });
+}
+
 initUI();
+setupReportExport();
 syncAllInputsFromState();
 recomputeAndRender(72, true);
 
