@@ -2026,6 +2026,8 @@ function intersectRayWithSurface(triangles, Mux, Muy, Pu) {
     phi,
     capped,
     thetaDeg,
+    // Preserve the actual triangle and barycentric weights for a reproducible report.
+    vertices: [{ weight: w, point: v0 }, { weight: u, point: v1 }, { weight: v, point: v2 }],
   };
 }
 
@@ -4714,7 +4716,7 @@ const __exp = {};
  */
 
 const { REBAR_LIST, getBarInfo } = __mods['./rebarDB.js'];
-const { computeInteractionSurface, checkLoadCase, computeTextbookApproxChecks, exportBiaxTableRows } = __mods['./rcEngine.js'];
+const { computeInteractionSurface, checkLoadCase, computeTextbookApproxChecks, exportBiaxTableRows, clipPolygonHalfPlane, polygonAreaCentroid } = __mods['./rcEngine.js'];
 const { generateRectPerimeterBars, generateCircularRingBars, checkCodeDetailing, autoDesignRebar } = __mods['./autoDesign.js'];
 const { PRESETS, parseNewRCBiaxInput, formatNewRCBiaxInput, formatBiaxOutputTxt, formatBiaxOutputCsv } = __mods['./biaxIO.js'];
 const { SectionEditor } = __mods['./sectionEditor.js'];
@@ -5664,6 +5666,68 @@ function reportDownloadPng(id, filename) {
     a.href = reportCanvas(id); a.download = filename; document.body.appendChild(a); a.click(); a.remove();
   } catch (error) { alert('圖形匯出失敗：' + error.message); }
 }
+function reportMeshVertex(summary, vertex, index) {
+  const st = vertex.point.state, f = reportNumber, e = exportEsc;
+  const ux = Math.cos(st.alpha), uy = Math.sin(st.alpha);
+  const projections = summary.poly.map(p => p.x * ux + p.y * uy);
+  const sMax = Math.max(...projections), sMin = Math.min(...projections);
+  const compPole = st.c === Infinity, tensPole = st.c === -Infinity || st.c <= 0;
+  const cut = compPole ? -Infinity : tensPole ? Infinity : sMax - summary.beta1 * st.c;
+  const concrete = compPole ? polygonAreaCentroid(summary.poly) : tensPole ? {area:0,cx:0,cy:0} :
+    polygonAreaCentroid(cut <= sMin ? summary.poly : clipPolygonHalfPlane(summary.poly, ux, uy, cut));
+  const cc = 0.85 * summary.fc * concrete.area;
+  let sumF = 0, sumMx = 0, sumMy = 0;
+  const barRows = summary.bars.map((b, i) => {
+    const projection = b.x * ux + b.y * uy;
+    const strain = compPole ? 0.003 : tensPole ? null : 0.003 * (projection - (sMax - st.c)) / st.c;
+    const fs = tensPole ? -b.fy : compPole ? b.fy : Math.max(-b.fy, Math.min(b.fy, summary.Es * strain));
+    const deduct = !tensPole && summary.deductConcrete && projection >= cut;
+    const net = fs - (deduct ? 0.85 * summary.fc : 0);
+    const force = b.area * net;
+    const mx = force * (b.y - summary.ypc), my = force * (b.x - summary.xpc);
+    sumF += force; sumMx += mx; sumMy += my;
+    return '<tr><td>' + (i+1) + '</td><td>' + e(getBarInfo(b.barId).label) + '</td><td>' + f(b.x,2) + '</td><td>' +
+      f(b.y,2) + '</td><td>' + f(b.area,3) + '</td><td>' + f(sMax-projection,2) + '</td><td>' +
+      (tensPole ? '純拉降伏' : f(strain,6)) + '</td><td>' + f(fs,1) + '</td><td>' + (deduct ? '是' : '否') +
+      '</td><td>' + f(force/1000,3) + '</td><td>' + f(mx/100000,3) + '</td><td>' + f(my/100000,3) + '</td></tr>';
+  }).join('');
+  const cmx = cc * (concrete.cy-summary.ypc), cmy = cc * (concrete.cx-summary.xpc);
+  const pcalc = (cc+sumF)/1000, mxcalc = (cmx+sumMx)/100000, mycalc = (cmy+sumMy)/100000;
+  const stateLabel = compPole ? '純壓端點' : tensPole ? '純拉端點' : '一般應變相容狀態';
+  return '<div class="case"><h4>頂點 ' + index + '：' + stateLabel + '，內插權重 = ' + f(vertex.weight,6) + '</h4>' +
+    '<p>中性軸角 θ = ' + f(st.thetaDeg,2) + '°；壓力法向角 α = ' + f(st.alpha*180/Math.PI,2) +
+    '°；c = ' + (compPole ? '∞（純壓）' : tensPole ? '純拉極限' : f(st.c,3)+' cm') +
+    '；a = ' + (compPole ? '全斷面受壓' : tensPole ? '0' : f(summary.beta1,3)+' × '+f(st.c,3)+' = '+f(summary.beta1*st.c,3)+' cm') + '。</p>' +
+    '<p>混凝土壓力面積 Ac = ' + f(concrete.area,3) + ' cm²；壓力重心 (Xc,Yc) = (' + f(concrete.cx,3) + ', ' + f(concrete.cy,3) +
+    ') cm；Cc = 0.85 × ' + f(summary.fc,1) + ' × ' + f(concrete.area,3) + ' / 1000 = ' + f(cc/1000,3) + ' tf。</p>' +
+    '<p>距壓緣 di = smax − (xi cosα + yi sinα)；εsi = 0.003(c − di)/c；fsi = 限制(Es εsi, −fyi, fyi)。' +
+    '受壓應力塊內若啟用扣除，鋼筋淨應力再減 0.85fc′；Fi = Asi × 淨應力。正值為壓，負值為拉。純壓及純拉端點依程式分別直接取 +fy、−fy。</p>' +
+    '<table><thead><tr><th>#</th><th>號數</th><th>X<br>cm</th><th>Y<br>cm</th><th>As<br>cm²</th><th>di<br>cm</th>' +
+    '<th>εs</th><th>fs<br>kgf/cm²</th><th>扣混凝土</th><th>Fi<br>tf</th><th>Mix<br>tf·m</th><th>Miy<br>tf·m</th></tr></thead><tbody>' + barRows + '</tbody></table>' +
+    '<p>ΣFs = ' + f(sumF/1000,3) + ' tf；ΣMsx = ' + f(sumMx/100000,3) + ' tf·m；ΣMsy = ' + f(sumMy/100000,3) + ' tf·m。<br>' +
+    'Pn = Cc + ΣFs = ' + f(cc/1000,3) + ' + (' + f(sumF/1000,3) + ') = ' + f(pcalc,3) + ' tf。<br>' +
+    'Mnx = Cc(Yc − Ypc) + Σ[Fi(Yi − Ypc)] = ' + f(cmx/100000,3) + ' + (' + f(sumMx/100000,3) + ') = ' + f(mxcalc,3) + ' tf·m。<br>' +
+    'Mny = Cc(Xc − Xpc) + Σ[Fi(Xi − Xpc)] = ' + f(cmy/100000,3) + ' + (' + f(sumMy/100000,3) + ') = ' + f(mycalc,3) + ' tf·m。</p>' +
+    '<p>εt = ' + f(st.epsT,6) + '；εty = ' + f(st.epsTy,6) + '；φ = ' + f(st.phi,4) +
+    '；頂點設計座標 (φMnx, φMny, φPn) = (' + f(vertex.point.x,3) + ', ' + f(vertex.point.y,3) + ', ' +
+    f(vertex.point.z,3) + ')，其中軸力' + (st.capped ? '已套用上限' : '未達上限') + '。</p></div>';
+}
+function reportMeshForLoad(surface, result, label) {
+  const f=reportNumber, cap=result.capDesign, vertices=cap && cap.vertices;
+  if (!vertices) {
+    return '<h3>' + exportEsc(label) + '</h3><p>' +
+      (result.Mu < 1e-7 && Math.abs(result.Pu) < 1e-6
+        ? '零載重：D/C = 0；程式未進行互制面射線求交。'
+        : result.Mu < 1e-7
+          ? '純軸力：程式依純軸壓或純軸拉強度直接計算 D/C，未進行互制面三角形插值；參見斷面基本計算。'
+          : '未找到設計強度面交點，無法提供頂點分解；請檢查斷面與載重。') + '</p>';
+  }
+  const pieces=vertices.map((v,i)=>reportMeshVertex(surface.summary,v,i+1)).join('');
+  const formula=vertices.map((v,i)=>f(v.weight,6)+' × ('+f(v.point.x,3)+', '+f(v.point.y,3)+', '+f(v.point.z,3)+')').join(' + ');
+  return '<h3>' + exportEsc(label) + '</h3><p>交點所在三角形的三個頂點均依各自應變狀態計算，然後按面積座標加權；以下各頂點的 c、θ 不應視為同一個「交點斷面」。</p>' +
+    pieces + '<p><strong>交點插值：</strong>(φMnx, φMny, φPn) = ' + formula + ' = (' +
+    f(cap.x,3) + ', ' + f(cap.y,3) + ', ' + f(cap.z,3) + ')。交點為三角形近似值，並非重新以單一 c、θ 直接積分的狀態。</p>';
+}
 function makeReport() {
   if (!appState.surface) throw new Error('尚無分析結果。');
   // Force a full calculation so that an export cannot capture an intermediate drag calculation.
@@ -5690,7 +5754,10 @@ function makeReport() {
     const approx = computeTextbookApproxChecks(appState.surface, lc);
     const b = approx.bresler;
     const breslerText = b.valid
-      ? 'Pnxo = ' + fmt(b.Pnxo,2) + ' tf；Pnyo = ' + fmt(b.Pnyo,2) + ' tf；φPn = ' + fmt(b.phiPnBresler,2) +
+      ? 'ex = |Muy| × 100 / Pu = ' + fmt(b.ex,2) + ' cm；ey = |Mux| × 100 / Pu = ' + fmt(b.ey,2) +
+        ' cm。由程式單軸互制曲線插得 Pnxo = ' + fmt(b.Pnxo,2) + ' tf、Pnyo = ' + fmt(b.Pnyo,2) +
+        ' tf。1/Pn = 1/Pnxo + 1/Pnyo − 1/Po = 1/' + fmt(b.Pnxo,2) + ' + 1/' + fmt(b.Pnyo,2) +
+        ' − 1/' + fmt(summary.Po,2) + '；Pn = ' + fmt(b.PnBresler,2) + ' tf。φPn（含上限）= ' + fmt(b.phiPnBresler,2) +
         ' tf；Pu / φPn = ' + fmt(b.dcRatio) + '（' + (b.isSafe ? 'OK' : 'NG') + '）'
       : '未適用：' + e(b.reason || '無法求得有效交點');
     return '<div class="case"><h3>' + (i + 1) + '. ' + e(lc.name || '設計載重') + '</h3>' +
@@ -5703,7 +5770,11 @@ function makeReport() {
       '，' + (r.isSafe ? '≤ 1，判定 OK' : '> 1 或無有效交點，判定 NG') +
       '。純軸力依軸壓／軸拉上限處理；零載重 D/C = 0。</p>' +
       '<p><strong>載重等高線近似：</strong>φMnxo = ' + fmt(approx.phiMnxo,2) + '、φMnyo = ' + fmt(approx.phiMnyo,2) +
-      ' tf·m，估計指數 α = ' + fmt(approx.alphaContour) + '；互制值 = ' + fmt(approx.contourRatio) +
+      ' tf·m；程式估算 β = ' + fmt(Math.exp(Math.log(0.5)/approx.alphaContour),3) +
+      '，指數 α = log(0.5)/log(β) = ' + fmt(approx.alphaContour) +
+      '；(|Mux|/φMnxo)^α + (|Muy|/φMnyo)^α = (' + fmt(Math.abs(r.Mux),2) + '/' + fmt(approx.phiMnxo,2) +
+      ')^' + fmt(approx.alphaContour) + ' + (' + fmt(Math.abs(r.Muy),2) + '/' + fmt(approx.phiMnyo,2) +
+      ')^' + fmt(approx.alphaContour) + ' = ' + fmt(approx.contourRatio) +
       '（' + (approx.contourSafe ? 'OK' : 'NG／不適用') + '）。</p>' +
       '<p><strong>Bresler 倒數法近似：</strong>' + breslerText + '。</p></div>';
   }).join('');
@@ -5725,7 +5796,7 @@ function makeReport() {
     '<div class="print"><button onclick="window.print()">列印／另存 PDF</button>　可使用瀏覽器列印選擇「另存 PDF」。</div>' +
     '<h1>RC 柱配筋與雙軸向彎矩互制分析報告書</h1><p>工程：' + project + '　｜　柱編號／備註：' + member +
     '　｜　輸出時間：' + e(new Date().toLocaleString('zh-TW', {timeZone:'Asia/Taipei'})) + '</p>' +
-    '<p class="note">依原程式採用之《鋼筋混凝土學》與 ACI 318-19 計算假設呈現。此報告由既有計算引擎產生，未經獨立驗算；實際設計應確認現行適用規範、設計條件與結果。</p>' +
+    '<p class="note">參考《鋼筋混凝土學（土木406-112）》第七章：第 7-13～7-18 頁應變相容、第 7-26～7-29 頁雙軸近似法、第 7-31～7-35 頁例題 7.8。教材倒數法與等高線法採圖表取值；本程式以數值單軸曲線及估算 β 替代，結果可能不同。此報告由既有計算引擎產生，實際設計應另行確認現行適用規範與結果。</p>' +
     '<h2>一、斷面與材料輸入</h2><p>' + dimensions + '；混凝土 fc′ = ' + fmt(summary.fc,0) + ' kgf/cm²；主筋預設 fy = ' +
     fmt(summary.fy,0) + ' kgf/cm²；橫向鋼筋：' + (summary.hoopType === 'spiral' ? '螺箍柱' : '橫箍柱') +
     '。鋼筋中心設定距離 = ' + fmt(appState.coverCenter,2) + ' cm（僅供生成陣列；實際座標如下）。</p>' +
@@ -5744,13 +5815,18 @@ function makeReport() {
     '<h2>四、分析方法與假設</h2><p>採平面斷面與應變諧合，混凝土等值應力塊深度 a = β1c，混凝土壓力 Cc = 0.85fc′Ac；' +
     '各鋼筋應力依 εs 與 Es 計算並限制於 ±fy，依設定扣除壓力區鋼筋排擠混凝土應力。Pn = Cc + ΣFs，' +
     'Mnx、Mny 為各內力對塑性中心之力矩和；以應變對應強度折減係數 φ 並套用軸壓上限。</p>' +
+    '<p>原程式折減係數：εty = fy / Es（若啟用 SD420 簡化則取 0.002）；εt ≤ εty 時取 φmin，' +
+    'εt ≥ εty + 0.003 時取 0.90，中間線性插值。橫箍 φmin = 0.65、螺箍 φmin = 0.75；' +
+    '各頂點取最外緣受拉筋的 fy 求 εty。純壓與純拉極限採程式端點設定。</p>' +
     '<p>互制面依 72 個方向離散建立並以三角網格插值；D/C 是載重向量與設計強度面交點的比例。圖示及 2D 剖面為匯出當下視角，' +
     '檢核結果列出全部載重組合。不同方法結果皆為原程式數值，近似法不取代應變諧合分析。</p>' +
     '<h2>五、設計載重與互制檢核</h2><p>符號及單位：軸力 Pu 受壓為正，受拉為負；Pu 為 tf，Mux、Muy、Mu 與 φM 為 tf·m。</p>' +
     '<table><thead><tr><th>組合</th><th>Pu</th><th>Mux</th><th>Muy</th><th>Mu</th><th>φM</th><th>φP</th><th>D/C</th><th>判定</th></tr></thead><tbody>' + loadRows + '</tbody></table>' + perLoad +
-    '<h2>六、互制圖</h2>' + image('plot3dCanvas','3D P–Mx–My 互制曲面','依當前 3D 顯示範圍、角度及標稱／設計曲面選項輸出。') +
+    '<h2>六、強度面交點逐步計算</h2><p>下列步驟逐一呈現構成交點的三個網格頂點，包含鋼筋應變、應力、內力與力矩，再列出交點內插；分析細度為 72 個方向，角度間隔 5°。</p>' +
+    appState.loads.map((lc,i)=>reportMeshForLoad(appState.surface,appState.loadResults[i],lc.name || ('載重 '+(i+1)))).join('') +
+    '<h2>七、互制圖</h2>' + image('plot3dCanvas','3D P–Mx–My 互制曲面','依當前 3D 顯示範圍、角度及標稱／設計曲面選項輸出。') +
     image('plot2dCanvas','2D P–M 互制剖面','依當前載重彎矩或指定中性軸角度剖面輸出。') +
-    '<h2>七、配筋與箍筋參考檢核</h2><p>主筋比 1%～8%：' + (detailing.rhoMinOk && detailing.rhoMaxOk ? '符合' : '不符合') +
+    '<h2>八、配筋與箍筋參考檢核</h2><p>主筋比 1%～8%：' + (detailing.rhoMinOk && detailing.rhoMaxOk ? '符合' : '不符合') +
     '；主筋根數 ' + summary.bars.length + ' 根，最低參考 ' + detailing.minBarsReq + ' 根：' + (detailing.countOk ? '符合' : '不符合') +
     '；最小淨距 = ' + (detailing.spacingCheck.minClear == null ? '無法判定' : fmt(detailing.spacingCheck.minClear,2)+' cm') +
     '，程式參考需求 ≥ ' + fmt(detailing.spacingCheck.reqClear,2) + ' cm：' + (detailing.spacingCheck.minClear == null ? '無法判定' : (detailing.spacingCheck.ok ? '符合' : '不符合')) + '。</p><p>' + trans + e(detailing.transverse.note) + '</p>' +
