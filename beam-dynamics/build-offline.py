@@ -30,6 +30,7 @@ script, count = re.subn(r'<script type="module" src="\./app\.js[^\"]*"></script>
 if count != 1:
     raise ValueError('Expected exactly one app entry point')
 html = script.replace('<link rel="manifest" href="./manifest.webmanifest">', '')
+html = html.replace('<a class="brand" href="./">', '<a class="brand" href="#">')
 for name, mime in [('icon.svg', 'image/svg+xml'), ('icon-180.png', 'image/png')]:
     data = base64.b64encode((root / name).read_bytes()).decode()
     html = html.replace('href="./' + name + '"', 'href="data:' + mime + ';base64,' + data + '"')
