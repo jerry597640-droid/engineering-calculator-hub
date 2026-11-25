@@ -112,7 +112,7 @@ label{font-size:14px}.hub-return{font-size:14px;align-self:center;text-decoratio
 #beamWrap>svg{max-height:none;height:auto;display:block}
 
 .chart>svg[data-plot-left]{max-height:none;height:auto;display:block}
-.vehicle-body [role=button]:focus circle{stroke-width:.06px}
+.vehicle-body [role=button]:focus circle{stroke-width:2.5px}
 
-/* Keep SVG user units from enlarging on wide desktop panels. */
-#beamWrap>svg,.chart>svg[data-plot-left]{max-width:1000px;margin-inline:auto}
+/* Match the SVG viewBox to the available panel width, including wide desktops. */
+#beamWrap>svg,.chart>svg[data-plot-left]{max-width:2400px;margin-inline:auto}
