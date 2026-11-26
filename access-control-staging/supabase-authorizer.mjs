@@ -37,4 +37,3 @@ export function createSupabaseAuthorizer({ url, publishableKey, fetchImpl = fetc
     return allowed ? 'allow' : 'deny';
   };
 }
-

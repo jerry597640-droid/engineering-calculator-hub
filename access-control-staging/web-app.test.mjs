@@ -50,4 +50,3 @@ test('admin changes reject CSRF before making a mutation',async()=>{
   const x=fake({claims:{sub:id,aal:'aal2'},userProfile:{user_id:id,role:'owner',status:'approved'}});
   const r=await route(req('/admin/status',form('target='+id+'&status=approved','https://evil.example')),x);assert.equal(r.status,400);assert.equal(x.rpcs().length,0);
 });
-

@@ -52,4 +52,3 @@ reset role;
 rollback;
 select 'PASS: administrative fixtures rolled back' as result;
 
-

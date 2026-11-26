@@ -170,4 +170,3 @@ grant execute on function public.ech_admin_users(integer,integer), public.ech_ad
   public.ech_admin_set_status(uuid,text,timestamptz), public.ech_admin_set_role(uuid,text),
   public.ech_admin_set_permission(uuid,text,boolean,timestamptz,timestamptz) to authenticated;
 
-

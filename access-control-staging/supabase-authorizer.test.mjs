@@ -47,4 +47,3 @@ test('unexpected responses fail closed', async () => {
   const auth = createSupabaseAuthorizer({url,publishableKey,fetchImpl:async()=>Response.json({allowed:true})});
   await assert.rejects(() => auth(request(cookie),'rc-beam'));
 });
-

@@ -43,4 +43,3 @@ reset role;
 rollback;
 select 'PASS: synthetic authorization fixtures rolled back' as result;
 
-

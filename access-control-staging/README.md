@@ -1,20 +1,19 @@
-# �u�{�u����v�h�D�G�������ծ֤�
+# 工程工具授權閘道：本機測試核心
 
-�o�O**�|���W�u�禬�����ժ�**�A���O�i��J�����ϥΪ�����t�ΡC�w�ǳƨ�ӬJ���u��տ��ɮסB���A���ݵn�J���޲z�������ΡB�v�����v�h�D�θ�Ʈw migration�F�Ҧ��\�ऴ���b�u�ꨭ���BMFA�BCloudflare�BSupabase �s�u�P��˸m���Һݨ�����ҡA���i�@���������ҡC
+這是**尚未上線驗收的測試版**，不是可投入正式使用的完整系統。已準備兩個既有工具試辦檔案、伺服器端登入／管理介面雛形、逐項授權閘道及資料庫 migration；所有功能仍須在真實身分、MFA、Cloudflare、Supabase 連線與跨裝置環境端到端驗證，不可作為正式環境。
 
-�ت��G�T�O����h�D�b�������|�B���n�J�B�����v�B�]�w�ʥ��α��v�A�ȬG�ٮɡA���|Ū���u��귽�C��@�̿� `authorize` �Ѧ��A���i�a���Ҩ����Υثe���v�����v�A�B������ Cloudflare Worker ���B�z�Ҧ��귽���|�C������@�e�������թҦ�����BCookie�BRLS�B�귽¶�L�B�֨��B�u��ۨ��ɮ׻P����n�J�y�{�C
+目的：確保後續閘道在未知路徑、未登入、未授權、設定缺失或授權服務故障時，不會讀取工具資源。實作依賴 `authorize` 由伺服器可靠驗證身分及目前的逐項授權，且必須由 Cloudflare Worker 先處理所有資源路徑。正式實作前仍須測試所有網域、Cookie、RLS、資源繞過、快取、工具相依檔案與完整登入流程。
 
-�����q�Y��ڵ� URL �s�X�r���Υ��M�g���|�A�o�i�ण�ۮe�{���u��겣�F�ݽL�I�γ]�p�w�����зǤƳB�z��~��E���C����̥����������իź٥������p�w���C
+本階段嚴格拒絕 URL 編碼字元及未映射路徑，這可能不相容現有工具資產；需盤點及設計安全的標準化處理後才能遷移。不能依本機模擬測試宣稱正式部署安全。
 
-`worker-entry.mjs` �ϥ� Supabase �����A���� SDK �޲z Cookie�B���Ҩ����F`web-app.mjs` �b���Τu��귽�e�d�߸�Ʈw���v�C`supabase-authorizer.mjs` �O�t�@�ӿW�ߪ����դ����A�|�����J��� Worker�C��Ʈw���޲z�ާ@�n�D MFA �P�����Ī��u�@���q�F��l�֦��̩|���إߡC
+`worker-entry.mjs` 使用 Supabase 的伺服器端 SDK 管理 Cookie、驗證身分；`web-app.mjs` 在取用工具資源前查詢資料庫授權。`supabase-authorizer.mjs` 是另一個獨立的測試介面，尚未接入實際 Worker。資料庫的管理操作要求 MFA 與仍有效的工作階段；初始擁有者尚未建立。
 
-## ���p�e�����n�ƶ�
+## 部署前的必要事項
 
-- ���կ������]�w `SITE_ORIGIN`�B`SUPABASE_URL` �P `SUPABASE_PUBLISHABLE_KEY`�A�䤤 `SITE_ORIGIN` ���P���I HTTPS ���}�����ۦP�C���]�w�ɹh�D�|�^ 503�C���� secret��service role key �����o��J�x�s�w�C
-- `wrangler.jsonc` �� `assets.run_worker_first` �����O�� `true`�C���ե�������B�������}�B�R�A�ɮ׻P�� GitHub ���}�O�_�i¶�L�A������ `no-store`�C
-- ����֦��̥������b�����������u����U�P�q�l�l�����ҡA�g�T�{������~�ѥi�H�޲z�̪�l�ƨ���C�޲z�ާ@�������� MFA ���ҡC
-- Google OAuth�B���U���ҫH�B�K�X���]�B�ϥβέp�B�B�~ 40 �Ӥu��P�¤��}���}�B�z�|�������ι���C��Ӹտ�u��i�ऴ�t�s���¤��}�������s���C
-- �����ϥ� Node �������աA�L�k�N���u�� SDK�B�s�����ζ������Ҥw���ҡC���p�e�����滷�ݫظm�B�n�J�B���v�θ귽��¶�L���աA�ðO�����G�C
+- 測試站必須設定 `SITE_ORIGIN`、`SUPABASE_URL` 與 `SUPABASE_PUBLISHABLE_KEY`，其中 `SITE_ORIGIN` 須與站點 HTTPS 網址完全相同。未設定時閘道會回 503。任何 secret／service role key 均不得放入儲存庫。
+- `wrangler.jsonc` 的 `assets.run_worker_first` 必須保持 `true`。測試正式網域、版本網址、靜態檔案與舊 GitHub 網址是否可繞過，並驗證 `no-store`。
+- 首位擁有者必須先在受控站完成真實註冊與電子郵件驗證，經確認身分後才由可信管理者初始化角色。管理操作必須完成 MFA 驗證。
+- Google OAuth、註冊驗證信、密碼重設、使用統計、額外 40 個工具與舊公開網址處理尚未完成或實測。兩個試辦工具可能仍含連至舊公開網站的連結。
+- 本機使用 Node 模擬測試，無法代表真實 SDK、瀏覽器或雲端環境已驗證。部署前須執行遠端建置、登入、停權及資源防繞過測試，並記錄結果。
 
-���楻�����աG`node --test *.test.mjs`
-
+執行本機測試：`node --test *.test.mjs`

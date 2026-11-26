@@ -60,4 +60,3 @@ test('unsupported methods and paths cannot access assets', async () => {
   assert.equal((await f.handle(req('/unmapped/app.js'))).status,404);
   assert.equal(f.count(),0);
 });
-

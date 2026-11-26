@@ -57,4 +57,3 @@ export function createProtectedGateway({ authorize, assets } = {}) {
     });
   };
 }
-
