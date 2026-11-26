@@ -9,16 +9,17 @@ import { join } from 'node:path';
 const origin='https://engineering-tools-access-staging.jerry597640.workers.dev';
 const profile=await mkdtemp(join(tmpdir(),'ech-browser-'));
 const chrome=spawn('google-chrome',['--headless=new','--no-sandbox','--disable-gpu',
-  '--disable-dev-shm-usage','--remote-debugging-port=9222',`--user-data-dir=${profile}`,'about:blank'],{stdio:'ignore'});
+  '--disable-dev-shm-usage','--remote-debugging-port=9222',`--user-data-dir=${profile}`,'about:blank'],{stdio:['ignore','ignore','pipe']});
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+let chromeError='';chrome.stderr.on('data',chunk=>{chromeError=(chromeError+chunk.toString()).slice(-2000)});
 let ws;
 try {
   let pages;
-  for(let n=0;n<100;n++){
+  for(let n=0;n<300;n++){
     try{const r=await fetch('http://127.0.0.1:9222/json/list');pages=await r.json();if(pages.length)break}catch{}
     await delay(100);
   }
-  assert.ok(pages?.[0]?.webSocketDebuggerUrl,'headless Chrome did not start');
+  assert.ok(pages?.[0]?.webSocketDebuggerUrl,'headless Chrome did not start: '+chromeError);
   ws=new WebSocket(pages[0].webSocketDebuggerUrl);
   await Promise.race([new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true})}),delay(10000).then(()=>{throw Error('browser connection timed out')})]);
   let seq=0;const pending=new Map();
