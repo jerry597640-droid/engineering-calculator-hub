@@ -73,9 +73,11 @@ try{
     const inputs=[...document.querySelectorAll('input,select,textarea')].filter(e=>visible(e)&&
       !['hidden','file','password','button','submit'].includes(e.type))
       .map((e,i)=>({key:e.id||e.name||'#'+i,value:e.type==='checkbox'||e.type==='radio'?String(e.checked):e.value}));
-    const result=[...document.querySelectorAll('[id]')].filter(e=>visible(e)&&
-      /^(?:results?|output|summary|calcresult|rescard)/i.test(e.id))
-      .map(e=>({id:e.id,text:(e.innerText||'').slice(0,3000)}))
+    const result=[...document.querySelectorAll('[id],output,[role="status"],[aria-live],[class*="result"],[class*="output"],[class*="summary"]')]
+      .filter(e=>visible(e)&&(/^(?:results?|output|summary|calcresult|rescard)/i.test(e.id)||
+        e.tagName==='OUTPUT'||e.getAttribute('role')==='status'||e.hasAttribute('aria-live')||
+        /(?:result|output|summary)/i.test(typeof e.className==='string'?e.className:'')))
+      .map((e,i)=>({id:e.id||'@'+i,text:(e.innerText||'').slice(0,3000)}))
       .filter(e=>/\d/.test(e.text))
       .map(e=>({id:e.id,numbers:(e.text.match(/-?\d[\d,]*(?:\.\d+)?(?:e[+-]?\d+)?/gi)||[]).map(x=>x.replace(/,/g,''))}));
     return {path:location.pathname,title:document.title,body:(document.body?.innerText||'').trim().length,inputs,result};

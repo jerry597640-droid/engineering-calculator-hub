@@ -34,24 +34,6 @@ export function rewriteLinks(text,tools){
   return text.split('驗算與操作說明.html').join('manual-zh.html')
     .split('%E9%A9%97%E7%AE%97%E8%88%87%E6%93%8D%E4%BD%9C%E8%AA%AA%E6%98%8E.html').join('manual-zh.html');
 }
-// The staging build does not publish offline packages. Retain element IDs so
-// existing scripts can initialize, but make their download controls inert.
-export function suspendOfflineDownloads(html){
-  return html.split(/(<(?:script|style)\b[^>]*>[\s\S]*?<\/(?:script|style)\s*>)/gi)
-    .map((part,i)=>i%2?part:part
-      .replace(/<a\b([^>]*?)\s+href\s*=\s*(["'])([^"']*)\2([^>]*)>([\s\S]*?)<\/a>/gi,(all,before,q,href,after)=>{
-        if(!/(?:offline|\.zip(?:$|[?#]))/i.test(href))return all;
-        const attrs=(before+after).replace(/\s+download(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?/gi,'');
-        return '<a'+attrs+' aria-disabled="true" title="測試站暫不提供離線下載">離線下載暫未開放</a>';
-      })
-      .replace(/<button\b([^>]*)>([\s\S]*?)<\/button>/gi,(all,attrs,inside)=>{
-        const isOffline=(/offline/i.test(attrs)&&/下載|匯出|download/i.test(inside))||
-          /下載.{0,8}離線|離線.{0,8}下載/.test(inside);
-        if(!isOffline)return all;
-        const clean=attrs.replace(/\s+title\s*=\s*(?:"[^"]*"|'[^']*')/gi,'').replace(/\s+disabled\b/gi,'');
-        return '<button'+clean+' disabled title="測試站暫不提供離線下載">離線下載暫未開放</button>';
-      })).join('');
-}
 export async function prepare({repoRoot,stageRoot,manifest,sourceRoot=join(repoRoot,'.migration-sources'),skipPilots=true}){
   const tools=manifest?.tools;if(!Array.isArray(tools))throw Error('invalid manifest');
   const ids=new Set();for(const t of tools){if(!/^[a-z0-9][a-z0-9-]{0,79}$/.test(t.id)||ids.has(t.id)||!['hub','external'].includes(t.kind)||typeof t.source!=='string')throw Error('invalid tool entry');ids.add(t.id)}
@@ -70,8 +52,7 @@ export async function prepare({repoRoot,stageRoot,manifest,sourceRoot=join(repoR
     let actualDest=dest;if(tool.id==='footing-design' && rel==='驗算與操作說明.html')actualDest=join(dirname(dest),'manual-zh.html');
     await mkdir(dirname(actualDest),{recursive:true});
     if(textTypes.has(extname(rel).toLowerCase())){
-      const original=await readFile(source,'utf8');let changed=rewriteLinks(original,tools);
-      if(extname(rel).toLowerCase()==='.html')changed=suspendOfflineDownloads(changed);
+      const original=await readFile(source,'utf8');const changed=rewriteLinks(original,tools);
       await writeFile(actualDest,changed,'utf8');
     }else await copyFile(source,actualDest);
     tool.files++;tool.bytes+=st.size;
@@ -84,25 +65,8 @@ export async function prepare({repoRoot,stageRoot,manifest,sourceRoot=join(repoR
     if(st.isSymbolicLink())throw Error('symlink source not allowed');
     if(st.isFile()){
       if(!t.source.endsWith('.html'))throw Error('unexpected single-file tool');
-      const raw=await readFile(source,'utf8');await writeFile(join(dest,'index.html'),suspendOfflineDownloads(rewriteLinks(raw,tools)),'utf8');entry.files=1;entry.bytes=st.size;
+      const raw=await readFile(source,'utf8');await writeFile(join(dest,'index.html'),rewriteLinks(raw,tools),'utf8');entry.files=1;entry.bytes=st.size;
     }else await walk(source,dest,'',entry);
-    for(const extra of t.extra_assets||[]){
-      if(t.kind!=='hub'||typeof extra.source!=='string'||typeof extra.dest!=='string'||!shouldCopy(extra.dest))throw Error('invalid extra asset');
-      const from=assertInside(repoRoot,extra.source),to=assertInside(dest,extra.dest),info=await lstat(from);
-      if(!info.isFile()||info.isSymbolicLink()||info.size>25*1024*1024)throw Error('invalid extra asset source');
-      if(await lstat(to).catch(()=>null))throw Error('extra asset would overwrite a file');
-      await mkdir(dirname(to),{recursive:true});
-      if(textTypes.has(extname(extra.dest).toLowerCase()))await writeFile(to,rewriteLinks(await readFile(from,'utf8'),tools),'utf8');
-      else await copyFile(from,to);
-      entry.files++;entry.bytes+=info.size;
-    }
-    for(const change of t.replacements||[]){
-      if(typeof change.file!=='string'||typeof change.from!=='string'||!change.from||
-         typeof change.to!=='string'||!textTypes.has(extname(change.file).toLowerCase()))throw Error('invalid replacement');
-      const target=assertInside(dest,change.file),raw=await readFile(target,'utf8');
-      if(raw.split(change.from).length!==2)throw Error('replacement must match exactly once: '+t.id);
-      await writeFile(target,raw.replace(change.from,change.to),'utf8');
-    }
     const index=await lstat(join(dest,'index.html')).catch(()=>null);if(!index?.isFile())throw Error('missing tool entry: '+t.id);
     summary.push(entry);
   }
