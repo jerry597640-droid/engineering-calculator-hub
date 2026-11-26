@@ -72,3 +72,37 @@ test('an existing grant can be extended without revoking it',async()=>{
   const html=await (await route(req('/admin?target='+id),x)).text();
   assert.match(html,/value="2027-01-01T12:30"/);assert.match(html,/name="allowed" value="true">更新期限/);assert.match(html,/name="allowed" value="false">取消授權/);
 });
+test('account search is bounded, escaped, and sent to the server',async()=>{
+  const x=fake({claims:{sub:id,aal:'aal2'},userProfile:{user_id:id,role:'owner',status:'approved'}});
+  const r=await route(req('/admin?q=%3Cowner%3E'),x),html=await r.text();
+  assert.equal(r.status,200);assert.match(html,/value="&lt;owner&gt;"/);
+  assert.equal(x.rpcs()[0].name,'ech_admin_search_users');assert.equal(x.rpcs()[0].args.search_text,'<owner>');
+  assert.equal((await route(req('/admin?q='+('x'.repeat(255))),x)).status,400);
+});
+test('batch preview lists only selected existing tools and performs no mutation',async()=>{
+  const x=fake({claims:{sub:id,aal:'aal2'},userProfile:{user_id:id,role:'owner',status:'approved'}}),calls=[];
+  x.client.rpc=async(name,args)=>{calls.push({name,args});return name==='ech_admin_permissions'?
+    {data:[{tool_id:'rc-beam',name:'RC 梁',enabled:true},{tool_id:'wind',name:'風力',enabled:false}],error:null}:{data:null,error:null}};
+  const r=await route(req('/admin/permission-batch/preview',form('target='+id+'&operation=grant-enabled&q=owner&valid_until=')),x);
+  const html=await r.text();assert.equal(r.status,200);assert.match(html,/RC 梁/);assert.doesNotMatch(html,/風力/);
+  assert.deepEqual(calls.map(c=>c.name),['ech_admin_permissions']);assert.match(html,/name="tools" value="rc-beam"/);
+  const bad=await route(req('/admin/permission-batch/preview',form('target='+id+'&operation=grant-selected&tools=unknown')),x);
+  assert.equal(bad.status,400);
+});
+test('batch confirmation sends explicit unique tool IDs and keeps CSRF checks',async()=>{
+  const x=fake({claims:{sub:id,aal:'aal2'},userProfile:{user_id:id,role:'owner',status:'approved'}});
+  const body='target='+id+'&allowed=true&tools=rc-beam&tools=wind&valid_until=2027-01-01T12%3A30';
+  const r=await route(req('/admin/permission-batch',form(body)),x);assert.equal(r.status,303);
+  assert.equal(x.rpcs()[0].name,'ech_admin_set_permissions');
+  assert.deepEqual(x.rpcs()[0].args.requested_tools,['rc-beam','wind']);
+  assert.equal(x.rpcs()[0].args.new_valid_until,'2027-01-01T04:30:00.000Z');
+  const dup=await route(req('/admin/permission-batch',form(body+'&tools=wind')),x);assert.equal(dup.status,400);
+  const csrf=await route(req('/admin/permission-batch',form(body,'https://evil.example')),x);assert.equal(csrf.status,400);
+  assert.equal(x.rpcs().length,1);
+});
+test('only a verified owner can view the administrative audit',async()=>{
+  const admin=fake({claims:{sub:id,aal:'aal2'},userProfile:{user_id:id,role:'admin',status:'approved'}});
+  assert.equal((await route(req('/admin/audit'),admin)).status,403);assert.equal(admin.rpcs().length,0);
+  const owner=fake({claims:{sub:id,aal:'aal2'},userProfile:{user_id:id,role:'owner',status:'approved'}});
+  assert.equal((await route(req('/admin/audit'),owner)).status,200);assert.equal(owner.rpcs()[0].name,'ech_admin_audit');
+});

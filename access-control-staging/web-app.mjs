@@ -24,15 +24,26 @@ const taipeiInstant = value => {
   return new Date(ms).toISOString();
 };
 
-async function formValues(req) {
+async function formValues(req,{allowMultiple=[]}={}) {
   if (!sameOrigin(req) || !(req.headers.get('content-type') || '').startsWith('application/x-www-form-urlencoded')) throw new Error('bad request');
   const reader=req.body?.getReader(); let size=0, parts=[];
   if(reader) for (;;) { const {value,done}=await reader.read(); if(done)break; size+=value.byteLength; if(size>16384){await reader.cancel();throw Error('too large')} parts.push(value); }
   const bytes=new Uint8Array(size);let pos=0;for(const part of parts){bytes.set(part,pos);pos+=part.byteLength}
   const params=new URLSearchParams(new TextDecoder().decode(bytes));
-  for(const key of new Set(params.keys()))if(params.getAll(key).length!==1)throw Error('duplicate field');
+  for(const key of new Set(params.keys()))if(params.getAll(key).length!==1 && !allowMultiple.includes(key))throw Error('duplicate field');
   return params;
 }
+const searchValue = value => {
+  const text=(value||'').trim();
+  if(text.length>254 || /[\u0000-\u001f\u007f]/.test(text))throw Error('invalid search');
+  return text;
+};
+const adminUrl = (pageNumber,search,target) => {
+  const q=new URLSearchParams({page:String(pageNumber)});
+  if(search)q.set('q',search);
+  if(target)q.set('target',target);
+  return '/admin?'+q.toString();
+};
 
 async function identity(client) {
   const {data,error}=await client.auth.getClaims();
@@ -45,7 +56,7 @@ async function profile(client,claims) {
   return data;
 }
 const approved = p => p?.status==='approved' && (!p.expires_at || Date.parse(p.expires_at)>Date.now());
-const loginPage = message => page('工程計算工具中心｜登入',`<section><p>${esc(message || '請登入，帳號須經管理員核准後使用。')}</p><form method="post" action="/auth/login"><label>電子郵件 <input required type="email" name="email" autocomplete="username"></label><label>密碼 <input required type="password" name="password" autocomplete="current-password"></label><button>登入</button></form><form method="post" action="/auth/google"><button>使用 Google 登入</button></form><p><a href="/signup">申請帳號</a></p><small>測試環境：工具尚未正式開放。</small></section>`);
+const loginPage = message => page('工程計算工具中心｜登入',`<section><p>${esc(message || '請登入，帳號須經管理員核准後使用。')}</p><form method="post" action="/auth/login"><label>電子郵件 <input required type="email" name="email" autocomplete="username"></label><label>密碼 <input required type="password" name="password" autocomplete="current-password"></label><button>登入</button></form><p>Google 登入尚在設定中。</p><p><a href="/signup">申請帳號</a></p><small>測試環境：工具尚未正式開放。</small></section>`);
 const signupPage = () => page('申請帳號',`<section><p>申請後需先驗證電子郵件，並由管理員核准。</p><form method="post" action="/auth/signup"><label>電子郵件 <input required type="email" name="email"></label><label>密碼 <input required minlength="10" type="password" name="password" autocomplete="new-password"></label><button>送出申請</button></form><p><a href="/login">回到登入</a></p></section>`);
 const userToolbar = `<nav class="toolbar"><a href="/">工具入口</a><a href="/mfa">多因素驗證</a><a href="/admin">管理後台</a><form class="inline" method="post" action="/auth/logout"><button>登出</button></form></nav>`;
 
@@ -90,7 +101,7 @@ export async function route(request,{client,assets}) {
     h.set('cache-control','private, no-store, max-age=0');h.set('x-content-type-options','nosniff');h.set('referrer-policy','no-referrer');h.set('vary','Cookie');h.delete('set-cookie');
     return new Response(request.method==='HEAD'?null:source.body,{status:source.status,statusText:source.statusText,headers:h});
   }
-  if(!['/','/admin','/mfa','/mfa/enroll','/mfa/verify','/admin/status','/admin/permission','/admin/role'].includes(path))return errorPage('找不到頁面。',404);
+  if(!['/','/admin','/admin/audit','/mfa','/mfa/enroll','/mfa/verify','/admin/status','/admin/permission','/admin/permission-batch/preview','/admin/permission-batch','/admin/role'].includes(path))return errorPage('找不到頁面。',404);
   if(!['GET','POST'].includes(request.method))return errorPage('不支援此操作。',405);
   const claims=await identity(client);if(!claims)return redirect('/login');
   const p=await profile(client,claims);if(!approved(p))return page('帳號尚未開通',`<section><p>帳號待核准、已停用或已過期，請聯絡管理員。</p><form method="post" action="/auth/logout"><button>登出</button></form></section>`,403);
@@ -121,24 +132,63 @@ export async function route(request,{client,assets}) {
   if(claims.aal!=='aal2')return page('需要多因素驗證',`${userToolbar}<section><p>請先完成驗證器驗證，再進入管理後台。</p><a href="/mfa">前往驗證</a></section>`,403);
   if(path==='/admin' && request.method==='GET'){
     const n=Number(u.searchParams.get('page')||0);if(!Number.isInteger(n)||n<0||n>2000)return errorPage('頁碼無效。',400);
-    const result=await client.rpc('ech_admin_users',{page_size:50,page_offset:n*50});if(result.error)return errorPage('管理資料暫時無法取得。',503);
-    const rows=(result.data||[]).map(x=>`<tr><td><a href="/admin?page=${n}&target=${encodeURIComponent(x.user_id)}">${esc(x.email)}</a></td><td>${esc(x.role)}</td><td>${esc(x.status)}</td></tr>`).join('');
+    let search;try{search=searchValue(u.searchParams.get('q'))}catch{return errorPage('搜尋條件無效。',400)}
+    const result=search?await client.rpc('ech_admin_search_users',{search_text:search,page_size:50,page_offset:n*50}):
+      await client.rpc('ech_admin_users',{page_size:50,page_offset:n*50});
+    if(result.error)return errorPage('管理資料暫時無法取得。',503);
+    const rows=(result.data||[]).map(x=>`<tr><td><a href="${esc(adminUrl(n,search,x.user_id))}">${esc(x.email)}</a></td><td>${esc(x.role)}</td><td>${esc(x.status)}</td></tr>`).join('');
     let details='',target=u.searchParams.get('target');
     if(target && UUID.test(target)){
       const selected=(result.data||[]).find(x=>x.user_id===target);
       if(selected){const r=await client.rpc('ech_admin_permissions',{target});if(r.error)return errorPage('權限資料暫時無法取得。',503);
-        const tools=(r.data||[]).map(t=>`<tr><td>${esc(t.name)}</td><td>${t.enabled?'已啟用':'未啟用'}</td><td>${t.allowed?'允許':'未授權'}</td><td><form method="post" action="/admin/permission"><input type="hidden" name="target" value="${esc(target)}"><input type="hidden" name="page" value="${n}"><input type="hidden" name="tool" value="${esc(t.tool_id)}"><label>到期日（台北時間 UTC+8，可留空）<input type="datetime-local" name="valid_until" value="${t.valid_until?esc(taipeiValue(t.valid_until)):''}"></label><button name="allowed" value="true">${t.allowed?'更新期限':'開放'}</button>${t.allowed?' <button name="allowed" value="false">取消授權</button>':''}</form></td></tr>`).join('');
+        const common=`<input type="hidden" name="target" value="${esc(target)}"><input type="hidden" name="page" value="${n}"><input type="hidden" name="q" value="${esc(search)}">`;
+        const tools=(r.data||[]).map(t=>`<tr><td><input type="checkbox" form="batch-permissions" name="tools" value="${esc(t.tool_id)}" aria-label="選取 ${esc(t.name)}"></td><td>${esc(t.name)}</td><td>${t.enabled?'已啟用':'未啟用'}</td><td>${t.allowed?'允許':'未授權'}</td><td><form method="post" action="/admin/permission">${common}<input type="hidden" name="tool" value="${esc(t.tool_id)}"><label>到期日（台北時間 UTC+8，可留空）<input type="datetime-local" name="valid_until" value="${t.valid_until?esc(taipeiValue(t.valid_until)):''}"></label><button name="allowed" value="true">${t.allowed?'更新期限':'開放'}</button>${t.allowed?' <button name="allowed" value="false">取消授權</button>':''}</form></td></tr>`).join('');
         const options=['pending','approved','disabled'].map(s=>`<option value="${s}" ${s===selected.status?'selected':''}>${s}</option>`).join('');
         const roles=['user','admin','owner'].map(s=>`<option value="${s}" ${s===selected.role?'selected':''}>${s}</option>`).join('');
-        const roleForm=p.role==='owner' && target!==claims.sub?`<form method="post" action="/admin/role"><input type="hidden" name="target" value="${esc(target)}"><input type="hidden" name="page" value="${n}"><label>管理角色 <select name="role">${roles}</select></label><button>更新角色</button></form>`:'';
-        details=`<section><h2>${esc(selected.email)} 的權限</h2><form method="post" action="/admin/status"><input type="hidden" name="target" value="${esc(target)}"><input type="hidden" name="page" value="${n}"><label>帳號狀態 <select name="status">${options}</select></label><label>到期日（台北時間 UTC+8，留空為不限）<input type="datetime-local" name="expiry" value="${selected.expires_at?esc(taipeiValue(selected.expires_at)):''}"></label><button>更新狀態</button></form>${roleForm}<table><tr><th>工具</th><th>部署</th><th>授權</th><th>操作</th></tr>${tools}</table></section>`;
+        const roleForm=p.role==='owner' && target!==claims.sub?`<form method="post" action="/admin/role">${common}<label>管理角色 <select name="role">${roles}</select></label><button>更新角色</button></form>`:'';
+        const batch=`<form id="batch-permissions" method="post" action="/admin/permission-batch/preview">${common}<p>勾選工具後預覽授權異動。全部開放只影響目前已啟用的工具，未來新增工具仍須另外授權。</p><label>批次授權到期日（台北時間，可留空）<input type="datetime-local" name="valid_until"></label><button name="operation" value="grant-selected">預覽開放勾選</button> <button name="operation" value="revoke-selected">預覽取消勾選</button> <button name="operation" value="grant-enabled">預覽開放全部已啟用工具</button> <button name="operation" value="revoke-all">預覽取消全部工具</button></form>`;
+        details=`<section><h2>${esc(selected.email)} 的權限</h2><form method="post" action="/admin/status">${common}<label>帳號狀態 <select name="status">${options}</select></label><label>到期日（台北時間 UTC+8，留空為不限）<input type="datetime-local" name="expiry" value="${selected.expires_at?esc(taipeiValue(selected.expires_at)):''}"></label><button>更新狀態</button></form>${roleForm}${batch}<table><tr><th>勾選</th><th>工具</th><th>部署</th><th>授權</th><th>操作</th></tr>${tools}</table></section>`;
       }
     }
-    return page('管理後台',`${userToolbar}<section><h2>帳號</h2><table><tr><th>電子郵件</th><th>角色</th><th>狀態</th></tr>${rows}</table><p>${n>0?`<a href="/admin?page=${n-1}">上一頁</a> `:''}${(result.data||[]).length===50?`<a href="/admin?page=${n+1}">下一頁</a>`:''}</p></section>${details}`);
+    return page('管理後台',`${userToolbar}<section><h2>帳號</h2>${p.role==='owner'?'<p><a href="/admin/audit">查看管理異動紀錄</a></p>':''}<form method="get" action="/admin"><label>搜尋電子郵件或姓名 <input name="q" maxlength="254" value="${esc(search)}"></label><button>搜尋</button> <a href="/admin">清除搜尋</a></form><table><tr><th>電子郵件</th><th>角色</th><th>狀態</th></tr>${rows}</table><p>${n>0?`<a href="${esc(adminUrl(n-1,search))}">上一頁</a> `:''}${(result.data||[]).length===50?`<a href="${esc(adminUrl(n+1,search))}">下一頁</a>`:''}</p></section>${details}`);
+  }
+  if(path==='/admin/audit' && request.method==='GET'){
+    if(p.role!=='owner')return errorPage('只有擁有者可查看管理紀錄。',403);
+    const n=Number(u.searchParams.get('page')||0);if(!Number.isInteger(n)||n<0||n>2000)return errorPage('頁碼無效。',400);
+    const r=await client.rpc('ech_admin_audit',{page_size:50,page_offset:n*50});if(r.error)return errorPage('管理紀錄暫時無法取得。',503);
+    const rows=(r.data||[]).map(x=>`<tr><td>${esc(taipeiValue(x.created_at))}</td><td>${esc(x.action)}</td><td>${esc(x.actor_id||'')}</td><td>${esc(x.target_user_id||'')}</td><td>${esc(x.target_tool_id||'')}</td><td>${esc(JSON.stringify(x.detail||{}))}</td></tr>`).join('');
+    return page('管理異動紀錄',`${userToolbar}<section><p>時間顯示為台北時間；僅擁有者可查看。</p><table><tr><th>時間</th><th>操作</th><th>操作者</th><th>對象</th><th>工具</th><th>異動內容</th></tr>${rows}</table><p>${n>0?`<a href="/admin/audit?page=${n-1}">上一頁</a> `:''}${(r.data||[]).length===50?`<a href="/admin/audit?page=${n+1}">下一頁</a>`:''}</p></section>`);
+  }
+  if(path==='/admin/permission-batch/preview' && request.method==='POST'){
+    let f;try{f=await formValues(request,{allowMultiple:['tools']})}catch{return errorPage('請求格式無效。',400)}
+    const target=f.get('target')||'',n=Number(f.get('page')||0),operation=f.get('operation')||'',raw=f.get('valid_until')||'';
+    let search;try{search=searchValue(f.get('q'));taipeiInstant(raw)}catch{return errorPage('資料格式無效。',400)}
+    if(!UUID.test(target)||!Number.isInteger(n)||n<0||n>2000||!['grant-selected','revoke-selected','grant-enabled','revoke-all'].includes(operation))return errorPage('資料格式無效。',400);
+    const r=await client.rpc('ech_admin_permissions',{target});if(r.error)return errorPage('權限資料暫時無法取得。',503);
+    const available=r.data||[],requested=f.getAll('tools');
+    const chosen=operation==='grant-enabled'?available.filter(t=>t.enabled).map(t=>t.tool_id):
+      operation==='revoke-all'?available.map(t=>t.tool_id):requested;
+    if(!chosen.length||chosen.length>100||new Set(chosen).size!==chosen.length||
+      chosen.some(id=>!/^[a-z0-9][a-z0-9-]{0,79}$/.test(id)||!available.some(t=>t.tool_id===id)))return errorPage('請選取有效的工具。',400);
+    const allowed=operation.startsWith('grant-');
+    const names=chosen.map(id=>{const t=available.find(x=>x.tool_id===id);return `<li>${esc(t.name)}（${t.enabled?'已啟用':'未啟用'}）</li>`}).join('');
+    const hidden=chosen.map(id=>`<input type="hidden" name="tools" value="${esc(id)}">`).join('');
+    const date=allowed&&raw?raw:'';
+    return page('確認批次授權',`${userToolbar}<section><p>將對此帳號${allowed?'開放':'取消'}以下 ${chosen.length} 個工具的個別授權：</p><ul>${names}</ul><p>${allowed?(date?'到期日：'+esc(date.replace('T',' '))+'（台北時間）':'到期日：不限'):'取消後，新的受控資源請求會被拒絕。'}</p><form method="post" action="/admin/permission-batch"><input type="hidden" name="target" value="${esc(target)}"><input type="hidden" name="page" value="${n}"><input type="hidden" name="q" value="${esc(search)}"><input type="hidden" name="allowed" value="${allowed}"><input type="hidden" name="valid_until" value="${esc(date)}">${hidden}<button>確認執行</button> <a href="${esc(adminUrl(n,search,target))}">返回修改</a></form></section>`);
+  }
+  if(path==='/admin/permission-batch' && request.method==='POST'){
+    let f;try{f=await formValues(request,{allowMultiple:['tools']})}catch{return errorPage('請求格式無效。',400)}
+    const target=f.get('target')||'',n=Number(f.get('page')||0),allowed=f.get('allowed'),tools=f.getAll('tools');
+    let search,until;try{search=searchValue(f.get('q'));until=taipeiInstant(f.get('valid_until')||'')}catch{return errorPage('資料格式無效。',400)}
+    if(!UUID.test(target)||!Number.isInteger(n)||n<0||n>2000||!['true','false'].includes(allowed)||
+      !tools.length||tools.length>100||new Set(tools).size!==tools.length||tools.some(id=>!/^[a-z0-9][a-z0-9-]{0,79}$/.test(id)))return errorPage('資料格式無效。',400);
+    const r=await client.rpc('ech_admin_set_permissions',{target,requested_tools:tools,new_allowed:allowed==='true',new_valid_until:allowed==='true'?until:null});
+    return r.error?errorPage('操作失敗，請確認管理權限與資料。',403):redirect(adminUrl(n,search,target));
   }
   if(request.method==='POST' && ['/admin/status','/admin/permission','/admin/role'].includes(path)){
     let f;try{f=await formValues(request)}catch{return errorPage('請求格式無效。',400)}
     const target=f.get('target')||'',pageNum=Number(f.get('page')||0);if(!UUID.test(target)||!Number.isInteger(pageNum)||pageNum<0||pageNum>2000)return errorPage('帳號格式無效。',400);
+    let search;try{search=searchValue(f.get('q'))}catch{return errorPage('搜尋條件無效。',400)}
     let r;
     if(path==='/admin/status'){
       const status=f.get('status'),raw=f.get('expiry')||'';let expiry;try{expiry=taipeiInstant(raw)}catch{return errorPage('資料格式無效。',400)}
@@ -152,7 +202,7 @@ export async function route(request,{client,assets}) {
       const role=f.get('role');if(!['user','admin','owner'].includes(role))return errorPage('角色無效。',400);
       r=await client.rpc('ech_admin_set_role',{target,new_role:role});
     }
-    return r.error?errorPage('操作失敗，請確認管理權限與資料。',403):redirect('/admin?page='+pageNum+'&target='+encodeURIComponent(target));
+    return r.error?errorPage('操作失敗，請確認管理權限與資料。',403):redirect(adminUrl(pageNum,search,target));
   }
   return errorPage('不支援此操作。',405);
 }
