@@ -9,11 +9,11 @@ for(let n=0;n<5;n++){
   if(!response.ok)throw Error('Unable to inspect staging observability settings: HTTP '+response.status);
   const body=await response.json();
   if(!body.success)throw Error('Unable to inspect staging observability settings');
-  settings=body.result?.observability?.logs;
-  if(settings?.enabled===true && settings?.invocation_logs===true && settings?.redact_query_string===true)break;
+  settings=body.result?.observability;
+  if(settings?.logs?.enabled===true && settings?.logs?.invocation_logs===true && settings?.redact_query_string===true)break;
   await new Promise(resolve=>setTimeout(resolve,1500));
 }
-assert.equal(settings?.enabled,true,'Worker logs must remain enabled');
-assert.equal(settings?.invocation_logs,true,'invocation logs must remain enabled');
+assert.equal(settings?.logs?.enabled,true,'Worker logs must remain enabled');
+assert.equal(settings?.logs?.invocation_logs,true,'invocation logs must remain enabled');
 assert.equal(settings?.redact_query_string,true,'URL query strings must be redacted');
 console.log('PASS: invocation logs remain enabled and URL query strings are redacted.');
