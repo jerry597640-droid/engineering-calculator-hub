@@ -1,0 +1,25 @@
+name: Audit engineering migration candidates
+on:
+  push:
+    branches: [codex/engineering-access-migration-prep]
+    paths:
+      - 'access-control-staging/audit-migrated-assets.mjs'
+      - '.github/workflows/access-migration-audit.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: github.repository == 'jerry597640-droid/engineering-calculator-hub' && github.ref == 'refs/heads/codex/engineering-access-migration-prep'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out migration candidates without persistent credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Inspect browser initial loads and local assets
+        run: node access-control-staging/audit-migrated-assets.mjs

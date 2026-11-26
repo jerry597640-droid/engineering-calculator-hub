@@ -14,7 +14,13 @@
     {
       "id": "rc-beam-auto-design",
       "kind": "hub",
-      "source": "rc-beam-auto-design"
+      "source": "rc-beam-auto-design",
+      "extra_assets": [
+        {"source": "icon.svg", "dest": "icon.svg"}
+      ],
+      "replacements": [
+        {"file": "index.html", "from": "../icon.svg", "to": "./icon.svg"}
+      ]
     },
     {
       "id": "retaining-wall",
@@ -69,7 +75,11 @@
     {
       "id": "rebar-development",
       "kind": "hub",
-      "source": "rebar-development"
+      "source": "rebar-development",
+      "replacements": [
+        {"file": "index.html", "from": "<button class=\"secondary\" type=\"button\" id=\"downloadOffline\">下載離線 HTML</button>", "to": "<button class=\"secondary\" type=\"button\" id=\"downloadOffline\" disabled title=\"測試站暫不提供離線下載\">離線下載暫未開放</button>"},
+        {"file": "ui.js", "from": "<button class=\"secondary\" type=\"button\" id=\"downloadOffline\">下載離線 HTML</button>", "to": "<button class=\"secondary\" type=\"button\" id=\"downloadOffline\" disabled title=\"測試站暫不提供離線下載\">離線下載暫未開放</button>"}
+      ]
     },
     {
       "id": "crane-outrigger",
@@ -104,7 +114,10 @@
     {
       "id": "src-beam",
       "kind": "hub",
-      "source": "src-beam"
+      "source": "src-beam",
+      "replacements": [
+        {"file": "index.html", "from": "$('offline').disabled=false", "to": "$('offline').disabled=true"}
+      ]
     },
     {
       "id": "rc-slab-shear",
@@ -114,7 +127,13 @@
     {
       "id": "rc-wall",
       "kind": "hub",
-      "source": "rc-wall"
+      "source": "rc-wall",
+      "extra_assets": [
+        {"source": "rc-wall/VALIDATION.md", "dest": "engineering-review.txt"}
+      ],
+      "replacements": [
+        {"file": "index.html", "from": "https://github.com/jerry597640-droid/engineering-calculator-hub/blob/main/rc-wall/VALIDATION.md", "to": "/tools/rc-wall/engineering-review.txt"}
+      ]
     },
     {
       "id": "footing-design",
@@ -129,12 +148,25 @@
     {
       "id": "src-beam-column",
       "kind": "hub",
-      "source": "src-beam-column"
+      "source": "src-beam-column",
+      "replacements": [
+        {"file": "index.html", "from": "$('offline').disabled=false", "to": "$('offline').disabled=true"},
+        {"file": "index.html", "from": "$('offline').disabled=!cr", "to": "$('offline').disabled=true"},
+        {"file": "index.html", "from": "$('offline').disabled=currentModule==='column'?!cr:!result", "to": "$('offline').disabled=true"}
+      ]
     },
     {
       "id": "concrete-strength",
       "kind": "hub",
-      "source": "concrete-strength.html"
+      "source": "concrete-strength.html",
+      "extra_assets": [
+        {"source": "concrete-media/poster.jpg", "dest": "concrete-media/poster.jpg"},
+        {"source": "concrete-media/tutorial.mp4", "dest": "concrete-media/tutorial.mp4"},
+        {"source": "concrete-media/transcript.txt", "dest": "concrete-media/transcript.txt"}
+      ],
+      "replacements": [
+        {"file": "index.html", "from": "$('offline').disabled=!valid", "to": "$('offline').disabled=true"}
+      ]
     },
     {
       "id": "steel-sections",
@@ -149,7 +181,11 @@
     {
       "id": "beam-analysis",
       "kind": "hub",
-      "source": "beam-analysis"
+      "source": "beam-analysis",
+      "replacements": [
+        {"file": "index.html", "from": "document.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=on)", "to": "document.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=on || el.id==='offline-download')"},
+        {"file": "app.js", "from": "document.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=on)", "to": "document.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=on || el.id==='offline-download')"}
+      ]
     },
     {
       "id": "beam-dynamics",
@@ -182,7 +218,15 @@
       "id": "formwork",
       "kind": "external",
       "source": "formwork-support-calculator",
-      "commit": "4d26caa29e0e2a6b85b5111b77b74744689de691"
+      "commit": "4d26caa29e0e2a6b85b5111b77b74744689de691",
+      "replacements": [
+        {"file": "index.html", "from": "$('offline').disabled=false", "to": "$('offline').disabled=true"},
+        {"file": "app.js", "from": "$('offline').disabled=false", "to": "$('offline').disabled=true"},
+        {"file": "index.html", "from": "document.querySelector('#offline').disabled=errors.length>0", "to": "document.querySelector('#offline').disabled=true"},
+        {"file": "staged-ui.js", "from": "document.querySelector('#offline').disabled=errors.length>0", "to": "document.querySelector('#offline').disabled=true"},
+        {"file": "index.html", "from": "document.querySelector('#offline').disabled=!canExport()", "to": "document.querySelector('#offline').disabled=true"},
+        {"file": "staged-ui.js", "from": "document.querySelector('#offline').disabled=!canExport()", "to": "document.querySelector('#offline').disabled=true"}
+      ]
     },
     {
       "id": "rc-beam",
@@ -200,13 +244,20 @@
       "id": "wind",
       "kind": "external",
       "source": "wind-load-analysis",
-      "commit": "49635ca0676b52c93197c2aeab1261fc1529718f"
+      "commit": "49635ca0676b52c93197c2aeab1261fc1529718f",
+      "replacements": [
+        {"file": "index.html", "from": "$('offlineBtn').disabled=false", "to": "$('offlineBtn').disabled=true"}
+      ]
     },
     {
       "id": "scaffold",
       "kind": "external",
       "source": "scaffold-analysis-calculator",
-      "commit": "89d3d61c237f1d005102ca7e42e2ea29e6ccaecd"
+      "commit": "89d3d61c237f1d005102ca7e42e2ea29e6ccaecd",
+      "replacements": [
+        {"file": "index.html", "from": "const offline=$('offline')||document.createElement('button');offline.id='offline';", "to": "const offline=$('offline')||document.createElement('button');offline.id='offline';offline.disabled=true;offline.title='測試站暫不提供離線下載';"},
+        {"file": "index.html", "from": "offline.disabled=!!last.errors.length", "to": "offline.disabled=true"}
+      ]
     },
     {
       "id": "steel",

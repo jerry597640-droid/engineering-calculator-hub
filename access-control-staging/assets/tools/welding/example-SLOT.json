@@ -1,0 +1,21 @@
+{
+  "kind": "weld-other-v1",
+  "type": "SLOT",
+  "method": "ASD",
+  "mode": "shear",
+  "t": 12,
+  "t2": 12,
+  "F": 70,
+  "Fy": 2500,
+  "length": 30,
+  "te": 6,
+  "count": 4,
+  "diameter": 21,
+  "depth": 12,
+  "slotLength": 60,
+  "pitch": 84,
+  "pitchL": 120,
+  "P": 5000,
+  "bm": 0,
+  "qualified": false
+}

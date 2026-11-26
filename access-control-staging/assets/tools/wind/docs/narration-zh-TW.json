@@ -1,0 +1,66 @@
+{
+  "voice": "zh-TW-HsiaoChenNeural",
+  "locale": "zh-TW",
+  "gender": "Female",
+  "rate": "-5%",
+  "chapterSeconds": 15,
+  "leadInSeconds": 0.55,
+  "chapters": [
+    {
+      "title": "整體分析",
+      "text": "歡迎使用整體耐風分析。先載入範例，再依實際工程填寫尺寸、工址與風速，確認符合適用範圍。",
+      "startSeconds": 0,
+      "speechStartSeconds": 0.55,
+      "sourceDurationSeconds": 11.136
+    },
+    {
+      "title": "動態參數",
+      "text": "頻率與阻尼，請依結構模型填寫，包括兩個方向及扭轉。阻尼零點零一，就是百分之一。",
+      "startSeconds": 15,
+      "speechStartSeconds": 15.55,
+      "sourceDurationSeconds": 9.96
+    },
+    {
+      "title": "施工期間",
+      "text": "施工期間，請填月數、回歸期與採用依據，最低採十年回歸期。保留五十年原始風速，由程式換算。",
+      "startSeconds": 30,
+      "speechStartSeconds": 30.55,
+      "sourceDurationSeconds": 11.688
+    },
+    {
+      "title": "三向風載",
+      "text": "請分別匯出本案設計、五十年變位、半年共振的載重檔。順風、橫風是水平力，扭轉是扭矩。",
+      "startSeconds": 45,
+      "speechStartSeconds": 45.55,
+      "sourceDurationSeconds": 10.992
+    },
+    {
+      "title": "效應組合",
+      "text": "效應組合，請回填同一構件、相同單位的結果與來源。層間變位使用五十年相對位移，兩個風向都要檢查。",
+      "startSeconds": 60,
+      "speechStartSeconds": 60.55,
+      "sourceDurationSeconds": 11.952
+    },
+    {
+      "title": "居室加速度",
+      "text": "居室加速度，使用半年僅共振的位移與轉角。位移用公尺，轉角用弧度，不可代入五十年全風載結果。",
+      "startSeconds": 75,
+      "speechStartSeconds": 75.55,
+      "sourceDurationSeconds": 10.968
+    },
+    {
+      "title": "設計檢核",
+      "text": "依外部報告，填寫構件、穩定、基礎與被覆物的需求容量比。缺資料就保持未完成，材料抗力須另行計算。",
+      "startSeconds": 90,
+      "speechStartSeconds": 90.55,
+      "sourceDurationSeconds": 11.88
+    },
+    {
+      "title": "離線使用",
+      "text": "儲存專案並下載離線版，影片與語音可離線播放。手機可切換輸入與結果；修改參數後，請重新確認分析資料。",
+      "startSeconds": 105,
+      "speechStartSeconds": 105.55,
+      "sourceDurationSeconds": 12.36
+    }
+  ]
+}

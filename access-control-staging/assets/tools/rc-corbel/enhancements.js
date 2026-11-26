@@ -1,0 +1,76 @@
+(function(){'use strict';
+const A=CorbelApp,E=CorbelEngine,$=id=>document.getElementById(id),esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const examples={project:'RC 托架示範案',member:'C1－托架／控制組合 LC1',kind:'RC 托架',concrete:'常重混凝土',fc:'280 kgf/cm²（約27.46 MPa）',fy:'4200 kgf/cm²（約411.88 MPa）',interface:'一體澆置',bw:'40 cm：垂直立面方向',h:'50 cm：柱牆交界全深',htip:'30 cm：最外端全深',L:'40 cm：支承面到外端',av:'20 cm：支承面到反力中心',cover:'4 cm：混凝土面到箍筋外皮',agg:'2 cm＝20 mm',bl:'20 cm：沿伸出方向',bb:'30 cm：垂直立面方向',xAnchor:'35 cm：大於承壓外緣30 cm',Vu:'60 tf（約588.40 kN）：因數化反力',Nu:'12 tf：因數化向外拉力',nMode:'直接輸入完整 Nuc',nCombine:'完整總拉力取大；獨立額外外拉力相加',Rs:'40 tf：持續未因數化反力',muPad:'0.10：僅供可靠低摩擦試驗例',mainBar:'D25：直徑2.54 cm、面積5.067 cm²',mainN:'4支：Asc＝20.268 cm²',hoopBar:'D10：每肢0.7133 cm²',hoopN:'6道×2肢：Ah＝8.5596 cm²'};
+const cautions={fc:'設計強度取圖說指定值；個別試體的實測強度不能直接提高設計容量。',fy:'本版主筋與箍筋採相同強度，且剪力摩擦計算fy上限4200 kgf/cm²。',cover:'不是量到主筋中心。暴露、土壤接觸及防火可能要求更大保護層。',av:'不是托架總長。承壓中心若不同於合力位置，本版均勻承壓假設不適用。',Vu:'Vu與Nuc必須屬同一控制組合，不能各取不同組合最大值後宣稱完整分析。',Nu:'「取大」不能取代獨立同時作用水平力的相加；正值代表向外拉力。',Rs:'不是因數化Vu，也不是全部含暫時活載的服務反力。',hoopN:'增加主筋會提高所需Ah；增加箍筋後仍須確認淨距與實際施工可行性。',nCombine:'反向作用或不同控制組合，請先做完整結構分析，再選直接模式輸入總Nuc。'};
+for(const [k,t,u,g,ty,h,source]of A.defs){const label=$('field-'+k).querySelector('label');const b=document.createElement('button');b.type='button';b.className='help-button';b.textContent='?';b.setAttribute('aria-label','查看'+t+'的定義');b.onclick=()=>{ $('parameter-title').textContent=t;$('parameter-content').innerHTML=`<p><b>定義與填寫方式</b></p><p>${esc(h)}</p><p><b>單位</b> ${esc(u||'選項／無因次')}</p><p class="help-example"><b>範例</b> ${esc(examples[k]||E.DEFAULT[k])}</p><p><b>資料來源</b> ${esc(source)}</p>${cautions[k]?`<p class="scope-note">${esc(cautions[k])}</p>`:''}`;$('parameter-dialog').showModal();};label.after(b);const el=$(k);el.setAttribute('aria-describedby','help-'+k);if(ty==='number'){el.min=['Nu','Rs','muPad'].includes(k)?'0':'0.000001';if(['mainN','hoopN'].includes(k)){el.min=k==='mainN'?'2':'1';el.max='100';el.step='1';el.inputMode='numeric';}if(k==='fc'){el.min='175';el.max='700';}if(k==='fy'){el.min='2800';el.max='4200';}}
+}
+$('close-parameter').onclick=()=>$('parameter-dialog').close();$('parameter-dialog').addEventListener('click',e=>{if(e.target===$('parameter-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
+function parameters(){const term=$('parameter-search').value.trim().toLowerCase();let count=0;$('manual-fields').innerHTML=A.defs.map(([k,t,u,g,ty,h,s])=>{const visible=(t+h+s+examples[k]+k).toLowerCase().includes(term);if(visible)count++;return `<tr ${visible?'':'hidden'}><td><b>${esc(t)}</b><br>${esc(u||'選項／無因次')}<small class="param-symbol">${esc(k)}</small></td><td>${esc(h)}<div class="help-example">範例：${esc(examples[k])}</div>${cautions[k]?`<small>${esc(cautions[k])}</small>`:''}</td><td>${esc(s)}</td></tr>`;}).join('');$('parameter-count').textContent=`顯示 ${count} / ${A.defs.length} 個參數。`;}$('parameter-search').oninput=parameters;parameters();
+function filter(){const rows=[...$('checks').children],ng=rows.filter(r=>r.querySelector('.ng'));rows.forEach(r=>r.hidden=$('ng-only').checked&&!r.querySelector('.ng'));$('filter-note').textContent=rows.length?`${ng.length} 項未通過${!ng.length&&$('ng-only').checked?'；仍需確認細部設計':''}`:'請先修正輸入';}
+$('ng-only').onchange=filter;new MutationObserver(filter).observe($('checks'),{childList:true});filter();
+function view(v){document.querySelectorAll('.view').forEach(e=>e.hidden=e.id!=='view-'+v);document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));if(v!=='tutorial')$('tutorial-video').pause();history.replaceState(null,'',location.pathname+'?view='+v);window.scrollTo(0,0);}
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>view(b.dataset.view));function jump(id){view('overview');if(id==='checks'&&drawingPinned&&!mobilePreview.matches){layout.scrollIntoView({block:'start',behavior:'instant'});const target=$('checks').closest('.card');resultDetails.scrollTop+=target.getBoundingClientRect().top-resultDetails.getBoundingClientRect().top;}else{$(id).scrollIntoView({block:'start',behavior:'instant'});}} $('jump-result').onclick=$('mobile-results').onclick=()=>jump('checks');$('mobile-inputs').onclick=()=>jump('input-form');
+$('tutorial-download').onclick=()=>{$('tutorial-download').href=$('tutorial-video').querySelector('source').src;};
+$('video-speed').onchange=()=>$('tutorial-video').playbackRate=Number($('video-speed').value);
+window.CorbelTutorial=[{"title": "從範例開始", "text": "先按載入範例，熟悉輸入與檢核。這個工作台採台灣現行混凝土規範的托架與梁托計算方法。側邊選單可以查看詳細計算、參數說明、操作影片與規範驗證。", "start": 0, "duration": 17.9}, {"title": "材料與資料來源", "text": "第一步，填入案件與材料。範例混凝土強度為二百八十，鋼筋強度為四千二百，單位都是公斤力每平方公分。按欄位旁的問號，可以查看定義、輸入範例與資料來源。施工縫條件請依實際構造選擇。", "start": 17.9, "duration": 22.508}, {"title": "幾何與有效深度", "text": "第二步，輸入幾何。寬四十公分，支承面全深五十，外端深三十，伸出長四十，剪跨二十。剪跨量到反力中心。保護層量到箍筋外皮。本例有效深度約四十三點七八公分，不需要自行輸入。", "start": 40.408, "duration": 23.108}, {"title": "作用力與束制力", "text": "第三步，填入同一控制組合的因數化作用力。本例豎向六十噸力，向外拉力十二噸力。有支承墊時，另填持續且未因數化反力。完整拉力與束制估值取大；同時同向的獨立額外拉力，則選相加。", "start": 63.516, "duration": 22.052}, {"title": "配筋與結果判讀", "text": "第四步，填四支二十五號主筋，以及六道十號水平閉合箍。每道計兩肢。本例所需主筋約十三點五三平方公分，閉合箍約八點二三。增加主筋後，也要重新檢核閉合箍需求與淨距。", "start": 85.568, "duration": 20.708}, {"title": "NG 調整與適用範圍", "text": "把水平閉合箍改成四道，可以看到不通過的項目。勾選只看未通過，快速找到問題，再改回六道。尺寸剪力上限不足時，單純加筋不能解決。剪跨比超過一，或水平拉力大於豎向力，就超出本方法範圍。", "start": 106.276, "duration": 22.82}, {"title": "詳細計算與規範", "text": "詳細計算列出公式、數值代入、控制值與完整精度中間結果，也可展開一百次二分迭代。規範頁附官方來源與內建驗證。數值通過後，仍需依施工圖確認錨定、支承附件與母構材；勾選不是程式自動驗算。", "start": 129.096, "duration": 22.796}, {"title": "保存、離線與手機", "text": "最後，儲存案件供日後開啟，或匯出完整計算書及可編輯的文件。下載離線版後，直接開啟網頁檔，就能離線計算與播放本影片。手機下方有輸入、檢核、計算和教學快捷鍵。參數表也可以搜尋，方便查詢。", "start": 151.892, "duration": 23.948}];
+function chapters(){const entries=window.CorbelTutorial||[];$('video-chapters').innerHTML=entries.map((c,i)=>`<button data-chapter="${i}"><span>${String(Math.floor(c.start/60)).padStart(2,'0')}:${String(Math.floor(c.start%60)).padStart(2,'0')}</span>${esc(c.title)}</button>`).join('');$('tutorial-transcript').innerHTML=entries.map(c=>`<details open><summary>${esc(c.title)}</summary><p>${esc(c.text)}</p></details>`).join('');$('video-chapters').querySelectorAll('button').forEach(b=>b.onclick=()=>{const video=$('tutorial-video');video.currentTime=entries[Number(b.dataset.chapter)].start;video.play().catch(()=>A.notify('請按影片播放鍵開始。'));});}chapters();
+$('tutorial-video').addEventListener('error',()=>A.notify('影片未能載入。請使用線上版或含影片的離線套件。'));
+async function dataURL(url){const r=await fetch(url);if(!r.ok)throw Error('無法下載 '+url);const blob=await r.blob();return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob);});}
+$('download-offline').onclick=async()=>{const button=$('download-offline');button.disabled=true;button.textContent='準備離線版…';try{const clone=document.documentElement.cloneNode(true);const enhanced=clone.querySelector('script[src^="enhancements.js"]');if(enhanced){const r=await fetch(enhanced.getAttribute('src'));if(!r.ok)throw Error('無法讀取操作模組');enhanced.removeAttribute('src');enhanced.textContent=(await r.text()).replace(/<\/script/gi,'<\\/script');}const video=clone.querySelector('#tutorial-video');if(!video.querySelector('source').src.startsWith('data:')){A.notify('正在下載含旁白的操作影片，完成後即存為單檔離線版。');const media=await Promise.all(['tutorial.mp4','tutorial-poster.jpg','tutorial.vtt'].map(dataURL));video.querySelector('source').setAttribute('src',media[0]);video.setAttribute('poster',media[1]);video.querySelector('track').setAttribute('src',media[2]);}
+ clone.querySelector('#tutorial-download').setAttribute('href','tutorial.mp4');
+ const seed=clone.querySelector('#report-seed');seed.textContent=JSON.stringify({inputs:A.getInputs()}).replace(/</g,'\\u003c');clone.querySelector('body').insertBefore(seed,clone.querySelector('body script'));
+ for(const id of ['fields-material','fields-geometry','fields-loads','fields-rebar','detail-checks','manual-fields','calculation','checks','diagram','video-chapters','tutorial-transcript'])clone.querySelector('#'+id).innerHTML='';clone.querySelectorAll('.preview-pin,.preview-enlarge,.preview-checks,.preview-state,#drawing-dialog').forEach(e=>e.remove());clone.querySelector('#result-details').scrollTop=0;clone.querySelector('#parameter-dialog').removeAttribute('open');clone.querySelector('#parameter-content').innerHTML='';clone.querySelector('#ng-only').removeAttribute('checked');clone.querySelector('#toast').hidden=true;clone.querySelector('#download-offline').removeAttribute('disabled');clone.querySelector('#download-offline').textContent='下載離線版';A.download('<!doctype html>\n'+clone.outerHTML,'RC托架及梁托_離線版.html');A.notify('含影片、旁白及Word匯出的單檔離線版已下載。');}catch(e){A.notify('下載未完成：'+e.message+'。計算仍可使用，請稍後重試。');}finally{button.disabled=false;button.textContent='下載離線版';}};
+
+/* Pin preference applies to the whole right pane, so results never sit behind it. */
+const layout=document.querySelector('.analysis-layout');
+const resultPane=layout.querySelector('.results');
+const drawingCard=resultPane.querySelector('.diagram-card');
+const resultDetails=$('result-details');
+const mobilePreview=matchMedia('(max-width:720px)');
+const PIN_KEY='rc-corbel.ui.pinDrawing';
+let pinSaved=document.body.dataset.drawingPinned;
+if(pinSaved===undefined){try{pinSaved=localStorage.getItem(PIN_KEY);}catch{}}
+let drawingPinned=pinSaved!=='false';
+const pinButton=document.createElement('button');pinButton.type='button';pinButton.className='preview-pin';
+pinButton.title='釘選時固定圖形；下方檢核表可獨立捲動。';
+drawingCard.querySelector('.card-title').appendChild(pinButton);
+const enlarge=document.createElement('button');enlarge.type='button';enlarge.className='preview-enlarge';enlarge.textContent='放大圖形';enlarge.setAttribute('aria-haspopup','dialog');drawingCard.querySelector('.card-title').appendChild(enlarge);
+const checkShortcut=document.createElement('button');checkShortcut.type='button';checkShortcut.className='preview-checks';checkShortcut.textContent='查看檢核';checkShortcut.onclick=()=>jump('checks');drawingCard.querySelector('.card-title').appendChild(checkShortcut);
+const previewState=document.createElement('p');previewState.className='preview-state';previewState.id='preview-state';drawingCard.appendChild(previewState);
+const drawingDialog=document.createElement('dialog');drawingDialog.id='drawing-dialog';drawingDialog.setAttribute('aria-labelledby','drawing-dialog-title');drawingDialog.innerHTML='<div class="dialog-head"><h2 id="drawing-dialog-title">受力與配置示意</h2><button type="button" id="close-drawing" aria-label="關閉放大圖形">✕</button></div><div id="drawing-dialog-content"></div>';document.body.appendChild(drawingDialog);
+$('close-drawing').onclick=()=>drawingDialog.close();
+function previewStatus(){
+ const r=A.getResult();previewState.textContent=(drawingPinned?'已釘選':'未釘選')+' · '+(r.valid?'即時預覽 · Vu '+r.p.Vu+' tf · Nuc '+(r.Nuc/1000).toFixed(2)+' tf · h '+r.p.h+' cm · 主筋 '+r.p.mainN+'-'+r.p.mainBar:'輸入待修正，請查看紅色欄位與上方提示。');
+ if(!r.valid&&!$('diagram').children.length)$('diagram').innerHTML='<div class="preview-empty">輸入資料待修正<br>有效數值輸入後，圖形即時更新。</div>';
+ if(drawingDialog.open)$('drawing-dialog-content').innerHTML=$('diagram').innerHTML;
+}
+function clearance(){layout.style.setProperty('--preview-clearance',drawingPinned&&mobilePreview.matches?Math.ceil(drawingCard.getBoundingClientRect().height+16)+'px':'16px');}
+function placeResultDetails(){
+ // On a phone, the pin stops at the end of the inputs, before any check cards.
+ if(mobilePreview.matches){layout.after(resultDetails);}else{resultPane.appendChild(resultDetails);}
+ clearance();
+}
+function applyPin(persist=false){
+ layout.classList.toggle('preview-pinned',drawingPinned);
+ document.body.dataset.drawingPinned=String(drawingPinned);
+ pinButton.textContent=drawingPinned?'取消釘選':'釘選圖形';
+ pinButton.setAttribute('aria-label',drawingPinned?'取消釘選右側圖形':'釘選右側圖形');
+ pinButton.setAttribute('aria-pressed',String(drawingPinned));
+ if(persist){try{localStorage.setItem(PIN_KEY,String(drawingPinned));}catch{}}
+ previewStatus();clearance();
+}
+pinButton.onclick=()=>{drawingPinned=!drawingPinned;applyPin(true);if(!drawingPinned)drawingCard.scrollIntoView({block:'start',behavior:'instant'});};
+mobilePreview.addEventListener('change',placeResultDetails);
+new ResizeObserver(clearance).observe(drawingCard);
+new MutationObserver(previewStatus).observe($('diagram'),{childList:true});
+placeResultDetails();applyPin();
+$('input-form').addEventListener('focusin',()=>{
+ if(!drawingPinned||mobilePreview.matches)return;
+ const box=resultPane.getBoundingClientRect();
+ if(box.top>16&&box.bottom>window.innerHeight)window.scrollBy({top:box.top-16,behavior:'instant'});
+});
+enlarge.onclick=()=>{$('drawing-dialog-content').innerHTML=$('diagram').innerHTML;drawingDialog.showModal();};
+
+const initial=new URLSearchParams(location.search).get('view');if(['overview','process','manual','verify','tutorial'].includes(initial))view(initial);
+})();
+

@@ -1,0 +1,4144 @@
+[
+  {
+    "id": "length",
+    "name": "長度",
+    "group": "幾何與量測",
+    "base": "m",
+    "source": "CAD 尺寸、施工圖標註、捲尺或測量成果。",
+    "note": "選擇與原資料相同的單位；係數以完整精度計算，結果僅在顯示時取有效位數。",
+    "units": [
+      {
+        "id": "m",
+        "symbol": "m",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft",
+        "symbol": "ft",
+        "factor": 0.3048,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "rod",
+        "symbol": "rod",
+        "factor": 5.0292,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cable (國際，0.1 nmi)",
+        "symbol": "cable (國際，0.1 nmi)",
+        "factor": 185.2,
+        "offset": 0,
+        "note": "本版明確採國際 cable = 0.1 海浬；原版約採 100 fathom，定義不同。"
+      },
+      {
+        "id": "dm",
+        "symbol": "dm",
+        "factor": 0.1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "in",
+        "symbol": "in",
+        "factor": 0.0254,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "nmi",
+        "symbol": "nmi",
+        "factor": 1852,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "hand",
+        "symbol": "hand",
+        "factor": 0.1016,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cm",
+        "symbol": "cm",
+        "factor": 0.01,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "yd",
+        "symbol": "yd",
+        "factor": 0.9144,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "nmi (舊英制，6080 ft)",
+        "symbol": "nmi (舊英制，6080 ft)",
+        "factor": 1853.1840000000002,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "barleycorn",
+        "symbol": "barleycorn",
+        "factor": 0.008466666666666666,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mm",
+        "symbol": "mm",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "furlong",
+        "symbol": "furlong",
+        "factor": 201.168,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Å",
+        "symbol": "Å",
+        "factor": 1e-10,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "台丈",
+        "symbol": "台丈",
+        "factor": 3.0303030303030303,
+        "offset": 0,
+        "note": "傳統台制定義：1 台尺 = 10/33 m；台丈／寸／分按十進位推導。非 SI 單位。"
+      },
+      {
+        "id": "km",
+        "symbol": "km",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mi",
+        "symbol": "mi",
+        "factor": 1609.344,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "pc",
+        "symbol": "pc",
+        "factor": 3.085677581491367e+16,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "台尺",
+        "symbol": "台尺",
+        "factor": 0.30303030303030304,
+        "offset": 0,
+        "note": "傳統台制定義：1 台尺 = 10/33 m；台丈／寸／分按十進位推導。非 SI 單位。"
+      },
+      {
+        "id": "µm",
+        "symbol": "µm",
+        "factor": 1e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "fathom",
+        "symbol": "fathom",
+        "factor": 1.8288000000000002,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ly",
+        "symbol": "ly",
+        "factor": 9460730472580800,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "台寸",
+        "symbol": "台寸",
+        "factor": 0.030303030303030304,
+        "offset": 0,
+        "note": "傳統台制定義：1 台尺 = 10/33 m；台丈／寸／分按十進位推導。非 SI 單位。"
+      },
+      {
+        "id": "nm",
+        "symbol": "nm",
+        "factor": 1e-09,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "chain",
+        "symbol": "chain",
+        "factor": 20.1168,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mil",
+        "symbol": "mil",
+        "factor": 2.54e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "台分",
+        "symbol": "台分",
+        "factor": 0.0030303030303030303,
+        "offset": 0,
+        "note": "傳統台制定義：1 台尺 = 10/33 m；台丈／寸／分按十進位推導。非 SI 單位。"
+      }
+    ],
+    "sample": [
+      100,
+      "cm",
+      "m"
+    ],
+    "default": [
+      100,
+      "cm",
+      "m"
+    ]
+  },
+  {
+    "id": "area",
+    "name": "面積",
+    "group": "幾何與量測",
+    "base": "m²",
+    "source": "建築平面、面積計算表、地籍或權狀。",
+    "note": "坪採 400/121 m²；地籍面積以登記的 m² 為準。",
+    "units": [
+      {
+        "id": "m²",
+        "symbol": "m²",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "坪",
+        "symbol": "坪",
+        "factor": 3.3057851239669422,
+        "offset": 0,
+        "note": "尺貫制：坪 = 400/121 m²；日本段、畝、合、勺依坪的倍數換算，非現行 SI。"
+      },
+      {
+        "id": "in²",
+        "symbol": "in²",
+        "factor": 0.00064516,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "township (36 mi²)",
+        "symbol": "township (36 mi²)",
+        "factor": 93239571.972096,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dm²",
+        "symbol": "dm²",
+        "factor": 0.01,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft²",
+        "symbol": "ft²",
+        "factor": 0.09290304,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "circular inch",
+        "symbol": "circular inch",
+        "factor": 0.0005067074790974977,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cm²",
+        "symbol": "cm²",
+        "factor": 0.0001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "yd²",
+        "symbol": "yd²",
+        "factor": 0.83612736,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mm²",
+        "symbol": "mm²",
+        "factor": 1e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "acre",
+        "symbol": "acre",
+        "factor": 4046.8564224,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "段 (日制)",
+        "symbol": "段 (日制)",
+        "factor": 991.7355371900826,
+        "offset": 0,
+        "note": "尺貫制：坪 = 400/121 m²；日本段、畝、合、勺依坪的倍數換算，非現行 SI。"
+      },
+      {
+        "id": "km²",
+        "symbol": "km²",
+        "factor": 1000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "rod²",
+        "symbol": "rod²",
+        "factor": 25.292852640000003,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "畝 (日制)",
+        "symbol": "畝 (日制)",
+        "factor": 99.17355371900827,
+        "offset": 0,
+        "note": "尺貫制：坪 = 400/121 m²；日本段、畝、合、勺依坪的倍數換算，非現行 SI。"
+      },
+      {
+        "id": "a",
+        "symbol": "a",
+        "factor": 100,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mi²",
+        "symbol": "mi²",
+        "factor": 2589988.110336,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "合 (日制)",
+        "symbol": "合 (日制)",
+        "factor": 0.3305785123966942,
+        "offset": 0,
+        "note": "尺貫制：坪 = 400/121 m²；日本段、畝、合、勺依坪的倍數換算，非現行 SI。"
+      },
+      {
+        "id": "ha",
+        "symbol": "ha",
+        "factor": 10000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "rood",
+        "symbol": "rood",
+        "factor": 1011.7141056,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "勺 (日制)",
+        "symbol": "勺 (日制)",
+        "factor": 0.03305785123966942,
+        "offset": 0,
+        "note": "尺貫制：坪 = 400/121 m²；日本段、畝、合、勺依坪的倍數換算，非現行 SI。"
+      }
+    ],
+    "sample": [
+      30,
+      "坪",
+      "m²"
+    ],
+    "default": [
+      30,
+      "坪",
+      "m²"
+    ]
+  },
+  {
+    "id": "volume",
+    "name": "體積與容量",
+    "group": "幾何與量測",
+    "base": "m³",
+    "source": "混凝土數量表、容器容量、設備型錄。",
+    "note": "US 與 UK 加侖不同；桶容量依商品種類區分，不可只填 barrel。",
+    "units": [
+      {
+        "id": "m³",
+        "symbol": "m³",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "acre·ft",
+        "symbol": "acre·ft",
+        "factor": 1233.4818375475202,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "qt (US liquid)",
+        "symbol": "qt (US liquid)",
+        "factor": 0.0009463529459999999,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "L",
+        "symbol": "L",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "yd³",
+        "symbol": "yd³",
+        "factor": 0.764554857984,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cup (US)",
+        "symbol": "cup (US)",
+        "factor": 0.00023658823649999998,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dm³",
+        "symbol": "dm³",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft³",
+        "symbol": "ft³",
+        "factor": 0.028316846592000004,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "fl oz (UK)",
+        "symbol": "fl oz (UK)",
+        "factor": 2.84130625e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cup (metric 250 mL)",
+        "symbol": "cup (metric 250 mL)",
+        "factor": 0.00025,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dL",
+        "symbol": "dL",
+        "factor": 0.0001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "in³",
+        "symbol": "in³",
+        "factor": 1.6387064e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "fl oz (US)",
+        "symbol": "fl oz (US)",
+        "factor": 2.9573529562499998e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cup (UK，10 fl oz)",
+        "symbol": "cup (UK，10 fl oz)",
+        "factor": 0.000284130625,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cL",
+        "symbol": "cL",
+        "factor": 1e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gal (UK)",
+        "symbol": "gal (UK)",
+        "factor": 0.00454609,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "pt (UK)",
+        "symbol": "pt (UK)",
+        "factor": 0.00056826125,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tsp (US)",
+        "symbol": "tsp (US)",
+        "factor": 4.92892159375e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cm³",
+        "symbol": "cm³",
+        "factor": 1e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gal (US liquid)",
+        "symbol": "gal (US liquid)",
+        "factor": 0.0037854117839999997,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "pt (US liquid)",
+        "symbol": "pt (US liquid)",
+        "factor": 0.00047317647299999996,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tsp (metric 5 mL)",
+        "symbol": "tsp (metric 5 mL)",
+        "factor": 5e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mm³",
+        "symbol": "mm³",
+        "factor": 1e-09,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "bbl (oil，42 US gal)",
+        "symbol": "bbl (oil，42 US gal)",
+        "factor": 0.15898729492799998,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "qt (UK)",
+        "symbol": "qt (UK)",
+        "factor": 0.0011365225,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mL",
+        "symbol": "mL",
+        "factor": 1e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "bbl (US liquid，31.5 gal)",
+        "symbol": "bbl (US liquid，31.5 gal)",
+        "factor": 0.119240471196,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "bbl (UK beer，36 gal)",
+        "symbol": "bbl (UK beer，36 gal)",
+        "factor": 0.16365924,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "m³",
+      "L"
+    ],
+    "default": [
+      1,
+      "m³",
+      "L"
+    ]
+  },
+  {
+    "id": "weightDensity",
+    "name": "單位重／重量密度",
+    "group": "結構與載重",
+    "base": "N/m³",
+    "source": "材料單位重表、地質鑽探報告或設計假設。",
+    "note": "這是力／體積（γ）；質量密度 ρ 請選另一類別。γ = ρg 不屬同維度單位換算。",
+    "units": [
+      {
+        "id": "kgf/m³",
+        "symbol": "kgf/m³",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mgf/m³",
+        "symbol": "mgf/m³",
+        "factor": 9.806649999999999e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "US tonf/yd³",
+        "symbol": "US tonf/yd³",
+        "factor": 11636.108433055273,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf/ft³",
+        "symbol": "lbf/ft³",
+        "factor": 157.08746384624618,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf/cm³",
+        "symbol": "gf/cm³",
+        "factor": 9806.65,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf/L",
+        "symbol": "gf/L",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N/m³",
+        "symbol": "N/m³",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf/mL",
+        "symbol": "gf/mL",
+        "factor": 9806.65,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf/m³",
+        "symbol": "gf/m³",
+        "factor": 0.00980665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N/cm³",
+        "symbol": "N/cm³",
+        "factor": 1000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf/L",
+        "symbol": "kgf/L",
+        "factor": 9806.65,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kip/in³",
+        "symbol": "kip/in³",
+        "factor": 271447137.5263134,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kN/m³",
+        "symbol": "kN/m³",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mgf/mL",
+        "symbol": "mgf/mL",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf/m³",
+        "symbol": "tf/m³",
+        "factor": 9806.65,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kip/ft³",
+        "symbol": "kip/ft³",
+        "factor": 157087.46384624616,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kN/cm³",
+        "symbol": "kN/cm³",
+        "factor": 1000000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mgf/L",
+        "symbol": "mgf/L",
+        "factor": 0.00980665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "UK tonf/yd³",
+        "symbol": "UK tonf/yd³",
+        "factor": 13032.441445021905,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf/in³",
+        "symbol": "lbf/in³",
+        "factor": 271447.1375263134,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf/cm³",
+        "symbol": "kgf/cm³",
+        "factor": 9806650.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf/cm³",
+        "symbol": "tf/cm³",
+        "factor": 9806650000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N/mm³",
+        "symbol": "N/mm³",
+        "factor": 1000000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      2.4,
+      "tf/m³",
+      "kN/m³"
+    ],
+    "default": [
+      2.4,
+      "tf/m³",
+      "kN/m³"
+    ]
+  },
+  {
+    "id": "mass",
+    "name": "質量",
+    "group": "結構與載重",
+    "base": "kg",
+    "source": "材料質量、設備自重型錄、過磅或數量計算。",
+    "note": "kg／t 是質量；kgf／tf 是力。原版將 N 混入質量，本版拆開。",
+    "units": [
+      {
+        "id": "kg",
+        "symbol": "kg",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "g",
+        "symbol": "g",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mg",
+        "symbol": "mg",
+        "factor": 1e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "µg",
+        "symbol": "µg",
+        "factor": 1e-09,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "t",
+        "symbol": "t",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ng",
+        "symbol": "ng",
+        "factor": 1e-12,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Gg",
+        "symbol": "Gg",
+        "factor": 1000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "hg",
+        "symbol": "hg",
+        "factor": 0.1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dag",
+        "symbol": "dag",
+        "factor": 0.01,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ct",
+        "symbol": "ct",
+        "factor": 0.0002,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb",
+        "symbol": "lb",
+        "factor": 0.45359237,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "UK long ton",
+        "symbol": "UK long ton",
+        "factor": 1016.0469088000001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "US short ton",
+        "symbol": "US short ton",
+        "factor": 907.18474,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "UK long cwt",
+        "symbol": "UK long cwt",
+        "factor": 50.80234544,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "US short cwt",
+        "symbol": "US short cwt",
+        "factor": 45.359237,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "stone",
+        "symbol": "stone",
+        "factor": 6.35029318,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "oz",
+        "symbol": "oz",
+        "factor": 0.028349523125,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "grain",
+        "symbol": "grain",
+        "factor": 6.479891000000001e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "oz troy",
+        "symbol": "oz troy",
+        "factor": 0.0311034768,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb troy",
+        "symbol": "lb troy",
+        "factor": 0.3732417216,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "千磅質量 (1000 lb)",
+        "symbol": "千磅質量 (1000 lb)",
+        "factor": 453.59237,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "台斤",
+        "symbol": "台斤",
+        "factor": 0.6,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "台兩",
+        "symbol": "台兩",
+        "factor": 0.0375,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dwt (troy pennyweight)",
+        "symbol": "dwt (troy pennyweight)",
+        "factor": 0.00155517384,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "scruple",
+        "symbol": "scruple",
+        "factor": 0.0012959782000000002,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "t",
+      "kg"
+    ],
+    "default": [
+      1,
+      "t",
+      "kg"
+    ]
+  },
+  {
+    "id": "force",
+    "name": "力／重量",
+    "group": "結構與載重",
+    "base": "N",
+    "source": "結構分析反力、軸力、設備重量或設計荷載表。",
+    "note": "工程慣用「kg」代表重量時，必須確認並選 kgf；tf 指公噸力。",
+    "units": [
+      {
+        "id": "kgf",
+        "symbol": "kgf",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N",
+        "symbol": "N",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf",
+        "symbol": "lbf",
+        "factor": 4.4482216152605,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "台兩力 (37.5 gf)",
+        "symbol": "台兩力 (37.5 gf)",
+        "factor": 0.367749375,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf",
+        "symbol": "gf",
+        "factor": 0.00980665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kN",
+        "symbol": "kN",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "台斤力 (600 gf)",
+        "symbol": "台斤力 (600 gf)",
+        "factor": 5.88399,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf",
+        "symbol": "tf",
+        "factor": 9806.65,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "MN",
+        "symbol": "MN",
+        "factor": 1000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "市斤力 (500 gf)",
+        "symbol": "市斤力 (500 gf)",
+        "factor": 4.903325,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mgf",
+        "symbol": "mgf",
+        "factor": 9.806649999999999e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dyn",
+        "symbol": "dyn",
+        "factor": 1e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kip",
+        "symbol": "kip",
+        "factor": 4448.2216152605,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "quintal-force (100 kgf)",
+        "symbol": "quintal-force (100 kgf)",
+        "factor": 980.665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cgf",
+        "symbol": "cgf",
+        "factor": 9.80665e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "sthène",
+        "symbol": "sthène",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "pdl",
+        "symbol": "pdl",
+        "factor": 0.13825495437600002,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "US tonf",
+        "symbol": "US tonf",
+        "factor": 8896.443230521,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dgf",
+        "symbol": "dgf",
+        "factor": 0.000980665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dagf",
+        "symbol": "dagf",
+        "factor": 0.0980665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ozf",
+        "symbol": "ozf",
+        "factor": 0.2780138509537812,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "UK tonf",
+        "symbol": "UK tonf",
+        "factor": 9964.016418183519,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "stone-force",
+        "symbol": "stone-force",
+        "factor": 62.27510261364699,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "grain-force",
+        "symbol": "grain-force",
+        "factor": 0.0006354602307515,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "carat-force",
+        "symbol": "carat-force",
+        "factor": 0.00196133,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "scruple-force",
+        "symbol": "scruple-force",
+        "factor": 0.01270920461503,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "tf",
+      "kN"
+    ],
+    "default": [
+      1,
+      "tf",
+      "kN"
+    ]
+  },
+  {
+    "id": "pressure",
+    "name": "應力／壓力／面載重",
+    "group": "結構與載重",
+    "base": "Pa",
+    "source": "混凝土強度試驗、鋼材材證、地基容許承載力、風壓或樓面載重。",
+    "note": "1 MPa = 1 N/mm²；t/m² 若表示荷載，應選 tf/m²。水銀／水柱採 conventional 定義。",
+    "units": [
+      {
+        "id": "kgf/cm²",
+        "symbol": "kgf/cm²",
+        "factor": 98066.49999999999,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "psi",
+        "symbol": "psi",
+        "factor": 6894.757293168361,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Pa",
+        "symbol": "Pa",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "MPa",
+        "symbol": "MPa",
+        "factor": 1000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf/mm²",
+        "symbol": "kgf/mm²",
+        "factor": 9806650.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "psf",
+        "symbol": "psf",
+        "factor": 47.88025898033584,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N/cm²",
+        "symbol": "N/cm²",
+        "factor": 10000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "MN/cm²",
+        "symbol": "MN/cm²",
+        "factor": 10000000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf/m²",
+        "symbol": "kgf/m²",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ksi",
+        "symbol": "ksi",
+        "factor": 6894757.293168361,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N/mm²",
+        "symbol": "N/mm²",
+        "factor": 1000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "MN/mm²",
+        "symbol": "MN/mm²",
+        "factor": 1000000000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf/cm²",
+        "symbol": "tf/cm²",
+        "factor": 98066499.99999999,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kip/ft²",
+        "symbol": "kip/ft²",
+        "factor": 47880.258980335835,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kPa",
+        "symbol": "kPa",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "UK tonf/in²",
+        "symbol": "UK tonf/in²",
+        "factor": 15444256.336697128,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf/mm²",
+        "symbol": "tf/mm²",
+        "factor": 9806650000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "US tonf/in²",
+        "symbol": "US tonf/in²",
+        "factor": 13789514.586336723,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf/m²",
+        "symbol": "tf/m²",
+        "factor": 9806.65,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mbar",
+        "symbol": "mbar",
+        "factor": 100,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kN/mm²",
+        "symbol": "kN/mm²",
+        "factor": 1000000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cmHg (conventional)",
+        "symbol": "cmHg (conventional)",
+        "factor": 1333.224,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "atm",
+        "symbol": "atm",
+        "factor": 101325,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "inHg (conventional)",
+        "symbol": "inHg (conventional)",
+        "factor": 3386.389,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cmH₂O (conventional)",
+        "symbol": "cmH₂O (conventional)",
+        "factor": 980.665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "inH₂O (conventional)",
+        "symbol": "inH₂O (conventional)",
+        "factor": 249.08890999999997,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "bar",
+        "symbol": "bar",
+        "factor": 100000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N/m²",
+        "symbol": "N/m²",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kN/m²",
+        "symbol": "kN/m²",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      280,
+      "kgf/cm²",
+      "MPa"
+    ],
+    "default": [
+      280,
+      "kgf/cm²",
+      "MPa"
+    ]
+  },
+  {
+    "id": "moment",
+    "name": "彎矩／扭矩",
+    "group": "結構與載重",
+    "base": "N·m",
+    "source": "結構分析彎矩、接頭計算書、扭力扳手規格。",
+    "note": "彎矩與能量雖同為 N·m，物理意義不同；本類別不進行能量轉換。",
+    "units": [
+      {
+        "id": "kgf·cm",
+        "symbol": "kgf·cm",
+        "factor": 0.0980665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf·in",
+        "symbol": "lbf·in",
+        "factor": 0.11298482902761668,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N·cm",
+        "symbol": "N·cm",
+        "factor": 0.01,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mN·m",
+        "symbol": "mN·m",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf·mm",
+        "symbol": "kgf·mm",
+        "factor": 0.00980665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf·ft",
+        "symbol": "lbf·ft",
+        "factor": 1.3558179483314003,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N·mm",
+        "symbol": "N·mm",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf·cm",
+        "symbol": "gf·cm",
+        "factor": 9.80665e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf·m",
+        "symbol": "kgf·m",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kip·in",
+        "symbol": "kip·in",
+        "factor": 112.98482902761668,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N·m",
+        "symbol": "N·m",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf·mm",
+        "symbol": "gf·mm",
+        "factor": 9.806649999999999e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf·cm",
+        "symbol": "tf·cm",
+        "factor": 98.06649999999999,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kip·ft",
+        "symbol": "kip·ft",
+        "factor": 1355.8179483314004,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kN·cm",
+        "symbol": "kN·cm",
+        "factor": 10,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf·m",
+        "symbol": "gf·m",
+        "factor": 0.00980665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf·mm",
+        "symbol": "tf·mm",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "UK tonf·in",
+        "symbol": "UK tonf·in",
+        "factor": 253.08601702186138,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kN·mm",
+        "symbol": "kN·mm",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dyn·cm",
+        "symbol": "dyn·cm",
+        "factor": 1e-07,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf·m",
+        "symbol": "tf·m",
+        "factor": 9806.65,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "UK tonf·ft",
+        "symbol": "UK tonf·ft",
+        "factor": 3037.0322042623366,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kN·m",
+        "symbol": "kN·m",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dyn·mm",
+        "symbol": "dyn·mm",
+        "factor": 1e-08,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "pdl·in",
+        "symbol": "pdl·in",
+        "factor": 0.0035116758411504003,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "pdl·ft",
+        "symbol": "pdl·ft",
+        "factor": 0.042140110093804806,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "µN·m",
+        "symbol": "µN·m",
+        "factor": 1e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dyn·m",
+        "symbol": "dyn·m",
+        "factor": 1e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "tf·m",
+      "kgf·cm"
+    ],
+    "default": [
+      1,
+      "tf·m",
+      "kgf·cm"
+    ]
+  },
+  {
+    "id": "density",
+    "name": "質量密度",
+    "group": "材料與流體",
+    "base": "kg/m³",
+    "source": "材料手冊、試驗報告或設備型錄的質量／體積。",
+    "note": "與單位重分開；例如 2400 kg/m³ 不能直接稱 2400 N/m³。",
+    "units": [
+      {
+        "id": "kg/m³",
+        "symbol": "kg/m³",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mg/m³",
+        "symbol": "mg/m³",
+        "factor": 1e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "US short ton/yd³",
+        "symbol": "US short ton/yd³",
+        "factor": 1186.552842515566,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb/ft³",
+        "symbol": "lb/ft³",
+        "factor": 16.018463373960138,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "g/cm³",
+        "symbol": "g/cm³",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "g/L",
+        "symbol": "g/L",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "slug/ft³",
+        "symbol": "slug/ft³",
+        "factor": 515.3788183931961,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb/gal (UK)",
+        "symbol": "lb/gal (UK)",
+        "factor": 99.7763726631017,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "g/mL",
+        "symbol": "g/mL",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "g/m³",
+        "symbol": "g/m³",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "oz/in³",
+        "symbol": "oz/in³",
+        "factor": 1729.9940443876953,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb/gal (US)",
+        "symbol": "lb/gal (US)",
+        "factor": 119.82642731689664,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kg/L",
+        "symbol": "kg/L",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf·s²/m⁴",
+        "symbol": "kgf·s²/m⁴",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "oz/gal (UK)",
+        "symbol": "oz/gal (UK)",
+        "factor": 6.236023291443856,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "grain/gal (UK)",
+        "symbol": "grain/gal (UK)",
+        "factor": 0.014253767523300244,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mg/mL",
+        "symbol": "mg/mL",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "t/m³",
+        "symbol": "t/m³",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "oz/gal (US)",
+        "symbol": "oz/gal (US)",
+        "factor": 7.48915170730604,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "grain/gal (US)",
+        "symbol": "grain/gal (US)",
+        "factor": 0.01711806104527095,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mg/L",
+        "symbol": "mg/L",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "UK long ton/yd³",
+        "symbol": "UK long ton/yd³",
+        "factor": 1328.9391836174339,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb/in³",
+        "symbol": "lb/in³",
+        "factor": 27679.904710203125,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kg/cm³",
+        "symbol": "kg/cm³",
+        "factor": 1000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      2400,
+      "kg/m³",
+      "t/m³"
+    ],
+    "default": [
+      2400,
+      "kg/m³",
+      "t/m³"
+    ]
+  },
+  {
+    "id": "lineLoad",
+    "name": "線載重",
+    "group": "結構與載重",
+    "base": "N/m",
+    "source": "梁線載重、牆重分攤、施工載重或分析軟體輸出。",
+    "note": "選擇與原資料相同的單位；係數以完整精度計算，結果僅在顯示時取有效位數。",
+    "units": [
+      {
+        "id": "kgf/cm",
+        "symbol": "kgf/cm",
+        "factor": 980.665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf/m",
+        "symbol": "kgf/m",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf/mm",
+        "symbol": "kgf/mm",
+        "factor": 9806.65,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf/m",
+        "symbol": "tf/m",
+        "factor": 9806.65,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf/cm",
+        "symbol": "tf/cm",
+        "factor": 980665.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "tf/mm",
+        "symbol": "tf/mm",
+        "factor": 9806650.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N/cm",
+        "symbol": "N/cm",
+        "factor": 100,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N/m",
+        "symbol": "N/m",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N/mm",
+        "symbol": "N/mm",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kN/m",
+        "symbol": "kN/m",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kN/cm",
+        "symbol": "kN/cm",
+        "factor": 100000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kN/mm",
+        "symbol": "kN/mm",
+        "factor": 1000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf/in",
+        "symbol": "lbf/in",
+        "factor": 175.12683524647636,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf/ft",
+        "symbol": "lbf/ft",
+        "factor": 14.593902937206362,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kip/in",
+        "symbol": "kip/in",
+        "factor": 175126.83524647637,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kip/ft",
+        "symbol": "kip/ft",
+        "factor": 14593.902937206363,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf/yd",
+        "symbol": "lbf/yd",
+        "factor": 4.864634312402122,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dyn/cm",
+        "symbol": "dyn/cm",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dyn/m",
+        "symbol": "dyn/m",
+        "factor": 1e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dyn/mm",
+        "symbol": "dyn/mm",
+        "factor": 0.01,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf/cm",
+        "symbol": "gf/cm",
+        "factor": 0.980665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf/m",
+        "symbol": "gf/m",
+        "factor": 0.00980665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf/mm",
+        "symbol": "gf/mm",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kip/yd",
+        "symbol": "kip/yd",
+        "factor": 4864.634312402121,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "tf/m",
+      "kgf/cm"
+    ],
+    "default": [
+      1,
+      "tf/m",
+      "kgf/cm"
+    ]
+  },
+  {
+    "id": "power",
+    "name": "功率",
+    "group": "熱工與設備",
+    "base": "W",
+    "source": "機電設備功率銘牌、泵浦／空調型錄。",
+    "note": "cal、Btu 必須區分 IT 與 th；馬力區分機械 hp 與公制 PS。",
+    "units": [
+      {
+        "id": "W",
+        "symbol": "W",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kW",
+        "symbol": "kW",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "erg/s",
+        "symbol": "erg/s",
+        "factor": 1e-07,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf·m/s",
+        "symbol": "kgf·m/s",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "PS",
+        "symbol": "PS",
+        "factor": 735.49875,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/s",
+        "symbol": "cal (IT)/s",
+        "factor": 4.1868,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)/h",
+        "symbol": "kcal (IT)/h",
+        "factor": 1.163,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)/min",
+        "symbol": "kcal (IT)/min",
+        "factor": 69.78,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "pdl·ft/s",
+        "symbol": "pdl·ft/s",
+        "factor": 0.042140110093804806,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf·ft/min",
+        "symbol": "lbf·ft/min",
+        "factor": 0.02259696580552334,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf·ft/s",
+        "symbol": "lbf·ft/s",
+        "factor": 1.3558179483314003,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "hp (mechanical)",
+        "symbol": "hp (mechanical)",
+        "factor": 745.6998715822702,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/h",
+        "symbol": "Btu (IT)/h",
+        "factor": 0.29307107017222217,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/min",
+        "symbol": "Btu (IT)/min",
+        "factor": 17.58426421033333,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "RT (US refrigeration)",
+        "symbol": "RT (US refrigeration)",
+        "factor": 3516.8528420666657,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "GW",
+        "symbol": "GW",
+        "factor": 1000000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "MW",
+        "symbol": "MW",
+        "factor": 1000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "J/s",
+        "symbol": "J/s",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "J/min",
+        "symbol": "J/min",
+        "factor": 0.016666666666666666,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "J/h",
+        "symbol": "J/h",
+        "factor": 0.0002777777777777778,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (th)/min",
+        "symbol": "cal (th)/min",
+        "factor": 0.06973333333333334,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (th)/h",
+        "symbol": "cal (th)/h",
+        "factor": 0.0011622222222222223,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/s",
+        "symbol": "Btu (IT)/s",
+        "factor": 1055.0558526199998,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf·m/min",
+        "symbol": "kgf·m/min",
+        "factor": 0.16344416666666667,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf·m/h",
+        "symbol": "kgf·m/h",
+        "factor": 0.0027240694444444443,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "kW",
+      "W"
+    ],
+    "default": [
+      1,
+      "kW",
+      "W"
+    ]
+  },
+  {
+    "id": "energy",
+    "name": "能量／功",
+    "group": "熱工與設備",
+    "base": "J",
+    "source": "電表 kWh、設備耗能、熱量試驗或材料熱工資料。",
+    "note": "cal 與 Btu 已明定 IT／th。原版能量中的 amu、波數屬其他物理量，不直接換算。",
+    "units": [
+      {
+        "id": "J",
+        "symbol": "J",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kJ",
+        "symbol": "kJ",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "erg",
+        "symbol": "erg",
+        "factor": 1e-07,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Wh",
+        "symbol": "Wh",
+        "factor": 3600,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kWh",
+        "symbol": "kWh",
+        "factor": 3600000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "MWh",
+        "symbol": "MWh",
+        "factor": 3600000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf·m",
+        "symbol": "kgf·m",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gf·cm",
+        "symbol": "gf·cm",
+        "factor": 9.80665e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)",
+        "symbol": "cal (IT)",
+        "factor": 4.1868,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)",
+        "symbol": "kcal (IT)",
+        "factor": 4186.8,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "PS·s",
+        "symbol": "PS·s",
+        "factor": 735.49875,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "PS·h",
+        "symbol": "PS·h",
+        "factor": 2647795.5,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "eV",
+        "symbol": "eV",
+        "factor": 1.602176634e-19,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "MeV",
+        "symbol": "MeV",
+        "factor": 1.602176634e-13,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft·pdl",
+        "symbol": "ft·pdl",
+        "factor": 0.042140110093804806,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf·ft",
+        "symbol": "lbf·ft",
+        "factor": 1.3558179483314003,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "hp·h",
+        "symbol": "hp·h",
+        "factor": 2684519.537696173,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)",
+        "symbol": "Btu (IT)",
+        "factor": 1055.0558526199998,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "L·atm",
+        "symbol": "L·atm",
+        "factor": 101.325,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "MJ",
+        "symbol": "MJ",
+        "factor": 1000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "W·s",
+        "symbol": "W·s",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "N·m",
+        "symbol": "N·m",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf·in",
+        "symbol": "lbf·in",
+        "factor": 0.11298482902761668,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "therm (EC)",
+        "symbol": "therm (EC)",
+        "factor": 105505585.26199998,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (th)",
+        "symbol": "cal (th)",
+        "factor": 4.184,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (th)",
+        "symbol": "kcal (th)",
+        "factor": 4184.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (th)",
+        "symbol": "Btu (th)",
+        "factor": 1054.350264488889,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "therm (US)",
+        "symbol": "therm (US)",
+        "factor": 105480400,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "kWh",
+      "MJ"
+    ],
+    "default": [
+      1,
+      "kWh",
+      "MJ"
+    ]
+  },
+  {
+    "id": "specificHeat",
+    "name": "比熱容",
+    "group": "熱工與設備",
+    "base": "J/(kg·K)",
+    "source": "材料熱工試驗、混凝土溫控資料或熱傳手冊。",
+    "note": "原版 Enthalpy 頁標示 J/kg·°C，實際是比熱容，本版合併於此。溫差使用 K、°C 的刻度，不加 273.15。",
+    "units": [
+      {
+        "id": "J/(kg·K)",
+        "symbol": "J/(kg·K)",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kJ/(kg·K)",
+        "symbol": "kJ/(kg·K)",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/(kg·K)",
+        "symbol": "cal (IT)/(kg·K)",
+        "factor": 4.1868,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)/(kg·K)",
+        "symbol": "kcal (IT)/(kg·K)",
+        "factor": 4186.8,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/(g·K)",
+        "symbol": "cal (IT)/(g·K)",
+        "factor": 4186.8,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/(lb·°F)",
+        "symbol": "Btu (IT)/(lb·°F)",
+        "factor": 4186.799999999999,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Wh/(kg·K)",
+        "symbol": "Wh/(kg·K)",
+        "factor": 3600,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kWh/(kg·K)",
+        "symbol": "kWh/(kg·K)",
+        "factor": 3600000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kJ/(g·K)",
+        "symbol": "kJ/(g·K)",
+        "factor": 1000000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "J/(g·K)",
+        "symbol": "J/(g·K)",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/(lb·°F)",
+        "symbol": "cal (IT)/(lb·°F)",
+        "factor": 16.614565187681617,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)/(lb·°F)",
+        "symbol": "kcal (IT)/(lb·°F)",
+        "factor": 16614.56518768162,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "J/(lb·°F)",
+        "symbol": "J/(lb·°F)",
+        "factor": 3.9683207193277963,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kJ/(lb·°F)",
+        "symbol": "kJ/(lb·°F)",
+        "factor": 3968.3207193277967,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/(oz·°F)",
+        "symbol": "cal (IT)/(oz·°F)",
+        "factor": 265.83304300290587,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)/(oz·°F)",
+        "symbol": "kcal (IT)/(oz·°F)",
+        "factor": 265833.0430029059,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "J/(oz·°F)",
+        "symbol": "J/(oz·°F)",
+        "factor": 63.49313150924474,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kJ/(oz·°F)",
+        "symbol": "kJ/(oz·°F)",
+        "factor": 63493.13150924475,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/(lb·K)",
+        "symbol": "Btu (IT)/(lb·K)",
+        "factor": 2325.9999999999995,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf·m/(kg·K)",
+        "symbol": "kgf·m/(kg·K)",
+        "factor": 9.80665,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kgf·m/(g·K)",
+        "symbol": "kgf·m/(g·K)",
+        "factor": 9806.65,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf·ft/(lb·°F)",
+        "symbol": "lbf·ft/(lb·°F)",
+        "factor": 5.380320455999999,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (th)/(g·K)",
+        "symbol": "cal (th)/(g·K)",
+        "factor": 4184.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (th)/(lb·°F)",
+        "symbol": "Btu (th)/(lb·°F)",
+        "factor": 4184.000000000001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "kJ/(kg·K)",
+      "J/(kg·K)"
+    ],
+    "default": [
+      1,
+      "kJ/(kg·K)",
+      "J/(kg·K)"
+    ]
+  },
+  {
+    "id": "angle",
+    "name": "角度",
+    "group": "幾何與量測",
+    "base": "rad",
+    "source": "測量角度、坡度角、分析模型或旋轉角。",
+    "note": "1° = 60′ = 3600″；gon 為百分度，一周 400 gon。",
+    "units": [
+      {
+        "id": "°",
+        "symbol": "°",
+        "factor": 0.017453292519943295,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "rad",
+        "symbol": "rad",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "′",
+        "symbol": "′",
+        "factor": 0.0002908882086657216,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "″",
+        "symbol": "″",
+        "factor": 4.84813681109536e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "quadrant",
+        "symbol": "quadrant",
+        "factor": 1.5707963267948966,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "sextant",
+        "symbol": "sextant",
+        "factor": 1.0471975511965976,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "octant",
+        "symbol": "octant",
+        "factor": 0.7853981633974483,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "sign",
+        "symbol": "sign",
+        "factor": 0.5235987755982988,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "rev",
+        "symbol": "rev",
+        "factor": 6.283185307179586,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gon",
+        "symbol": "gon",
+        "factor": 0.015707963267948967,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "°",
+      "″"
+    ],
+    "default": [
+      1,
+      "°",
+      "″"
+    ]
+  },
+  {
+    "id": "speed",
+    "name": "速度",
+    "group": "幾何與量測",
+    "base": "m/s",
+    "source": "流速、車速、吊裝速度、設備型錄或測量成果。",
+    "note": "Mach 數需介質與音速，非固定係數；原版 Mach 未定條件，本版不以固定倍數換算。",
+    "units": [
+      {
+        "id": "m/s",
+        "symbol": "m/s",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cm/s",
+        "symbol": "cm/s",
+        "factor": 0.01,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mm/s",
+        "symbol": "mm/s",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "km/s",
+        "symbol": "km/s",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "m/min",
+        "symbol": "m/min",
+        "factor": 0.016666666666666666,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cm/min",
+        "symbol": "cm/min",
+        "factor": 0.00016666666666666666,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "km/min",
+        "symbol": "km/min",
+        "factor": 16.666666666666668,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mm/min",
+        "symbol": "mm/min",
+        "factor": 1.6666666666666667e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "m/h",
+        "symbol": "m/h",
+        "factor": 0.0002777777777777778,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cm/h",
+        "symbol": "cm/h",
+        "factor": 2.777777777777778e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mm/h",
+        "symbol": "mm/h",
+        "factor": 2.7777777777777776e-07,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "km/h",
+        "symbol": "km/h",
+        "factor": 0.2777777777777778,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "in/s",
+        "symbol": "in/s",
+        "factor": 0.0254,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "in/min",
+        "symbol": "in/min",
+        "factor": 0.00042333333333333334,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "in/h",
+        "symbol": "in/h",
+        "factor": 7.055555555555555e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft/s",
+        "symbol": "ft/s",
+        "factor": 0.3048,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft/min",
+        "symbol": "ft/min",
+        "factor": 0.00508,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft/h",
+        "symbol": "ft/h",
+        "factor": 8.466666666666667e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "yd/s",
+        "symbol": "yd/s",
+        "factor": 0.9144,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "yd/min",
+        "symbol": "yd/min",
+        "factor": 0.01524,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "yd/h",
+        "symbol": "yd/h",
+        "factor": 0.000254,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mi/s",
+        "symbol": "mi/s",
+        "factor": 1609.344,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mi/min",
+        "symbol": "mi/min",
+        "factor": 26.822400000000002,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mi/h",
+        "symbol": "mi/h",
+        "factor": 0.44704,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kn",
+        "symbol": "kn",
+        "factor": 0.5144444444444445,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kn (舊英制)",
+        "symbol": "kn (舊英制)",
+        "factor": 0.5147733333333334,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "c (vacuum)",
+        "symbol": "c (vacuum)",
+        "factor": 299792458,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "m/s",
+      "ft/min"
+    ],
+    "default": [
+      1,
+      "m/s",
+      "ft/min"
+    ]
+  },
+  {
+    "id": "time",
+    "name": "時間",
+    "group": "幾何與量測",
+    "base": "s",
+    "source": "施工工時、養護時間、監測紀錄或設備運轉時數。",
+    "note": "月、年需明確約定：本版提供月（30日）、年（365日）、儒略年（365.25日），不是日曆期間。",
+    "units": [
+      {
+        "id": "min",
+        "symbol": "min",
+        "factor": 60,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "s",
+        "symbol": "s",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "h",
+        "symbol": "h",
+        "factor": 3600,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ms",
+        "symbol": "ms",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "µs",
+        "symbol": "µs",
+        "factor": 1e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ns",
+        "symbol": "ns",
+        "factor": 1e-09,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "d",
+        "symbol": "d",
+        "factor": 86400,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "week",
+        "symbol": "week",
+        "factor": 604800,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "month (30 d)",
+        "symbol": "month (30 d)",
+        "factor": 2592000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "year (365 d)",
+        "symbol": "year (365 d)",
+        "factor": 31536000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Julian year (365.25 d)",
+        "symbol": "Julian year (365.25 d)",
+        "factor": 31557600,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "h",
+      "min"
+    ],
+    "default": [
+      1,
+      "h",
+      "min"
+    ]
+  },
+  {
+    "id": "heatCapacity",
+    "name": "熱容量",
+    "group": "熱工與設備",
+    "base": "J/K",
+    "source": "設備總熱容量、熱工手冊、試驗結果。",
+    "note": "熱容量是整體 J/K；比熱容是 J/(kg·K)，勿互換。",
+    "units": [
+      {
+        "id": "J/K",
+        "symbol": "J/K",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kJ/K",
+        "symbol": "kJ/K",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/K",
+        "symbol": "cal (IT)/K",
+        "factor": 4.1868,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)/K",
+        "symbol": "kcal (IT)/K",
+        "factor": 4186.8,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/°F",
+        "symbol": "Btu (IT)/°F",
+        "factor": 1899.1005347159996,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "kJ/K",
+      "J/K"
+    ],
+    "default": [
+      1,
+      "kJ/K",
+      "J/K"
+    ]
+  },
+  {
+    "id": "heatFlux",
+    "name": "熱通量",
+    "group": "熱工與設備",
+    "base": "W/m²",
+    "source": "表面熱流量測、空調熱負載或熱傳計算。",
+    "note": "選擇與原資料相同的單位；係數以完整精度計算，結果僅在顯示時取有效位數。",
+    "units": [
+      {
+        "id": "W/m²",
+        "symbol": "W/m²",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "W/cm²",
+        "symbol": "W/cm²",
+        "factor": 10000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "mW/cm²",
+        "symbol": "mW/cm²",
+        "factor": 10,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kW/m²",
+        "symbol": "kW/m²",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "J/(s·m²)",
+        "symbol": "J/(s·m²)",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)/(h·m²)",
+        "symbol": "kcal (IT)/(h·m²)",
+        "factor": 1.163,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/(s·cm²)",
+        "symbol": "cal (IT)/(s·cm²)",
+        "factor": 41868.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/(min·cm²)",
+        "symbol": "cal (IT)/(min·cm²)",
+        "factor": 697.8,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/(h·cm²)",
+        "symbol": "cal (IT)/(h·cm²)",
+        "factor": 11.629999999999999,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (th)/(s·cm²)",
+        "symbol": "cal (th)/(s·cm²)",
+        "factor": 41840.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (th)/(min·cm²)",
+        "symbol": "cal (th)/(min·cm²)",
+        "factor": 697.3333333333334,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (th)/(h·cm²)",
+        "symbol": "cal (th)/(h·cm²)",
+        "factor": 11.622222222222222,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "dyn/(h·cm)",
+        "symbol": "dyn/(h·cm)",
+        "factor": 2.777777777777778e-07,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "erg/(h·mm²)",
+        "symbol": "erg/(h·mm²)",
+        "factor": 2.777777777777778e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lbf·ft/(min·ft²)",
+        "symbol": "lbf·ft/(min·ft²)",
+        "factor": 0.24323171562010606,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "hp/ft²",
+        "symbol": "hp/ft²",
+        "factor": 8026.6466154635,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "PS/ft²",
+        "symbol": "PS/ft²",
+        "factor": 7916.842656601979,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/(s·ft²)",
+        "symbol": "Btu (IT)/(s·ft²)",
+        "factor": 11356.526682226973,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/(min·ft²)",
+        "symbol": "Btu (IT)/(min·ft²)",
+        "factor": 189.27544470378288,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/(h·ft²)",
+        "symbol": "Btu (IT)/(h·ft²)",
+        "factor": 3.154590745063048,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (th)/(s·in²)",
+        "symbol": "Btu (th)/(s·in²)",
+        "factor": 1634246.178450135,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (th)/(s·ft²)",
+        "symbol": "Btu (th)/(s·ft²)",
+        "factor": 11348.931794792603,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (th)/(min·ft²)",
+        "symbol": "Btu (th)/(min·ft²)",
+        "factor": 189.14886324654339,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (th)/(h·in²)",
+        "symbol": "Btu (th)/(h·in²)",
+        "factor": 453.9572717917041,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "W/in²",
+        "symbol": "W/in²",
+        "factor": 1550.0031000062002,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (th)/(h·ft²)",
+        "symbol": "kcal (th)/(h·ft²)",
+        "factor": 12.510055884309299,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "W/m²",
+      "W/cm²"
+    ],
+    "default": [
+      1,
+      "W/m²",
+      "W/cm²"
+    ]
+  },
+  {
+    "id": "heatTransfer",
+    "name": "熱傳係數",
+    "group": "熱工與設備",
+    "base": "W/(m²·K)",
+    "source": "外牆 U 值、設備傳熱係數、建材熱工報告。",
+    "note": "分母的 °F 是溫差，換成 K 時係數乘 1.8。",
+    "units": [
+      {
+        "id": "W/(m²·K)",
+        "symbol": "W/(m²·K)",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/(s·cm²·K)",
+        "symbol": "cal (IT)/(s·cm²·K)",
+        "factor": 41868.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)/(h·m²·K)",
+        "symbol": "kcal (IT)/(h·m²·K)",
+        "factor": 1.163,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)/(h·ft²·K)",
+        "symbol": "kcal (IT)/(h·ft²·K)",
+        "factor": 12.518427814633407,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/(s·ft²·°F)",
+        "symbol": "Btu (IT)/(s·ft²·°F)",
+        "factor": 20441.74802800855,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (th)/(s·ft²·°F)",
+        "symbol": "Btu (th)/(s·ft²·°F)",
+        "factor": 20428.077230626684,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/(h·ft²·°F)",
+        "symbol": "Btu (IT)/(h·ft²·°F)",
+        "factor": 5.678263341113486,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (th)/(h·ft²·°F)",
+        "symbol": "Btu (th)/(h·ft²·°F)",
+        "factor": 5.674465897396301,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "W/(m²·K)",
+      "Btu (IT)/(h·ft²·°F)"
+    ],
+    "default": [
+      1,
+      "W/(m²·K)",
+      "Btu (IT)/(h·ft²·°F)"
+    ]
+  },
+  {
+    "id": "radiation",
+    "name": "輻射係數",
+    "group": "熱工與設備",
+    "base": "W/(m²·K⁴)",
+    "source": "熱輻射模型係數、材料放射率計算或熱工手冊。",
+    "note": "僅換算輻射係數單位；T⁴ 的溫度必須使用絕對溫標，不可用攝氏溫度直接代入。",
+    "units": [
+      {
+        "id": "W/(m²·K⁴)",
+        "symbol": "W/(m²·K⁴)",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kW/(m²·K⁴)",
+        "symbol": "kW/(m²·K⁴)",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "W/(cm²·K⁴)",
+        "symbol": "W/(cm²·K⁴)",
+        "factor": 10000.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)/(m²·h·K⁴)",
+        "symbol": "kcal (IT)/(m²·h·K⁴)",
+        "factor": 1.163,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/(cm²·s·K⁴)",
+        "symbol": "cal (IT)/(cm²·s·K⁴)",
+        "factor": 41868.0,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)/(ft²·h·K⁴)",
+        "symbol": "Btu (IT)/(ft²·h·K⁴)",
+        "factor": 3.154590745063048,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "W/(m²·K⁴)",
+      "kW/(m²·K⁴)"
+    ],
+    "default": [
+      1,
+      "W/(m²·K⁴)",
+      "kW/(m²·K⁴)"
+    ]
+  },
+  {
+    "id": "conductivity",
+    "name": "熱導率",
+    "group": "熱工與設備",
+    "base": "W/(m·K)",
+    "source": "保溫材料、混凝土或建材型錄與試驗報告。",
+    "note": "熱導率 W/(m·K) 與熱傳係數 W/(m²·K) 不同。",
+    "units": [
+      {
+        "id": "W/(m·K)",
+        "symbol": "W/(m·K)",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "W/(cm·K)",
+        "symbol": "W/(cm·K)",
+        "factor": 100,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kW/(m·K)",
+        "symbol": "kW/(m·K)",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (IT)/(s·cm·K)",
+        "symbol": "cal (IT)/(s·cm·K)",
+        "factor": 418.67999999999995,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cal (th)/(s·cm·K)",
+        "symbol": "cal (th)/(s·cm·K)",
+        "factor": 418.40000000000003,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (IT)/(h·m·K)",
+        "symbol": "kcal (IT)/(h·m·K)",
+        "factor": 1.163,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kcal (th)/(h·m·K)",
+        "symbol": "kcal (th)/(h·m·K)",
+        "factor": 1.1622222222222223,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)·in/(s·ft²·°F)",
+        "symbol": "Btu (IT)·in/(s·ft²·°F)",
+        "factor": 519.2203999114172,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (th)·in/(s·ft²·°F)",
+        "symbol": "Btu (th)·in/(s·ft²·°F)",
+        "factor": 518.8731616579178,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)·ft/(h·ft²·°F)",
+        "symbol": "Btu (IT)·ft/(h·ft²·°F)",
+        "factor": 1.7307346663713907,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (th)·ft/(h·ft²·°F)",
+        "symbol": "Btu (th)·ft/(h·ft²·°F)",
+        "factor": 1.7295772055263927,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)·in/(h·ft²·°F)",
+        "symbol": "Btu (IT)·in/(h·ft²·°F)",
+        "factor": 0.14422788886428256,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (th)·in/(h·ft²·°F)",
+        "symbol": "Btu (th)·in/(h·ft²·°F)",
+        "factor": 0.14413143379386603,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Btu (IT)·in/(h·in²·°F)",
+        "symbol": "Btu (IT)·in/(h·in²·°F)",
+        "factor": 20.768815996456688,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "W/(m·K)",
+      "Btu (IT)·in/(h·ft²·°F)"
+    ],
+    "default": [
+      1,
+      "W/(m·K)",
+      "Btu (IT)·in/(h·ft²·°F)"
+    ]
+  },
+  {
+    "id": "volumeFlow",
+    "name": "體積流量",
+    "group": "材料與流體",
+    "base": "m³/s",
+    "source": "泵浦、冷卻水與空調設備流量、管線設計。",
+    "note": "油桶明定 42 US gal；原版 bbl 係數採不同容量，現改按石油桶定義。",
+    "units": [
+      {
+        "id": "m³/s",
+        "symbol": "m³/s",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cm³/s",
+        "symbol": "cm³/s",
+        "factor": 1e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "m³/min",
+        "symbol": "m³/min",
+        "factor": 0.016666666666666666,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cm³/min",
+        "symbol": "cm³/min",
+        "factor": 1.6666666666666667e-08,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "m³/h",
+        "symbol": "m³/h",
+        "factor": 0.0002777777777777778,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cm³/h",
+        "symbol": "cm³/h",
+        "factor": 2.7777777777777777e-10,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "in³/s",
+        "symbol": "in³/s",
+        "factor": 1.6387064e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "in³/min",
+        "symbol": "in³/min",
+        "factor": 2.7311773333333333e-07,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "in³/h",
+        "symbol": "in³/h",
+        "factor": 4.551962222222222e-09,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft³/s",
+        "symbol": "ft³/s",
+        "factor": 0.028316846592000004,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft³/min",
+        "symbol": "ft³/min",
+        "factor": 0.0004719474432000001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft³/h",
+        "symbol": "ft³/h",
+        "factor": 7.86579072e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "L/s",
+        "symbol": "L/s",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "L/min",
+        "symbol": "L/min",
+        "factor": 1.6666666666666667e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "L/h",
+        "symbol": "L/h",
+        "factor": 2.7777777777777776e-07,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gal (US)/s",
+        "symbol": "gal (US)/s",
+        "factor": 0.0037854117839999997,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gal (US)/min",
+        "symbol": "gal (US)/min",
+        "factor": 6.309019639999999e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gal (US)/h",
+        "symbol": "gal (US)/h",
+        "factor": 1.0515032733333332e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gal (UK)/s",
+        "symbol": "gal (UK)/s",
+        "factor": 0.00454609,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gal (UK)/min",
+        "symbol": "gal (UK)/min",
+        "factor": 7.576816666666667e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gal (UK)/h",
+        "symbol": "gal (UK)/h",
+        "factor": 1.2628027777777779e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "bbl (oil)/s",
+        "symbol": "bbl (oil)/s",
+        "factor": 0.15898729492799998,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "bbl (oil)/min",
+        "symbol": "bbl (oil)/min",
+        "factor": 0.0026497882488,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "bbl (oil)/h",
+        "symbol": "bbl (oil)/h",
+        "factor": 4.416313748e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "bbl (oil)/d",
+        "symbol": "bbl (oil)/d",
+        "factor": 1.8401307283333331e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "m³/s",
+      "L/min"
+    ],
+    "default": [
+      1,
+      "m³/s",
+      "L/min"
+    ]
+  },
+  {
+    "id": "massFlow",
+    "name": "質量流量",
+    "group": "材料與流體",
+    "base": "kg/s",
+    "source": "原料輸送、製程設備型錄、質量平衡計算。",
+    "note": "千磅質量明定 1000 lb；kips 通常指力，不作質量符號。",
+    "units": [
+      {
+        "id": "kg/s",
+        "symbol": "kg/s",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kg/min",
+        "symbol": "kg/min",
+        "factor": 0.016666666666666666,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kg/h",
+        "symbol": "kg/h",
+        "factor": 0.0002777777777777778,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "t/s",
+        "symbol": "t/s",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "t/min",
+        "symbol": "t/min",
+        "factor": 16.666666666666668,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "t/h",
+        "symbol": "t/h",
+        "factor": 0.2777777777777778,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb/s",
+        "symbol": "lb/s",
+        "factor": 0.45359237,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb/min",
+        "symbol": "lb/min",
+        "factor": 0.007559872833333333,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb/h",
+        "symbol": "lb/h",
+        "factor": 0.00012599788055555556,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "UK long ton/h",
+        "symbol": "UK long ton/h",
+        "factor": 0.2822352524444445,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "1000 lb/s",
+        "symbol": "1000 lb/s",
+        "factor": 453.59237,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "1000 lb/min",
+        "symbol": "1000 lb/min",
+        "factor": 7.559872833333333,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "1000 lb/h",
+        "symbol": "1000 lb/h",
+        "factor": 0.12599788055555555,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "kg/s",
+      "kg/h"
+    ],
+    "default": [
+      1,
+      "kg/s",
+      "kg/h"
+    ]
+  },
+  {
+    "id": "specificVolume",
+    "name": "比容",
+    "group": "材料與流體",
+    "base": "m³/kg",
+    "source": "流體物性表、材料密度的倒數、熱工資料。",
+    "note": "比容為體積／質量；密度的倒數應先確認相同物質及狀態。",
+    "units": [
+      {
+        "id": "m³/kg",
+        "symbol": "m³/kg",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "L/kg",
+        "symbol": "L/kg",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cm³/kg",
+        "symbol": "cm³/kg",
+        "factor": 1e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "m³/t",
+        "symbol": "m³/t",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "L/t",
+        "symbol": "L/t",
+        "factor": 1e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "cm³/t",
+        "symbol": "cm³/t",
+        "factor": 1e-09,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "in³/lb",
+        "symbol": "in³/lb",
+        "factor": 3.612729200008369e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft³/lb",
+        "symbol": "ft³/lb",
+        "factor": 0.062427960576144616,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft³/slug",
+        "symbol": "ft³/slug",
+        "factor": 0.0019403203319797162,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "in³/slug",
+        "symbol": "in³/slug",
+        "factor": 1.1228705624882616e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gal (US)/lb",
+        "symbol": "gal (US)/lb",
+        "factor": 0.00834540445201933,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gal (UK)/lb",
+        "symbol": "gal (UK)/lb",
+        "factor": 0.010022412854960501,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "in³/(1000 lb)",
+        "symbol": "in³/(1000 lb)",
+        "factor": 3.612729200008368e-08,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "ft³/(1000 lb)",
+        "symbol": "ft³/(1000 lb)",
+        "factor": 6.242796057614462e-05,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "gal (US)/(1000 lb)",
+        "symbol": "gal (US)/(1000 lb)",
+        "factor": 8.345404452019331e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "m³/kg",
+      "L/kg"
+    ],
+    "default": [
+      1,
+      "m³/kg",
+      "L/kg"
+    ]
+  },
+  {
+    "id": "massInertia",
+    "name": "質量慣性矩",
+    "group": "結構與載重",
+    "base": "kg·m²",
+    "source": "設備轉動慣量、動力模型質量慣性矩。",
+    "note": "這是質量慣性矩 kg·m²；梁斷面的面積二次矩是 m⁴，不可互換。",
+    "units": [
+      {
+        "id": "kg·m²",
+        "symbol": "kg·m²",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "kg·cm²",
+        "symbol": "kg·cm²",
+        "factor": 0.0001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "t·m²",
+        "symbol": "t·m²",
+        "factor": 1000,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "t·cm²",
+        "symbol": "t·cm²",
+        "factor": 0.1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb·ft²",
+        "symbol": "lb·ft²",
+        "factor": 0.042140110093804806,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb·in²",
+        "symbol": "lb·in²",
+        "factor": 0.0002926396534292,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "lb·m²",
+        "symbol": "lb·m²",
+        "factor": 0.45359237,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "g·m²",
+        "symbol": "g·m²",
+        "factor": 0.001,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "g·cm²",
+        "symbol": "g·cm²",
+        "factor": 1e-07,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "oz·m²",
+        "symbol": "oz·m²",
+        "factor": 0.028349523125,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "oz·cm²",
+        "symbol": "oz·cm²",
+        "factor": 2.8349523125000004e-06,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "(1000 lb)·ft²",
+        "symbol": "(1000 lb)·ft²",
+        "factor": 42.14011009380481,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "(1000 lb)·in²",
+        "symbol": "(1000 lb)·in²",
+        "factor": 0.2926396534292,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      1,
+      "kg·m²",
+      "g·cm²"
+    ],
+    "default": [
+      1,
+      "kg·m²",
+      "g·cm²"
+    ]
+  },
+  {
+    "id": "temperature",
+    "name": "溫度",
+    "group": "熱工與設備",
+    "base": "K",
+    "source": "溫度計、養護記錄、設備運轉條件。",
+    "note": "絕對溫度使用偏移換算；不可將攝氏、華氏、K 當比例倍數。",
+    "units": [
+      {
+        "id": "°C",
+        "symbol": "°C",
+        "factor": 1,
+        "offset": 273.15,
+        "note": "SI 定義、NIST 係數或由其基本單位推導",
+        "min": -273.15
+      },
+      {
+        "id": "°F",
+        "symbol": "°F",
+        "factor": 0.5555555555555556,
+        "offset": 255.3722222222222,
+        "note": "SI 定義、NIST 係數或由其基本單位推導",
+        "min": -459.67
+      },
+      {
+        "id": "K",
+        "symbol": "K",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導",
+        "min": 0
+      },
+      {
+        "id": "°R",
+        "symbol": "°R",
+        "factor": 0.5555555555555556,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導",
+        "min": 0
+      }
+    ],
+    "sample": [
+      0,
+      "°C",
+      "°F"
+    ],
+    "default": [
+      0,
+      "°C",
+      "°F"
+    ]
+  },
+  {
+    "id": "temperatureDelta",
+    "name": "溫差",
+    "group": "熱工與設備",
+    "base": "K",
+    "source": "溫度變化、熱傳計算中兩點的溫度差。",
+    "note": "溫差無 273.15 或 32 的偏移：1 Δ°C = 1 K = 1.8 Δ°F。",
+    "units": [
+      {
+        "id": "K",
+        "symbol": "K",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Δ°C",
+        "symbol": "Δ°C",
+        "factor": 1,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Δ°F",
+        "symbol": "Δ°F",
+        "factor": 0.5555555555555556,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      },
+      {
+        "id": "Δ°R",
+        "symbol": "Δ°R",
+        "factor": 0.5555555555555556,
+        "offset": 0,
+        "note": "SI 定義、NIST 係數或由其基本單位推導"
+      }
+    ],
+    "sample": [
+      10,
+      "Δ°C",
+      "Δ°F"
+    ],
+    "default": [
+      10,
+      "Δ°C",
+      "Δ°F"
+    ]
+  }
+]
