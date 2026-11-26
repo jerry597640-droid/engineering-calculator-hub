@@ -86,7 +86,10 @@ try {
           body:(document.body?.innerText||'').trim().length,
           controls:document.querySelectorAll('input,select,button,textarea').length,
           legacy:[...document.querySelectorAll('a[href]')].map(a=>a.href)
-            .filter(u=>/^https?:\\/\\/jerry597640-droid\\.github\\.io\\//i.test(u)).slice(0,4)}))()`);
+            .filter(u=>/^https?:\\/\\/(?:jerry597640-droid\\.github\\.io\\/|github\\.com\\/jerry597640-droid\\/)/i.test(u)).slice(0,4),
+          offlineLinks:[...document.querySelectorAll('a[href]')]
+            .filter(a=>/\\.zip(?:$|[?#])/i.test(a.href) || /離線(?:版|版本|套件).*下載|下載.*離線/.test(a.innerText))
+            .map(a=>a.getAttribute('href')).slice(0,4)}))()`);
         if(info?.path==='/tools/'+id+'/' && info.ready!=='loading' && info.body>0)break;
       }
       await delay(1200);
@@ -95,10 +98,11 @@ try {
     const problems=[...new Set(exceptions)].slice(0,4);
     const remoteErrors=failedExternal.filter((x,i,a)=>a.findIndex(y=>y.url===x.url&&y.status===x.status)===i).slice(0,4);
     const ok=Boolean(info && info.path==='/tools/'+id+'/' && info.body>0 && !issue &&
-      !localMissing.length && !problems.length && !info.legacy.length && !remoteErrors.length);
+      !localMissing.length && !problems.length && !info.legacy.length && !info.offlineLinks.length && !remoteErrors.length);
     const row={id,status:ok?'initial-load-ok':'review',title:info?.title||'',controls:info?.controls||0,
       ...(issue?{issue}:{}),...(localMissing.length?{localMissing}:{}),...(problems.length?{exceptions:problems}:{}),
-      ...(info?.legacy?.length?{legacy:info.legacy}:{}),...(remoteErrors.length?{remoteErrors}:{})};
+      ...(info?.legacy?.length?{legacy:info.legacy}:{}),...(info?.offlineLinks?.length?{offlineLinks:info.offlineLinks}:{}),
+      ...(remoteErrors.length?{remoteErrors}:{})};
     report.push(row);console.log(JSON.stringify(row));
   }
   console.log(JSON.stringify({summary:{total:report.length,initialLoadOk:report.filter(x=>x.status==='initial-load-ok').length,
