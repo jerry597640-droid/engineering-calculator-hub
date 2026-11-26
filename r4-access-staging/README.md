@@ -8,6 +8,6 @@
 ## 佈署與驗收
 
 1. 由 Supabase 測試專案管理者執行 `authz.sql`。只給已經確認身分的測試管理者專案 A 權限。勿新增或覆寫現有工具權限。這版透過 Supabase 後台管理測試授權，沒有 R4 授權管理介面。
-2. Node 22 或以上執行 `node --test worker.test.mjs`，再以 `npx --yes wrangler@4.92.0 deploy --dry-run` 檢查。如果使用 GitHub Actions，僅 `codex/r4-login-staging-20261126` 分支有這個獨立試辦部署，沿用既有 `CLOUDFLARE_STAGING_TOKEN`，不在工作流程列印或讀取金鑰值。
+2. Node 22 或以上執行 `node --test worker.test.mjs`，再以 `npx --yes wrangler@4.92.0 deploy --dry-run` 檢查。GitHub Actions 此處只檢查、不部署，也不使用工具管控站的憑證。若以 Cloudflare 已連接的 GitHub 專案部署，設定分支 `codex/r4-login-staging-20261126`、根目錄 `r4-access-staging`，部署指令 `npx --yes wrangler@4.92.0 deploy`，Worker 名稱只用 `xjtc-r4-access-staging`，不要選擇既有的工程工具 Worker。
 3. 使用自己的既有測試帳號登入，自己輸入手機 6 位碼。應只能列出專案 A，直接前往 `/workspace/R4-DEMO-B` 應被拒絕。未獲 R4 授權但有工具權限的獨立帳號應可通過 MFA，隨後看到「已驗證帳號，但未開通 R4」。
 4. 登出 R4 後，直接開啟 `/workspace/R4-DEMO-A` 應回登入頁，`/api/projects/R4-DEMO-A` 應回 401。R4 登出不會登出原工具站。本機模擬測試不能取代雲端真實登入端到端驗收。
