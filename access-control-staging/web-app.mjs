@@ -109,7 +109,7 @@ export async function route(request,{client,assets}) {
     const {data,error}=await client.from('ech_tools').select('tool_id,name').order('name');
     if(error)return errorPage('工具清單暫時無法取得。',503);
     const cards=(data||[]).filter(x=>/^[a-z0-9][a-z0-9-]{0,79}$/.test(x.tool_id)).map(x=>`<article><a href="/tools/${esc(x.tool_id)}/">${esc(x.name)}</a></article>`).join('');
-    return page('工程計算工具中心',`${userToolbar}<section><p>顯示已授權且已啟用的工具。</p><div class="tools">${cards||'<p>目前沒有可使用的工具。</p>'}</div></section>`);
+    return page('工程計算工具中心｜測試版',`${userToolbar}<section><strong>測試環境</strong><p>部分工具目前僅完成頁面載入檢查；工程案例、匯出及手機操作仍需逐項驗證。</p></section><section><p>顯示已授權且已啟用的工具。</p><div class="tools">${cards||'<p>目前沒有可使用的工具。</p>'}</div></section>`);
   }
   if(path==='/mfa' && request.method==='GET'){
     const {data,error}=await client.auth.mfa.listFactors();if(error)return errorPage('無法讀取驗證設定。',503);
