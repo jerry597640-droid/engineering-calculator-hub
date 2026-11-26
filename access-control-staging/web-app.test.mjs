@@ -118,6 +118,13 @@ test('password recovery uses the fixed callback and a secure short-lived marker'
   assert.match(callback.headers.get('set-cookie'),/Max-Age=0/);
   const ordinary=await route(req('/auth/callback?code=example'),x);
   assert.equal(ordinary.headers.get('location'),'/');
+  const missing=await route(req('/auth/callback'),x);
+  assert.equal(missing.status,400);assert.match(await missing.text(),/同一台裝置及瀏覽器/);
+  assert.match(missing.headers.get('set-cookie'),/Max-Age=0/);
+  x.client.auth.exchangeCodeForSession=async()=>({error:{message:'private upstream error'}});
+  const expired=await route(req('/auth/callback?code=expired'),x);
+  assert.equal(expired.status,400);const message=await expired.text();
+  assert.match(message,/最新的郵件/);assert.doesNotMatch(message,/private upstream error/);
   assert.equal((await route(req('/auth/request-reset',form('email=test%40example.invalid','https://evil.example')),x)).status,400);
 });
 test('password change requires identity, matching inputs and signs out other sessions',async()=>{
@@ -127,6 +134,10 @@ test('password change requires identity, matching inputs and signs out other ses
   assert.match(await (await route(req('/login'),x)).text(),/忘記密碼/);
   assert.equal((await route(req('/auth/reset-password',form('password=1234567890&confirm=wrong')),x)).status,400);
   assert.equal(calls.length,0);
+  x.client.auth.updateUser=async()=>({error:{code:'same_password'}});
+  const reused=await route(req('/auth/reset-password',form('password=1234567890&confirm=1234567890')),x);
+  assert.equal(reused.status,400);assert.match(await reused.text(),/與原密碼不同/);assert.equal(calls.length,0);
+  x.client.auth.updateUser=async arg=>{calls.push({method:'update',arg});return {error:null}};
   const done=await route(req('/auth/reset-password',form('password=1234567890&confirm=1234567890')),x);
   assert.equal(done.status,200);assert.match(await done.text(),/密碼已更新/);
   assert.deepEqual(calls.map(c=>c.method),['update','signout']);assert.equal(calls[1].arg.scope,'global');

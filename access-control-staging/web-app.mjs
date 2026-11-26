@@ -19,6 +19,7 @@ const hasRecoveryCookie = request => {
   return matches.length===1 && matches[0]==='__Host-ech-recovery=1';
 };
 const errorPage = (message,status=403) => page('無法完成操作',`<section><p>${esc(message)}</p><p><a href="/">回到入口</a></p></section>`,status);
+const callbackError = () => page('登入連結無法使用','<section><p>連結可能已過期、已使用，或無法在目前的瀏覽器完成驗證。請在原本申請的同一台裝置及瀏覽器重新操作，並只開啟最新的郵件。</p><p><a href="/forgot-password">重新申請密碼重設</a> · <a href="/login">回到登入</a> · <a href="/signup">重新申請帳號</a></p></section>',400);
 const sameOrigin = req => req.headers.get('origin') === new URL(req.url).origin;
 // The administration form always uses Taiwan time, independent of the server locale.
 const taipeiValue = value => {
@@ -80,9 +81,9 @@ export async function route(request,{client,assets}) {
     const claims=await identity(client);return claims?resetPage():redirect('/login');
   }
   if(request.method==='GET' && path==='/auth/callback') {
-    const code=u.searchParams.get('code'); if(!code || code.length>512)return errorPage('登入連結無效。',400);
+    const code=u.searchParams.get('code'); if(!code || code.length>512)return recoveryCookie(callbackError(),true);
     const {data,error}=await client.auth.exchangeCodeForSession(code);
-    return error ? recoveryCookie(errorPage('登入或驗證失敗，請重新操作。',400),true) :
+    return error ? recoveryCookie(callbackError(),true) :
       recoveryCookie(redirect(data?.redirectType==='recovery'||hasRecoveryCookie(request)?'/reset-password':'/'),true);
   }
   if(request.method==='POST' && path.startsWith('/auth/')) {
@@ -97,7 +98,10 @@ export async function route(request,{client,assets}) {
       const claims=await identity(client),password=form.get('password')||'',confirm=form.get('confirm')||'';
       if(!claims)return errorPage('請先使用重設連結登入。',401);
       if(password.length<10||password.length>256||password!==confirm)return errorPage('請確認兩次輸入相同且至少 10 個字元。',400);
-      const {error}=await client.auth.updateUser({password});if(error)return errorPage('密碼更新失敗，請重新申請連結。',400);
+      const {error}=await client.auth.updateUser({password});
+      if(error?.code==='same_password')return page('無法更新密碼','<section><p>新密碼必須與原密碼不同，請換一組至少 10 個字元的密碼。</p><a href="/reset-password">重新設定密碼</a></section>',400);
+      if(error?.code==='weak_password')return page('無法更新密碼','<section><p>此密碼不符合安全設定，請換一組較強且未重複使用的密碼。</p><a href="/reset-password">重新設定密碼</a></section>',400);
+      if(error)return page('無法更新密碼','<section><p>密碼更新失敗，請重新申請重設連結。</p><a href="/forgot-password">重新申請重設連結</a></section>',400);
       const signedOut=await client.auth.signOut({scope:'global'});
       if(signedOut.error)return recoveryCookie(errorPage('密碼已更新，但無法登出其他裝置，請聯絡管理員。',503),true);
       return recoveryCookie(page('密碼已更新','<section><p>請使用新密碼重新登入。</p><a href="/login">前往登入</a></section>'),true);
