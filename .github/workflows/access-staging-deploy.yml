@@ -1,0 +1,46 @@
+name: Engineering access staging deploy
+on:
+  push:
+    branches: [codex/engineering-access-staging-20261126]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: engineering-access-staging
+  cancel-in-progress: false
+jobs:
+  verify-and-deploy:
+    if: github.repository == 'jerry597640-droid/engineering-calculator-hub' && github.ref == 'refs/heads/codex/engineering-access-staging-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: access-control-staging
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Install pinned dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify authorization and SDK integration
+        run: npm test
+      - name: Check deploy bundle
+        run: npx wrangler deploy --dry-run --outdir .staging-dry-run
+      - name: Check whether deployment is configured
+        id: readiness
+        env:
+          DEPLOY_TOKEN: ${{ secrets.CLOUDFLARE_STAGING_TOKEN }}
+        run: |
+          if [ -n "$DEPLOY_TOKEN" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Deployment skipped; the staging token is not configured."
+          fi
+      - name: Deploy the isolated staging Worker
+        if: steps.readiness.outputs.ready == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_STAGING_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 3c4291ea6933452f275090a2819b25e9
+        run: npx wrangler deploy --keep-vars
