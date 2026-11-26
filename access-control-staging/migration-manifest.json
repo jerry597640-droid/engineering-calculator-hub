@@ -120,7 +120,13 @@
     {
       "id": "rc-wall",
       "kind": "hub",
-      "source": "rc-wall"
+      "source": "rc-wall",
+      "extra_assets": [
+        {"source": "rc-wall/VALIDATION.md", "dest": "validation.txt"}
+      ],
+      "replacements": [
+        {"file": "index.html", "from": "https://github.com/jerry597640-droid/engineering-calculator-hub/blob/main/rc-wall/VALIDATION.md", "to": "/tools/rc-wall/validation.txt"}
+      ]
     },
     {
       "id": "footing-design",
@@ -217,7 +223,10 @@
       "id": "scaffold",
       "kind": "external",
       "source": "scaffold-analysis-calculator",
-      "commit": "89d3d61c237f1d005102ca7e42e2ea29e6ccaecd"
+      "commit": "89d3d61c237f1d005102ca7e42e2ea29e6ccaecd",
+      "replacements": [
+        {"file": "index.html", "from": "const offline=$('offline')||document.createElement('button');offline.id='offline';", "to": "const offline=$('offline')||document.createElement('button');offline.id='offline';offline.disabled=true;offline.title='測試站暫不提供離線下載';"}
+      ]
     },
     {
       "id": "steel",

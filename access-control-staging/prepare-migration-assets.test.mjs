@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { join, resolve, sep } from 'node:path';
 import { tmpdir } from 'node:os';
-import { prepare, rewriteLinks, shouldCopy } from './prepare-migration-assets.mjs';
+import { prepare, rewriteLinks, shouldCopy, suspendOfflineDownloads } from './prepare-migration-assets.mjs';
 
 const manifest={tools:[
   {id:'welding',kind:'hub',source:'welding-design'},
@@ -17,6 +17,13 @@ test('public tool links map to separately authorized tool paths',()=>{
 test('runtime filter excludes offline bundles, tests, and hidden directories',()=>{
   for(const p of ['offline.html','x-offline.zip','tests/app.js','.git/config','data/verification.json'])assert.equal(shouldCopy(p),false,p);
   for(const p of ['index.html','app.js','media/tutorial.mp4','vendor/license.txt'])assert.equal(shouldCopy(p),true,p);
+});
+test('staging disables offline downloads without rewriting embedded scripts or normal exports',()=>{
+  const source='<a id="pkg" href="./bundle-offline.zip" download>下載離線套件</a><button id="offline">下載單檔 HTML</button><a href="media/tutorial.mp4" download>下載影片</a><script>const text=\'<a href="./offline.zip">example</a>\';</script>';
+  const out=suspendOfflineDownloads(source);
+  assert.match(out,/<a id="pkg" aria-disabled="true"/);assert.match(out,/<button id="offline" disabled/);
+  assert.match(out,/<a href="media\/tutorial\.mp4" download>下載影片<\/a>/);
+  assert.match(out,/<script>const text='<a href="\.\/offline\.zip">example<\/a>';<\/script>/);
 });
 test('migration copies only candidate assets into bounded tool paths',async()=>{
   const base=resolve(tmpdir()),dir=await mkdtemp(join(base,'ech-migration-'));assert.ok(resolve(dir).startsWith(base+sep));
