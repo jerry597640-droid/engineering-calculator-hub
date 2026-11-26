@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": {"test": "node --test gateway.test.mjs supabase-authorizer.test.mjs web-app.test.mjs worker-sdk-integration.test.mjs"},
+  "scripts": {"test": "node --test gateway.test.mjs supabase-authorizer.test.mjs web-app.test.mjs worker-sdk-integration.test.mjs pilot-rebar-baseline.test.mjs"},
   "dependencies": {"@supabase/ssr": "0.12.7", "@supabase/supabase-js": "2.119.2"},
   "devDependencies": {"wrangler": "4.168.0"}
 }
