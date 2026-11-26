@@ -44,3 +44,19 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_STAGING_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: 3c4291ea6933452f275090a2819b25e9
         run: npx wrangler deploy --keep-vars
+      - name: Verify anonymous requests cannot read pilot tools
+        if: steps.readiness.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -eu
+          site='https://engineering-tools-access-staging.jerry597640.workers.dev'
+          check() {
+            local path="$1" expected="$2" status
+            status=$(curl --silent --show-error --retry 3 --retry-all-errors --retry-delay 2 --max-time 20 -D /tmp/ech-headers -o /tmp/ech-body -w '%{http_code}' "$site$path")
+            test "$status" = "$expected" || { echo "Unexpected HTTP $status for $path (expected $expected)"; exit 1; }
+            tr -d '\r' < /tmp/ech-headers | grep -qi '^cache-control:.*no-store'
+          }
+          check '/login' 200
+          check '/tools/rc-slab-auto-design/index.html' 401
+          check '/tools/rebar/index.html' 401
+          check '/assets/tools/rebar/index.html' 404
