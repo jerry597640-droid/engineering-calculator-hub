@@ -1,0 +1,38 @@
+name: Engineering access staging checks
+on:
+  push:
+    branches: [codex/engineering-access-staging-20261126]
+    paths: ['access-control-staging/**', '.github/workflows/access-staging-checks.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: access-control-staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve pinned dependencies when lockfile is absent
+        run: |
+          if [ ! -f package-lock.json ]; then npm install --package-lock-only --ignore-scripts --no-audit --no-fund; fi
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Test authorization and request routing
+        run: npm test
+      - name: Build worker without deploying
+        run: npx wrangler deploy --dry-run --outdir .staging-dry-run
+      - name: Retain dependency lockfile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: access-staging-lockfile
+          path: access-control-staging/package-lock.json
+          if-no-files-found: ignore
+          retention-days: 7
+
