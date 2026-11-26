@@ -106,3 +106,30 @@ test('only a verified owner can view the administrative audit',async()=>{
   const owner=fake({claims:{sub:id,aal:'aal2'},userProfile:{user_id:id,role:'owner',status:'approved'}});
   assert.equal((await route(req('/admin/audit'),owner)).status,200);assert.equal(owner.rpcs()[0].name,'ech_admin_audit');
 });
+test('password recovery uses the fixed callback and a secure short-lived marker',async()=>{
+  const x=fake(),calls=[];
+  x.client.auth.resetPasswordForEmail=async(email,options)=>{calls.push({email,options});return {error:null}};
+  x.client.auth.exchangeCodeForSession=async(code)=>{calls.push({code});return {error:null}};
+  const sent=await route(req('/auth/request-reset',form('email=test%40example.invalid')),x);
+  assert.equal(sent.status,200);assert.equal(calls[0].options.redirectTo,'https://stage.example/auth/callback');
+  assert.match(sent.headers.get('set-cookie'),/__Host-ech-recovery=1;.*HttpOnly; Secure; SameSite=Lax/);
+  const callback=await route(req('/auth/callback?code=example',{headers:{cookie:'__Host-ech-recovery=1'}}),x);
+  assert.equal(callback.status,303);assert.equal(callback.headers.get('location'),'/reset-password');
+  assert.match(callback.headers.get('set-cookie'),/Max-Age=0/);
+  const ordinary=await route(req('/auth/callback?code=example'),x);
+  assert.equal(ordinary.headers.get('location'),'/');
+  assert.equal((await route(req('/auth/request-reset',form('email=test%40example.invalid','https://evil.example')),x)).status,400);
+});
+test('password change requires identity, matching inputs and signs out other sessions',async()=>{
+  const x=fake(),calls=[];
+  x.client.auth.updateUser=async arg=>{calls.push({method:'update',arg});return {error:null}};
+  x.client.auth.signOut=async arg=>{calls.push({method:'signout',arg});return {error:null}};
+  assert.match(await (await route(req('/login'),x)).text(),/忘記密碼/);
+  assert.equal((await route(req('/auth/reset-password',form('password=1234567890&confirm=wrong')),x)).status,400);
+  assert.equal(calls.length,0);
+  const done=await route(req('/auth/reset-password',form('password=1234567890&confirm=1234567890')),x);
+  assert.equal(done.status,200);assert.match(await done.text(),/密碼已更新/);
+  assert.deepEqual(calls.map(c=>c.method),['update','signout']);assert.equal(calls[1].arg.scope,'global');
+  const anonymous=fake({claims:null});assert.equal((await route(req('/reset-password'),anonymous)).status,303);
+  assert.equal((await route(req('/auth/reset-password',form('password=1234567890&confirm=1234567890')),anonymous)).status,401);
+});

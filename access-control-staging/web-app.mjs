@@ -9,6 +9,15 @@ const headers = {'cache-control':'private, no-store, max-age=0','content-type':'
   'content-security-policy':"default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"};
 const page = (title,body,status=200) => new Response(`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>body{font-family:system-ui,sans-serif;margin:0;background:#f4f6f9;color:#203148}main{max-width:1000px;margin:4vh auto;padding:24px}section,article{background:white;border:1px solid #dbe3ec;border-radius:12px;padding:20px;margin:14px 0}input,select,button{font:inherit;padding:10px;border:1px solid #bdcbd9;border-radius:6px}button{background:#193e5c;color:white;cursor:pointer}a{color:#135d87}label{display:block;margin:12px 0}table{border-collapse:collapse;width:100%}td,th{text-align:left;padding:10px;border-bottom:1px solid #dbe3ec}small{color:#657589}.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}form.inline{display:inline-block;margin:4px}.qr{max-width:220px}</style></head><body><main><h1>${esc(title)}</h1>${body}</main></body></html>`,{status,headers});
 const redirect = location => new Response(null,{status:303,headers:{...headers,location}});
+const recoveryCookie = (response,clear=false) => {
+  const h=new Headers(response.headers);
+  h.append('set-cookie','__Host-ech-recovery='+(clear?'':'1')+'; Path=/; Max-Age='+(clear?'0':'1800')+'; HttpOnly; Secure; SameSite=Lax');
+  return new Response(response.body,{status:response.status,statusText:response.statusText,headers:h});
+};
+const hasRecoveryCookie = request => {
+  const matches=(request.headers.get('cookie')||'').split(';').map(x=>x.trim()).filter(x=>x.startsWith('__Host-ech-recovery='));
+  return matches.length===1 && matches[0]==='__Host-ech-recovery=1';
+};
 const errorPage = (message,status=403) => page('無法完成操作',`<section><p>${esc(message)}</p><p><a href="/">回到入口</a></p></section>`,status);
 const sameOrigin = req => req.headers.get('origin') === new URL(req.url).origin;
 // The administration form always uses Taiwan time, independent of the server locale.
@@ -56,22 +65,43 @@ async function profile(client,claims) {
   return data;
 }
 const approved = p => p?.status==='approved' && (!p.expires_at || Date.parse(p.expires_at)>Date.now());
-const loginPage = message => page('工程計算工具中心｜登入',`<section><p>${esc(message || '請登入，帳號須經管理員核准後使用。')}</p><form method="post" action="/auth/login"><label>電子郵件 <input required type="email" name="email" autocomplete="username"></label><label>密碼 <input required type="password" name="password" autocomplete="current-password"></label><button>登入</button></form><p>Google 登入尚在設定中。</p><p><a href="/signup">申請帳號</a></p><small>測試環境：工具尚未正式開放。</small></section>`);
+const loginPage = message => page('工程計算工具中心｜登入',`<section><p>${esc(message || '請登入，帳號須經管理員核准後使用。')}</p><form method="post" action="/auth/login"><label>電子郵件 <input required type="email" name="email" autocomplete="username"></label><label>密碼 <input required type="password" name="password" autocomplete="current-password"></label><button>登入</button></form><p>Google 登入尚在設定中。</p><p><a href="/forgot-password">忘記密碼</a> · <a href="/signup">申請帳號</a></p><small>測試環境：工具尚未正式開放。</small></section>`);
 const signupPage = () => page('申請帳號',`<section><p>申請後需先驗證電子郵件，並由管理員核准。</p><form method="post" action="/auth/signup"><label>電子郵件 <input required type="email" name="email"></label><label>密碼 <input required minlength="10" type="password" name="password" autocomplete="new-password"></label><button>送出申請</button></form><p><a href="/login">回到登入</a></p></section>`);
 const userToolbar = `<nav class="toolbar"><a href="/">工具入口</a><a href="/mfa">多因素驗證</a><a href="/admin">管理後台</a><form class="inline" method="post" action="/auth/logout"><button>登出</button></form></nav>`;
+const forgotPage = () => page('重設密碼','<section><p>請輸入註冊電子郵件。收到郵件後，請用目前這個瀏覽器開啟重設連結。</p><form method="post" action="/auth/request-reset"><label>電子郵件 <input required type="email" name="email" autocomplete="username"></label><button>寄送重設連結</button></form><p><a href="/login">回到登入</a></p></section>');
+const resetPage = () => page('設定新密碼','<section><p>請設定至少 10 個字元的新密碼。</p><form method="post" action="/auth/reset-password"><label>新密碼 <input required minlength="10" maxlength="256" type="password" name="password" autocomplete="new-password"></label><label>再次輸入新密碼 <input required minlength="10" maxlength="256" type="password" name="confirm" autocomplete="new-password"></label><button>更新密碼</button></form></section>');
 
 export async function route(request,{client,assets}) {
   const u=new URL(request.url), path=u.pathname;
-  if(request.method==='GET' && path==='/login') return loginPage();
-  if(request.method==='GET' && path==='/signup') return signupPage();
+  if(request.method==='GET' && path==='/login') return recoveryCookie(loginPage(),true);
+  if(request.method==='GET' && path==='/signup') return recoveryCookie(signupPage(),true);
+  if(request.method==='GET' && path==='/forgot-password')return forgotPage();
+  if(request.method==='GET' && path==='/reset-password'){
+    const claims=await identity(client);return claims?resetPage():redirect('/login');
+  }
   if(request.method==='GET' && path==='/auth/callback') {
     const code=u.searchParams.get('code'); if(!code || code.length>512)return errorPage('登入連結無效。',400);
-    const {error}=await client.auth.exchangeCodeForSession(code);
-    return error ? errorPage('登入或驗證失敗，請重新操作。',400) : redirect('/');
+    const {data,error}=await client.auth.exchangeCodeForSession(code);
+    return error ? recoveryCookie(errorPage('登入或驗證失敗，請重新操作。',400),true) :
+      recoveryCookie(redirect(data?.redirectType==='recovery'||hasRecoveryCookie(request)?'/reset-password':'/'),true);
   }
   if(request.method==='POST' && path.startsWith('/auth/')) {
     let form;try{form=await formValues(request)}catch{return errorPage('請求格式無效。',400)}
     if(path==='/auth/logout'){await client.auth.signOut({scope:'local'});return redirect('/login')}
+    if(path==='/auth/request-reset'){
+      const email=form.get('email')||'';if(email.length>254||!email.includes('@'))return errorPage('請檢查電子郵件格式。',400);
+      await client.auth.resetPasswordForEmail(email,{redirectTo:u.origin+'/auth/callback'});
+      return recoveryCookie(page('請查看電子郵件','<section><p>若帳號存在且寄信服務可用，您會收到重設連結。請用相同瀏覽器開啟；若未收到，請稍後再試。</p><a href="/login">回到登入</a></section>'));
+    }
+    if(path==='/auth/reset-password'){
+      const claims=await identity(client),password=form.get('password')||'',confirm=form.get('confirm')||'';
+      if(!claims)return errorPage('請先使用重設連結登入。',401);
+      if(password.length<10||password.length>256||password!==confirm)return errorPage('請確認兩次輸入相同且至少 10 個字元。',400);
+      const {error}=await client.auth.updateUser({password});if(error)return errorPage('密碼更新失敗，請重新申請連結。',400);
+      const signedOut=await client.auth.signOut({scope:'global'});
+      if(signedOut.error)return recoveryCookie(errorPage('密碼已更新，但無法登出其他裝置，請聯絡管理員。',503),true);
+      return recoveryCookie(page('密碼已更新','<section><p>請使用新密碼重新登入。</p><a href="/login">前往登入</a></section>'),true);
+    }
     if(path==='/auth/google') {
       const {data,error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo:u.origin+'/auth/callback'}});
       if(error || !data?.url)return errorPage('Google 登入尚未設定或暫時無法使用。',503);
