@@ -38,6 +38,14 @@ test('forms reject cross-origin and duplicate values',async()=>{
   const x=fake();assert.equal((await route(req('/auth/login',form('email=a%40b.com&password=abcdefgh','https://evil.example')),x)).status,400);
   assert.equal((await route(req('/auth/login',form('email=a%40b.com&email=b%40c.com&password=abcdefgh')),x)).status,400);
 });
+test('login forms retain same-origin CSRF checks and a usable browser referrer policy',async()=>{
+  const x=fake();
+  for(const path of ['/login','/signup'])assert.equal((await route(req(path),x)).headers.get('referrer-policy'),'same-origin');
+  const valid=await route(req('/auth/login',form('email=qa%40example.invalid&password=x')),x);
+  assert.equal(valid.status,400);assert.match(await valid.text(),/請檢查帳號及密碼格式/);
+  const anonymousOrigin=await route(req('/auth/login',form('email=qa%40example.invalid&password=x','null')),x);
+  assert.equal(anonymousOrigin.status,400);assert.match(await anonymousOrigin.text(),/請求格式無效/);
+});
 test('tool names are HTML escaped',async()=>{
   const x=fake({tools:[{tool_id:'rc-beam',name:'<img src=x onerror=alert(1)>'}]});const html=await (await route(req('/'),x)).text();
   assert.ok(html.includes('&lt;img'));assert.ok(!html.includes('<img src=x'));
