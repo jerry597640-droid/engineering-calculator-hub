@@ -1,0 +1,97 @@
+{
+  "voice": "zh-TW-HsiaoChenNeural",
+  "locale": "zh-TW",
+  "gender": "Female",
+  "rate": "-8%",
+  "timingSource": "TTS word boundaries, not speech recognition",
+  "duration": 211.656,
+  "generated": "2026-10-10",
+  "chapters": 6,
+  "captions": 60,
+  "scriptCoverage": "All six source scripts exactly match the normalized TTS word-boundary text. This is timing/text verification, not independent speech recognition.",
+  "audioChecks": [
+    {
+      "chapter": "beat1",
+      "scriptMatchesTtsBoundaries": true,
+      "decodedAudioSeconds": 30.216,
+      "rmsDbFS": -19.23,
+      "peakDbFS": -3.44,
+      "captions": 9
+    },
+    {
+      "chapter": "beat2",
+      "scriptMatchesTtsBoundaries": true,
+      "decodedAudioSeconds": 32.952,
+      "rmsDbFS": -18.96,
+      "peakDbFS": -4.13,
+      "captions": 8
+    },
+    {
+      "chapter": "beat3",
+      "scriptMatchesTtsBoundaries": true,
+      "decodedAudioSeconds": 33.504,
+      "rmsDbFS": -19.49,
+      "peakDbFS": -3.27,
+      "captions": 11
+    },
+    {
+      "chapter": "beat4",
+      "scriptMatchesTtsBoundaries": true,
+      "decodedAudioSeconds": 34.92,
+      "rmsDbFS": -19.31,
+      "peakDbFS": -4.14,
+      "captions": 11
+    },
+    {
+      "chapter": "beat5",
+      "scriptMatchesTtsBoundaries": true,
+      "decodedAudioSeconds": 36.96,
+      "rmsDbFS": -19.14,
+      "peakDbFS": -3.97,
+      "captions": 10
+    },
+    {
+      "chapter": "beat6",
+      "scriptMatchesTtsBoundaries": true,
+      "decodedAudioSeconds": 39.504,
+      "rmsDbFS": -19.08,
+      "peakDbFS": -3.7,
+      "captions": 11
+    }
+  ],
+  "chapterStartSeconds": [
+    0,
+    30.816,
+    64.368,
+    98.472,
+    133.992,
+    171.552
+  ],
+  "audioConcatenationDriftSeconds": 0,
+  "finalVideo": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "24000",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "211.700000",
+      "size": "5184883"
+    }
+  },
+  "videoSha256": "536f2271e27631f4abe7e73a31bff8c68840e3422c897c470448f745fcee47ed",
+  "fullFileDecode": "ffmpeg decoded all video and audio frames without errors",
+  "offlineAudioDecode": "Verified in a browser with networking disabled; see ../media-validation.json",
+  "finalIntegratedLoudnessLUFS": -16.0,
+  "finalTruePeakDbFS": -3.2
+}

@@ -1,0 +1,530 @@
+{
+  "version": "1.6.0-review",
+  "date": "2026-10-09",
+  "scope": "依目前實際程式參數語義審查；不取代規範引用審查",
+  "parameters": [
+    {
+      "id": "name",
+      "label": "柱編號",
+      "unit": "文字",
+      "definition": "識別報告與專案的構材編號，不改變受力計算。",
+      "source": "結構柱位圖、柱配筋表",
+      "commonMisuse": "不要用同一編號混合不同樓層或斷面。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "mode",
+      "label": "柱類型",
+      "unit": "選項",
+      "definition": "normal一般柱；seismic特殊抗彎矩構架的本版保守篩選（Vc=0、φV=.60），非完整耐震容量設計。",
+      "source": "結構系統設計說明、耐震分析與圖說",
+      "commonMisuse": "不可因選耐震就認為強柱弱梁、接頭、容量剪力已自動完成。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "b",
+      "label": "X向斷面尺寸",
+      "unit": "cm",
+      "definition": "斷面水平X向全寬；剪力X計算深度沿b，剪力Y的bw=b。",
+      "source": "柱配筋表、竣工圖或量測",
+      "commonMisuse": "不可將圖紙mm直接輸入，亦不可因Mx而把b當Mx的深度。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "h",
+      "label": "Y向斷面尺寸",
+      "unit": "cm",
+      "definition": "斷面垂直Y向全高；Mx應力沿Y變化；X軸迴轉半徑=h/√12。",
+      "source": "柱配筋表、竣工圖或量測",
+      "commonMisuse": "截面旋轉時須同步轉換作用內力與座標。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "environment",
+      "label": "暴露環境",
+      "unit": "選項",
+      "definition": "inside、exposed、soil、corrosive；本工具最低cover分別4、5、7.5、10 cm。",
+      "source": "建築位置、土壤或海水接觸條件、耐久設計",
+      "commonMisuse": "不可用室內預設取代埋置或腐蝕環境；規定保護層尚須依實際工況核定。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "cover",
+      "label": "淨保護層",
+      "unit": "cm",
+      "definition": "混凝土表面至最外箍筋外緣。均勻主筋中心偏距o=cover+箍筋直徑+主筋直徑/2；Ach=(b−2cover)(h−2cover)。",
+      "source": "柱詳圖、耐久與防火設計要求",
+      "commonMisuse": "不可填主筋中心距、箍筋中心距或表面至主筋外緣距。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "agg",
+      "label": "粗粒料最大標稱粒徑",
+      "unit": "cm",
+      "definition": "用於主筋與箍筋淨距篩選；20 mm填2 cm。",
+      "source": "混凝土配比設計、材料規格",
+      "commonMisuse": "不可填砂粒徑，或把20 mm輸入20 cm。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "fc",
+      "label": "混凝土規定抗壓強度fc′",
+      "unit": "kgf/cm²",
+      "definition": "設計採用之常重混凝土規定強度，通常28天圓柱強度；不是立方體或單次試體平均值。",
+      "source": "結構規格、核定材料設計強度",
+      "commonMisuse": "不可將MPa或試驗平均值直接填入；本工具範圍210～700。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "fy",
+      "label": "主筋降伏強度",
+      "unit": "kgf/cm²",
+      "definition": "所有主筋共享的設計降伏強度，影響鋼筋應力上限及εty=fy/Es。",
+      "source": "鋼筋規格、核定圖說、材料證明",
+      "commonMisuse": "混用筋徑不代表可混用不同fy；不可填抗拉強度fu。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "fyt",
+      "label": "箍／繫筋降伏強度",
+      "unit": "kgf/cm²",
+      "definition": "箍繫筋材料fy；剪力fytUsed一般取min(fyt,4200)，耐震取min(fyt,5600)。圍束式使用輸入fyt。",
+      "source": "箍繫筋材料規格、核定詳圖",
+      "commonMisuse": "不可直接複製主筋fy而不查箍筋材質，也不可假設所有公式皆採同一上限。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "Es",
+      "label": "鋼筋彈性模數",
+      "unit": "kgf/cm²",
+      "definition": "應變至應力轉換fs=Es εs；程式再以±fy截限。",
+      "source": "設計規格、鋼材資料或採用規範",
+      "commonMisuse": "不可填GPa數字如200；預設2040000 kgf/cm²。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "layout",
+      "label": "主筋輸入方式",
+      "unit": "選項",
+      "definition": "uniform周邊對稱單層；custom實際座標；layers模板產生2～6層，計算仍歸入custom實際座標。",
+      "source": "柱配筋表及所需建模方式",
+      "commonMisuse": "修改多層草稿但未產生不影響計算；以目前座標表權威。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "bar",
+      "label": "均勻主筋尺寸",
+      "unit": "D號",
+      "definition": "固定查表取得鋼筋面積與直徑；均勻模式所有主筋同尺寸。",
+      "source": "柱配筋表、鋼筋材料表",
+      "commonMisuse": "不可將D25當25 cm直徑；custom應在各列填尺寸。",
+      "applies": "uniform；多層模板預設來源"
+    },
+    {
+      "id": "nx",
+      "label": "沿b每邊根數",
+      "unit": "根",
+      "definition": "上、下每一邊各有nx根，包含兩端角筋；總N=2nx+2ny−4。",
+      "source": "柱斷面配筋圖",
+      "commonMisuse": "不可填上下合計根數或扣除角筋數。",
+      "applies": "uniform"
+    },
+    {
+      "id": "ny",
+      "label": "沿h每邊根數",
+      "unit": "根",
+      "definition": "左、右每一邊各有ny根，包含兩端角筋；角筋只計一次。",
+      "source": "柱斷面配筋圖",
+      "commonMisuse": "不可填左右合計或把總N填入。",
+      "applies": "uniform"
+    },
+    {
+      "id": "tie",
+      "label": "箍筋尺寸",
+      "unit": "D號",
+      "definition": "箍／繫筋直徑與單肢面積查表值；影響主筋中心、Av與圍束面積。",
+      "source": "柱箍繫筋詳圖、材料表",
+      "commonMisuse": "本版所有有效肢同一尺寸；不同實際尺寸須另核定等效或保守模型。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "s",
+      "label": "箍筋中心間距",
+      "unit": "cm",
+      "definition": "沿柱軸向相鄰箍筋中心距；seismic本版全高採同一輸入間距。",
+      "source": "箍筋配置及加密區詳圖",
+      "commonMisuse": "不可填箍筋淨距；不同柱段間距需分別檢核。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "tieLegsX",
+      "label": "平行X有效箍筋肢數",
+      "unit": "肢",
+      "definition": "剪力X/圍束X中有效且平行X的箍／繫筋總肢數，Av=肢數×單肢面積。",
+      "source": "實際箍繫筋剖面詳圖及錨定",
+      "commonMisuse": "不可直接用主筋總根數或圈數；uniform自算為ny，此欄不覆寫uniform。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "tieLegsY",
+      "label": "平行Y有效箍筋肢數",
+      "unit": "肢",
+      "definition": "剪力Y/圍束Y中有效且平行Y的箍／繫筋肢數。",
+      "source": "實際箍繫筋剖面詳圖及錨定",
+      "commonMisuse": "不可把兩方向肢數交換；uniform自算為nx。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "dX",
+      "label": "X向剪力有效深度",
+      "unit": "cm",
+      "definition": "沿X向自壓縮側混凝土面至受拉縱筋形心的核定有效深度；Vx使用bw=h、d=dX。正反向取保守較小值。",
+      "source": "配筋詳圖、各受力方向受拉筋形心計算",
+      "commonMisuse": "不可填b本身或將Mx受拉筋深度套用；產生多層後預填b/2須核定；uniform自算b−o。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "dY",
+      "label": "Y向剪力有效深度",
+      "unit": "cm",
+      "definition": "沿Y向自壓縮側面至受拉縱筋形心的核定深度；Vy使用bw=b、d=dY。",
+      "source": "配筋詳圖、受拉筋形心計算",
+      "commonMisuse": "不可填h本身；多層預填h/2須核定；uniform自算h−o。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "hx",
+      "label": "最大側撐主筋中心距",
+      "unit": "cm",
+      "definition": "沿柱各邊，被角隅繫筋或閉合箍筋側向支撐之縱向主筋中心至中心最大間距；控制耐震箍距及高軸力側撐限值。",
+      "source": "箍繫筋側撐詳圖",
+      "commonMisuse": "不可填筋表面淨距、沿柱箍距s或未经侧撐證明的最近鄰距离；uniform由配筋幾何估計。",
+      "applies": "custom/layers覆寫；uniform自算"
+    },
+    {
+      "id": "nl",
+      "label": "核心周邊有效側撐主筋數n_l",
+      "unit": "根",
+      "definition": "圍束核心周邊具有箍／繫筋有效側撐的縱筋數，kn=nl/(nl−2)。uniform取周邊全部根數，custom使用核定nl。",
+      "source": "實際周邊主筋與箍繫筋支承詳圖",
+      "commonMisuse": "不可用多層全部主筋數；內層不自動計入；缺省4為舊專案保守值而非已查證。；規範束筋以單一鋼筋計算，但本程式不支援束筋。",
+      "applies": "custom/layers；高軸力圍束式"
+    },
+    {
+      "id": "supported",
+      "label": "側撐與肢數確認",
+      "unit": "核取",
+      "definition": "使用者已按實際詳圖確認主筋侧撐及有效箍繫筋肢數；不是程式自動推定。",
+      "source": "經核定箍繫筋配置、錨定及施工詳圖",
+      "commonMisuse": "不可因圖上有外框箍就勾選；拖曳或配置變更後要重新確認。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "L",
+      "label": "無側向支撐長度",
+      "unit": "cm",
+      "definition": "兩有效側向支撐間柱軸向長度，用於kL/r篩選與耐震端部範圍；不一定等於樓高。",
+      "source": "結構剖面、模型支承與構架分析",
+      "commonMisuse": "不可把層高直接當無支撐淨長而不看梁/支承。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "frame",
+      "label": "構架側移分類",
+      "unit": "選項",
+      "definition": "braced側移受抑制或sway可側移；後者kL/r可忽略門檻22，前者用min(40,34+12M1/M2)。",
+      "source": "整體結構分析與有效側向支撐判定",
+      "commonMisuse": "不是一般柱/耐震柱分類；不可只憑外觀或有牆就選braced。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "kx",
+      "label": "X軸有效長度係數",
+      "unit": "無因次",
+      "definition": "繞X軸長細比kx L/(h/√12)。",
+      "source": "構架穩定分析、端部剛度與支承條件",
+      "commonMisuse": "不可把X向剪力或有效深度數字填入，也不應無依據固定1。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "ky",
+      "label": "Y軸有效長度係數",
+      "unit": "無因次",
+      "definition": "繞Y軸長細比ky L/(b/√12)。",
+      "source": "構架穩定分析、端部剛度與支承條件",
+      "commonMisuse": "不可與kx交換；方柱兩值仍可能不同。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "ratioX",
+      "label": "X軸端彎矩比M1/M2",
+      "unit": "無因次",
+      "definition": "同一組合兩端繞X端彎矩較小絕對值/較大絕對值；本版符號單曲率負、雙曲率正，-1～1，採最不利適用值。若橫向載重作用在支點之間，M2採構材中最大彎矩；需依核定分析及適用條文取值。",
+      "source": "同一組合端部分析內力與曲率型態",
+      "commonMisuse": "不是某斷面的Mx/My；sway門檻不用此值。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "ratioY",
+      "label": "Y軸端彎矩比M1/M2",
+      "unit": "無因次",
+      "definition": "Y軸端彎矩比，定義與ratioX相同。若橫向載重作用在支點之間，M2採構材中最大彎矩；需依核定分析及適用條文取值。",
+      "source": "Y軸同組合端彎矩分析結果",
+      "commonMisuse": "不可用兩種不同載重組合端內力或忽略曲率符號。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "second",
+      "label": "內力已含二階效應確認",
+      "unit": "核取",
+      "definition": "確認載重表輸入Pu/Mx/My已由外部分析包含所需二階效應；只解除長細篩選待處理狀態，不在程式內放大彎矩。",
+      "source": "已核定二階分析或彎矩放大計算書",
+      "commonMisuse": "不可用勾選取代二階分析；沒有外部資料不得藉勾選認定可用。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "loads.name",
+      "label": "載重組合名稱",
+      "unit": "文字",
+      "definition": "同時發生設計內力的識別名稱。",
+      "source": "結構分析載重組合表",
+      "commonMisuse": "每列必須来自相同組合與同一斷面，不組合個別最大值。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "loads.P",
+      "label": "設計軸力Pu",
+      "unit": "tf",
+      "definition": "因數化設計軸力，壓縮正、拉力負；1tf=1000kgf。",
+      "source": "強度設計組合分析結果",
+      "commonMisuse": "不可直接用服務載重或kN；拉力不可填正。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "loads.Mx",
+      "label": "繞X軸設計彎矩",
+      "unit": "tf·m",
+      "definition": "正Mx壓縮斷面Y正側（上側）；與My同時檢核。",
+      "source": "同一組合/同斷面分析結果，轉換局部座標",
+      "commonMisuse": "不可把外部軟體局部軸與端力符號未換算直接輸入。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "loads.My",
+      "label": "繞Y軸設計彎矩",
+      "unit": "tf·m",
+      "definition": "正My壓縮斷面X正側（右側）；非對稱配置正負容量不同。",
+      "source": "同一組合/同斷面分析結果，轉換局部座標",
+      "commonMisuse": "不可取絕對值抹除非對称方向資訊。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "loads.Vx",
+      "label": "X方向設計剪力",
+      "unit": "tf",
+      "definition": "正向右；檢核取絕對值；使用dX、bw=h、平行X有效箍筋。",
+      "source": "同一組合/同斷面分析结果與必要容量剪力",
+      "commonMisuse": "不可因名称X就以Mx方向深度代入。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "loads.Vy",
+      "label": "Y方向設計剪力",
+      "unit": "tf",
+      "definition": "正向上；檢核取絕對值；使用dY、bw=b、平行Y有效箍筋。",
+      "source": "同一組合/同斷面分析结果與必要容量剪力",
+      "commonMisuse": "不可遗漏正交剪力同時作用；耐震所需容量剪力另完成。",
+      "applies": "全部模式"
+    },
+    {
+      "id": "customBars.bar",
+      "label": "實際配筋列尺寸",
+      "unit": "D號",
+      "definition": "各列查表筋徑及面積，可混尺寸但共享fy。",
+      "source": "實際配筋詳圖/量測",
+      "commonMisuse": "不可用一個D号代表不同尺寸束筋。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "customBars.n",
+      "label": "每列根數N",
+      "unit": "根",
+      "definition": "同列起終點等分展開（含兩端）；N=1只用起點，範圍1～50，總4～200根。",
+      "source": "配筋詳圖根數",
+      "commonMisuse": "角筋勿跨列重複；相同座標不自動合併。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "customBars.x1",
+      "label": "起點X",
+      "unit": "cm",
+      "definition": "鋼筋中心坐標；原點斷面左下角，X向右、Y向上。N>1沿起點→終點等分；N=1忽略終點。",
+      "source": "配筋詳圖、現場中心位置量測",
+      "commonMisuse": "不是斷面中心相對坐標；不可把表面位置填作鋼筋中心。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "customBars.y1",
+      "label": "起點Y",
+      "unit": "cm",
+      "definition": "鋼筋中心坐標；原點斷面左下角，X向右、Y向上。N>1沿起點→終點等分；N=1忽略終點。",
+      "source": "配筋詳圖、現場中心位置量測",
+      "commonMisuse": "不是斷面中心相對坐標；不可把表面位置填作鋼筋中心。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "customBars.x2",
+      "label": "終點X",
+      "unit": "cm",
+      "definition": "鋼筋中心坐標；原點斷面左下角，X向右、Y向上。N>1沿起點→終點等分；N=1忽略終點。",
+      "source": "配筋詳圖、現場中心位置量測",
+      "commonMisuse": "不是斷面中心相對坐標；不可把表面位置填作鋼筋中心。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "customBars.y2",
+      "label": "終點Y",
+      "unit": "cm",
+      "definition": "鋼筋中心坐標；原點斷面左下角，X向右、Y向上。N>1沿起點→終點等分；N=1忽略終點。",
+      "source": "配筋詳圖、現場中心位置量測",
+      "commonMisuse": "不是斷面中心相對坐標；不可把表面位置填作鋼筋中心。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "customBars.layer",
+      "label": "來源層標籤",
+      "unit": "層號",
+      "definition": "只保留原模板分組，拖曳後容量採實際坐標，不再假定規則矩形層。",
+      "source": "多層模板產生",
+      "commonMisuse": "不是容量折減/增強參數或重新排序依據。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "layerCount",
+      "label": "主筋配置層數",
+      "unit": "層",
+      "definition": "2～6層矩形周邊模板，從外向內。",
+      "source": "配筋詳圖",
+      "commonMisuse": "不可將軸向不同柱段當主筋層數；更改後需按產生。",
+      "applies": "layers"
+    },
+    {
+      "id": "layerConfig.bar",
+      "label": "層筋徑",
+      "unit": "D號",
+      "definition": "该層所有周邊主筋同尺寸；每層N=2nx+2ny−4。",
+      "source": "配筋詳圖",
+      "commonMisuse": "尚未產生的模板不影響現有坐標。",
+      "applies": "layers"
+    },
+    {
+      "id": "layerConfig.nx",
+      "label": "層沿b每邊根數",
+      "unit": "根",
+      "definition": "上下每邊各自根數，含角筋；每層N=2nx+2ny−4。",
+      "source": "配筋詳圖",
+      "commonMisuse": "尚未產生的模板不影響現有坐標。",
+      "applies": "layers"
+    },
+    {
+      "id": "layerConfig.ny",
+      "label": "層沿h每邊根數",
+      "unit": "根",
+      "definition": "左右每邊各自根數，含角筋；每層N=2nx+2ny−4。",
+      "source": "配筋詳圖",
+      "commonMisuse": "尚未產生的模板不影響現有坐標。",
+      "applies": "layers"
+    },
+    {
+      "id": "layerConfig.clear",
+      "label": "與前層淨距",
+      "unit": "cm",
+      "definition": "相鄰平行鋼筋排的筋表面淨距；o_i=o前+(db前+db_i)/2+clear；最外層無前層且由cover定位。",
+      "source": "配筋詳圖、施工容許與粒徑需求",
+      "commonMisuse": "不可填兩層中心距；各根仍按實際兩兩淨距檢查。",
+      "applies": "layers"
+    },
+    {
+      "id": "dragSnap",
+      "label": "拖曳座標吸附",
+      "unit": "cm",
+      "definition": "拖曳步距0.1/0.5/1 cm，自由取0.01；圖形輸入主筋中心座標。",
+      "source": "操作精度選择",
+      "commonMisuse": "吸附值不是材料/工程公差，拖曳圖不是加工圖。",
+      "applies": "custom/layers"
+    },
+    {
+      "id": "pm3dSliceP",
+      "label": "自由軸力切片",
+      "unit": "tf",
+      "definition": "僅观察指定设计轴力的Mx–My容量轮廓，不修改載重表或需求D/C。",
+      "source": "使用者想檢视的設計軸力",
+      "commonMisuse": "不可將新Pu切片認作当前載重已重算；超界應明示無切片。",
+      "applies": "3D顯示"
+    },
+    {
+      "id": "pm3dQuality",
+      "label": "曲面取樣",
+      "unit": "層／角數",
+      "definition": "3D視覺網格精度，標準29×60或精細45×120；載重检核仍按原核心120方向。",
+      "source": "圖形操作選項",
+      "commonMisuse": "不可將更精细曲面当作自动提高容量或完整设计驗證。",
+      "applies": "3D顯示"
+    }
+  ],
+  "requiredAttention": [
+    "新增nl須有UI输入、read/apply持久化、舊專案缺省说明、教学示例重置与边界校验",
+    "環境新增corrosive字典应包括10 cm说明",
+    "耐震Vc=0且φV=.60与一般φV=.75应一致",
+    "ratioX/Y符號按最新官方版；從外部局部端力轉換須明示",
+    "Vx/dX/bw=h與Mx軸命名不可混淆",
+    "dX/dY/hx/tieLegs在uniform不覆写，只custom使用",
+    "second勾選不進行彎矩放大",
+    "每列设计内力须同时发生同组合同截面"
+  ],
+  "officialDefinitionChecks": [
+    {
+      "parameter": "hx",
+      "source": "official-113-corrected.txt lines731-732",
+      "verified": "沿構材各邊受側撐縱筋中心距，不是旧版箍筋肢距"
+    },
+    {
+      "parameter": "nl",
+      "source": "official-113-corrected.txt lines836-837,13345-13346",
+      "verified": "核心周邊受箍筋角隅/耐震彎鉤側撐縱筋，束筋一組算一筋；程式不支援束筋"
+    },
+    {
+      "parameter": "ratioX/ratioY",
+      "source": "official-113-corrected.txt lines823-829,2875",
+      "verified": "單曲率負，雙曲率正；M2在支點間有橫向載重時採構材最大彎矩"
+    }
+  ],
+  "uiReview": {
+    "date": "2026-10-09",
+    "checks": [
+      "完整52項字典、唯一id與參數資料已載入",
+      "52項均有定義／單位／範圍／來源／可照填範例／適用模式／誤用提醒",
+      "可選主筋範圍對照核心D10～D36九種，未宣稱未支援D57",
+      "cover/主筋中心/dX/hx/nxny範例與實際幾何結果一致",
+      "欄位ⓘ可開啟cover定義，Escape可關閉",
+      "二階ⓘ不誤勾確認，關閉按鈕不因委派重開對話框",
+      "字典搜尋可檢索二階、X剪力與主筋坐標，結果定義符合核心",
+      "nₗ說明可跳到完整字典，點字典按鈕不重開對話框",
+      "n_l與nₗ別名搜尋可查核心周邊側撐筋數",
+      "動態多層淨距、主筋根數與載重剪力欄位ⓘ可操作且定義正確",
+      "320px手機說明對話框與完整字典無截斷、跳查可用",
+      "390px手機說明對話框與完整字典無截斷、跳查可用",
+      "獨立離線manual含完整52項靜態卡及nₗ定義",
+      "參數說明互動無JavaScript錯誤"
+    ],
+    "errors": [],
+    "resolvedIssues": [
+      "D57範圍宣稱修正為D10～D36九種",
+      "二階/側撐checkbox標籤ⓘ fallback",
+      "各參數適用模式顯示",
+      "動態配筋/多層/載重欄位ⓘ覆蓋",
+      "關閉/跳字典委派事件重開對話框已修正"
+    ],
+    "pending": []
+  }
+}
