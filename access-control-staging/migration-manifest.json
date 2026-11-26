@@ -1,0 +1,218 @@
+{
+  "hub_source_commit": "de4bffdd0d99698e33ee1dee569d1608247263c2",
+  "tools": [
+    {
+      "id": "aluminum-formwork",
+      "kind": "hub",
+      "source": "aluminum-formwork"
+    },
+    {
+      "id": "rc-slab-auto-design",
+      "kind": "hub",
+      "source": "rc-slab-auto-design"
+    },
+    {
+      "id": "rc-beam-auto-design",
+      "kind": "hub",
+      "source": "rc-beam-auto-design"
+    },
+    {
+      "id": "retaining-wall",
+      "kind": "hub",
+      "source": "retaining-wall"
+    },
+    {
+      "id": "steel-beam",
+      "kind": "hub",
+      "source": "steel-beam"
+    },
+    {
+      "id": "welding",
+      "kind": "hub",
+      "source": "welding-design"
+    },
+    {
+      "id": "rebar-revision",
+      "kind": "hub",
+      "source": "rebar-revision"
+    },
+    {
+      "id": "cfrp",
+      "kind": "hub",
+      "source": "cfrp-design"
+    },
+    {
+      "id": "steel-sheet-pile",
+      "kind": "hub",
+      "source": "steel-sheet-pile"
+    },
+    {
+      "id": "pile",
+      "kind": "hub",
+      "source": "pile"
+    },
+    {
+      "id": "ground-anchorage",
+      "kind": "hub",
+      "source": "ground-anchorage"
+    },
+    {
+      "id": "isolated-footing",
+      "kind": "hub",
+      "source": "isolated-footing"
+    },
+    {
+      "id": "combined-footing",
+      "kind": "hub",
+      "source": "combined-footing"
+    },
+    {
+      "id": "rebar-development",
+      "kind": "hub",
+      "source": "rebar-development"
+    },
+    {
+      "id": "crane-outrigger",
+      "kind": "hub",
+      "source": "crane-outrigger"
+    },
+    {
+      "id": "unit-converter",
+      "kind": "hub",
+      "source": "unit-converter"
+    },
+    {
+      "id": "concrete-anchor",
+      "kind": "hub",
+      "source": "concrete-anchor"
+    },
+    {
+      "id": "rc-column",
+      "kind": "hub",
+      "source": "rc-column"
+    },
+    {
+      "id": "rc-column-biaxial",
+      "kind": "hub",
+      "source": "rc-column-biaxial"
+    },
+    {
+      "id": "shear-friction",
+      "kind": "hub",
+      "source": "shear-friction"
+    },
+    {
+      "id": "src-beam",
+      "kind": "hub",
+      "source": "src-beam"
+    },
+    {
+      "id": "rc-slab-shear",
+      "kind": "hub",
+      "source": "rc-slab-shear"
+    },
+    {
+      "id": "rc-wall",
+      "kind": "hub",
+      "source": "rc-wall"
+    },
+    {
+      "id": "footing-design",
+      "kind": "hub",
+      "source": "footing-design"
+    },
+    {
+      "id": "rc-corbel",
+      "kind": "hub",
+      "source": "rc-corbel"
+    },
+    {
+      "id": "src-beam-column",
+      "kind": "hub",
+      "source": "src-beam-column"
+    },
+    {
+      "id": "concrete-strength",
+      "kind": "hub",
+      "source": "concrete-strength.html"
+    },
+    {
+      "id": "steel-sections",
+      "kind": "hub",
+      "source": "steel-sections"
+    },
+    {
+      "id": "slope-stability",
+      "kind": "hub",
+      "source": "slope-stability"
+    },
+    {
+      "id": "beam-analysis",
+      "kind": "hub",
+      "source": "beam-analysis"
+    },
+    {
+      "id": "beam-dynamics",
+      "kind": "hub",
+      "source": "beam-dynamics"
+    },
+    {
+      "id": "steel-beam-holes",
+      "kind": "hub",
+      "source": "steel-beam-holes"
+    },
+    {
+      "id": "pdf-toolbox",
+      "kind": "hub",
+      "source": "tools/pdf-toolbox"
+    },
+    {
+      "id": "rebar",
+      "kind": "external",
+      "source": "rebar-wire-mesh-converter",
+      "commit": "24ce3370e6c4edf1639623b29bad127923d5fedc"
+    },
+    {
+      "id": "seismic",
+      "kind": "external",
+      "source": "seismic-force-calculator",
+      "commit": "fba583b71211d5c1eed65a569df7244ef133527c"
+    },
+    {
+      "id": "formwork",
+      "kind": "external",
+      "source": "formwork-support-calculator",
+      "commit": "4d26caa29e0e2a6b85b5111b77b74744689de691"
+    },
+    {
+      "id": "rc-beam",
+      "kind": "external",
+      "source": "rc-beam-design-calculator",
+      "commit": "58646ab56935b2ef45678a3a3e359636a24742ae"
+    },
+    {
+      "id": "slab-analysis",
+      "kind": "external",
+      "source": "slab-analysis-design",
+      "commit": "9d1b7d4035cb51a0e6a91a5e25b0052a08b51315"
+    },
+    {
+      "id": "wind",
+      "kind": "external",
+      "source": "wind-load-analysis",
+      "commit": "49635ca0676b52c93197c2aeab1261fc1529718f"
+    },
+    {
+      "id": "scaffold",
+      "kind": "external",
+      "source": "scaffold-analysis-calculator",
+      "commit": "89d3d61c237f1d005102ca7e42e2ea29e6ccaecd"
+    },
+    {
+      "id": "steel",
+      "kind": "external",
+      "source": "steel-column-design",
+      "commit": "b6c8128d2dbfebe4938ffd602f3cd8cbf4b6b27a"
+    }
+  ]
+}

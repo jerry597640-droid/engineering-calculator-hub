@@ -1,0 +1,96 @@
+name: Prepare engineering access migration
+on:
+  push:
+    branches: [codex/engineering-access-migration-prep]
+    paths:
+      - 'access-control-staging/migration-manifest.json'
+      - 'access-control-staging/prepare-migration-assets.mjs'
+      - 'access-control-staging/prepare-migration-assets.test.mjs'
+      - '.github/workflows/access-migration-prepare.yml'
+permissions:
+  contents: write
+concurrency:
+  group: engineering-access-migration-prep
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: github.repository == 'jerry597640-droid/engineering-calculator-hub' && github.ref == 'refs/heads/codex/engineering-access-migration-prep'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out isolated migration branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Check out pinned original hub as data
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: de4bffdd0d99698e33ee1dee569d1608247263c2
+          path: .migration-sources/hub
+          persist-credentials: false
+      - name: Check out seismic tool as data
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: jerry597640-droid/seismic-force-calculator
+          ref: fba583b71211d5c1eed65a569df7244ef133527c
+          path: .migration-sources/seismic
+          persist-credentials: false
+      - name: Check out formwork tool as data
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: jerry597640-droid/formwork-support-calculator
+          ref: 4d26caa29e0e2a6b85b5111b77b74744689de691
+          path: .migration-sources/formwork
+          persist-credentials: false
+      - name: Check out RC beam tool as data
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: jerry597640-droid/rc-beam-design-calculator
+          ref: 58646ab56935b2ef45678a3a3e359636a24742ae
+          path: .migration-sources/rc-beam
+          persist-credentials: false
+      - name: Check out slab tool as data
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: jerry597640-droid/slab-analysis-design
+          ref: 9d1b7d4035cb51a0e6a91a5e25b0052a08b51315
+          path: .migration-sources/slab-analysis
+          persist-credentials: false
+      - name: Check out wind tool as data
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: jerry597640-droid/wind-load-analysis
+          ref: 49635ca0676b52c93197c2aeab1261fc1529718f
+          path: .migration-sources/wind
+          persist-credentials: false
+      - name: Check out scaffold tool as data
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: jerry597640-droid/scaffold-analysis-calculator
+          ref: 89d3d61c237f1d005102ca7e42e2ea29e6ccaecd
+          path: .migration-sources/scaffold
+          persist-credentials: false
+      - name: Check out steel-column tool as data
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: jerry597640-droid/steel-column-design
+          ref: b6c8128d2dbfebe4938ffd602f3cd8cbf4b6b27a
+          path: .migration-sources/steel
+          persist-credentials: false
+      - name: Test the bounded copy and link rewriter
+        run: node --test access-control-staging/prepare-migration-assets.test.mjs
+      - name: Prepare disabled staging candidates
+        env:
+          ECH_SOURCE_ROOT: .migration-sources/hub
+          ECH_EXTERNAL_ROOT: .migration-sources
+        run: node access-control-staging/prepare-migration-assets.mjs
+      - name: Commit candidates only to isolated branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -f -- access-control-staging/assets/tools
+          if git diff --cached --quiet; then
+            echo "No migration candidates changed."
+            exit 0
+          fi
+          git diff --cached --shortstat
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Prepare disabled engineering tool candidates'
+          git push origin HEAD:refs/heads/codex/engineering-access-migration-prep
