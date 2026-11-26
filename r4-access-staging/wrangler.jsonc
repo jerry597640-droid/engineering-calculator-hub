@@ -1,0 +1,22 @@
+{
+  "name": "xjtc-r4-access-staging",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-25",
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    "SITE_ORIGIN": "https://xjtc-r4-access-staging.jerry597640.workers.dev",
+    "SUPABASE_URL": "https://nykejluenwmqirylkjfq.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_2-aD52Jilu62SoCdNYU5Zg_Vqp9-WY9"
+  },
+  "ratelimits": [
+    {
+      "name": "LOGIN_RATE",
+      "namespace_id": "2611264",
+      "simple": {
+        "limit": 14,
+        "period": 60
+      }
+    }
+  ]
+}
