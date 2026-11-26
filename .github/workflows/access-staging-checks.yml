@@ -27,6 +27,8 @@ jobs:
         run: npm test
       - name: Build worker without deploying
         run: npx wrangler deploy --dry-run --outdir .staging-dry-run
+      - name: Export generated dependency lock for review
+        run: node -e "const d=require('fs').readFileSync('package-lock.json').toString('base64');for(let i=0;i<d.length;i+=1024)console.log('ECH_LOCK_CHUNK:'+d.slice(i,i+1024))"
       - name: Retain dependency lockfile
         if: always()
         uses: actions/upload-artifact@v4
