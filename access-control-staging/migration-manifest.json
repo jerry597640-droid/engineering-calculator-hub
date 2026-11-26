@@ -122,10 +122,10 @@
       "kind": "hub",
       "source": "rc-wall",
       "extra_assets": [
-        {"source": "rc-wall/VALIDATION.md", "dest": "validation.txt"}
+        {"source": "rc-wall/VALIDATION.md", "dest": "engineering-review.txt"}
       ],
       "replacements": [
-        {"file": "index.html", "from": "https://github.com/jerry597640-droid/engineering-calculator-hub/blob/main/rc-wall/VALIDATION.md", "to": "/tools/rc-wall/validation.txt"}
+        {"file": "index.html", "from": "https://github.com/jerry597640-droid/engineering-calculator-hub/blob/main/rc-wall/VALIDATION.md", "to": "/tools/rc-wall/engineering-review.txt"}
       ]
     },
     {

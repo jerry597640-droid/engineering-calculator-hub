@@ -18,6 +18,10 @@ test('runtime filter excludes offline bundles, tests, and hidden directories',()
   for(const p of ['offline.html','x-offline.zip','tests/app.js','.git/config','data/verification.json'])assert.equal(shouldCopy(p),false,p);
   for(const p of ['index.html','app.js','media/tutorial.mp4','vendor/license.txt'])assert.equal(shouldCopy(p),true,p);
 });
+test('declared extra asset destinations pass the runtime filter',async()=>{
+  const actual=JSON.parse(await readFile(new URL('./migration-manifest.json',import.meta.url),'utf8'));
+  for(const t of actual.tools)for(const a of t.extra_assets||[])assert.equal(shouldCopy(a.dest),true,t.id+': '+a.dest);
+});
 test('staging disables offline downloads without rewriting embedded scripts or normal exports',()=>{
   const source='<a id="pkg" href="./bundle-offline.zip" download>下載離線套件</a><button id="offline">下載單檔 HTML</button><a href="media/tutorial.mp4" download>下載影片</a><script>const text=\'<a href="./offline.zip">example</a>\';</script>';
   const out=suspendOfflineDownloads(source);
