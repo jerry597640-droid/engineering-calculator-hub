@@ -12,6 +12,7 @@ const root=dirname(fileURLToPath(import.meta.url));
 const assetRoot=resolve(root,'assets');
 const manifest=JSON.parse(await readFile(join(root,'migration-manifest.json'),'utf8'));
 const ids=manifest.tools.map(t=>t.id);
+if(new Set(ids).size!==ids.length)throw Error('duplicate tool in migration manifest');
 const contentTypes={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8',
   '.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8',
   '.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml',
