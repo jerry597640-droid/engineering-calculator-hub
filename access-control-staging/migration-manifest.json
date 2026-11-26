@@ -110,7 +110,10 @@
     {
       "id": "src-beam",
       "kind": "hub",
-      "source": "src-beam"
+      "source": "src-beam",
+      "replacements": [
+        {"file": "index.html", "from": "$('offline').disabled=false", "to": "$('offline').disabled=true"}
+      ]
     },
     {
       "id": "rc-slab-shear",
@@ -141,7 +144,12 @@
     {
       "id": "src-beam-column",
       "kind": "hub",
-      "source": "src-beam-column"
+      "source": "src-beam-column",
+      "replacements": [
+        {"file": "index.html", "from": "$('offline').disabled=false", "to": "$('offline').disabled=true"},
+        {"file": "index.html", "from": "$('offline').disabled=!cr", "to": "$('offline').disabled=true"},
+        {"file": "index.html", "from": "$('offline').disabled=currentModule==='column'?!cr:!result", "to": "$('offline').disabled=true"}
+      ]
     },
     {
       "id": "concrete-strength",
@@ -217,7 +225,10 @@
       "id": "wind",
       "kind": "external",
       "source": "wind-load-analysis",
-      "commit": "49635ca0676b52c93197c2aeab1261fc1529718f"
+      "commit": "49635ca0676b52c93197c2aeab1261fc1529718f",
+      "replacements": [
+        {"file": "index.html", "from": "$('offlineBtn').disabled=false", "to": "$('offlineBtn').disabled=true"}
+      ]
     },
     {
       "id": "scaffold",
@@ -225,7 +236,8 @@
       "source": "scaffold-analysis-calculator",
       "commit": "89d3d61c237f1d005102ca7e42e2ea29e6ccaecd",
       "replacements": [
-        {"file": "index.html", "from": "const offline=$('offline')||document.createElement('button');offline.id='offline';", "to": "const offline=$('offline')||document.createElement('button');offline.id='offline';offline.disabled=true;offline.title='測試站暫不提供離線下載';"}
+        {"file": "index.html", "from": "const offline=$('offline')||document.createElement('button');offline.id='offline';", "to": "const offline=$('offline')||document.createElement('button');offline.id='offline';offline.disabled=true;offline.title='測試站暫不提供離線下載';"},
+        {"file": "index.html", "from": "offline.disabled=!!last.errors.length", "to": "offline.disabled=true"}
       ]
     },
     {
