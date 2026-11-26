@@ -5,6 +5,14 @@
   "workers_dev": true,
   "preview_urls": false,
   "keep_vars": true,
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "redact_query_string": true
+    }
+  },
   "assets": {
     "directory": "./assets",
     "binding": "ASSETS",
