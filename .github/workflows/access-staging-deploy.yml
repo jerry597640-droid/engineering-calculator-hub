@@ -23,6 +23,8 @@ jobs:
           node-version: '22'
       - name: Install pinned dependencies
         run: npm ci --no-audit --no-fund
+      - name: Inspect available query-string privacy setting
+        run: node -e "const s=require('node:fs').readFileSync('node_modules/wrangler/config-schema.json','utf8');console.log('redact_query_string_supported='+s.includes('redact_query_string'))"
       - name: Verify authorization and SDK integration
         run: npm test
       - name: Check deploy bundle
@@ -57,6 +59,8 @@ jobs:
             tr -d '\r' < /tmp/ech-headers | grep -qi '^cache-control:.*no-store'
           }
           check '/login' 200
+          check '/forgot-password' 200
+          check '/reset-password' 303
           check '/tools/rc-slab-auto-design/index.html' 401
           check '/tools/rebar/index.html' 401
           check '/assets/tools/rebar/index.html' 404
