@@ -1,0 +1,9 @@
+{
+  "provider": "Microsoft Edge neural TTS",
+  "voice": "zh-TW-HsiaoChenNeural",
+  "locale": "zh-TW",
+  "rate": "-5%",
+  "tlsVerification": true,
+  "duration": 103.624,
+  "captions": "SentenceBoundary events from synthesis"
+}

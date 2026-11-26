@@ -1,0 +1,43 @@
+import assert from 'node:assert/strict';
+import {steelCapacity,combinations,combinationConfig,runSteelDesign,steelReportBlocks} from './steel-design.js';
+import {evaluateSection} from './section-geometry.js';
+import {build,statics,axleLoads,dynamic} from './solver.js';
+import {unitSystem} from './units.js';
+const near=(a,b,t=1e-7)=>assert.ok(Math.abs(a-b)<=t*Math.max(1,Math.abs(b)),`${a} ≠ ${b}`);
+const section={type:'i',axis:'h',name:'H400×200×8×13',dims:{h:.4,b:.2,tw:.008,tf:.013}};
+const g=evaluateSection(section),span={L:10,E:200,I:g.Ih,mass:1000,section,material:{kind:'steel',name:'測試鋼材'}};
+const p={fy:235,lb:0,deflection:28,fabrication:'rolled',loadHeight:'centroid'};
+const cap=steelCapacity(span,p,false);
+assert.ok(cap.available);
+// Independent plastic block integration: two flanges + two half-webs, SI units.
+const Z=2*(.2*.013*(.4/2-.013/2)+.008*(.4/2-.013)*(.4/2-.013)/2);
+near(cap.phiM,.9*235e3*Z);near(cap.phiV,.9*.6*235e3*.4*.008);
+assert.ok(steelCapacity(span,{...p,lb:20},false).phiM<cap.phiM);
+assert.ok(!steelCapacity(span,p,true).reason);
+assert.equal(steelCapacity(span,{...p,lb:6},true).available,false);
+assert.equal(steelCapacity({...span,section:{...section,axis:'v'}},p,false).available,false);
+assert.equal(steelCapacity({...span,material:{kind:'wood'}},p,false).available,false);
+assert.equal(steelCapacity(span,{...p,fy:null},false).available,false);
+const slender={...section,dims:{...section.dims,tf:.003}};
+assert.equal(steelCapacity({...span,section:slender},p,false).available,false);
+const c={spans:[span],supports:['pin','roller'],loads:[{type:'line',a:0,b:10,w1:10,w2:10,loadCase:'D'},{type:'point',x:5,p:50,loadCase:'L'}],axles:[{p:60,offset:0}],mesh:8,mode:'static',direction:1,factor:1,speed:60,damping:2,step:1,dt:.01,tail:0,selfWeight:true};
+const combo=combinations().find(v=>v.id==='U-DL'),sc=combinationConfig(c,combo),m=build(sc),r=statics(m);
+near(r.at(5).M,1.2*(10+9.80665)*100/8+1.6*50*10/4);
+near(axleLoads(m,5)[0].p,96);near(build(c).omega,m.omega);assert.deepEqual(build(c).M,m.M);
+const dc=combinationConfig(c,combinations().find(v=>v.id==='U-D'));
+near(axleLoads(build(dc),5)[0].p,0);assert.equal(dc.spans[0].mass,1000);
+assert.throws(()=>combinationConfig({...c,loads:[{type:'point',p:1,x:5}]},combo),/分類|類別/);
+const wind={...c,loads:[{type:'point',x:5,p:10,loadCase:'W'}],selfWeight:false};
+const wc=combinations().find(v=>v.id==='U-DW-');near(statics(build(combinationConfig(wind,wc))).at(5).M,-40);
+assert.equal(combinations(true).find(v=>v.id==='U-DLW+').L,1);
+assert.equal(combinations(false).find(v=>v.id==='U-DLW+').L,.5);
+for(const mode of ['static','moving','dynamic']){
+ const result=await runSteelDesign({...c,mode},{fullLive:true,spans:[p],selected:['S-DL','U-D','U-DL']});
+ const plain=JSON.stringify(steelReportBlocks(result,unitSystem()));
+ assert.doesNotMatch(plain,/NaN|undefined|Infinity/);
+ assert.equal(result.cases[1].steps,1);assert.equal(result.cases[1].mode,'static');
+ assert.ok(result.cases[2].demands[0].M.value>0);
+ assert.ok(result.cases[2].trace.length>10);
+ if(mode==='static')near(result.cases[2].demands[0].M.value,r.at(5).M);
+}
+console.log('Steel design regression passed: independent plastic/shear capacities, LTB reduction, unsupported cases, signed combinations, gravity vs physical mass, 3 analysis modes and report traces.');
