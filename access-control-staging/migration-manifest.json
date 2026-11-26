@@ -14,7 +14,13 @@
     {
       "id": "rc-beam-auto-design",
       "kind": "hub",
-      "source": "rc-beam-auto-design"
+      "source": "rc-beam-auto-design",
+      "extra_assets": [
+        {"source": "icon.svg", "dest": "icon.svg"}
+      ],
+      "replacements": [
+        {"file": "index.html", "from": "../icon.svg", "to": "./icon.svg"}
+      ]
     },
     {
       "id": "retaining-wall",
@@ -134,7 +140,12 @@
     {
       "id": "concrete-strength",
       "kind": "hub",
-      "source": "concrete-strength.html"
+      "source": "concrete-strength.html",
+      "extra_assets": [
+        {"source": "concrete-media/poster.jpg", "dest": "concrete-media/poster.jpg"},
+        {"source": "concrete-media/tutorial.mp4", "dest": "concrete-media/tutorial.mp4"},
+        {"source": "concrete-media/transcript.txt", "dest": "concrete-media/transcript.txt"}
+      ]
     },
     {
       "id": "steel-sections",

@@ -67,6 +67,23 @@ export async function prepare({repoRoot,stageRoot,manifest,sourceRoot=join(repoR
       if(!t.source.endsWith('.html'))throw Error('unexpected single-file tool');
       const raw=await readFile(source,'utf8');await writeFile(join(dest,'index.html'),rewriteLinks(raw,tools),'utf8');entry.files=1;entry.bytes=st.size;
     }else await walk(source,dest,'',entry);
+    for(const extra of t.extra_assets||[]){
+      if(t.kind!=='hub'||typeof extra.source!=='string'||typeof extra.dest!=='string'||!shouldCopy(extra.dest))throw Error('invalid extra asset');
+      const from=assertInside(repoRoot,extra.source),to=assertInside(dest,extra.dest),info=await lstat(from);
+      if(!info.isFile()||info.isSymbolicLink()||info.size>25*1024*1024)throw Error('invalid extra asset source');
+      if(await lstat(to).catch(()=>null))throw Error('extra asset would overwrite a file');
+      await mkdir(dirname(to),{recursive:true});
+      if(textTypes.has(extname(extra.dest).toLowerCase()))await writeFile(to,rewriteLinks(await readFile(from,'utf8'),tools),'utf8');
+      else await copyFile(from,to);
+      entry.files++;entry.bytes+=info.size;
+    }
+    for(const change of t.replacements||[]){
+      if(typeof change.file!=='string'||typeof change.from!=='string'||!change.from||
+         typeof change.to!=='string'||!textTypes.has(extname(change.file).toLowerCase()))throw Error('invalid replacement');
+      const target=assertInside(dest,change.file),raw=await readFile(target,'utf8');
+      if(raw.split(change.from).length!==2)throw Error('replacement must match exactly once: '+t.id);
+      await writeFile(target,raw.replace(change.from,change.to),'utf8');
+    }
     const index=await lstat(join(dest,'index.html')).catch(()=>null);if(!index?.isFile())throw Error('missing tool entry: '+t.id);
     summary.push(entry);
   }
