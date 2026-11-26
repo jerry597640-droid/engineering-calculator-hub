@@ -75,7 +75,11 @@
     {
       "id": "rebar-development",
       "kind": "hub",
-      "source": "rebar-development"
+      "source": "rebar-development",
+      "replacements": [
+        {"file": "index.html", "from": "<button class=\"secondary\" type=\"button\" id=\"downloadOffline\">下載離線 HTML</button>", "to": "<button class=\"secondary\" type=\"button\" id=\"downloadOffline\" disabled title=\"測試站暫不提供離線下載\">離線下載暫未開放</button>"},
+        {"file": "ui.js", "from": "<button class=\"secondary\" type=\"button\" id=\"downloadOffline\">下載離線 HTML</button>", "to": "<button class=\"secondary\" type=\"button\" id=\"downloadOffline\" disabled title=\"測試站暫不提供離線下載\">離線下載暫未開放</button>"}
+      ]
     },
     {
       "id": "crane-outrigger",
@@ -159,6 +163,9 @@
         {"source": "concrete-media/poster.jpg", "dest": "concrete-media/poster.jpg"},
         {"source": "concrete-media/tutorial.mp4", "dest": "concrete-media/tutorial.mp4"},
         {"source": "concrete-media/transcript.txt", "dest": "concrete-media/transcript.txt"}
+      ],
+      "replacements": [
+        {"file": "index.html", "from": "$('offline').disabled=!valid", "to": "$('offline').disabled=true"}
       ]
     },
     {
@@ -174,7 +181,11 @@
     {
       "id": "beam-analysis",
       "kind": "hub",
-      "source": "beam-analysis"
+      "source": "beam-analysis",
+      "replacements": [
+        {"file": "index.html", "from": "document.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=on)", "to": "document.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=on || el.id==='offline-download')"},
+        {"file": "app.js", "from": "document.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=on)", "to": "document.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=on || el.id==='offline-download')"}
+      ]
     },
     {
       "id": "beam-dynamics",
@@ -207,7 +218,15 @@
       "id": "formwork",
       "kind": "external",
       "source": "formwork-support-calculator",
-      "commit": "4d26caa29e0e2a6b85b5111b77b74744689de691"
+      "commit": "4d26caa29e0e2a6b85b5111b77b74744689de691",
+      "replacements": [
+        {"file": "index.html", "from": "$('offline').disabled=false", "to": "$('offline').disabled=true"},
+        {"file": "app.js", "from": "$('offline').disabled=false", "to": "$('offline').disabled=true"},
+        {"file": "index.html", "from": "document.querySelector('#offline').disabled=errors.length>0", "to": "document.querySelector('#offline').disabled=true"},
+        {"file": "staged-ui.js", "from": "document.querySelector('#offline').disabled=errors.length>0", "to": "document.querySelector('#offline').disabled=true"},
+        {"file": "index.html", "from": "document.querySelector('#offline').disabled=!canExport()", "to": "document.querySelector('#offline').disabled=true"},
+        {"file": "staged-ui.js", "from": "document.querySelector('#offline').disabled=!canExport()", "to": "document.querySelector('#offline').disabled=true"}
+      ]
     },
     {
       "id": "rc-beam",
