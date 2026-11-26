@@ -50,3 +50,17 @@ test('admin changes reject CSRF before making a mutation',async()=>{
   const x=fake({claims:{sub:id,aal:'aal2'},userProfile:{user_id:id,role:'owner',status:'approved'}});
   const r=await route(req('/admin/status',form('target='+id+'&status=approved','https://evil.example')),x);assert.equal(r.status,400);assert.equal(x.rpcs().length,0);
 });
+test('admin expiry is interpreted as Taipei time and invalid dates are rejected',async()=>{
+  const x=fake({claims:{sub:id,aal:'aal2'},userProfile:{user_id:id,role:'owner',status:'approved'}});
+  const ok=await route(req('/admin/status',form('target='+id+'&status=approved&expiry=2027-01-01T12%3A30')),x);
+  assert.equal(ok.status,303);assert.equal(x.rpcs()[0].args.new_expiry,'2027-01-01T04:30:00.000Z');
+  const bad=await route(req('/admin/status',form('target='+id+'&status=approved&expiry=2027-02-30T12%3A30')),x);
+  assert.equal(bad.status,400);assert.equal(x.rpcs().length,1);
+});
+test('an existing grant can be extended without revoking it',async()=>{
+  const x=fake({claims:{sub:id,aal:'aal2'},userProfile:{user_id:id,role:'owner',status:'approved'}});
+  x.client.rpc=async(name,args)=>name==='ech_admin_users'?{data:[{user_id:id,email:'owner@example.invalid',role:'owner',status:'approved',expires_at:'2027-01-01T04:30:00Z'}],error:null}:
+    name==='ech_admin_permissions'?{data:[{tool_id:'rc-beam',name:'RC beam',enabled:true,allowed:true,valid_until:'2027-01-01T04:30:00Z'}],error:null}:({data:[],error:null});
+  const html=await (await route(req('/admin?target='+id),x)).text();
+  assert.match(html,/value="2027-01-01T12:30"/);assert.match(html,/name="allowed" value="true">更新期限/);assert.match(html,/name="allowed" value="false">取消授權/);
+});

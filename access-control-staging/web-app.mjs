@@ -11,6 +11,18 @@ const page = (title,body,status=200) => new Response(`<!doctype html><html lang=
 const redirect = location => new Response(null,{status:303,headers:{...headers,location}});
 const errorPage = (message,status=403) => page('無法完成操作',`<section><p>${esc(message)}</p><p><a href="/">回到入口</a></p></section>`,status);
 const sameOrigin = req => req.headers.get('origin') === new URL(req.url).origin;
+// The administration form always uses Taiwan time, independent of the server locale.
+const taipeiValue = value => {
+  const ms=Date.parse(value);
+  return Number.isFinite(ms) ? new Date(ms+8*60*60*1000).toISOString().slice(0,16) : '';
+};
+const taipeiInstant = value => {
+  if(!value)return null;
+  if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value))throw Error('invalid date');
+  const ms=Date.parse(value+':00+08:00');
+  if(!Number.isFinite(ms) || taipeiValue(new Date(ms).toISOString())!==value)throw Error('invalid date');
+  return new Date(ms).toISOString();
+};
 
 async function formValues(req) {
   if (!sameOrigin(req) || !(req.headers.get('content-type') || '').startsWith('application/x-www-form-urlencoded')) throw new Error('bad request');
@@ -115,11 +127,11 @@ export async function route(request,{client,assets}) {
     if(target && UUID.test(target)){
       const selected=(result.data||[]).find(x=>x.user_id===target);
       if(selected){const r=await client.rpc('ech_admin_permissions',{target});if(r.error)return errorPage('權限資料暫時無法取得。',503);
-        const tools=(r.data||[]).map(t=>`<tr><td>${esc(t.name)}</td><td>${t.enabled?'已啟用':'未啟用'}</td><td>${t.allowed?'允許':'未授權'}</td><td><form method="post" action="/admin/permission"><input type="hidden" name="target" value="${esc(target)}"><input type="hidden" name="page" value="${n}"><input type="hidden" name="tool" value="${esc(t.tool_id)}"><input type="hidden" name="allowed" value="${t.allowed?'false':'true'}"><label>到期日（UTC，可留空）<input type="datetime-local" name="valid_until" value="${t.valid_until?esc(new Date(t.valid_until).toISOString().slice(0,16)):''}"></label><button>${t.allowed?'取消授權':'開放'}</button></form></td></tr>`).join('');
+        const tools=(r.data||[]).map(t=>`<tr><td>${esc(t.name)}</td><td>${t.enabled?'已啟用':'未啟用'}</td><td>${t.allowed?'允許':'未授權'}</td><td><form method="post" action="/admin/permission"><input type="hidden" name="target" value="${esc(target)}"><input type="hidden" name="page" value="${n}"><input type="hidden" name="tool" value="${esc(t.tool_id)}"><label>到期日（台北時間 UTC+8，可留空）<input type="datetime-local" name="valid_until" value="${t.valid_until?esc(taipeiValue(t.valid_until)):''}"></label><button name="allowed" value="true">${t.allowed?'更新期限':'開放'}</button>${t.allowed?' <button name="allowed" value="false">取消授權</button>':''}</form></td></tr>`).join('');
         const options=['pending','approved','disabled'].map(s=>`<option value="${s}" ${s===selected.status?'selected':''}>${s}</option>`).join('');
         const roles=['user','admin','owner'].map(s=>`<option value="${s}" ${s===selected.role?'selected':''}>${s}</option>`).join('');
         const roleForm=p.role==='owner' && target!==claims.sub?`<form method="post" action="/admin/role"><input type="hidden" name="target" value="${esc(target)}"><input type="hidden" name="page" value="${n}"><label>管理角色 <select name="role">${roles}</select></label><button>更新角色</button></form>`:'';
-        details=`<section><h2>${esc(selected.email)} 的權限</h2><form method="post" action="/admin/status"><input type="hidden" name="target" value="${esc(target)}"><input type="hidden" name="page" value="${n}"><label>帳號狀態 <select name="status">${options}</select></label><label>到期日（UTC，留空為不限）<input type="datetime-local" name="expiry" value="${selected.expires_at?esc(new Date(selected.expires_at).toISOString().slice(0,16)):''}"></label><button>更新狀態</button></form>${roleForm}<table><tr><th>工具</th><th>部署</th><th>授權</th><th>操作</th></tr>${tools}</table></section>`;
+        details=`<section><h2>${esc(selected.email)} 的權限</h2><form method="post" action="/admin/status"><input type="hidden" name="target" value="${esc(target)}"><input type="hidden" name="page" value="${n}"><label>帳號狀態 <select name="status">${options}</select></label><label>到期日（台北時間 UTC+8，留空為不限）<input type="datetime-local" name="expiry" value="${selected.expires_at?esc(taipeiValue(selected.expires_at)):''}"></label><button>更新狀態</button></form>${roleForm}<table><tr><th>工具</th><th>部署</th><th>授權</th><th>操作</th></tr>${tools}</table></section>`;
       }
     }
     return page('管理後台',`${userToolbar}<section><h2>帳號</h2><table><tr><th>電子郵件</th><th>角色</th><th>狀態</th></tr>${rows}</table><p>${n>0?`<a href="/admin?page=${n-1}">上一頁</a> `:''}${(result.data||[]).length===50?`<a href="/admin?page=${n+1}">下一頁</a>`:''}</p></section>${details}`);
@@ -129,11 +141,13 @@ export async function route(request,{client,assets}) {
     const target=f.get('target')||'',pageNum=Number(f.get('page')||0);if(!UUID.test(target)||!Number.isInteger(pageNum)||pageNum<0||pageNum>2000)return errorPage('帳號格式無效。',400);
     let r;
     if(path==='/admin/status'){
-      const status=f.get('status'),raw=f.get('expiry')||'';if(!['pending','approved','disabled'].includes(status) || (raw&&!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)))return errorPage('資料格式無效。',400);
-      r=await client.rpc('ech_admin_set_status',{target,new_status:status,new_expiry:raw?raw+':00Z':null});
+      const status=f.get('status'),raw=f.get('expiry')||'';let expiry;try{expiry=taipeiInstant(raw)}catch{return errorPage('資料格式無效。',400)}
+      if(!['pending','approved','disabled'].includes(status))return errorPage('資料格式無效。',400);
+      r=await client.rpc('ech_admin_set_status',{target,new_status:status,new_expiry:expiry});
     } else if(path==='/admin/permission'){
-      const tool=f.get('tool')||'',allowed=f.get('allowed'),until=f.get('valid_until')||'';if(!/^[a-z0-9][a-z0-9-]{0,79}$/.test(tool)||!['true','false'].includes(allowed)||(until&&!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(until)))return errorPage('資料格式無效。',400);
-      r=await client.rpc('ech_admin_set_permission',{target,requested_tool:tool,new_allowed:allowed==='true',new_valid_from:null,new_valid_until:until?until+':00Z':null});
+      const tool=f.get('tool')||'',allowed=f.get('allowed'),until=f.get('valid_until')||'';let validUntil;try{validUntil=taipeiInstant(until)}catch{return errorPage('資料格式無效。',400)}
+      if(!/^[a-z0-9][a-z0-9-]{0,79}$/.test(tool)||!['true','false'].includes(allowed))return errorPage('資料格式無效。',400);
+      r=await client.rpc('ech_admin_set_permission',{target,requested_tool:tool,new_allowed:allowed==='true',new_valid_from:null,new_valid_until:validUntil});
     } else {
       const role=f.get('role');if(!['user','admin','owner'].includes(role))return errorPage('角色無效。',400);
       r=await client.rpc('ech_admin_set_role',{target,new_role:role});
