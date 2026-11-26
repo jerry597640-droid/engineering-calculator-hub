@@ -60,3 +60,6 @@ jobs:
           check '/tools/rc-slab-auto-design/index.html' 401
           check '/tools/rebar/index.html' 401
           check '/assets/tools/rebar/index.html' 404
+      - name: Verify real browser form submission
+        if: steps.readiness.outputs.ready == 'true'
+        run: node browser-form-test.mjs
