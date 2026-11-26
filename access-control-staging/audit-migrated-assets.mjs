@@ -76,7 +76,7 @@ try {
   const report=[];
   for(const id of ids){
     missing.length=0;exceptions=[];failedExternal=[];
-    let info=null,issue='';
+    let info=null,issue='',activeOfflineButtons=[];
     try{
       const navigation=await send('Page.navigate',{url:origin+'/tools/'+id+'/'});
       if(navigation.errorText)throw Error(navigation.errorText);
@@ -93,15 +93,21 @@ try {
         if(info?.path==='/tools/'+id+'/' && info.ready!=='loading' && info.body>0)break;
       }
       await delay(1200);
+      activeOfflineButtons=await evaluate(`[...document.querySelectorAll('button')].filter(b=>!b.disabled &&
+        ((/offline/i.test(b.id||'')&&/下載|匯出|download/i.test(b.innerText)) ||
+          /下載.{0,8}離線|離線.{0,8}下載/.test(b.innerText)))
+        .map(b=>({id:b.id,text:b.innerText.trim().slice(0,80)})).slice(0,4)`);
     }catch(e){issue=String(e.message||e).slice(0,200)}
     const localMissing=[...new Set(missing)].slice(0,8);
     const problems=[...new Set(exceptions)].slice(0,4);
     const remoteErrors=failedExternal.filter((x,i,a)=>a.findIndex(y=>y.url===x.url&&y.status===x.status)===i).slice(0,4);
     const ok=Boolean(info && info.path==='/tools/'+id+'/' && info.body>0 && !issue &&
-      !localMissing.length && !problems.length && !info.legacy.length && !info.offlineLinks.length && !remoteErrors.length);
+      !localMissing.length && !problems.length && !info.legacy.length && !info.offlineLinks.length &&
+      !activeOfflineButtons.length && !remoteErrors.length);
     const row={id,status:ok?'initial-load-ok':'review',title:info?.title||'',controls:info?.controls||0,
       ...(issue?{issue}:{}),...(localMissing.length?{localMissing}:{}),...(problems.length?{exceptions:problems}:{}),
       ...(info?.legacy?.length?{legacy:info.legacy}:{}),...(info?.offlineLinks?.length?{offlineLinks:info.offlineLinks}:{}),
+      ...(activeOfflineButtons.length?{activeOfflineButtons}:{}),
       ...(remoteErrors.length?{remoteErrors}:{})};
     report.push(row);console.log(JSON.stringify(row));
   }
