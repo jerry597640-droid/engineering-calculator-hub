@@ -1,4 +1,4 @@
-name: XJTC R4 isolated access staging
+name: XJTC R4 isolated access staging checks
 on:
   push:
     branches: [codex/r4-login-staging-20261126]
@@ -12,7 +12,7 @@ concurrency:
   group: xjtc-r4-access-staging
   cancel-in-progress: false
 jobs:
-  verify-and-deploy:
+  verify:
     if: github.repository == 'jerry597640-droid/engineering-calculator-hub' && github.ref == 'refs/heads/codex/r4-login-staging-20261126'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -31,32 +31,3 @@ jobs:
           set -eu
           node -e 'const c=JSON.parse(require("fs").readFileSync("wrangler.jsonc"));if(c.name!=="xjtc-r4-access-staging"||c.vars.SITE_ORIGIN!=="https://xjtc-r4-access-staging.jerry597640.workers.dev"||c.assets||c.d1_databases||c.r2_buckets||c.preview_urls!==false)process.exit(1)'
           npx --yes wrangler@4.92.0 deploy --dry-run --outdir /tmp/xjtc-r4-dry-run
-      - name: Deploy the isolated R4 Worker
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_STAGING_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: 3c4291ea6933452f275090a2819b25e9
-        run: |
-          set -eu
-          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
-            echo "::error::The existing Cloudflare staging secret is unavailable."
-            exit 1
-          fi
-          npx --yes wrangler@4.92.0 deploy
-      - name: Verify the deployed login and anonymous separation
-        run: |
-          set -eu
-          site='https://xjtc-r4-access-staging.jerry597640.workers.dev'
-          check(){
-            path="$1"
-            expected="$2"
-            code=$(curl -sS --retry 3 --retry-all-errors --max-time 12 -D /tmp/r4-headers -o /tmp/r4-body -w '%{http_code}' "$site$path")
-            test "$code" = "$expected"
-            tr -d '\r' </tmp/r4-headers | grep -qi '^cache-control:.*no-store'
-          }
-          check / 200
-          grep -q '登入 R4 測試入口' /tmp/r4-body
-          check /xjtc.svg 200
-          check /workspace/R4-DEMO-A 303
-          check /api/projects/R4-DEMO-A 401
-          check /api/projects/R4-DEMO-B 401
-          check /authz.sql 404
